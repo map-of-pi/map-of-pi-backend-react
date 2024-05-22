@@ -76,8 +76,8 @@ The Map of Pi Front End is a [Next.js](https://nextjs.org/) project bootstrapped
 - Rokundo Soleil
 - Ayomikun Omotosho
 - Samuel Oluyomi
-- Placeholder
-- Placeholder
+- Yusuf Adisa
+- Francis Mwaura
 
 ## <a name='contributions'></a>Contributions
 
