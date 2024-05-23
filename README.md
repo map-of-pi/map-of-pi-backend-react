@@ -35,7 +35,7 @@
 
 ## <a name='backend-local-execution'></a>Backend Local Execution
 
-The Map of Pi Front End is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) which is a React framework to build web applications.
+The Map of Pi Back End is a [Node.js](https://nodejs.org/) project.
 
 ### Build the Project
 
