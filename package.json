@@ -1,15 +1,16 @@
 {
   "name": "map-of-pi-backend",
   "version": "1.0.0",
-  "description": "This is official map of backend repo in ts",
+  "author": "Map of Pi Team",
+  "description": "Map of Pi Backend",
+  "license": "PiOS",
   "main": "index.js",
+  "private": true,
   "scripts": {
     "build": "tsc",
-    "dev": "nodemon  src/index.ts",
+    "dev": "nodemon src/index.ts",
     "test": "jest --detectOpenHandles --coverage"
   },
-  "author": "",
-  "license": "MIT",
   "dependencies": {
     "@types/swagger-ui-express": "^4.1.6",
     "axios": "^1.6.8",
