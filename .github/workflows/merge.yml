@@ -1,10 +1,10 @@
-name: Map of Pi CI/CD [Merge]
+name: Map of Pi Merge
 
 # Controls when the workflow will execute
 on:
   # Triggers the workflow when build successfully completes
   workflow_run:
-    workflows: ["Map of Pi CI/CD [Build]"]
+    workflows: ["Map of Pi Build"]
     types:
       - completed
 
