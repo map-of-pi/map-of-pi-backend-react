@@ -1,4 +1,4 @@
-export const RoleSchema = {
+export const UserSchema = {
   type: "object",
   properties: {
     name: {
@@ -6,7 +6,8 @@ export const RoleSchema = {
     },
   },
 };
-export const PermissionSchema = {
+
+export const UserPreferenceSchema = {
   type: "object",
   properties: {
     name: {
@@ -14,7 +15,17 @@ export const PermissionSchema = {
     },
   },
 };
-export const CategorySchema = {
+
+export const SellerSchema = {
+  type: "object",
+  properties: {
+    name: {
+      type: "string",
+    },
+  },
+};
+
+export const ReviewFeedbackSchema = {
   type: "object",
   properties: {
     name: {
