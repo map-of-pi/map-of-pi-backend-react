@@ -1,37 +1,37 @@
 import { Router } from "express";
-import * as shopController from "../controllers/shopController";
+import * as sellerController from "../controllers/sellerController";
 import upload from "../utils/multer";
 import { isAuthenticated } from "../middlewares/isAuthenticated";
 import { isShopOwner } from "../middlewares/isShopOwner";
 import { isShopFound } from "../middlewares/isShopFound";
 
-const shopRoutes = Router();
+const sellerRoutes = Router();
 
-shopRoutes.get("/", shopController.getAllShops);
+sellerRoutes.get("/", sellerController.getAllSellers);
 
-shopRoutes.post(
+sellerRoutes.post(
   "/register",
   isAuthenticated,
   upload.array("images"),
-  shopController.registerNewShop
+  sellerController.registerNewSeller
 );
 
-shopRoutes.get("/:id", isShopFound, shopController.getSingleShop);
+sellerRoutes.get("/:id", isShopFound, sellerController.getSingleSeller);
 
-shopRoutes.put(
+sellerRoutes.put(
   "/:id",
   isAuthenticated,
   isShopFound,
   isShopOwner,
-  shopController.updateShop
+  sellerController.updateSeller
 );
 
-shopRoutes.delete(
+sellerRoutes.delete(
   "/:id",
   isAuthenticated,
   isShopFound,
   isShopOwner,
-  shopController.deleteShop
+  sellerController.deleteSeller
 );
 
-export default shopRoutes;
+export default sellerRoutes;

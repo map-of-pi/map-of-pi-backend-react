@@ -3,7 +3,7 @@ import { Document, Types } from "mongoose";
 import { RatingScale } from "./models/enums/ratingScale";
 import { TrustMeterScale } from "./models/enums/trustMeterScale";
 
-export interface IUser extends Document {
+export interface IUser_ extends Document {
   user_id: string;
   username: string;
 }
@@ -47,6 +47,19 @@ export interface IReviewFeedback extends Document {
 }
 
 /* ------- NOT IN PIFEST SCOPE ------- */
+
+export interface IUser extends Document {
+  username: string;
+  uid: string;
+  balance: number;
+  address?: Types.ObjectId;
+  orders: Types.ObjectId[];
+  role: Types.ObjectId[];
+  permission: Types.ObjectId[];
+  transactions: Types.ObjectId[];
+  createdAt?: Date;
+  updatedAt?: Date;
+}
 
 export interface IShop extends Document {
   name: string;
