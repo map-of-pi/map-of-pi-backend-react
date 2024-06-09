@@ -1,16 +1,24 @@
 import express from "express";
-// import cors from "cors"
+import cors from "cors"
 import bodyParser from "body-parser";
 import appRouter from "../routes";
 import docRouter from "../docs/swagger";
+import loggerMiddleware from "../middlewares/logger";
 
 const app = express();
+
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(bodyParser.json());
 
-app.use("/", appRouter);
+app.use(loggerMiddleware)
+
+app.use(cors({
+    origin:"*"
+}))
+
+app.use("/api/v1", appRouter);
 app.use("/", docRouter);
 
 export default app;

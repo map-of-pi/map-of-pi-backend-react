@@ -6,7 +6,7 @@ const userSchema = new Schema<IUser_>(
   {
     user_id: {
       type: String,
-      required: true,
+      required: false,
     },
     username: {
       type: String,

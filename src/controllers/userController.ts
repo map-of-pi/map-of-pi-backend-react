@@ -3,24 +3,17 @@ import * as userService from "../services/user.service";
 import * as jwtHelper from "../helpers/jwt";
 
 export const authenticateUser = async (req: Request, res: Response) => {
-  const auth = req.body.AuthResult;
+  const { authResult } = req.body;
   try {
-    const { user: currentUser, userExist } = await userService.authenticate(
-      auth
-    );
-    const token = jwtHelper.generateUserToken(currentUser);
+    const user = await userService.authenticate(authResult);
+    const token = jwtHelper.generateUserToken(user);
 
-    if (userExist) {
-      return res.status(200).json({
-        currentUser,
-        token,
-      });
-    } else {
-      return res.status(201).json({
-        currentUser,
-        token,
-      });
-    }
+    console.log(user)
+
+    return res.status(200).json({
+      user,
+      token,
+    });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
