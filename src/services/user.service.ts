@@ -1,5 +1,5 @@
 
-import User from "../models/User_";
+import User from "../models/User";
 import { IAuthResult } from "../types";
 
 export const authenticate = async (currentUser: IAuthResult) => {

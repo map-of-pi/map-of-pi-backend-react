@@ -1,5 +1,5 @@
-// controllers/reviewFeedbackController.ts
 import { Request, Response } from 'express';
+
 import ReviewFeedback from '../models/ReviewFeedback';
 import { IReviewFeedback } from '../types';
 
@@ -7,7 +7,7 @@ import { IReviewFeedback } from '../types';
 export const addReviewToShop = async (req: Request, res: Response) => {
   try {
     const { review_id, review_receiver_id, review_giver_id, reply_to_review_id, rating, comment } = req.body;
-    const image = req.files?.[0]?.path || '';
+    const image = req.file?.path || '';
 
     const newReview: IReviewFeedback = new ReviewFeedback({
       review_id,
@@ -64,7 +64,7 @@ export const updateReview = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { rating, comment } = req.body;
-    const image = req.files?.[0]?.path || (req as any).currentReview.image;
+    const image = req.file?.path || (req as any).currentReview.image;
 
     const updatedReview = await ReviewFeedback.findByIdAndUpdate(
       id,
