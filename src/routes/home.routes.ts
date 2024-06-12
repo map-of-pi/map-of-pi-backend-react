@@ -1,7 +1,5 @@
 import { Router } from "express";
 
-
-
 const homeRoutes = Router()
 
 homeRoutes.get("/", (req, res) => {
@@ -9,6 +7,5 @@ homeRoutes.get("/", (req, res) => {
         message:"server is running"
     })
 })
-
 
 export default homeRoutes

@@ -1,6 +1,8 @@
 import jwt from "jsonwebtoken";
+
 import { IUser } from "../types";
 import { env } from "../utils/env";
+
 import User from "../models/User";
 
 export const generateUserToken = (user: IUser) => {
@@ -19,7 +21,7 @@ export const decodeUserToken = async (token: string) => {
   try {
     const decoded = jwt.verify(token, env.JWT_SECRET) as { userId: string };
     if (!decoded.userId) {
-      throw new Error("Invalid token: Missing user ID");
+      throw new Error("Invalid token: Missing userID");
     }
     const associatedUser = await User.findById(decoded.userId);
     if (!associatedUser) {
