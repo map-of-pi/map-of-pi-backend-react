@@ -4,7 +4,7 @@ export const homepage = {
 
   responses: {
     200: {
-      description: "success",
+      description: "Success",
     },
     500: {
       description: "Internal Server Error",

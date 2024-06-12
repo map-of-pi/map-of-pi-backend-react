@@ -1,17 +1,19 @@
 import { Router } from "express";
-import { env } from "../utils/env";
-import { CategorySchema, PermissionSchema, RoleSchema } from "./schemas";
-import { homepage } from "./homepage";
 import { serve, setup } from "swagger-ui-express";
+
+import { env } from "../utils/env";
+import { homepage } from "./homepage";
+
+import { UserSchema, UserPreferenceSchema, SellerSchema, ReviewFeedbackSchema } from "./schemas";
 
 const docRouter = Router();
 
 const options = {
   openapi: "3.0.1",
   info: {
-    title: "Map Of Pi Backend Documentation",
+    title: "Map of Pi API Documentation",
     version: "1.0.0",
-    description: "Documentation Of MAP OF PI",
+    description: "API Documentation for Map of Pi.",
   },
 
   servers: [
@@ -33,41 +35,21 @@ const options = {
       description: "Homepage",
     },
     {
-      name: "Users",
-      description: "User endpoints",
+      name: "User",
+      description: "User endpoints and operations.",
     },
     {
-      name: "Profile",
-      description: "Profile endpoints",
+      name: "UserPreference",
+      description: "UserPreference endpoints and operations.",
     },
     {
-      name: "Address",
-      description: "Address endpoints",
+      name: "Seller",
+      description: "Seller endpoints and operations.",
     },
     {
-      name: "Roles",
-      description: "Roles endpoints",
-    },
-    {
-      name: "Permission",
-      description: "Permission endpoints",
-    },
-    {
-      name: "Shops",
-      description: "Shops endpoints",
-    },
-    {
-      name: "products",
-      description: "products endpoints",
-    },
-    {
-      name: "Order",
-      description: "Order endpoints",
-    },
-    {
-      name: "Product Reviews",
-      description: "Product Reviews endpoints",
-    },
+      name: "ReviewFeedback",
+      description: "ReviewFeedback endpoints and operations.",
+    }
   ],
 
   paths: {
@@ -75,11 +57,13 @@ const options = {
       get: homepage,
     },
   },
+
   components: {
     schemas: {
-      Role: RoleSchema,
-      Permission: PermissionSchema,
-      Category: CategorySchema,
+      User: UserSchema,
+      UserPreference: UserPreferenceSchema,
+      Seller: SellerSchema,
+      ReviewFeedback: ReviewFeedbackSchema
     },
     securitySchemes: {
       bearerAuth: {
@@ -92,6 +76,7 @@ const options = {
     },
   },
 };
+
 docRouter.use("/", serve, setup(options));
 
 export default docRouter;

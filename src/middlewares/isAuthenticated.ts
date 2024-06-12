@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+
 import * as jwtHelper from "../helpers/jwt";
 
 export const isAuthenticated = async (
@@ -11,7 +12,7 @@ export const isAuthenticated = async (
 
   if (!token) {
     return res.status(401).json({
-      message: "Map of pi say every request must have token in headers",
+      message: "Map of Pi requires authentication tokens to be included in request headers.",
     });
   }
 
@@ -21,7 +22,7 @@ export const isAuthenticated = async (
     if (!currentUser) {
       return res.status(401).json({
         message:
-          "Map of pi say Token provided is invalid or could not found user associated to it",
+          "Map of Pi indicates that the provided token is either invalid or does not correspond to a user in the system.",
       });
     }
 
