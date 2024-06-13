@@ -10,7 +10,7 @@ export const authenticateUser = async (req: Request, res: Response) => {
     const user = await userService.authenticate(authResult);
     const token = jwtHelper.generateUserToken(user);
 
-    console.log(user)
+    console.log(user);
 
     return res.status(200).json({
       user,
