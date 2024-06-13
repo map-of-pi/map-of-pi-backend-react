@@ -1,17 +1,17 @@
 import { Router } from "express";
+
 import * as reviewController from "../controllers/reviewFeedbackController";
-import upload from "../utils/multer";
-import { isAuthenticated } from "../middlewares/isAuthenticated";
+import { verifyToken } from "../middlewares/verifyToken";
 import { isReviewOwner } from "../middlewares/isReviewOwner";
-// import { isShopFound } from "../middlewares/isShopFound";
+import upload from "../utils/multer";
 
 const reviewRoutes = Router();
 
-reviewRoutes.get("/:user_id", reviewController.getSingleUserReview); //get all reviews associated to a user
+reviewRoutes.get("/:user_id", reviewController.getSingleUserReview);
 
 reviewRoutes.post(
   "/add",
-  isAuthenticated,
+  verifyToken,
   upload.array("images"),
   reviewController.addReviewToShop
 );
@@ -20,14 +20,14 @@ reviewRoutes.get("/:id", reviewController.getAssociatedReviews);
 
 reviewRoutes.put(
   "/:id",
-  isAuthenticated,
+  verifyToken,
   isReviewOwner,
   reviewController.updateReview
 );
 
 reviewRoutes.delete(
   "/:id",
-  isAuthenticated,
+  verifyToken,
   isReviewOwner,
   reviewController.deleteReview
 );
