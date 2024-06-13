@@ -1,9 +1,8 @@
 import jwt from "jsonwebtoken";
 
 import { IUser } from "../types";
-import { env } from "../utils/env";
-
 import User from "../models/User";
+import { env } from "../utils/env";
 
 export const generateUserToken = (user: IUser) => {
   try {

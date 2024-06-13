@@ -7,7 +7,9 @@ import { IReviewFeedback } from '../types';
 export const addReviewToShop = async (req: Request, res: Response) => {
   try {
     const { review_id, review_receiver_id, review_giver_id, reply_to_review_id, rating, comment } = req.body;
-    const image = req.files?.[0]?.path || '';
+    // type assertion to treat req.files as an array of Express.Multer.File
+    const files = req.files as Express.Multer.File[];
+    const image = files?.[0]?.path || '';
 
     const newReview: IReviewFeedback = new ReviewFeedback({
       review_id,
@@ -64,7 +66,9 @@ export const updateReview = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { rating, comment } = req.body;
-    const image = req.files?.[0]?.path || (req as any).currentReview.image;
+    // type assertion to treat req.files as an array of Express.Multer.File
+    const files = req.files as Express.Multer.File[];
+    const image = files?.[0]?.path || (req as any).currentReview.image;
 
     const updatedReview = await ReviewFeedback.findByIdAndUpdate(
       id,

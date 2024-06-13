@@ -4,7 +4,7 @@ const homeRoutes = Router()
 
 homeRoutes.get("/", (req, res) => {
     res.status(200).json({
-        message:"server is running"
+        message:"Server is running"
     })
 })
 
