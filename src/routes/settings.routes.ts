@@ -1,15 +1,16 @@
 import { Router } from "express";
+
 import * as getUserSettings from "../controllers/userPreferenceController";
-import upload from "../utils/multer";
-import { isAuthenticated } from "../middlewares/isAuthenticated";
+import { verifyToken } from "../middlewares/verifyToken";
 import { isSettingsOwner } from "../middlewares/isSettingsOwner";
 import { isShopFound } from "../middlewares/isShopFound";
+import upload from "../utils/multer";
 
 const reviewRoutes = Router();
 
 reviewRoutes.post(
   "/add",
-  isAuthenticated,
+  verifyToken,
   upload.array("images"),
   getUserSettings.addUserSettings
 );
@@ -18,7 +19,7 @@ reviewRoutes.get("/:id", getUserSettings.getUserSettings);
 
 reviewRoutes.put(
   "/:id",
-  isAuthenticated,
+  verifyToken,
   isShopFound,
   isSettingsOwner,
   getUserSettings.updateUserSettings
@@ -26,7 +27,7 @@ reviewRoutes.put(
 
 reviewRoutes.delete(
   "/:id",
-  isAuthenticated,
+  verifyToken,
   isShopFound,
   isSettingsOwner,
   getUserSettings.deleteUserSettings

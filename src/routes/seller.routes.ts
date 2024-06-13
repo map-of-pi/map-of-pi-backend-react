@@ -1,9 +1,10 @@
 import { Router } from "express";
+
 import * as sellerController from "../controllers/sellerController";
-import upload from "../utils/multer";
-import { isAuthenticated } from "../middlewares/isAuthenticated";
+import { verifyToken } from "../middlewares/verifyToken";
 import { isShopOwner } from "../middlewares/isShopOwner";
 import { isShopFound } from "../middlewares/isShopFound";
+import upload from "../utils/multer";
 
 const sellerRoutes = Router();
 
@@ -11,7 +12,7 @@ sellerRoutes.get("/", sellerController.getAllSellers);
 
 sellerRoutes.post(
   "/register",
-  isAuthenticated,
+  verifyToken,
   upload.array("images"),
   sellerController.registerNewSeller
 );
@@ -20,7 +21,7 @@ sellerRoutes.get("/:id", isShopFound, sellerController.getSingleSeller);
 
 sellerRoutes.put(
   "/:id",
-  isAuthenticated,
+  verifyToken,
   isShopFound,
   isShopOwner,
   sellerController.updateSeller
@@ -28,7 +29,7 @@ sellerRoutes.put(
 
 sellerRoutes.delete(
   "/:id",
-  isAuthenticated,
+  verifyToken,
   isShopFound,
   isShopOwner,
   sellerController.deleteSeller

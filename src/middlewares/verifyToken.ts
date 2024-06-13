@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 
 import * as jwtHelper from "../helpers/jwt";
 
-export const isAuthenticated = async (
+export const verifyToken = async (
   req: Request,
   res: Response,
   next: NextFunction
