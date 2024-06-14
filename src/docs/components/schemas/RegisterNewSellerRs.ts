@@ -1,3 +1,5 @@
+import { TrustMeterScale } from "../../../models/enums/trustMeterScale";
+
 export const RegisterNewSellerRs = {
   type: "object",
   properties: {
@@ -40,7 +42,8 @@ export const RegisterNewSellerRs = {
         },
         trust_meter_rating: {
           type: "number",
-          example: 50,
+          enum: Object.values(TrustMeterScale),
+          example: TrustMeterScale.HUNDRED,
         },
         coordinates: {
           type: "object",

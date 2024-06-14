@@ -8,6 +8,7 @@ import { UserSchema, UserPreferenceSchema, SellerSchema, ReviewFeedbackSchema } 
 
 import { AuthenticateUserRq } from "./components/schemas/AuthenticateUserRq";
 import { AuthenticateUserRs } from "./components/schemas/AuthenticateUserRs";
+import { GetAllSellersRs } from "./components/schemas/GetAllSellersRs";
 import { RegisterNewSellerRq } from "./components/schemas/RegisterNewSellerRq";
 import { RegisterNewSellerRs } from "./components/schemas/RegisterNewSellerRs";
 
@@ -70,7 +71,7 @@ const options = {
           content: {
             "application/json": {
               schema: {
-                $ref: "#/components/schemas/users/AuthenticateUserRq",
+                $ref: "#/components/schemas/AuthenticateUserRq",
               },
             },
           },
@@ -81,7 +82,7 @@ const options = {
             content: {
               "application/json": {
                 schema: {
-                  $ref: "#/components/schemas/users/AuthenticateUserRs",
+                  $ref: "#/components/schemas/AuthenticateUserRs",
                 },
               },
             },
@@ -98,6 +99,33 @@ const options = {
         },
       },
     },
+    '/api/v1/sellers': {
+      get: {
+        tags: ['Seller'],
+        summary: 'Get all sellers',
+        responses: {
+          '200': {
+            description: 'Successful response',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'array',
+                  items: {
+                    $ref: '#/components/schemas/GetAllSellersRs',
+                  },
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Bad request',
+          },
+          '500': {
+            description: 'Internal server error',
+          },
+        },
+      },
+    },
     '/api/v1/sellers/register': {
       post: {
         tags: ['Seller'],
@@ -107,7 +135,7 @@ const options = {
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/sellers/RegisterNewSellerRq',
+                $ref: '#/components/schemas/RegisterNewSellerRq',
               },
             },
           },
@@ -118,7 +146,7 @@ const options = {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/sellers/RegisterNewSellerRs',
+                  $ref: '#/components/schemas/RegisterNewSellerRs',
                 },
               },
             },
@@ -140,14 +168,11 @@ const options = {
       UserPreference: UserPreferenceSchema,
       Seller: SellerSchema,
       ReviewFeedback: ReviewFeedbackSchema,
-      user: {
-        AuthenticateUserRq: AuthenticateUserRq,
-        AuthenticateUserRs: AuthenticateUserRs
-      },
-      seller: {
-        RegisterNewSellerRq: RegisterNewSellerRq,
-        RegisterNewSellerRs: RegisterNewSellerRs
-      }
+      AuthenticateUserRq: AuthenticateUserRq,
+      AuthenticateUserRs: AuthenticateUserRs,
+      GetAllSellersRs: GetAllSellersRs,
+      RegisterNewSellerRq: RegisterNewSellerRq,
+      RegisterNewSellerRs: RegisterNewSellerRs
     },
     securitySchemes: {
       bearerAuth: {
