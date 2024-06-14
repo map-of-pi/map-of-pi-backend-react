@@ -1,42 +1,43 @@
-import mongoose, { Types } from "mongoose";
+import mongoose, { Schema, Types } from "mongoose";
 
 import { ISeller } from "../types";
 
 import { TrustMeterScale } from "./enums/trustMeterScale";
 
-const sellerSchema = new mongoose.Schema<ISeller>(
+const sellerSchema = new Schema<ISeller>(
   {
     seller_id: {
       type: String,
-      required: true
+      required: true,
     },
     name: { 
       type: String, 
-      required: true 
+      required: true,
     },
     description: { 
       type: String, 
-      required: true 
+      required: true, 
     },
     image: {
       type: String,
-      required: false
+      required: false,
     },
     address: { 
       type: String, 
-      required: false 
+      required: false, 
     },
     sale_items: {
       type: String,
-      required: false
+      required: false,
     },
     average_rating: {
       type: Types.Decimal128,
-      required: true
+      required: true,
     },
     trust_meter_rating: {
+      type: Number,
       enum: Object.values(TrustMeterScale),
-      required: true
+      required: true,
     },
     coordinates: {
       type: {

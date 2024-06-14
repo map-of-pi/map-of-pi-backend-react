@@ -1,7 +1,11 @@
 import { Request, Response } from "express";
 
+import * as sellerService from "../services/seller.service";
+
 export const getAllSellers = async (req: Request, res: Response) => {
   try {
+    const sellers = await sellerService.getAllSellers();
+    return res.status(200).json(sellers);
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
@@ -9,10 +13,14 @@ export const getAllSellers = async (req: Request, res: Response) => {
 
 export const registerNewSeller = async (req: Request, res: Response) => {
   try {
+    const sellerData = req.body;
+    const newSeller = await sellerService.registerNewSeller(sellerData);
+    return res.status(200).json({ newSeller });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
 };
+
 export const getSingleSeller = async (req: Request, res: Response) => {
   try {
   } catch (error: any) {

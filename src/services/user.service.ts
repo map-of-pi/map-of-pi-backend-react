@@ -1,7 +1,7 @@
 import User from "../models/User";
 import { IUser } from "../types";
 
-export const authenticate = async (currentUser: IUser) => {
+export const authenticate = async (currentUser: IUser): Promise<IUser> => {
   try {
     const user = await User.findOne({
       username: currentUser.user_name,

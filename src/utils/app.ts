@@ -4,9 +4,11 @@ import cors from "cors"
 
 import docRouter from "../docs/swagger";
 import requestLogger from "../middlewares/logger";
+
 import appRouter from "../routes";
 import homeRoutes from "../routes/home.routes";
 import userRoutes from "../routes/user.routes";
+import sellerRoutes from "../routes/seller.routes";
 
 const app = express();
 
@@ -21,6 +23,8 @@ app.use(cors({
 
 app.use("/api/v1", appRouter);
 app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/seller", sellerRoutes);
+
 app.use("/", homeRoutes);
 app.use("/", docRouter);
 
