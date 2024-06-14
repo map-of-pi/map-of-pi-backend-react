@@ -8,6 +8,8 @@ import { UserSchema, UserPreferenceSchema, SellerSchema, ReviewFeedbackSchema } 
 
 import { AuthenticateUserRq } from "./components/schemas/AuthenticateUserRq";
 import { AuthenticateUserRs } from "./components/schemas/AuthenticateUserRs";
+import { SellerRegistrationRq } from "./components/schemas/SellerRegistrationRq";
+import { SellerRegistrationRs } from "./components/schemas/SellerRegistrationRs";
 
 const docRouter = Router();
 
@@ -96,6 +98,40 @@ const options = {
         },
       },
     },
+    '/api/v1/seller/register': {
+      post: {
+        tags: ['Seller'],
+        summary: 'Register a new seller',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/seller/SellerRegistrationRq',
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'Seller registration successful',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/seller/SellerRegistrationRs',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Bad request',
+          },
+          '500': {
+            description: 'Internal server error',
+          },
+        },
+      },
+    },
   },
 
   components: {
@@ -107,6 +143,10 @@ const options = {
       user: {
         AuthenticateUserRq: AuthenticateUserRq,
         AuthenticateUserRs: AuthenticateUserRs
+      },
+      seller: {
+        SellerRegistrationRq: SellerRegistrationRq,
+        SellerRegistrationRs: SellerRegistrationRs
       }
     },
     securitySchemes: {
