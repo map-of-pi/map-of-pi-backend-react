@@ -36,7 +36,7 @@ const sellerSchema = new Schema<ISeller>(
     },
     trust_meter_rating: {
       type: Number,
-      enum: Object.values(TrustMeterScale),
+      // enum: Object.values(TrustMeterScale),
       required: true,
     },
     coordinates: {

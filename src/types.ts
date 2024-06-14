@@ -27,8 +27,8 @@ export interface ISeller extends Document {
   address?: string;
   sale_items?: string;
   average_rating: Types.Decimal128;
-  trust_meter_rating: TrustMeterScale;
-  coordinates: {
+  trust_meter_rating: number;
+  coordinates?: {
     type: 'Point';
     coordinates: [number, number];
   };

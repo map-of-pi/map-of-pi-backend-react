@@ -16,12 +16,7 @@ export const getAllSellers = async (): Promise<ISeller[]> => {
 
 export const registerNewSeller = async (sellerData: ISeller): Promise<ISeller> => {
   try {
-    const newSellerData: ISeller = {
-      ...sellerData,
-      trust_meter_rating: sellerData.trust_meter_rating as TrustMeterScale,
-    };
-
-    const newSeller = new Seller(newSellerData);
+    const newSeller = new Seller(sellerData);
     const savedSeller = await newSeller.save();
     return savedSeller;
   } catch (error: any) {
