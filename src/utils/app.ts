@@ -22,8 +22,8 @@ app.use(cors({
 }))
 
 app.use("/api/v1", appRouter);
-app.use("/api/v1/user", userRoutes);
-app.use("/api/v1/seller", sellerRoutes);
+app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/sellers", sellerRoutes);
 
 app.use("/", homeRoutes);
 app.use("/", docRouter);

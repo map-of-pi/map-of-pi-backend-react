@@ -8,8 +8,8 @@ import { UserSchema, UserPreferenceSchema, SellerSchema, ReviewFeedbackSchema } 
 
 import { AuthenticateUserRq } from "./components/schemas/AuthenticateUserRq";
 import { AuthenticateUserRs } from "./components/schemas/AuthenticateUserRs";
-import { SellerRegistrationRq } from "./components/schemas/SellerRegistrationRq";
-import { SellerRegistrationRs } from "./components/schemas/SellerRegistrationRs";
+import { RegisterNewSellerRq } from "./components/schemas/RegisterNewSellerRq";
+import { RegisterNewSellerRs } from "./components/schemas/RegisterNewSellerRs";
 
 const docRouter = Router();
 
@@ -61,7 +61,7 @@ const options = {
     "/": {
       get: homepage,
     },
-    "/api/v1/user/authenticate": {
+    "/api/v1/users/authenticate": {
       post: {
         tags: ["User"],
         summary: "Authenticate User",
@@ -70,7 +70,7 @@ const options = {
           content: {
             "application/json": {
               schema: {
-                $ref: "#/components/schemas/user/AuthenticateUserRq",
+                $ref: "#/components/schemas/users/AuthenticateUserRq",
               },
             },
           },
@@ -81,7 +81,7 @@ const options = {
             content: {
               "application/json": {
                 schema: {
-                  $ref: "#/components/schemas/user/AuthenticateUserRs",
+                  $ref: "#/components/schemas/users/AuthenticateUserRs",
                 },
               },
             },
@@ -98,7 +98,7 @@ const options = {
         },
       },
     },
-    '/api/v1/seller/register': {
+    '/api/v1/sellers/register': {
       post: {
         tags: ['Seller'],
         summary: 'Register a new seller',
@@ -107,7 +107,7 @@ const options = {
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/seller/SellerRegistrationRq',
+                $ref: '#/components/schemas/sellers/RegisterNewSellerRq',
               },
             },
           },
@@ -118,7 +118,7 @@ const options = {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/seller/SellerRegistrationRs',
+                  $ref: '#/components/schemas/sellers/RegisterNewSellerRs',
                 },
               },
             },
@@ -145,8 +145,8 @@ const options = {
         AuthenticateUserRs: AuthenticateUserRs
       },
       seller: {
-        SellerRegistrationRq: SellerRegistrationRq,
-        SellerRegistrationRs: SellerRegistrationRs
+        RegisterNewSellerRq: RegisterNewSellerRq,
+        RegisterNewSellerRs: RegisterNewSellerRs
       }
     },
     securitySchemes: {

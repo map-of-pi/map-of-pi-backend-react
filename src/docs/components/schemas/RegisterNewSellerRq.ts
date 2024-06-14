@@ -1,4 +1,4 @@
-export const SellerRegistrationRq = {
+export const RegisterNewSellerRq = {
   type: "object",
   properties: {
     seller_id: {

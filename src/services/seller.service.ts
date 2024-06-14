@@ -1,7 +1,4 @@
-import mongoose, { Types } from "mongoose";
-
 import Seller from "../models/Seller";
-import { TrustMeterScale } from "../models/enums/trustMeterScale";
 import { ISeller } from "../types";
 
 export const getAllSellers = async (): Promise<ISeller[]> => {
@@ -9,7 +6,7 @@ export const getAllSellers = async (): Promise<ISeller[]> => {
     const sellers = await Seller.find();
     return sellers;
   } catch (error: any) {
-    console.log("Error during retrieving all sellers", error.message);
+    console.log("Error retrieving all sellers", error.message);
     throw new Error(error.message);
   }
 };
