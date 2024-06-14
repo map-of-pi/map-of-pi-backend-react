@@ -5,7 +5,7 @@ import { TrustMeterScale } from "./models/enums/trustMeterScale";
 
 export interface IUser extends Document {
   user_id: string;
-  username: string;
+  user_name: string;
 }
 
 export interface IUserSettings extends Document {
@@ -68,13 +68,4 @@ export interface IReview extends Document {
   message: string;
   rating?: number;
   reviewer?: Types.ObjectId;
-}
-
-export interface IAuthResult {
-  accessToken: string;
-  user: {
-    username: string;
-    uid: string;
-    roles: string[];
-  };
 }

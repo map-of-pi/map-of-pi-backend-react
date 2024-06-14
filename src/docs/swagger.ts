@@ -6,6 +6,9 @@ import { homepage } from "./homepage";
 
 import { UserSchema, UserPreferenceSchema, SellerSchema, ReviewFeedbackSchema } from "./schemas";
 
+import { AuthenticateUserRq } from "./components/schemas/AuthenticateUserRq";
+import { AuthenticateUserRs } from "./components/schemas/AuthenticateUserRs";
+
 const docRouter = Router();
 
 const options = {
@@ -56,6 +59,43 @@ const options = {
     "/": {
       get: homepage,
     },
+    "/api/v1/user/authenticate": {
+      post: {
+        tags: ["User"],
+        summary: "Authenticate User",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/user/AuthenticateUserRq",
+              },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: "Authentication successful",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/user/AuthenticateUserRs",
+                },
+              },
+            },
+          },
+          400: {
+            description: "Bad request",
+          },
+          401: {
+            description: "Unauthorized",
+          },
+          500: {
+            description: "Internal server error",
+          },
+        },
+      },
+    },
   },
 
   components: {
@@ -63,7 +103,11 @@ const options = {
       User: UserSchema,
       UserPreference: UserPreferenceSchema,
       Seller: SellerSchema,
-      ReviewFeedback: ReviewFeedbackSchema
+      ReviewFeedback: ReviewFeedbackSchema,
+      user: {
+        AuthenticateUserRq: AuthenticateUserRq,
+        AuthenticateUserRs: AuthenticateUserRs
+      }
     },
     securitySchemes: {
       bearerAuth: {
