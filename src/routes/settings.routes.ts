@@ -3,7 +3,7 @@ import { Router } from "express";
 import * as getUserSettings from "../controllers/userPreferenceController";
 import { verifyToken } from "../middlewares/verifyToken";
 import { isSettingsOwner } from "../middlewares/isSettingsOwner";
-import { isShopFound } from "../middlewares/isShopFound";
+import { isSellerFound } from "../middlewares/isSellerFound";
 import upload from "../utils/multer";
 
 const reviewRoutes = Router();
@@ -20,7 +20,7 @@ reviewRoutes.get("/:id", getUserSettings.getUserSettings);
 reviewRoutes.put(
   "/:id",
   verifyToken,
-  isShopFound,
+  isSellerFound,
   isSettingsOwner,
   getUserSettings.updateUserSettings
 );
@@ -28,7 +28,7 @@ reviewRoutes.put(
 reviewRoutes.delete(
   "/:id",
   verifyToken,
-  isShopFound,
+  isSellerFound,
   isSettingsOwner,
   getUserSettings.deleteUserSettings
 );

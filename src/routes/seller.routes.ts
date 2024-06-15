@@ -2,8 +2,8 @@ import { Router } from "express";
 
 import * as sellerController from "../controllers/sellerController";
 import { verifyToken } from "../middlewares/verifyToken";
-import { isShopOwner } from "../middlewares/isShopOwner";
-import { isShopFound } from "../middlewares/isShopFound";
+import { isSellerOwner } from "../middlewares/isSellerOwner";
+import { isSellerFound } from "../middlewares/isSellerFound";
 import upload from "../utils/multer";
 
 const sellerRoutes = Router();
@@ -17,22 +17,14 @@ sellerRoutes.post(
   sellerController.registerNewSeller
 );
 
-sellerRoutes.get("/:id", isShopFound, sellerController.getSingleSeller);
+sellerRoutes.get("/:seller_id", isSellerFound, sellerController.getSingleSeller);
 
 sellerRoutes.put(
-  "/:id",
+  "/:seller_id",
   verifyToken,
-  isShopFound,
-  isShopOwner,
+  isSellerFound,
+  isSellerOwner,
   sellerController.updateSeller
-);
-
-sellerRoutes.delete(
-  "/:id",
-  verifyToken,
-  isShopFound,
-  isShopOwner,
-  sellerController.deleteSeller
 );
 
 export default sellerRoutes;
