@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import * as sellerController from "../controllers/sellerController";
 import { verifyToken } from "../middlewares/verifyToken";
-import { isShopOwner } from "../middlewares/isShopOwner";
+import { isSellerOwner } from "../middlewares/isSellerOwner";
 import { isSellerFound } from "../middlewares/isSellerFound";
 import upload from "../utils/multer";
 
@@ -20,10 +20,10 @@ sellerRoutes.post(
 sellerRoutes.get("/:seller_id", isSellerFound, sellerController.getSingleSeller);
 
 sellerRoutes.put(
-  "/:id",
+  "/:seller_id",
   verifyToken,
   isSellerFound,
-  isShopOwner,
+  isSellerOwner,
   sellerController.updateSeller
 );
 

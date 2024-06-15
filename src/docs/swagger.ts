@@ -12,6 +12,8 @@ import { GetAllSellersRs } from "./components/schemas/GetAllSellersRs";
 import { GetSingleSellerRs } from "./components/schemas/GetSingleSellerRs";
 import { RegisterNewSellerRq } from "./components/schemas/RegisterNewSellerRq";
 import { RegisterNewSellerRs } from "./components/schemas/RegisterNewSellerRs";
+import { UpdateSellerRq } from "./components/schemas/UpdateSellerRq";
+import { UpdateSellerRs } from "./components/schemas/UpdateSellerRs";
 
 const docRouter = Router();
 
@@ -163,6 +165,67 @@ const options = {
           },
         },
       },
+      put: {
+        tags: ['Seller'],
+        summary: 'Update a seller',
+        parameters: [
+          {
+            in: 'path',
+            name: 'seller_id',
+            required: true,
+            schema: {
+              type: 'string',
+              example: 'test_seller_id',
+            },
+          },
+          {
+            in: 'header',
+            name: 'Authorization',
+            required: true,
+            schema: {
+              type: 'string',
+              example: 'Bearer <your_token_here>',
+            },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/UpdateSellerRq',
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'Successful update',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UpdateSellerRs',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Bad request',
+          },
+          '401': {
+            description: 'Unauthorized - Missing or invalid token',
+          },
+          '403': {
+            description: 'Forbidden - User does not have permission',
+          },
+          '404': {
+            description: 'Seller not found',
+          },
+          '500': {
+            description: 'Internal server error',
+          },
+        },
+      },
     },
     '/api/v1/sellers/register': {
       post: {
@@ -211,7 +274,9 @@ const options = {
       GetAllSellersRs: GetAllSellersRs,
       GetSingleSellerRs: GetSingleSellerRs,
       RegisterNewSellerRq: RegisterNewSellerRq,
-      RegisterNewSellerRs: RegisterNewSellerRs
+      RegisterNewSellerRs: RegisterNewSellerRs,
+      UpdateSellerRq: UpdateSellerRq,
+      UpdateSellerRs: UpdateSellerRs
     },
     securitySchemes: {
       bearerAuth: {

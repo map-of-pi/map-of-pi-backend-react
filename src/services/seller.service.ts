@@ -31,3 +31,13 @@ export const registerNewSeller = async (sellerData: ISeller): Promise<ISeller> =
     throw new Error(error.message);
   }
 };
+
+export const updateSeller = async (seller_id: string, sellerData: Partial<ISeller>): Promise<ISeller | null> => {
+  try {
+    const updatedSeller = await Seller.findOneAndUpdate({ seller_id }, sellerData, { new: true });
+    return updatedSeller;
+  } catch (error: any) {
+    console.log("Error updating seller", error.message);
+    throw new Error(error.message);
+  }
+};
