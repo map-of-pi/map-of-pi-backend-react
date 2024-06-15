@@ -25,12 +25,4 @@ reviewRoutes.put(
   getUserSettings.updateUserSettings
 );
 
-reviewRoutes.delete(
-  "/:id",
-  verifyToken,
-  isSellerFound,
-  isSettingsOwner,
-  getUserSettings.deleteUserSettings
-);
-
 export default reviewRoutes;
