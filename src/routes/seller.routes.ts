@@ -3,7 +3,7 @@ import { Router } from "express";
 import * as sellerController from "../controllers/sellerController";
 import { verifyToken } from "../middlewares/verifyToken";
 import { isShopOwner } from "../middlewares/isShopOwner";
-import { isShopFound } from "../middlewares/isShopFound";
+import { isSellerFound } from "../middlewares/isSellerFound";
 import upload from "../utils/multer";
 
 const sellerRoutes = Router();
@@ -17,22 +17,14 @@ sellerRoutes.post(
   sellerController.registerNewSeller
 );
 
-sellerRoutes.get("/:id", isShopFound, sellerController.getSingleSeller);
+sellerRoutes.get("/:seller_id", isSellerFound, sellerController.getSingleSeller);
 
 sellerRoutes.put(
   "/:id",
   verifyToken,
-  isShopFound,
+  isSellerFound,
   isShopOwner,
   sellerController.updateSeller
-);
-
-sellerRoutes.delete(
-  "/:id",
-  verifyToken,
-  isShopFound,
-  isShopOwner,
-  sellerController.deleteSeller
 );
 
 export default sellerRoutes;

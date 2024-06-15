@@ -9,6 +9,7 @@ import { UserSchema, UserPreferenceSchema, SellerSchema, ReviewFeedbackSchema } 
 import { AuthenticateUserRq } from "./components/schemas/AuthenticateUserRq";
 import { AuthenticateUserRs } from "./components/schemas/AuthenticateUserRs";
 import { GetAllSellersRs } from "./components/schemas/GetAllSellersRs";
+import { GetSingleSellerRs } from "./components/schemas/GetSingleSellerRs";
 import { RegisterNewSellerRq } from "./components/schemas/RegisterNewSellerRq";
 import { RegisterNewSellerRs } from "./components/schemas/RegisterNewSellerRs";
 
@@ -62,6 +63,7 @@ const options = {
     "/": {
       get: homepage,
     },
+    /* Users API endpoint operations */
     "/api/v1/users/authenticate": {
       post: {
         tags: ["User"],
@@ -99,6 +101,7 @@ const options = {
         },
       },
     },
+    /* Sellers API endpoint operations */
     '/api/v1/sellers': {
       get: {
         tags: ['Seller'],
@@ -119,6 +122,41 @@ const options = {
           },
           '400': {
             description: 'Bad request',
+          },
+          '500': {
+            description: 'Internal server error',
+          },
+        },
+      },
+    },
+    '/api/v1/sellers/{seller_id}': {
+      get: {
+        tags: ['Seller'],
+        summary: 'Get a single seller by seller ID',
+        parameters: [
+          {
+            name: 'seller_id',
+            in: 'path',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+            description: 'The ID of the seller to retrieve',
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Successful response',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/GetSingleSellerRs',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Seller not found',
           },
           '500': {
             description: 'Internal server error',
@@ -171,6 +209,7 @@ const options = {
       AuthenticateUserRq: AuthenticateUserRq,
       AuthenticateUserRs: AuthenticateUserRs,
       GetAllSellersRs: GetAllSellersRs,
+      GetSingleSellerRs: GetSingleSellerRs,
       RegisterNewSellerRq: RegisterNewSellerRq,
       RegisterNewSellerRs: RegisterNewSellerRs
     },
