@@ -10,4 +10,3 @@ app.listen(env.PORT, async () => {
     console.log("Server failed to run", error.message);
   }
 });
-
