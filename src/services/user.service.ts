@@ -1,18 +1,18 @@
 import User from "../models/User";
-import { IAuthResult } from "../types";
+import { IUser } from "../types";
 
-export const authenticate = async (currentUser: IAuthResult) => {
+export const authenticate = async (currentUser: IUser): Promise<IUser> => {
   try {
     const user = await User.findOne({
-      username: currentUser.user.username,
+      user_name: currentUser.user_name,
     });
 
     if (user) {
       return user;
     } else {
       const newUser = await User.create({
-        username: currentUser.user.username,
-        uid: currentUser.user.uid,
+        user_name: currentUser.user_name,
+        user_id: currentUser.user_id,
       });
       return newUser;
     }
