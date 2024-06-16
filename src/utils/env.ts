@@ -7,6 +7,7 @@ export const env = {
   NODE_ENV: (process.env.NODE_ENV as string) || "development",
   PI_API_KEY: process.env.PI_API_KEY as string,
   PLATFORM_API_URL: process.env.PLATFORM_API_URL as string,
+  UPLOAD_PATH: process.env.UPLOAD_PATH as string,
   CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME as string,
   CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY as string,
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET as string,
