@@ -16,6 +16,8 @@ import { UpdateSellerRs } from "./components/schemas/UpdateSellerRs";
 
 const docRouter = Router();
 
+const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.min.css";
+
 const options = {
   openapi: "3.0.1",
   info: {
@@ -288,6 +290,6 @@ const options = {
   },
 };
 
-docRouter.use("/", serve, setup(options));
+docRouter.use("/", serve, setup(options, { customCssUrl: CSS_URL }));
 
 export default docRouter;
