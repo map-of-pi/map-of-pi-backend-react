@@ -25,7 +25,9 @@ app.use("/api/v1", appRouter);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/sellers", sellerRoutes);
 
+// Swagger OpenAPI documentation
+app.use("/api/docs", docRouter);
+
 app.use("/", homeRoutes);
-app.use("/", docRouter);
 
 export default app;
