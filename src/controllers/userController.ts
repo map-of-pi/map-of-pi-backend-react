@@ -4,7 +4,7 @@ import * as jwtHelper from "../helpers/jwt";
 import * as userService from "../services/user.service";
 
 export const authenticateUser = async (req: Request, res: Response) => {
-  const { auth } = req.body;
+  const auth = req.body;
 
   try {
     const user = await userService.authenticate(auth);

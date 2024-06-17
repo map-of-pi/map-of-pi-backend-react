@@ -4,8 +4,8 @@ import { RatingScale } from "./models/enums/ratingScale";
 import { TrustMeterScale } from "./models/enums/trustMeterScale";
 
 export interface IUser extends Document {
-  user_id: string;
-  user_name: string;
+  uid: string;
+  username: string;
 }
 
 export interface IUserSettings extends Document {

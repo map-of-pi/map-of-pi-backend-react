@@ -17,7 +17,7 @@ export const isSellerOwner = async (
   
   try {
     const currentUser = await decodeUserToken(token);
-    if (seller_id === currentUser.user_id) {
+    if (seller_id === currentUser.uid) {
       return next();
     } else {
       return res.status(403).json({

@@ -2,17 +2,19 @@ import User from "../models/User";
 import { IUser } from "../types";
 
 export const authenticate = async (currentUser: IUser): Promise<IUser> => {
+  
   try {
+
     const user = await User.findOne({
-      user_name: currentUser.user_name,
+      user_name: currentUser.username,
     });
 
     if (user) {
       return user;
     } else {
       const newUser = await User.create({
-        user_name: currentUser.user_name,
-        user_id: currentUser.user_id,
+        username: currentUser.username,
+        uid: currentUser.uid,
       });
       return newUser;
     }
