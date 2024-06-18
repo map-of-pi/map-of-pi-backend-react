@@ -8,7 +8,7 @@ export const AuthenticateUserRs = {
           type: "string",
           example: "666bbae4a05bcc3d8dfab563",
         },
-        user_id: {
+        uid: {
           type: "string",
           example: "12345",
         },
@@ -21,7 +21,7 @@ export const AuthenticateUserRs = {
           example: 0,
         },
       },
-      required: ["_id", "user_id", "username", "__v"],
+      required: ["_id", "uid", "username", "__v"],
     },
     token: {
       type: "string",

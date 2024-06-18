@@ -3,16 +3,16 @@ import { TrustMeterScale } from '../models/enums/trustMeterScale';
 export const UserSchema = {
   type: 'object',
   properties: {
-    user_id: {
+    uid: {
       type: 'string',
       description: 'Pi user ID',
     },
-    user_name: {
+    username: {
       type: 'string',
       description: 'Name of Pi user; preset to Pi user ID',
     },
   },
-  required: ['user_id', 'user_name']
+  required: ['uid', 'username']
 };
 
 export const UserPreferenceSchema = {
