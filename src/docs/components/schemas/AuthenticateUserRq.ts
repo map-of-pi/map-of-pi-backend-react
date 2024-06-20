@@ -4,16 +4,22 @@ export const AuthenticateUserRq = {
     auth: {
       type: "object",
       properties: {
-        uid: {
-          type: "string",
-          example: "piuser",
-        },
-        username: {
-          type: "string",
-          example: "piuser",
+        user: {
+          type: "object",
+          properties: {
+            uid: {
+              type: "string",
+              example: "user_id",
+            },
+            username: {
+              type: "string",
+              example: "user_id",
+            },
+          },
+          required: ["uid", "username"],
         },
       },
-      required: ["uid", "username"],
+      required: ["user"],
     },
   },
   required: ["auth"],
