@@ -1,10 +1,9 @@
 import { Router } from "express";
 import { serve, setup } from "swagger-ui-express";
 
-import { env } from "../utils/env";
 import { homepage } from "./homepage";
-
 import { UserSchema, UserPreferenceSchema, SellerSchema, ReviewFeedbackSchema } from "./schemas";
+import { env } from "../utils/env";
 
 import { AuthenticateUserRq } from "./components/schemas/AuthenticateUserRq";
 import { AuthenticateUserRs } from "./components/schemas/AuthenticateUserRs";
@@ -17,6 +16,8 @@ import { UpdateSellerRs } from "./components/schemas/UpdateSellerRs";
 
 const docRouter = Router();
 
+const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.min.css";
+
 const options = {
   openapi: "3.0.1",
   info: {
@@ -24,7 +25,6 @@ const options = {
     version: "1.0.0",
     description: "API Documentation for Map of Pi.",
   },
-
   servers: [
     {
       url: env.DEVELOPMENT_URL,
@@ -290,6 +290,6 @@ const options = {
   },
 };
 
-docRouter.use("/", serve, setup(options));
+docRouter.use("/", serve, setup(options, { customCssUrl: CSS_URL }));
 
 export default docRouter;

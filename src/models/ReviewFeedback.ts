@@ -42,6 +42,6 @@ const reviewFeedbackSchema = new Schema<IReviewFeedback>(
   },
 );
 
-const ReviewFeedback = mongoose.model<IReviewFeedback>("ReviewFeedback", reviewFeedbackSchema);
+const ReviewFeedback = mongoose.model<IReviewFeedback>("Review-Feedback", reviewFeedbackSchema);
 
 export default ReviewFeedback;
