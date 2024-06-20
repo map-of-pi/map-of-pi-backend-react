@@ -6,7 +6,7 @@ export const authenticate = async (currentUser: IUser): Promise<IUser> => {
   try {
 
     const user = await User.findOne({
-      user_name: currentUser.username,
+      username: currentUser.username,
     });
 
     if (user) {
