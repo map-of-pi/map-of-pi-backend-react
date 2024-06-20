@@ -15,13 +15,42 @@ export const UserSchema = {
   required: ['uid', 'username']
 };
 
-export const UserPreferenceSchema = {
-  type: "object",
+export const UserPreferencesSchema = {
   properties: {
-    name: {
+    user_settings_id: {
       type: "string",
+      description: 'Pi user ID'
+    },
+    email: {
+      type: "string",
+      description: 'Email address of the user',
+    },
+    phone_number: {
+      type: "number",
+      description: 'Phone number of the user',
+    },
+    image: {
+      type: "string",
+      description: 'Image of the user',
+    },
+    search_map_center: {
+      type: "object",
+      description: 'Geographical coordinates of the user\'s search center location',
+      properties: {
+        type: {
+          type: "string",
+        },
+        coordinates: {
+          type: "array",
+          items: {
+            type: "number",
+          },
+        },
+      },
+      required: ['type', 'coordinates'],
     },
   },
+  required: ["user_settings_id"],
 };
 
 export const SellerSchema = {
