@@ -2,11 +2,16 @@ import { Router } from "express";
 import { serve, setup } from "swagger-ui-express";
 
 import { homepage } from "./homepage";
-import { UserSchema, UserPreferenceSchema, SellerSchema, ReviewFeedbackSchema } from "./schemas";
+import { UserSchema, UserPreferencesSchema, SellerSchema, ReviewFeedbackSchema } from "./schemas";
 import { env } from "../utils/env";
 
 import { AuthenticateUserRq } from "./components/schemas/AuthenticateUserRq";
 import { AuthenticateUserRs } from "./components/schemas/AuthenticateUserRs";
+import { GetUserPreferencesRs } from "./components/schemas/GetUserPreferencesRs";
+import { AddUserPreferencesRq } from "./components/schemas/AddUserPreferencesRq";
+import { AddUserPreferencesRs } from "./components/schemas/AddUserPreferencesRs";
+import { UpdateUserPreferencesRq } from "./components/schemas/UpdateUserPreferencesRq";
+import { UpdateUserPreferencesRs } from "./components/schemas/UpdateUserPreferencesRs";
 import { GetAllSellersRs } from "./components/schemas/GetAllSellersRs";
 import { GetSingleSellerRs } from "./components/schemas/GetSingleSellerRs";
 import { RegisterNewSellerRq } from "./components/schemas/RegisterNewSellerRq";
@@ -48,16 +53,16 @@ const options = {
       description: "User endpoints and operations.",
     },
     {
-      name: "UserPreference",
-      description: "UserPreference endpoints and operations.",
+      name: "User Preferences",
+      description: "User Preferences endpoints and operations.",
     },
     {
       name: "Seller",
       description: "Seller endpoints and operations.",
     },
     {
-      name: "ReviewFeedback",
-      description: "ReviewFeedback endpoints and operations.",
+      name: "Review Feedback",
+      description: "Review Feedback endpoints and operations.",
     }
   ],
 
@@ -99,6 +104,135 @@ const options = {
           },
           500: {
             description: "Internal server error",
+          },
+        },
+      },
+    },
+    /* User Preferences API endpoint operations */
+    '/api/v1/user-preferences/{user-settings_id}': {
+      get: {
+        tags: ['User Preferences'],
+        summary: 'Get the user preferences by user settings ID',
+        parameters: [
+          {
+            name: 'user_settings_id',
+            in: 'path',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+            description: 'The ID of the user preferences to retrieve',
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Successful response',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/GetUserPreferencesRs',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'User Preferences not found',
+          },
+          '500': {
+            description: 'Internal server error',
+          },
+        },
+      },
+      put: {
+        tags: ['User Preferences'],
+        summary: 'Update the user preferences',
+        parameters: [
+          {
+            name: 'user_settings_id',
+            in: 'path',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'Authorization',
+            in: 'header',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/UpdateUserPreferencesRq',
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'Successful update',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UpdateUserPreferencesRs',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Bad request',
+          },
+          '401': {
+            description: 'Unauthorized - Missing or invalid token',
+          },
+          '403': {
+            description: 'Forbidden - User does not have permission',
+          },
+          '404': {
+            description: 'User Preferences not found',
+          },
+          '500': {
+            description: 'Internal server error',
+          },
+        },
+      },
+    },
+    '/api/v1/user-preferences/add': {
+      post: {
+        tags: ['User Preferences'],
+        summary: 'Add new user preferences',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/AddUserPreferencesRq',
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'User preferences registration successful',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/AddUserPreferencesRs',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Bad request',
+          },
+          '500': {
+            description: 'Internal server error',
           },
         },
       },
@@ -170,21 +304,19 @@ const options = {
         summary: 'Update a seller',
         parameters: [
           {
-            in: 'path',
             name: 'seller_id',
+            in: 'path',
             required: true,
             schema: {
               type: 'string',
-              example: 'test_seller_id',
             },
           },
           {
-            in: 'header',
             name: 'Authorization',
+            in: 'header',
             required: true,
             schema: {
               type: 'string',
-              example: 'Bearer <your_token_here>',
             },
           },
         ],
@@ -266,11 +398,16 @@ const options = {
   components: {
     schemas: {
       User: UserSchema,
-      UserPreference: UserPreferenceSchema,
+      UserPreferences: UserPreferencesSchema,
       Seller: SellerSchema,
       ReviewFeedback: ReviewFeedbackSchema,
       AuthenticateUserRq: AuthenticateUserRq,
       AuthenticateUserRs: AuthenticateUserRs,
+      GetUserPreferencesRs: GetUserPreferencesRs,
+      AddUserPreferencesRq: AddUserPreferencesRq,
+      AddUserPreferencesRs: AddUserPreferencesRs,
+      UpdateUserPreferencesRq: UpdateUserPreferencesRq,
+      UpdateUserPreferencesRs: UpdateUserPreferencesRs,
       GetAllSellersRs: GetAllSellersRs,
       GetSingleSellerRs: GetSingleSellerRs,
       RegisterNewSellerRq: RegisterNewSellerRq,

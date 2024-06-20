@@ -22,7 +22,7 @@ export const decodeUserToken = async (token: string) => {
     if (!decoded.userId) {
       throw new Error("Invalid token: Missing userID");
     }
-    const associatedUser = await User.findById(decoded.userId);
+    const associatedUser = await User.findOne({uid: decoded.userId});
     if (!associatedUser) {
       throw new Error("User not found");
     }
