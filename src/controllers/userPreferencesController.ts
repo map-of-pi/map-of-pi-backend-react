@@ -6,11 +6,11 @@ import { IUserSettings } from '../types';
 export const getUserPreferences = async (req: Request, res: Response) => {
   try {
     const { user_settings_id } = req.params;
-    const userPreference: IUserSettings | null = await userSettingsService.getUserSettingsById(user_settings_id);
-    if (!userPreference) {
+    const userPreferences: IUserSettings | null = await userSettingsService.getUserSettingsById(user_settings_id);
+    if (!userPreferences) {
       return res.status(404).json({ message: "User Preferences not found." });
     }
-    res.status(200).json(userPreference);
+    res.status(200).json(userPreferences);
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }

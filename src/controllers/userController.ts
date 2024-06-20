@@ -5,10 +5,9 @@ import * as userService from "../services/user.service";
 
 export const authenticateUser = async (req: Request, res: Response) => {
   const auth = req.body;
-  console.log(auth.authResult.user)
 
   try {
-    const user = await userService.authenticate(auth.authResult.user);
+    const user = await userService.authenticate(auth.auth.user);
     const token = jwtHelper.generateUserToken(user);
 
     return res.status(200).json({

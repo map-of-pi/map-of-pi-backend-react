@@ -27,7 +27,7 @@ export const verifyToken = async (
     }
 
     //@ts-ignore
-    req.currentUser = currentUser
+    req.currentUser = currentUser;
 
     next();
   } catch (error: any) {
