@@ -8,6 +8,7 @@ import requestLogger from "../middlewares/logger";
 import appRouter from "../routes";
 import homeRoutes from "../routes/home.routes";
 import userRoutes from "../routes/user.routes";
+import userPreferenceRoutes from "../routes/userPreference.routes";
 import sellerRoutes from "../routes/seller.routes";
 
 const app = express();
@@ -23,6 +24,7 @@ app.use(cors({
 
 app.use("/api/v1", appRouter);
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/user-preferences", userPreferenceRoutes);
 app.use("/api/v1/sellers", sellerRoutes);
 
 // Swagger OpenAPI documentation
