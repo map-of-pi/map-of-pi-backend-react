@@ -45,27 +45,3 @@ export interface IReviewFeedback extends Document {
   image?: string;
   review_date: Date;
 }
-
-/* ------- NOT IN PIFEST SCOPE ------- */
-
-export interface IShop extends Document {
-  name: string;
-  description: string;
-  address: string;
-  phone?: number;
-  email?: string;
-  online_orders_enabled: boolean;
-  images: string[];
-  products?: Types.ObjectId[];
-  owner?: Types.ObjectId;
-  reviews?: Types.ObjectId[];
-  rating?: number;
-  orders?: Types.ObjectId[];
-}
-
-export interface IReview extends Document {
-  productId?: Types.ObjectId;
-  message: string;
-  rating?: number;
-  reviewer?: Types.ObjectId;
-}
