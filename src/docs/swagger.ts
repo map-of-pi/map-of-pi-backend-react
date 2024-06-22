@@ -18,6 +18,10 @@ import { RegisterNewSellerRq } from "./components/schemas/RegisterNewSellerRq";
 import { RegisterNewSellerRs } from "./components/schemas/RegisterNewSellerRs";
 import { UpdateSellerRq } from "./components/schemas/UpdateSellerRq";
 import { UpdateSellerRs } from "./components/schemas/UpdateSellerRs";
+import { GetReviewsRs } from "./components/schemas/GetReviewsRs";
+import { GetSingleReviewRs } from "./components/schemas/GetSingleReviewRs";
+import { AddReviewRq } from "./components/schemas/AddReviewRq";
+import { AddReviewRs } from "./components/schemas/AddReviewRs";
 
 const docRouter = Router();
 
@@ -207,6 +211,16 @@ const options = {
       post: {
         tags: ['User Preferences'],
         summary: 'Add new user preferences',
+        parameters: [
+          {
+            name: 'Authorization',
+            in: 'header',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+        ],
         requestBody: {
           required: true,
           content: {
@@ -219,7 +233,7 @@ const options = {
         },
         responses: {
           '200': {
-            description: 'User preferences registration successful',
+            description: 'User preferences added successfully',
             content: {
               'application/json': {
                 schema: {
@@ -363,6 +377,16 @@ const options = {
       post: {
         tags: ['Seller'],
         summary: 'Register a new seller',
+        parameters: [
+          {
+            name: 'Authorization',
+            in: 'header',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+        ],
         requestBody: {
           required: true,
           content: {
@@ -380,6 +404,127 @@ const options = {
               'application/json': {
                 schema: {
                   $ref: '#/components/schemas/RegisterNewSellerRs',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Bad request',
+          },
+          '500': {
+            description: 'Internal server error',
+          },
+        },
+      },
+    },
+    /* Review Feedback API endpoint operations */
+    '/api/v1/review-feedback/{review_receiver_id}': {
+      get: {
+        tags: ['Review Feedback'],
+        summary: 'Get all associated reviews for seller',
+        parameters: [
+          {
+            name: 'review_receiver_id',
+            in: 'path',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+            description: 'The ID of the review receiver to retrieve',
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Successful response',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'array',
+                  items: {
+                    $ref: '#/components/schemas/GetReviewsRs',
+                  },
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Review not found',
+          },
+          '500': {
+            description: 'Internal server error',
+          },
+        },
+      },
+    },
+    '/api/v1/review-feedback/single/{review_id}': {
+      get: {
+        tags: ['Review Feedback'],
+        summary: 'Get a single review by review ID',
+        parameters: [
+          {
+            name: 'review_id',
+            in: 'path',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+            description: 'The ID of the review to retrieve',
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Successful response',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'array',
+                  items: {
+                    $ref: '#/components/schemas/GetSingleReviewRs',
+                  },
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Review not found',
+          },
+          '500': {
+            description: 'Internal server error',
+          },
+        },
+      },
+    },
+    '/api/v1/review-feedback/add': {
+      post: {
+        tags: ['Review Feedback'],
+        summary: 'Add a new review',
+        parameters: [
+          {
+            name: 'Authorization',
+            in: 'header',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/AddReviewRq',
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'Review added successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/AddReviewRs',
                 },
               },
             },
@@ -413,7 +558,11 @@ const options = {
       RegisterNewSellerRq: RegisterNewSellerRq,
       RegisterNewSellerRs: RegisterNewSellerRs,
       UpdateSellerRq: UpdateSellerRq,
-      UpdateSellerRs: UpdateSellerRs
+      UpdateSellerRs: UpdateSellerRs,
+      GetReviewsRs: GetReviewsRs,
+      GetSingleReviewRs: GetSingleReviewRs,
+      AddReviewRq: AddReviewRq,
+      AddReviewRs: AddReviewRs
     },
     securitySchemes: {
       bearerAuth: {
