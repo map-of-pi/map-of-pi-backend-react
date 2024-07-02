@@ -1,19 +1,35 @@
 import Seller from "../models/Seller";
 import { ISeller } from "../types";
 
-export const getAllSellers = async (): Promise<ISeller[]> => {
+export const getAllSellers = async (
+  origin?: { lat: number; lng: number },
+  radius?: number
+): Promise<ISeller[]> => {
   try {
-    const sellers = await Seller.find();
-    return sellers;
+    if (origin && radius) {
+      // If origin and radius are provided, filter sellers based on the geographic location within the given radius
+      const sellers = await Seller.find({
+        coordinates: {
+          $geoWithin: {
+            $centerSphere: [[origin.lng, origin.lat], radius / 6378.1] // Radius in radians
+          }
+        }
+      });
+      return sellers;
+    } else {
+      // If no origin and radius, return all sellers
+      const sellers = await Seller.find();
+      return sellers;
+    }
   } catch (error: any) {
-    console.log("Error retrieving all sellers", error.message);
+    console.log("Error retrieving sellers", error.message);
     throw new Error(error.message);
   }
 };
 
 export const getSingleSellerById = async (seller_id: string): Promise<ISeller | null> => {
   try {
-    const seller = await Seller.findOne({seller_id});
+    const seller = await Seller.findOne({ seller_id });
     return seller;
   } catch (error: any) {
     console.error(`Error retrieving seller with ID ${seller_id}:`, error.message);
