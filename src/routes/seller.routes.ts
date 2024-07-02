@@ -1,5 +1,4 @@
 import { Router } from "express";
-
 import * as sellerController from "../controllers/sellerController";
 import { verifyToken } from "../middlewares/verifyToken";
 import { isSellerOwner } from "../middlewares/isSellerOwner";
@@ -17,7 +16,7 @@ sellerRoutes.post(
   sellerController.registerNewSeller
 );
 
-sellerRoutes.get("/:seller_id", isSellerFound, sellerController.getSingleSeller);
+sellerRoutes.get("/:seller_id", isSellerFound, sellerController.getSingleSeller); // Corrected here
 
 sellerRoutes.put(
   "/:seller_id",
