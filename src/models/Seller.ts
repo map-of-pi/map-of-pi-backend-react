@@ -1,7 +1,5 @@
 import mongoose, { Schema, Types } from "mongoose";
-
 import { ISeller } from "../types";
-
 import { TrustMeterScale } from "./enums/trustMeterScale";
 
 const sellerSchema = new Schema<ISeller>(
@@ -43,12 +41,12 @@ const sellerSchema = new Schema<ISeller>(
       type: {
         type: String,
         enum: ['Point'],
-        required: false,
+        required: true,
         default: 'Point',
       },
       coordinates: {
         type: [Number],
-        required: false,
+        required: true,
       },
     },
     order_online_enabled_pref: {
@@ -57,6 +55,8 @@ const sellerSchema = new Schema<ISeller>(
     }
   }
 );
+
+sellerSchema.index({ coordinates: '2dsphere' });
 
 const Seller = mongoose.model<ISeller>("Seller", sellerSchema);
 
