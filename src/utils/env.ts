@@ -1,17 +1,18 @@
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
+
 dotenv.config();
 
 export const env = {
-  PORT: process.env.PORT || 3000,
-  JWT_SECRET: process.env.JWT_SECRET as string,
-  NODE_ENV: (process.env.NODE_ENV as string) || "development",
-  PI_API_KEY: process.env.PI_API_KEY as string,
-  PLATFORM_API_URL: process.env.PLATFORM_API_URL as string,
-  UPLOAD_PATH: process.env.UPLOAD_PATH as string,
-  CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME as string,
-  CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY as string,
-  CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET as string,
-  MONGODB_URL: process.env.MONGODB_URL as string,
-  DEVELOPMENT_URL: process.env.DEVELOPMENT_URL as string,
-  PRODUCTION_URL: process.env.PRODUCTION_URL as string,
+  PORT: process.env.PORT || 8001,
+  NODE_ENV: process.env.NODE_ENV || 'development',
+  MONGODB_URL: process.env.MONGODB_URL || '',
+  PI_API_KEY: process.env.PI_API_KEY || '',
+  PLATFORM_API_URL: process.env.PLATFORM_API_URL || '',
+  UPLOAD_PATH: process.env.UPLOAD_PATH || '',
+  CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || '',
+  CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY || '',
+  CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET || '',
+  DEVELOPMENT_URL: process.env.DEVELOPMENT_URL || '',
+  PRODUCTION_URL: process.env.PRODUCTION_URL || '',
+  JWT_SECRET: process.env.JWT_SECRET || 'default_secret', // Added default secret for safety
 };
