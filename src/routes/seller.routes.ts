@@ -7,7 +7,7 @@ import upload from "../utils/multer";
 
 const sellerRoutes = Router();
 
-sellerRoutes.get("/", sellerController.getAllSellers);
+sellerRoutes.post("/fetch", sellerController.fetchSellersByLocation);
 
 sellerRoutes.post(
   "/register",
@@ -16,7 +16,7 @@ sellerRoutes.post(
   sellerController.registerNewSeller
 );
 
-sellerRoutes.get("/:seller_id", isSellerFound, sellerController.getSingleSeller); // Corrected here
+sellerRoutes.get("/:seller_id", isSellerFound, sellerController.getSingleSeller);
 
 sellerRoutes.put(
   "/:seller_id",
