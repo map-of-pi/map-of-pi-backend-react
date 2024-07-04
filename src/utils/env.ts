@@ -1,9 +1,10 @@
 import dotenv from 'dotenv';
 
+// Load environment variables from .env file
 dotenv.config();
 
 export const env = {
-  PORT: process.env.PORT || 8001,
+  PORT: process.env.PORT || 8000,
   NODE_ENV: process.env.NODE_ENV || 'development',
   MONGODB_URL: process.env.MONGODB_URL || '',
   PI_API_KEY: process.env.PI_API_KEY || '',
