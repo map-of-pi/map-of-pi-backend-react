@@ -2,21 +2,10 @@ import { Request, Response } from "express";
 import * as sellerService from "../services/seller.service";
 import { ISeller } from "../types";
 
-export const getAllSellers = async (req: Request, res: Response) => {
+export const fetchSellersByLocation = async (req: Request, res: Response) => {
   try {
-    // Extracting origin and radius from query parameters
-    const { origin, radius } = req.query;
-
-    // Parsing the origin to an object and radius to a float, with default radius of 10 if not provided
-    const parsedOrigin = JSON.parse(origin as string);
-    const parsedRadius = parseFloat(radius as string) || 10;
-
-    // Logging the received parameters for debugging purposes
-    console.log('Received origin:', parsedOrigin);
-    console.log('Received radius:', parsedRadius);
-
-    // Fetching sellers based on the provided origin and radius
-    const sellers = await sellerService.getAllSellers(parsedOrigin, parsedRadius);
+    const { origin, radius } = req.body;
+    const sellers = await sellerService.getAllSellers(origin, radius);
     return res.status(200).json(sellers);
   } catch (error: any) {
     console.error('Error fetching sellers:', error.message);
