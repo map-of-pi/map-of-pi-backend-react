@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import dotenv from 'dotenv';
+
 import docRouter from "../docs/swagger";
 import requestLogger from "../middlewares/logger";
 import appRouter from "../routes";
@@ -8,7 +10,6 @@ import userRoutes from "../routes/user.routes";
 import userPreferencesRoutes from "../routes/userPreferences.routes";
 import sellerRoutes from "../routes/seller.routes";
 import reviewFeedbackRoutes from "../routes/reviewFeedback.routes";
-import dotenv from 'dotenv';
 
 dotenv.config();
 

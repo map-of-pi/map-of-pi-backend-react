@@ -3,7 +3,7 @@ import { IReviewFeedback } from "../types";
 
 export const getReviewFeedback = async (review_receiver_id: string): Promise<IReviewFeedback[]> => {
   try {
-    const reviewFeedback = await ReviewFeedback.find({review_receiver_id});
+    const reviewFeedback = await ReviewFeedback.find({review_receiver_id}).exec();
     return reviewFeedback;
   } catch (error: any) {
     console.error(`Error retrieving review feedback collection for userID ${review_receiver_id}: `, error.message);
@@ -13,7 +13,7 @@ export const getReviewFeedback = async (review_receiver_id: string): Promise<IRe
 
 export const getReviewFeedbackById = async (review_id: string): Promise<IReviewFeedback | null> => {
   try {
-    const reviewFeedback = await ReviewFeedback.findOne({review_id});
+    const reviewFeedback = await ReviewFeedback.findOne({review_id}).exec();
     return reviewFeedback;
   } catch (error: any) {
     console.error(`Error retrieving review feedback with reviewID ${review_id}:`, error.message);

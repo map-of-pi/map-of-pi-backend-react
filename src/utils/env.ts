@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export const env = {
-  PORT: process.env.PORT || 8000,
+  PORT: process.env.PORT || 8001,
   NODE_ENV: process.env.NODE_ENV || 'development',
   MONGODB_URL: process.env.MONGODB_URL || '',
   PI_API_KEY: process.env.PI_API_KEY || '',
@@ -15,5 +15,5 @@ export const env = {
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET || '',
   DEVELOPMENT_URL: process.env.DEVELOPMENT_URL || '',
   PRODUCTION_URL: process.env.PRODUCTION_URL || '',
-  JWT_SECRET: process.env.JWT_SECRET || 'default_secret', // Added default secret for safety
+  JWT_SECRET: process.env.JWT_SECRET || 'default_secret',
 };

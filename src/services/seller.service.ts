@@ -1,15 +1,8 @@
 import Seller from "../models/Seller";
 import { ISeller } from "../types";
-import { Document } from "mongoose";
-
-// Define the type returned by mongoose find methods, which includes mongoose document properties
-type SellerDocument = ISeller & Document;
 
 // Fetch all sellers or within a specific radius from a given origin
-export const getAllSellers = async (
-  origin?: { lat: number; lng: number },
-  radius?: number
-): Promise<SellerDocument[]> => {
+export const getAllSellers = async (origin?: { lat: number; lng: number }, radius?: number): Promise<ISeller[]> => {
   try {
     let sellers;
     if (origin && radius) {
@@ -31,10 +24,10 @@ export const getAllSellers = async (
 };
 
 // Fetch a single seller by ID
-export const getSingleSellerById = async (seller_id: string): Promise<SellerDocument | null> => {
+export const getSingleSellerById = async (seller_id: string): Promise<ISeller | null> => {
   try {
     const seller = await Seller.findOne({ seller_id }).exec();
-    return seller as SellerDocument | null;
+    return seller ? seller as ISeller : null;
   } catch (error: any) {
     console.error(`Error retrieving seller with ID ${seller_id}:`, error.message);
     throw new Error(error.message);
@@ -42,11 +35,11 @@ export const getSingleSellerById = async (seller_id: string): Promise<SellerDocu
 };
 
 // Register a new seller
-export const registerNewSeller = async (sellerData: ISeller): Promise<SellerDocument> => {
+export const registerNewSeller = async (sellerData: ISeller): Promise<ISeller> => {
   try {
     const newSeller = new Seller(sellerData);
     const savedSeller = await newSeller.save();
-    return savedSeller as SellerDocument;
+    return savedSeller as ISeller;
   } catch (error: any) {
     console.error("Error registering new seller:", error.message);
     throw new Error(error.message);
@@ -54,10 +47,10 @@ export const registerNewSeller = async (sellerData: ISeller): Promise<SellerDocu
 };
 
 // Update an existing seller
-export const updateSeller = async (seller_id: string, sellerData: Partial<ISeller>): Promise<SellerDocument | null> => {
+export const updateSeller = async (seller_id: string, sellerData: Partial<ISeller>): Promise<ISeller | null> => {
   try {
     const updatedSeller = await Seller.findOneAndUpdate({ seller_id }, sellerData, { new: true }).exec();
-    return updatedSeller as SellerDocument | null;
+    return updatedSeller ? updatedSeller as ISeller : null;
   } catch (error: any) {
     console.error("Error updating seller:", error.message);
     throw new Error(error.message);

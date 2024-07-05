@@ -1,22 +1,7 @@
-import mongoose, { Schema, Types, Document } from "mongoose";
-import { TrustMeterScale } from "./enums/trustMeterScale";
+import mongoose, { Schema, Types } from "mongoose";
 
-// Defining the ISeller interface for TypeScript
-export interface ISeller extends Document {
-  seller_id: string;
-  name: string;
-  description: string;
-  image?: string;
-  address?: string;
-  sale_items?: string;
-  average_rating: Types.Decimal128;
-  trust_meter_rating: number;
-  coordinates: {
-    type: "Point"; // Ensuring this is always "Point"
-    coordinates: [number, number];
-  };
-  order_online_enabled_pref: boolean;
-}
+import { TrustMeterScale } from "./enums/trustMeterScale";
+import { ISeller } from "../types";
 
 // Defining the seller schema
 const sellerSchema = new Schema<ISeller>(

@@ -3,7 +3,6 @@ import { connectDB } from "./config/dbConnection";
 import app from "./utils/app";
 import { env } from "./utils/env";
 
-// Load environment variables from .env file
 dotenv.config();
 
 const startServer = async () => {

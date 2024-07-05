@@ -6,9 +6,11 @@ export const fetchSellersByLocation = async (req: Request, res: Response) => {
   try {
     const { origin, radius } = req.body;
     const sellers = await sellerService.getAllSellers(origin, radius);
-    return res.status(200).json(sellers);
+    if (!sellers) {
+      return res.status(404).json({ message: "Sellers not found." });
+    }
+    res.status(200).json(sellers);
   } catch (error: any) {
-    console.error('Error fetching sellers:', error.message);
     res.status(500).json({ message: error.message });
   }
 };
