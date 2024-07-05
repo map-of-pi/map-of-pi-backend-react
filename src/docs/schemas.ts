@@ -116,6 +116,10 @@ export const SellerSchema = {
       type: 'boolean',
       description: 'Preference for online ordering availability',
     },
+    timestamp: {
+      type: 'string',
+      description: 'Timestamp of the seller registration'
+    }
   },
   required: [
     'seller_id',

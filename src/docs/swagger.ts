@@ -12,6 +12,7 @@ import { AddUserPreferencesRq } from "./components/schemas/AddUserPreferencesRq"
 import { AddUserPreferencesRs } from "./components/schemas/AddUserPreferencesRs";
 import { UpdateUserPreferencesRq } from "./components/schemas/UpdateUserPreferencesRq";
 import { UpdateUserPreferencesRs } from "./components/schemas/UpdateUserPreferencesRs";
+import { GetAllSellersRq } from "./components/schemas/GetAllSellersRq";
 import { GetAllSellersRs } from "./components/schemas/GetAllSellersRs";
 import { GetSingleSellerRs } from "./components/schemas/GetSingleSellerRs";
 import { RegisterNewSellerRq } from "./components/schemas/RegisterNewSellerRq";
@@ -252,10 +253,20 @@ const options = {
       },
     },
     /* Sellers API endpoint operations */
-    '/api/v1/sellers': {
-      get: {
+    '/api/v1/sellers/fetch': {
+      post: {
         tags: ['Seller'],
-        summary: 'Get all sellers',
+        summary: 'Get all sellers around a given location [if origin and radius are provided], otherwise, get all sellers.',
+        requestBody: {
+          required: false,
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/GetAllSellersRq",
+              },
+            },
+          }
+        },
         responses: {
           '200': {
             description: 'Successful response',
@@ -270,8 +281,8 @@ const options = {
               },
             },
           },
-          '400': {
-            description: 'Bad request',
+          '404': {
+            description: 'Sellers not found around given location',
           },
           '500': {
             description: 'Internal server error',
@@ -553,6 +564,7 @@ const options = {
       AddUserPreferencesRs: AddUserPreferencesRs,
       UpdateUserPreferencesRq: UpdateUserPreferencesRq,
       UpdateUserPreferencesRs: UpdateUserPreferencesRs,
+      GetAllSellersRq: GetAllSellersRq,
       GetAllSellersRs: GetAllSellersRs,
       GetSingleSellerRs: GetSingleSellerRs,
       RegisterNewSellerRq: RegisterNewSellerRq,

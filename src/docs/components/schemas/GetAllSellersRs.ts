@@ -65,6 +65,11 @@ export const GetAllSellersRs = {
         type: "boolean",
         example: true,
       },
+      timestamp: {
+        type: "string",
+        format: "date-time",
+        example: "2023-01-01T12:00:00Z",
+      },
       _id: {
         type: "string",
         example: "666c84b9d77068c6efeeaa1a",
@@ -81,6 +86,7 @@ export const GetAllSellersRs = {
       "average_rating",
       "trust_meter_rating",
       "order_online_enabled_pref",
+      "timestamp",
       "_id",
       "__v",
     ],
