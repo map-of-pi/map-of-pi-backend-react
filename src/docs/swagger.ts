@@ -27,6 +27,8 @@ import { AddReviewRs } from "./components/schemas/AddReviewRs";
 
 const docRouter = Router();
 
+const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.css";
+
 const options = {
   openapi: "3.0.1",
   info: {
@@ -576,6 +578,9 @@ const options = {
   },
 };
 
-docRouter.use("/", serve, setup(options, { swaggerUrl: path.join(__dirname, swaggerUI.getAbsoluteFSPath()) }));
+docRouter.use("/", serve, setup(options, { 
+  customCssUrl: CSS_URL, 
+  swaggerUrl: path.join(__dirname, swaggerUI.getAbsoluteFSPath())
+}));
 
 export default docRouter;
