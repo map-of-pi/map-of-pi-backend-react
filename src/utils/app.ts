@@ -1,7 +1,6 @@
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors"
-import path from "path";
 
 import docRouter from "../docs/swagger";
 import requestLogger from "../middlewares/logger";
@@ -23,8 +22,6 @@ app.use(requestLogger);
 app.use(cors({
     origin:"*"
 }));
-
-app.use('/static', express.static(path.join(__dirname, '../docs/static')));
 
 // Swagger OpenAPI documentation
 app.use("/api/docs", docRouter);
