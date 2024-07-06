@@ -20,12 +20,13 @@ const reviewFeedbackSchema = new Schema<IReviewFeedback>(
     },
     reply_to_review_id: {
       type: String,
-      required: true
+      required: false,
+      default: null
     },
     rating: {
       type: Number,
       enum: Object.values(RatingScale).filter(value => typeof value === 'number'),
-      required: true
+      required: true,
     },
     comment: {
       type: String,

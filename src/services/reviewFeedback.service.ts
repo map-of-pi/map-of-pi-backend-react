@@ -22,8 +22,13 @@ export const getReviewFeedbackById = async (review_id: string): Promise<IReviewF
 };
 
 export const addReviewFeedback = async (reviewFeedbackData: IReviewFeedback): Promise<IReviewFeedback> => {
+  const date = new Date();
+  const replyReviewId = !reviewFeedbackData.reply_to_review_id ? null: reviewFeedbackData.reply_to_review_id;
   try {
     const newReviewFeedback = new ReviewFeedback(reviewFeedbackData);
+    newReviewFeedback.review_date = date;
+    newReviewFeedback.review_id = `${reviewFeedbackData.review_receiver_id}_${reviewFeedbackData.review_giver_id}_${date}`;
+    newReviewFeedback.reply_to_review_id = replyReviewId;
     const savedReviewFeedback = await newReviewFeedback.save();
     return savedReviewFeedback;
   } catch (error: any) {

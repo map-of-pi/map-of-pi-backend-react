@@ -36,11 +36,11 @@ const options = {
   },
   servers: [
     {
-      url: env.DEVELOPMENT_URL,
+      url: "http://localhost:8001",
       description: "Development server",
     },
     {
-      url: env.PRODUCTION_URL,
+      url: "https://mapofpi-react.netlify.app/",
       description: "Production server",
     },
   ],

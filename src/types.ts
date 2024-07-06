@@ -39,7 +39,7 @@ export interface IReviewFeedback extends Document {
   review_id: string;
   review_receiver_id: string;
   review_giver_id: string;
-  reply_to_review_id: string;
+  reply_to_review_id: string | null;
   rating: RatingScale;
   comment?: string;
   image?: string;

@@ -13,6 +13,7 @@
 .env*.local
 .env
 .vercel
+.env.local
 
 # local misc
 /uploads
