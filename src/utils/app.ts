@@ -1,6 +1,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors"
+import path from "path";
 
 import docRouter from "../docs/swagger";
 import requestLogger from "../middlewares/logger";
@@ -21,16 +22,18 @@ app.use(requestLogger);
 
 app.use(cors({
     origin:"*"
-}))
+}));
+
+app.use('/static', express.static(path.join(__dirname, '../docs/static')));
+
+// Swagger OpenAPI documentation
+app.use("/api/docs", docRouter);
 
 app.use("/api/v1", appRouter);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/user-preferences", userPreferencesRoutes);
 app.use("/api/v1/sellers", sellerRoutes);
 app.use("/api/v1/review-feedback", reviewFeedbackRoutes);
-
-// Swagger OpenAPI documentation
-app.use("/api/docs", docRouter);
 
 app.use("/", homeRoutes);
 
