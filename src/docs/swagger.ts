@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { serve, setup } from "swagger-ui-express";
+import swaggerUI from "swagger-ui-dist";
+import path from "path";
 
 import { homepage } from "./homepage";
 import { UserSchema, UserPreferencesSchema, SellerSchema, ReviewFeedbackSchema } from "./schemas";
@@ -25,7 +27,7 @@ import { AddReviewRs } from "./components/schemas/AddReviewRs";
 
 const docRouter = Router();
 
-const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.css";
+const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.min.css";
 
 const options = {
   openapi: "3.0.1",
@@ -576,6 +578,9 @@ const options = {
   },
 };
 
-docRouter.use("/", serve, setup(options, { customCssUrl: CSS_URL }));
+docRouter.use("/", serve, setup(options, { 
+  customCssUrl: CSS_URL, 
+  swaggerUrl: path.join(__dirname, swaggerUI.getAbsoluteFSPath())
+}));
 
 export default docRouter;
