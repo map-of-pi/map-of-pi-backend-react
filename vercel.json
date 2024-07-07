@@ -4,9 +4,17 @@
     {
       "src": "src/index.ts",
       "use": "@vercel/node"
+    },
+    {
+      "src": "src/docs/components/static/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
+    {
+      "src": "/api/docs/components/static/(.*)",
+      "dest": "/src/docs/components/static/$1"
+    },
     {
       "src": "/(.*)",
       "dest": "/src/index.ts"
