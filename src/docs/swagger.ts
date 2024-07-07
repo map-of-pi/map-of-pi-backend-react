@@ -1,7 +1,5 @@
 import { Router } from "express";
 import { serve, setup } from "swagger-ui-express";
-import swaggerJsDoc from "swagger-jsdoc";
-import path from "path";
 
 import { homepage } from "./homepage";
 import { UserSchema, UserPreferencesSchema, SellerSchema, ReviewFeedbackSchema } from "./schemas";
@@ -580,10 +578,8 @@ const options = {
   },
 };
 
-const specs = swaggerJsDoc(options);
-
-docRouter.use("/", serve, setup(specs, {
-  customCssUrl: "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.min.css"
+docRouter.use('/', serve, setup(options, {
+  customCssUrl: '/api/docs/components/static/swagger-ui.css'
 }));
 
 export default docRouter;
