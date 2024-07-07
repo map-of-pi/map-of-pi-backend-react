@@ -27,9 +27,9 @@ import { AddReviewRs } from "./components/schemas/AddReviewRs";
 
 const docRouter = Router();
 
-const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.css";
+const CSS_URL = { customCssUrl: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.css' };
 
-const options = {
+const spec = {
   openapi: "3.0.1",
   info: {
     title: "Map of Pi API Documentation",
@@ -578,8 +578,7 @@ const options = {
   },
 };
 
-docRouter.use("/", serve, setup(options, { 
-  customCssUrl: CSS_URL, 
+docRouter.use("/", serve, setup(spec, CSS_URL, {
   swaggerUrl: path.join(__dirname, swaggerUI.getAbsoluteFSPath())
 }));
 
