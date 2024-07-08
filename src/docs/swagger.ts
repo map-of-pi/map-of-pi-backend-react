@@ -8,13 +8,6 @@ import { homepage } from "./homepage";
 import { UserSchema, UserPreferencesSchema, SellerSchema, ReviewFeedbackSchema } from "./schemas";
 import { env } from "../utils/env";
 
-import { GetAllSellersRs } from "./components/schemas/GetAllSellersRs";
-import { GetSingleSellerRs } from "./components/schemas/GetSingleSellerRs";
-import { RegisterNewSellerRq } from "./components/schemas/RegisterNewSellerRq";
-import { RegisterNewSellerRs } from "./components/schemas/RegisterNewSellerRs";
-import { UpdateSellerRq } from "./components/schemas/UpdateSellerRq";
-import { UpdateSellerRs } from "./components/schemas/UpdateSellerRs";
-
 const docRouter = Router();
 
 const options = {
