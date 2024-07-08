@@ -23,7 +23,7 @@ export const getReviewFeedbackById = async (review_id: string): Promise<IReviewF
 
 export const addReviewFeedback = async (reviewFeedbackData: IReviewFeedback): Promise<IReviewFeedback> => {
   const date = new Date();
-  const replyReviewId = !reviewFeedbackData.reply_to_review_id ? null: reviewFeedbackData.reply_to_review_id;
+  const replyReviewId = reviewFeedbackData.reply_to_review_id==='' ? null: reviewFeedbackData.reply_to_review_id;
   try {
     const newReviewFeedback = new ReviewFeedback(reviewFeedbackData);
     newReviewFeedback.review_date = date;
