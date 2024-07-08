@@ -8,11 +8,6 @@ import { homepage } from "./homepage";
 import { UserSchema, UserPreferencesSchema, SellerSchema, ReviewFeedbackSchema } from "./schemas";
 import { env } from "../utils/env";
 
-import { GetUserPreferencesRs } from "./components/schemas/GetUserPreferencesRs";
-import { AddUserPreferencesRq } from "./components/schemas/AddUserPreferencesRq";
-import { AddUserPreferencesRs } from "./components/schemas/AddUserPreferencesRs";
-import { UpdateUserPreferencesRq } from "./components/schemas/UpdateUserPreferencesRq";
-import { UpdateUserPreferencesRs } from "./components/schemas/UpdateUserPreferencesRs";
 import { GetAllSellersRs } from "./components/schemas/GetAllSellersRs";
 import { GetSingleSellerRs } from "./components/schemas/GetSingleSellerRs";
 import { RegisterNewSellerRq } from "./components/schemas/RegisterNewSellerRq";

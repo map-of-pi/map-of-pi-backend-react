@@ -2,11 +2,41 @@ import { Router } from "express";
 
 import * as userPreferencesController from "../controllers/userPreferencesController";
 import { verifyToken } from "../middlewares/verifyToken";
-
 import upload from "../utils/multer";
 
 const userPreferencesRoutes = Router();
 
+/**
+ * @swagger
+ * /api/v1/user-preferences/add:
+ *   post:
+ *     tags:
+ *       - User Preferences
+ *     summary: Add new user preferences
+ *     parameters:
+ *       - name: Authorization
+ *         in: header
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AddUserPreferencesRq'
+ *     responses:
+ *       200:
+ *         description: User preferences added successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AddUserPreferencesRs'
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
 userPreferencesRoutes.post(
   "/add",
   verifyToken,
@@ -14,8 +44,76 @@ userPreferencesRoutes.post(
   userPreferencesController.addUserPreferences
 );
 
+/**
+ * @swagger
+ * /api/v1/user-preferences/{user-settings_id}:
+ *   get:
+ *     tags:
+ *       - User Preferences
+ *     summary: Get the user preferences by user settings ID
+ *     parameters:
+ *       - name: user_settings_id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the user preferences to retrieve
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/GetUserPreferencesRs'
+ *       404:
+ *         description: User Preferences not found
+ *       500:
+ *         description: Internal server error
+ */
 userPreferencesRoutes.get("/:user_settings_id", userPreferencesController.getUserPreferences);
 
+/**
+ * @swagger
+ * /api/v1/user-preferences/{user-settings_id}:
+ *   put:
+ *     tags:
+ *       - User Preferences
+ *     summary: Update the user preferences
+ *     parameters:
+ *       - name: user_settings_id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - name: Authorization
+ *         in: header
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateUserPreferencesRq'
+ *     responses:
+ *       200:
+ *         description: Successful update
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UpdateUserPreferencesRs'
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized - Missing or invalid token
+ *       403:
+ *         description: Forbidden - User does not have permission
+ *       404:
+ *         description: User Preferences not found
+ *       500:
+ *         description: Internal server error
+ */
 userPreferencesRoutes.put(
   "/:user_settings_id",
   verifyToken,
