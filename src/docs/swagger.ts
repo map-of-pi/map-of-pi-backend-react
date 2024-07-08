@@ -21,10 +21,6 @@ import { RegisterNewSellerRq } from "./components/schemas/RegisterNewSellerRq";
 import { RegisterNewSellerRs } from "./components/schemas/RegisterNewSellerRs";
 import { UpdateSellerRq } from "./components/schemas/UpdateSellerRq";
 import { UpdateSellerRs } from "./components/schemas/UpdateSellerRs";
-import { GetReviewsRs } from "./components/schemas/GetReviewsRs";
-import { GetSingleReviewRs } from "./components/schemas/GetSingleReviewRs";
-import { AddReviewRq } from "./components/schemas/AddReviewRq";
-import { AddReviewRs } from "./components/schemas/AddReviewRs";
 
 const docRouter = Router();
 
@@ -51,7 +47,11 @@ const options = {
       },
     ],
   },
-  apis: [path.join(__dirname, '../routes/*.{ts,js}')],
+  apis: [
+    path.join(__dirname, '../routes/*.{ts,js}'),
+    path.join(__dirname, '../models/enums/*.{ts,js}'),
+    path.join(__dirname, '../docs/components/schemas/*.{ts,js}')
+  ]
 };
 
 //     basePath: "/",
