@@ -8,8 +8,6 @@ import { homepage } from "./homepage";
 import { UserSchema, UserPreferencesSchema, SellerSchema, ReviewFeedbackSchema } from "./schemas";
 import { env } from "../utils/env";
 
-import { AuthenticateUserRq } from "./components/schemas/AuthenticateUserRq";
-import { AuthenticateUserRs } from "./components/schemas/AuthenticateUserRs";
 import { GetUserPreferencesRs } from "./components/schemas/GetUserPreferencesRs";
 import { AddUserPreferencesRq } from "./components/schemas/AddUserPreferencesRq";
 import { AddUserPreferencesRs } from "./components/schemas/AddUserPreferencesRs";
