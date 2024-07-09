@@ -4,6 +4,41 @@ import * as userPreferencesController from "../controllers/userPreferencesContro
 import { verifyToken } from "../middlewares/verifyToken";
 import upload from "../utils/multer";
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     UserPreferencesSchema:
+ *       type: object
+ *       properties:
+ *         user_settings_id:
+ *           type: string
+ *           description: Pi user ID
+ *         email:
+ *           type: string
+ *           description: Email address of the user
+ *         phone_number:
+ *           type: number
+ *           description: Phone number of the user
+ *         image:
+ *           type: string
+ *           description: Image of the user
+ *         search_map_center:
+ *           type: object
+ *           description: Geographical coordinates of the user's search center location
+ *           properties:
+ *             type:
+ *               type: string
+ *             coordinates:
+ *               type: array
+ *               items:
+ *                 type: number
+ *           required:
+ *             - type
+ *             - coordinates
+ *       required:
+ *         - user_settings_id
+ */
 const userPreferencesRoutes = Router();
 
 /**

@@ -9,7 +9,7 @@
  *         - 50
  *         - 80
  *         - 100
- *       description: The trust meter scale measured in increments.
+ *       description: The trust meter scale measured in increments for the seller.
  */
 export enum TrustMeterScale {
   ZERO = 0,

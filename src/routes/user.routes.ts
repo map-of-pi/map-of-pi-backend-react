@@ -3,6 +3,23 @@ import { Router } from "express";
 import * as userController from "../controllers/userController";
 import { verifyToken } from "../middlewares/verifyToken";
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     UserSchema:
+ *       type: object
+ *       properties:
+ *         uid:
+ *           type: string
+ *           description: Pi user ID
+ *         username:
+ *           type: string
+ *           description: Name of Pi user; preset to Pi user ID
+ *       required:
+ *         - uid
+ *         - username
+ */
 const userRoutes = Router();
 
 /**

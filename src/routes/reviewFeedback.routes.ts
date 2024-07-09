@@ -4,6 +4,46 @@ import * as reviewFeedbackController from "../controllers/reviewFeedbackControll
 import { verifyToken } from "../middlewares/verifyToken";
 import upload from "../utils/multer";
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     ReviewFeedbackSchema:
+ *       type: object
+ *       properties:
+ *         review_id:
+ *           type: string
+ *           description: Unique ID of the review
+ *         review_receiver_id:
+ *           type: string
+ *           description: Pi user ID of the user receiving the review
+ *         review_giver_id:
+ *           type: string
+ *           description: Pi user ID of the user giving the review
+ *         reply_to_review_id:
+ *           type: string
+ *           description: Unique ID of the replied review
+ *         rating:
+ *           type: object
+ *           $ref: '#/components/schemas/RatingScale'
+ *         comment:
+ *           type: string
+ *           description: Comment given in the review
+ *         image:
+ *           type: string
+ *           description: Image associated with the review
+ *         review_date:
+ *           type: string
+ *           format: date-time
+ *           description: Date when the review was given
+ *       required:
+ *         - review_id
+ *         - review_receiver_id
+ *         - review_giver_id
+ *         - reply_to_review_id
+ *         - rating
+ *         - review_date
+ */
 const reviewFeedbackRoutes = Router();
 
 /**
