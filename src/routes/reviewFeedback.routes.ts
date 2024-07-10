@@ -25,7 +25,7 @@ import upload from "../utils/multer";
  *           description: Unique ID of the replied review
  *         rating:
  *           type: object
- *           $ref: '#/components/schemas/RatingScale'
+ *           $ref: '/api/docs/enum/RatingScale.yml#/components/schemas/RatingScale'
  *         comment:
  *           type: string
  *           description: Comment given in the review
@@ -68,51 +68,13 @@ const reviewFeedbackRoutes = Router();
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/GetReviewsRs'
+ *                 $ref: '/api/docs/ReviewFeedbackSchema.yml#/components/schemas/GetReviewsRs'
  *       404:
  *         description: Review not found
  *       500:
  *         description: Internal server error
  */
 reviewFeedbackRoutes.get("/:review_receiver_id", reviewFeedbackController.getReviews);
-
-/**
- * @swagger
- * /api/v1/review-feedback/add:
- *   post:
- *     tags:
- *       - Review Feedback
- *     summary: Add a new review
- *     parameters:
- *       - name: Authorization
- *         in: header
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/AddReviewRq'
- *     responses:
- *       200:
- *         description: Review added successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/AddReviewRs'
- *       400:
- *         description: Bad request
- *       500:
- *         description: Internal server error
- */
-reviewFeedbackRoutes.post(
-  "/add",
-  verifyToken,
-  upload.array("images"),
-  reviewFeedbackController.addReview
-);
 
 /**
  * @swagger
@@ -136,12 +98,50 @@ reviewFeedbackRoutes.post(
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/GetSingleReviewRs'
+ *                 $ref: '/api/docs/ReviewFeedbackSchema.yml#/components/schemas/GetSingleReviewRs'
  *       404:
  *         description: Review not found
  *       500:
  *         description: Internal server error
  */
 reviewFeedbackRoutes.get("/single/:review_id", reviewFeedbackController.getSingleReviewById);
+
+/**
+ * @swagger
+ * /api/v1/review-feedback/add:
+ *   post:
+ *     tags:
+ *       - Review Feedback
+ *     summary: Add a new review
+ *     parameters:
+ *       - name: Authorization
+ *         in: header
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '/api/docs/ReviewFeedbackSchema.yml#/components/schemas/AddReviewRq'
+ *     responses:
+ *       200:
+ *         description: Review added successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '/api/docs/ReviewFeedbackSchema.yml#/components/schemas/AddReviewRs'
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
+reviewFeedbackRoutes.post(
+  "/add",
+  verifyToken,
+  upload.array("images"),
+  reviewFeedbackController.addReview
+);
 
 export default reviewFeedbackRoutes;

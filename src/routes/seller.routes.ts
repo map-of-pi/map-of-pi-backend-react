@@ -41,7 +41,7 @@ import upload from "../utils/multer";
  *             - $numberDecimal
  *         trust_meter_rating:
  *           type: object
- *           $ref: '#/components/schemas/TrustMeterScale'
+ *           $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
  *         coordinates:
  *           type: object
  *           description: Geographical coordinates of the seller's location
@@ -83,7 +83,7 @@ const sellerRoutes = Router();
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/GetAllSellersRs'
+ *                 $ref: '/api/docs/SellersSchema.yml#/components/schemas/GetAllSellersRs'
  *       400:
  *         description: Bad request
  *       500:
@@ -110,14 +110,14 @@ sellerRoutes.get("/", sellerController.getAllSellers);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/RegisterNewSellerRq'
+ *             $ref: '/api/docs/SellersSchema.yml#/components/schemas/RegisterNewSellerRq'
  *     responses:
  *       200:
  *         description: Seller registration successful
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/RegisterNewSellerRs'
+ *               $ref: '/api/docs/SellersSchema.yml#/components/schemas/RegisterNewSellerRs'
  *       400:
  *         description: Bad request
  *       500:
@@ -150,7 +150,7 @@ sellerRoutes.post(
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/GetSingleSellerRs'
+ *               $ref: '/api/docs/SellersSchema.yml#/components/schemas/GetSingleSellerRs'
  *       404:
  *         description: Seller not found
  *       500:
@@ -183,14 +183,14 @@ sellerRoutes.get("/:seller_id", isSellerFound, sellerController.getSingleSeller)
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/UpdateSellerRq'
+ *             $ref: '/api/docs/SellersSchema.yml#/components/schemas/UpdateSellerRq'
  *     responses:
  *       200:
  *         description: Successful update
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/UpdateSellerRs'
+ *               $ref: '/api/docs/SellersSchema.yml#/components/schemas/UpdateSellerRs'
  *       400:
  *         description: Bad request
  *       401:
