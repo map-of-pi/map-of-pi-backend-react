@@ -3,7 +3,7 @@ import bodyParser from "body-parser";
 import cors from "cors"
 import path from "path";
 
-import docRouter from "../docs/swagger";
+import docRouter from "../config/swagger";
 import requestLogger from "../middlewares/logger";
 
 import appRouter from "../routes";
