@@ -59,14 +59,14 @@ const userPreferencesRoutes = Router();
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/AddUserPreferencesRq'
+ *             $ref: '/api/docs/UserPreferencesSchema.yml#/components/schemas/AddUserPreferencesRq'
  *     responses:
  *       200:
  *         description: User preferences added successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/AddUserPreferencesRs'
+ *               $ref: '/api/docs/UserPreferencesSchema.yml#/components/schemas/AddUserPreferencesRs'
  *       400:
  *         description: Bad request
  *       500:
@@ -99,7 +99,7 @@ userPreferencesRoutes.post(
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/GetUserPreferencesRs'
+ *               $ref: '/api/docs/UserPreferencesSchema.yml#/components/schemas/GetUserPreferencesRs'
  *       404:
  *         description: User Preferences not found
  *       500:
@@ -130,14 +130,14 @@ userPreferencesRoutes.get("/:user_settings_id", userPreferencesController.getUse
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/UpdateUserPreferencesRq'
+ *             $ref: '/api/docs/UserPreferencesSchema.yml#/components/schemas/UpdateUserPreferencesRq'
  *     responses:
  *       200:
  *         description: Successful update
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/UpdateUserPreferencesRs'
+ *               $ref: '/api/docs/UserPreferencesSchema.yml#/components/schemas/UpdateUserPreferencesRs'
  *       400:
  *         description: Bad request
  *       401:

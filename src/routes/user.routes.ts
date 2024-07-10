@@ -34,14 +34,14 @@ const userRoutes = Router();
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/AuthenticateUserRq'
+ *             $ref: '/api/docs/UsersSchema.yml#/components/schemas/AuthenticateUserRq'
  *     responses:
  *       200:
  *         description: Authentication successful
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/AuthenticateUserRs'
+ *               $ref: '/api/docs/UsersSchema.yml#/components/schemas/AuthenticateUserRs'
  *       400:
  *         description: Bad request
  *       401:
