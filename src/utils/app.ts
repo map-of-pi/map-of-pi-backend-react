@@ -1,6 +1,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors"
+import path from "path";
 
 import docRouter from "../docs/swagger";
 import requestLogger from "../middlewares/logger";
@@ -22,6 +23,10 @@ app.use(requestLogger);
 app.use(cors({
     origin:"*"
 }));
+
+// serve static files for Swagger documentation
+app.use('/api/docs', express.static(path.join(__dirname, '../config/docs')));
+app.use('/api/docs/enum', express.static(path.join(__dirname, '../config/docs/enum')));
 
 // Swagger OpenAPI documentation
 app.use("/api/docs", docRouter);

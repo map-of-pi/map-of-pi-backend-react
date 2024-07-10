@@ -33,8 +33,7 @@ const options = {
   },
   apis: [
     path.join(__dirname, '../routes/*.{ts,js}'),
-    path.join(__dirname, '../docs/**/*.{ts,js}'),
-    path.join(__dirname, '../models/enums/*.{ts,js}')
+    path.join(__dirname, '../config/docs/*.yml'),
   ]
 };
 

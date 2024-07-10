@@ -83,7 +83,7 @@ const sellerRoutes = Router();
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/GetAllSellersRs'
+ *                 $ref: '/api/docs/SellersSchemas.yml#/components/schemas/GetAllSellersRs'
  *       400:
  *         description: Bad request
  *       500:
@@ -110,14 +110,14 @@ sellerRoutes.get("/", sellerController.getAllSellers);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/RegisterNewSellerRq'
+ *             $ref: '/api/docs/SellersSchemas.yml#/components/schemas/RegisterNewSellerRq'
  *     responses:
  *       200:
  *         description: Seller registration successful
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/RegisterNewSellerRs'
+ *               $ref: '/api/docs/SellersSchemas.yml#/components/schemas/RegisterNewSellerRs'
  *       400:
  *         description: Bad request
  *       500:
@@ -150,7 +150,7 @@ sellerRoutes.post(
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/GetSingleSellerRs'
+ *               $ref: '/api/docs/SellersSchemas.yml#/components/schemas/GetSingleSellerRs'
  *       404:
  *         description: Seller not found
  *       500:
@@ -183,14 +183,14 @@ sellerRoutes.get("/:seller_id", isSellerFound, sellerController.getSingleSeller)
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/UpdateSellerRq'
+ *             $ref: '/api/docs/SellersSchemas.yml#/components/schemas/UpdateSellerRq'
  *     responses:
  *       200:
  *         description: Successful update
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/UpdateSellerRs'
+ *               $ref: '/api/docs/SellersSchemas.yml#/components/schemas/UpdateSellerRs'
  *       400:
  *         description: Bad request
  *       401:
