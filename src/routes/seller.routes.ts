@@ -41,7 +41,7 @@ import upload from "../utils/multer";
  *             - $numberDecimal
  *         trust_meter_rating:
  *           type: object
- *           $ref: '#/components/schemas/TrustMeterScale'
+ *           $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
  *         coordinates:
  *           type: object
  *           description: Geographical coordinates of the seller's location
