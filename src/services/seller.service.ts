@@ -6,15 +6,43 @@ export const getAllSellers = async (origin?: { lat: number; lng: number }, radiu
   try {
     let sellers;
     if (origin && radius) {
+<<<<<<< Updated upstream
       sellers = await Seller.find({
+=======
+<<<<<<< Updated upstream
+      // If origin and radius are provided, filter sellers based on the geographic location within the given radius
+      const sellers = await Seller.find({
+=======
+      console.log('Fetching sellers within radius:', radius, 'from origin:', origin);
+      sellers = await Seller.find({
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
         coordinates: {
           $geoWithin: {
             $centerSphere: [[origin.lng, origin.lat], radius / 6378.1] // Radius in radians
           }
         }
+<<<<<<< Updated upstream
       }).exec();
     } else {
       sellers = await Seller.find().exec();
+=======
+<<<<<<< Updated upstream
+      });
+      return sellers;
+    } else {
+      // If no origin and radius, return all sellers
+      const sellers = await Seller.find();
+      return sellers;
+=======
+      }).exec();
+      console.log('Sellers fetched within radius:', sellers);
+    } else {
+      console.log('Fetching all sellers');
+      sellers = await Seller.find().exec();
+      console.log('All sellers fetched:', sellers);
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
     }
     return sellers;
   } catch (error: any) {
