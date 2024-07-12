@@ -1,5 +1,4 @@
 import { Router } from "express";
-
 import * as sellerController from "../controllers/sellerController";
 import { verifyToken } from "../middlewares/verifyToken";
 import { isSellerOwner } from "../middlewares/isSellerOwner";
@@ -89,7 +88,7 @@ const sellerRoutes = Router();
  *       500:
  *         description: Internal server error
  */
-sellerRoutes.get("/", sellerController.getAllSellers);
+sellerRoutes.post("/fetch", sellerController.fetchSellersByLocation);
 
 /**
  * @swagger
