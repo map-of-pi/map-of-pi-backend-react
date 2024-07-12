@@ -1,5 +1,27 @@
 components:
   schemas:
+    GetAllSellersRq:
+      type: object
+      properties:
+        origin:
+          type: object
+          properties:
+            lat:
+              type: number
+              example: 40.7128
+            lng:
+              type: number
+              example: -74.0060
+          required:
+            - lat
+            - lng
+        radius:
+          type: number
+          example: 15
+      optional:
+        - origin
+        - radius
+
     GetAllSellersRs:
       type: array
       items:

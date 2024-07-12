@@ -30,6 +30,20 @@ const options = {
         description: "Production server",
       },
     ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        }
+      }
+    },
+    security: [
+      {
+        bearerAuth: []
+      }
+    ]
   },
   apis: [
     path.join(__dirname, '../routes/*.{ts,js}'),
@@ -37,28 +51,6 @@ const options = {
   ]
 };
 
-/**
- * @swagger
- * basePath: "/"
- * tags:
- *   - name: "Home"
- *     description: "Server status."
- *   - name: "User"
- *     description: "User endpoints and operations."
- *   - name: "User Preferences"
- *     description: "User Preferences endpoints and operations."
- *   - name: "Seller"
- *     description: "Seller endpoints and operations."
- *   - name: "Review Feedback"
- *     description: "Review Feedback endpoints and operations."
- * securitySchemes:
- *   bearerAuth:
- *     type: "http"
- *     scheme: "bearer"
- *     bearerFormat: "JWT"
- *     in: "header"
- *     name: "Authorization"
- */
 const specs = swaggerJsDoc(options);
 
 docRouter.use("/", serve, setup(specs, {

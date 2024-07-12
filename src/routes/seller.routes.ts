@@ -4,6 +4,7 @@ import { verifyToken } from "../middlewares/verifyToken";
 import { isSellerOwner } from "../middlewares/isSellerOwner";
 import { isSellerFound } from "../middlewares/isSellerFound";
 import upload from "../utils/multer";
+import { logHeaders } from "../middlewares/logHeaders";
 
 /**
  * @swagger
@@ -69,11 +70,17 @@ const sellerRoutes = Router();
 
 /**
  * @swagger
- * /api/v1/sellers:
- *   get:
+ * /api/v1/sellers/fetch:
+ *   post:
  *     tags:
  *       - Seller
- *     summary: Get all sellers
+ *     summary: Fetch all sellers within given coordinates and radius, or all sellers if coordinates and radius are not provided
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '/api/docs/SellersSchema.yml#/components/schemas/GetAllSellersRq'
  *     responses:
  *       200:
  *         description: Successful response
@@ -97,13 +104,6 @@ sellerRoutes.post("/fetch", sellerController.fetchSellersByLocation);
  *     tags:
  *       - Seller
  *     summary: Register a new seller
- *     parameters:
- *       - name: Authorization
- *         in: header
- *         required: true
- *         schema:
- *           type: string
- *         description: Bearer token for authentication
  *     requestBody:
  *       required: true
  *       content:
@@ -121,9 +121,12 @@ sellerRoutes.post("/fetch", sellerController.fetchSellersByLocation);
  *         description: Bad request
  *       500:
  *         description: Internal server error
+ *     security:
+ *       - bearerAuth: []
  */
 sellerRoutes.post(
   "/register",
+  logHeaders,
   verifyToken,
   upload.array("images"),
   sellerController.registerNewSeller
