@@ -25,7 +25,7 @@ components:
               type: array
               items:
                 type: number
-                example: [-73.856077, 40.848447]
+              example: [-73.856077, 40.848447]
           required:
             - type
             - coordinates
@@ -69,7 +69,7 @@ components:
               type: array
               items:
                 type: number
-                example: [-73.856077, 40.848447]
+              example: [-73.856077, 40.848447]
           required:
             - type
             - coordinates
@@ -108,7 +108,7 @@ components:
                   type: array
                   items:
                     type: number
-                    example: [-73.856077, 40.848447]
+                  example: [-73.856077, 40.848447]
               required:
                 - type
                 - coordinates
@@ -151,7 +151,7 @@ components:
               type: array
               items:
                 type: number
-                example: [-73.856077, 40.848447]
+              example: [-73.856077, 40.848447]
           required:
             - type
             - coordinates
@@ -189,7 +189,7 @@ components:
                   type: array
                   items:
                     type: number
-                    example: [-73.856077, 40.848447]
+                  example: [-73.856077, 40.848447]
               required:
                 - type
                 - coordinates

@@ -1,12 +1,15 @@
 import { Request, Response } from "express";
-
 import * as sellerService from "../services/seller.service";
 import { ISeller } from "../types";
 
-export const getAllSellers = async (req: Request, res: Response) => {
+export const fetchSellersByLocation = async (req: Request, res: Response) => {
   try {
-    const sellers = await sellerService.getAllSellers();
-    return res.status(200).json(sellers);
+    const { origin, radius } = req.body;
+    const sellers = await sellerService.getAllSellers(origin, radius);
+    if (!sellers) {
+      return res.status(404).json({ message: "Sellers not found." });
+    }
+    res.status(200).json(sellers);
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }

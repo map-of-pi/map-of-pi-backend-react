@@ -30,6 +30,20 @@ const options = {
         description: "Production server",
       },
     ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        }
+      }
+    },
+    security: [
+      {
+        bearerAuth: []
+      }
+    ]
   },
   apis: [
     path.join(__dirname, '../routes/*.{ts,js}'),
@@ -37,35 +51,12 @@ const options = {
   ]
 };
 
-/**
- * @swagger
- * basePath: "/"
- * tags:
- *   - name: "Home"
- *     description: "Server status."
- *   - name: "User"
- *     description: "User endpoints and operations."
- *   - name: "User Preferences"
- *     description: "User Preferences endpoints and operations."
- *   - name: "Seller"
- *     description: "Seller endpoints and operations."
- *   - name: "Review Feedback"
- *     description: "Review Feedback endpoints and operations."
- * securitySchemes:
- *   bearerAuth:
- *     type: "http"
- *     scheme: "bearer"
- *     bearerFormat: "JWT"
- *     in: "header"
- *     name: "Authorization"
- */
 const specs = swaggerJsDoc(options);
 
 docRouter.use("/", serve, setup(specs, {
   customCss: '.swagger-ui .opblock .opblock-summary-path-description-wrapper { align-items: center; display: flex; flex-wrap: wrap; gap: 0 10px; padding: 0 10px; width: 100%; }',
   customCssUrl: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css', 
-  swaggerUrl: path.join(__dirname, swaggerUI.getAbsoluteFSPath()),
-  explorer: true 
+  swaggerUrl: path.join(__dirname, swaggerUI.getAbsoluteFSPath())
 }));
 
 export default docRouter;

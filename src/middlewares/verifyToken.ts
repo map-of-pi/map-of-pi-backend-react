@@ -1,38 +1,36 @@
 import { NextFunction, Request, Response } from "express";
 
-import * as jwtHelper from "../helpers/jwt";
+import { decodeUserToken } from "../helpers/jwt";
 
 export const verifyToken = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const token =
-    req.headers.authorization && req.headers.authorization.split(" ")[1];
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
     return res.status(401).json({
-      message: "Map of Pi requires authentication tokens to be included in request headers.",
+      message: "Authentication token is required",
     });
   }
 
   try {
-    const currentUser = await jwtHelper.decodeUserToken(token);
+    const currentUser = await decodeUserToken(token);
 
     if (!currentUser) {
       return res.status(401).json({
-        message:
-          "Map of Pi indicates that the provided token is either invalid or does not correspond to a user in the system.",
+        message: "Authentication token is invalid or expired",
       });
     }
 
     //@ts-ignore
     req.currentUser = currentUser;
-
     next();
   } catch (error: any) {
     return res
       .status(401)
-      .json({ error: "Unauthorized - Invalid token", message: error.message });
+      .json({ error: "Unauthorized due to invalid token", message: error.message });
   }
 };
