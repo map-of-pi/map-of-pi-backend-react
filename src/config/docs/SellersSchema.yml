@@ -12,15 +12,9 @@ components:
             lng:
               type: number
               example: -74.0060
-          required:
-            - lat
-            - lng
         radius:
           type: number
           example: 15
-      optional:
-        - origin
-        - radius
 
     GetAllSellersRs:
       type: array
@@ -314,13 +308,6 @@ components:
           example: true
       required:
         - coordinates
-      optional:
-        - name
-        - description
-        - image
-        - address
-        - sale_items
-        - order_online_enabled_pref
 
     UpdateSellerRs:
       type: object
