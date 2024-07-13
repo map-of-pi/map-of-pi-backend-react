@@ -20,7 +20,7 @@ export const addUserPreferences = async (req: Request, res: Response) => {
   try {
     const userSettingsData = req.body;
     const newUserPreferences = await userSettingsService.addUserSettings(userSettingsData);
-    res.status(201).json({ newUserPreferences: newUserPreferences });
+    res.status(200).json({ newUserPreferences: newUserPreferences });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
