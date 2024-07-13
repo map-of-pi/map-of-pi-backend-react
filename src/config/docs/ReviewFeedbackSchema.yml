@@ -21,7 +21,6 @@ components:
             type: string
             example: "test_reply_to_review_id"
           rating:
-            type: object
             $ref: '/api/docs/enum/RatingScale.yml#/components/schemas/RatingScale'
           comment:
             type: string
@@ -65,7 +64,6 @@ components:
           type: string
           example: "test_reply_to_review_id"
         rating:
-          type: object
           $ref: '/api/docs/enum/RatingScale.yml#/components/schemas/RatingScale'
         comment:
           type: string
@@ -106,7 +104,6 @@ components:
           type: string
           example: "test_reply_to_review_id"
         rating:
-          type: object
           $ref: '/api/docs/enum/RatingScale.yml#/components/schemas/RatingScale'
         comment:
           type: string
@@ -145,7 +142,6 @@ components:
               type: string
               example: "test_reply_to_review_id"
             rating:
-              type: object
               $ref: '/api/docs/enum/RatingScale.yml#/components/schemas/RatingScale'
             comment:
               type: string
