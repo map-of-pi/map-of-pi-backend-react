@@ -37,15 +37,13 @@ const userRoutes = Router();
  *             $ref: '/api/docs/UsersSchema.yml#/components/schemas/AuthenticateUserRq'
  *     responses:
  *       200:
- *         description: Authentication successful
+ *         description: Successful response
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '/api/docs/UsersSchema.yml#/components/schemas/AuthenticateUserRs'
  *       400:
  *         description: Bad request
- *       401:
- *         description: Unauthorized
  *       500:
  *         description: Internal server error
  */

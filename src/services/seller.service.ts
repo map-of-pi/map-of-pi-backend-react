@@ -29,7 +29,7 @@ export const getSingleSellerById = async (seller_id: string): Promise<ISeller | 
     const seller = await Seller.findOne({ seller_id }).exec();
     return seller ? seller as ISeller : null;
   } catch (error: any) {
-    console.error(`Error retrieving seller with ID ${seller_id}:`, error.message);
+    console.error(`Error retrieving seller with sellerID ${seller_id}:`, error.message);
     throw new Error(error.message);
   }
 };
@@ -52,7 +52,7 @@ export const updateSeller = async (seller_id: string, sellerData: Partial<ISelle
     const updatedSeller = await Seller.findOneAndUpdate({ seller_id }, sellerData, { new: true }).exec();
     return updatedSeller ? updatedSeller as ISeller : null;
   } catch (error: any) {
-    console.error("Error updating seller:", error.message);
+    console.error(`Error updating seller for sellerID ${seller_id}: `, error.message);
     throw new Error(error.message);
   }
 };
