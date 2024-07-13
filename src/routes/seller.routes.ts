@@ -1,10 +1,10 @@
 import { Router } from "express";
+
 import * as sellerController from "../controllers/sellerController";
 import { verifyToken } from "../middlewares/verifyToken";
 import { isSellerOwner } from "../middlewares/isSellerOwner";
 import { isSellerFound } from "../middlewares/isSellerFound";
 import upload from "../utils/multer";
-import { logHeaders } from "../middlewares/logHeaders";
 
 /**
  * @swagger
@@ -121,12 +121,9 @@ sellerRoutes.post("/fetch", sellerController.fetchSellersByLocation);
  *         description: Bad request
  *       500:
  *         description: Internal server error
- *     security:
- *       - bearerAuth: []
  */
 sellerRoutes.post(
   "/register",
-  logHeaders,
   verifyToken,
   upload.array("images"),
   sellerController.registerNewSeller
