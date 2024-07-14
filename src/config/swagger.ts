@@ -14,7 +14,7 @@ const options = {
     info: {
       title: "Map of Pi API Documentation",
       version: "1.0.0",
-      description: "API Documentation for Map of Pi.",
+      description: "Map of Pi is a mobile application developed to help Pi community members easily locate local businesses that accept Pi as payment. This Swagger documentation provides comprehensive details on the Map of Pi API, including endpoints + request and response structures.",
       contact: {
         name: "Map of Pi Team",
         email: "philip@mapofpi.com"
