@@ -26,7 +26,7 @@ const reviewFeedbackSchema = new Schema<IReviewFeedback>(
     rating: {
       type: Number,
       enum: Object.values(RatingScale).filter(value => typeof value === 'number'),
-      required: true,
+      required: true
     },
     comment: {
       type: String,
