@@ -1,30 +1,31 @@
 import mongoose, { Schema, Types } from "mongoose";
 
+import { TrustMeterScale } from "./enums/trustMeterScale";
 import { ISeller } from "../types";
 
-import { TrustMeterScale } from "./enums/trustMeterScale";
-
+// Defining the seller schema
 const sellerSchema = new Schema<ISeller>(
   {
     seller_id: {
       type: String,
       required: true,
+      unique: true, // Ensures unique seller_id
     },
-    name: { 
-      type: String, 
+    name: {
+      type: String,
       required: true,
     },
-    description: { 
-      type: String, 
-      required: true, 
+    description: {
+      type: String,
+      required: true,
     },
     image: {
       type: String,
       required: false,
     },
-    address: { 
-      type: String, 
-      required: false, 
+    address: {
+      type: String,
+      required: false,
     },
     sale_items: {
       type: String,
@@ -43,21 +44,26 @@ const sellerSchema = new Schema<ISeller>(
       type: {
         type: String,
         enum: ['Point'],
-        required: false,
+        required: true,
         default: 'Point',
       },
       coordinates: {
         type: [Number],
-        required: false,
+        required: true,
       },
     },
     order_online_enabled_pref: {
       type: Boolean,
       required: true,
     }
-  }
+  },
+  { timestamps: true } // Adds timestamps to track creation and update times
 );
 
+// Creating a 2dsphere index for the coordinates field
+sellerSchema.index({ coordinates: '2dsphere' });
+
+// Creating the Seller model from the schema
 const Seller = mongoose.model<ISeller>("Seller", sellerSchema);
 
 export default Seller;

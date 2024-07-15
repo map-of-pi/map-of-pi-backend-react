@@ -1,5 +1,21 @@
 components:
   schemas:
+    GetAllSellersRq:
+      type: object
+      properties:
+        origin:
+          type: object
+          properties:
+            lat:
+              type: number
+              example: 40.7128
+            lng:
+              type: number
+              example: -74.0060
+        radius:
+          type: number
+          example: 15
+
     GetAllSellersRs:
       type: array
       items:
@@ -32,7 +48,6 @@ components:
             required:
               - $numberDecimal
           trust_meter_rating:
-            type: object
             $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
           coordinates:
             type: object
@@ -44,9 +59,7 @@ components:
                 type: array
                 items:
                   type: number
-                  example:
-                    - 125.6
-                    - 10.1
+                example: [-73.856077, 40.848447]
             required:
               - type
               - coordinates
@@ -99,7 +112,6 @@ components:
           required:
             - $numberDecimal
         trust_meter_rating:
-          type: object
           $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
         coordinates:
           type: object
@@ -111,9 +123,7 @@ components:
               type: array
               items:
                 type: number
-                example:
-                  - 125.6
-                  - 10.1
+              example: [-73.856077, 40.848447]
           required:
             - type
             - coordinates
@@ -166,7 +176,6 @@ components:
           required:
             - $numberDecimal
         trust_meter_rating:
-          type: object
           $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
         coordinates:
           type: object
@@ -178,9 +187,7 @@ components:
               type: array
               items:
                 type: number
-                example:
-                  - 125.6
-                  - 10.1
+              example: [-73.856077, 40.848447]
           required:
             - type
             - coordinates
@@ -228,7 +235,6 @@ components:
               required:
                 - $numberDecimal
             trust_meter_rating:
-              type: object
               $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
             coordinates:
               type: object
@@ -240,9 +246,7 @@ components:
                   type: array
                   items:
                     type: number
-                    example:
-                      - 125.6
-                      - 10.1
+                  example: [-73.856077, 40.848447]
               required:
                 - type
                 - coordinates
@@ -295,9 +299,7 @@ components:
               type: array
               items:
                 type: number
-                example:
-                  - 125.6
-                  - 10.1
+              example: [-73.856077, 40.848447]
           required:
             - type
             - coordinates
@@ -306,13 +308,6 @@ components:
           example: true
       required:
         - coordinates
-      optional:
-        - name
-        - description
-        - image
-        - address
-        - sale_items
-        - order_online_enabled_pref
 
     UpdateSellerRs:
       type: object
@@ -347,7 +342,6 @@ components:
               required:
                 - $numberDecimal
             trust_meter_rating:
-              type: object
               $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
             coordinates:
               type: object
@@ -359,9 +353,7 @@ components:
                   type: array
                   items:
                     type: number
-                    example:
-                      - 125.6
-                      - 10.1
+                  example: [-73.856077, 40.848447]
               required:
                 - type
                 - coordinates
