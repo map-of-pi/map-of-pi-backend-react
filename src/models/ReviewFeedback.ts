@@ -20,7 +20,8 @@ const reviewFeedbackSchema = new Schema<IReviewFeedback>(
     },
     reply_to_review_id: {
       type: String,
-      required: true
+      required: false,
+      default: null
     },
     rating: {
       type: Number,
