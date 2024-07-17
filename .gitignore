@@ -10,10 +10,8 @@
 /coverage
 
 # local env files
-.env*.local
-.env
+.env*
 .vercel
-.env.local
 
 # local misc
 /uploads
