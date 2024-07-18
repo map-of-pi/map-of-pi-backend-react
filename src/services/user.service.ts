@@ -5,7 +5,7 @@ export const authenticate = async (currentUser: IUser): Promise<IUser> => {
   
   try {
     const user = await User.findOne({
-      username: currentUser.username,
+      uid: currentUser.uid,
     }).exec();
 
     if (user) {
