@@ -1,12 +1,6 @@
 import ReviewFeedback from "../models/ReviewFeedback";
-import User from "../models/User";
 import { IReviewFeedback } from "../types";
-
-
-const resolveUsername = async (reviewer_id: string): Promise<string> => {
-  const reviewer = await User.findOne({ uid: reviewer_id }).exec();
-  return reviewer ? reviewer.username : '';
-};
+import { getUser } from "./user.service";
 
 export const getReviewFeedback = async (review_receiver_id: string): Promise<IReviewFeedback[]> => {
   try {
@@ -15,7 +9,8 @@ export const getReviewFeedback = async (review_receiver_id: string): Promise<IRe
     // Update each reviewFeedback item with the reviewer's username instead of ID
     const updatedReviewFeedbackList = await Promise.all(
       reviewFeedbackList.map(async (reviewFeedback) => {
-        const username = await resolveUsername(reviewFeedback.review_giver_id);
+        const reviewer = await getUser(reviewFeedback.review_giver_id);
+        const username = reviewer ? reviewer.username : '';
         return { ...reviewFeedback.toObject(), review_giver_id: username };
       })
     );
@@ -27,18 +22,17 @@ export const getReviewFeedback = async (review_receiver_id: string): Promise<IRe
   }
 };
 
-
 export const getReviewFeedbackById = async (review_id: string): Promise<IReviewFeedback | null> => {
   try {
     const reviewFeedback = await ReviewFeedback.findOne({ review_id }).exec();
 
     if (!reviewFeedback) {
-      return null; // Return early if review feedback is not found
+      return null;
     }
 
     // Update reviewFeedback with reviewer's username instead of ID
-    const username = await resolveUsername(reviewFeedback.review_giver_id);
-    reviewFeedback.review_giver_id = username;
+    const reviewer = await getUser(reviewFeedback.review_giver_id);
+    reviewFeedback.review_giver_id = reviewer ? reviewer.username : '';
 
     return reviewFeedback as IReviewFeedback; // Return the modified review feedback object
   } catch (error: any) {

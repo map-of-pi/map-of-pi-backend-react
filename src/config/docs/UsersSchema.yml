@@ -11,7 +11,7 @@ components:
               properties:
                 uid:
                   type: string
-                  example: "user_id"
+                  example: "0d367ba3-a2e8-4380-86c3-ab7c0b7890c0"
                 username:
                   type: string
                   example: "user_id"
@@ -34,7 +34,7 @@ components:
               example: "666bbae4a05bcc3d8dfab563"
             uid:
               type: string
-              example: "12345"
+              example: "0d367ba3-a2e8-4380-86c3-ab7c0b7890c0"
             username:
               type: string
               example: "testuser"
@@ -53,3 +53,28 @@ components:
         - user
         - token
 
+    GetUserRs:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            _id:
+              type: string
+              example: "666bbae4a05bcc3d8dfab563"
+            uid:
+              type: string
+              example: "0d367ba3-a2e8-4380-86c3-ab7c0b7890c0"
+            username:
+              type: string
+              example: "testuser"
+            __v:
+              type: integer
+              example: 0
+          required:
+            - _id
+            - uid
+            - username
+            - __v       
+      required:
+        - user
