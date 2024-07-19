@@ -10,7 +10,7 @@ export const getReviewFeedback = async (review_receiver_id: string): Promise<IRe
     const updatedReviewFeedbackList = await Promise.all(
       reviewFeedbackList.map(async (reviewFeedback) => {
         const reviewer = await getUser(reviewFeedback.review_giver_id);
-        const username = reviewer ? reviewer.username : '';
+        const username = reviewer ? reviewer.pi_alias : '';
         return { ...reviewFeedback.toObject(), review_giver_id: username };
       })
     );
@@ -32,7 +32,7 @@ export const getReviewFeedbackById = async (review_id: string): Promise<IReviewF
 
     // Update reviewFeedback with reviewer's username instead of ID
     const reviewer = await getUser(reviewFeedback.review_giver_id);
-    reviewFeedback.review_giver_id = reviewer ? reviewer.username : '';
+    reviewFeedback.review_giver_id = reviewer ? reviewer.pi_alias : '';
 
     return reviewFeedback as IReviewFeedback; // Return the modified review feedback object
   } catch (error: any) {

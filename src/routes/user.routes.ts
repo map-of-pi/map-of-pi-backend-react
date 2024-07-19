@@ -10,15 +10,19 @@ import { verifyToken } from "../middlewares/verifyToken";
  *     UserSchema:
  *       type: object
  *       properties:
- *         uid:
+ *         pi_uid:
  *           type: string
  *           description: Pi user ID
- *         username:
+ *         pi_alias:
  *           type: string
- *           description: Name of Pi user; preset to Pi user ID
+ *           description: Pi user alias
+ *         user_name:
+ *           type: string
+ *           description: Name of Pi user; preset to Pi user alias
  *       required:
- *         - uid
- *         - username
+ *         - pi_uid
+ *         - pi_alias
+ *         - user_name
  */
 const userRoutes = Router();
 
@@ -54,18 +58,18 @@ userRoutes.get("/me", verifyToken, userController.autoLoginUser);
 
 /**
  * @swagger
- * /api/v1/users/{uid}:
+ * /api/v1/users/{pi_alias}:
  *   get:
  *     tags:
  *       - User
- *     summary: Get a user by UID
+ *     summary: Get a user by Pi alias
  *     parameters:
- *       - name: uid
+ *       - name: pi_alias
  *         in: path
  *         required: true
  *         schema:
  *           type: string
- *         description: The UID of the user to retrieve
+ *         description: The Pi alias of the user to retrieve
  *     responses:
  *       200:
  *         description: Successful response
@@ -80,6 +84,6 @@ userRoutes.get("/me", verifyToken, userController.autoLoginUser);
  *       500:
  *         description: Internal server error
  */
-userRoutes.get("/:uid", userController.getUser);
+userRoutes.get("/:pi_alias", userController.getUser);
 
 export default userRoutes;

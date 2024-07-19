@@ -4,11 +4,15 @@ import { IUser } from "../types";
 
 const userSchema = new Schema<IUser>(
   {
-    uid: {
+    pi_uid: {
       type: String,
       required: true,
     },
-    username: {
+    pi_alias: {
+      type: String,
+      required: true,
+    },
+    user_name: {
       type: String,
       required: true,
     }

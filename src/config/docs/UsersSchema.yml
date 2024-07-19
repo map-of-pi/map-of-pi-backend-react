@@ -9,15 +9,19 @@ components:
             user:
               type: object
               properties:
-                uid:
+                pi_uid:
                   type: string
                   example: "0d367ba3-a2e8-4380-86c3-ab7c0b7890c0"
-                username:
+                pi_alias:
                   type: string
-                  example: "user_id"
+                  example: "test_alias"
+                user_name:
+                  type: string
+                  example: "Test Alias"
               required:
-                - uid
-                - username
+                - pi_uid
+                - pi_alias
+                - user_name
           required:
             - user
       required:
@@ -32,19 +36,23 @@ components:
             _id:
               type: string
               example: "666bbae4a05bcc3d8dfab563"
-            uid:
+            pi_uid:
               type: string
               example: "0d367ba3-a2e8-4380-86c3-ab7c0b7890c0"
-            username:
+            pi_alias:
               type: string
-              example: "testuser"
+              example: "test_alias"
+            user_name:
+              type: string
+              example: "Test Alias"
             __v:
               type: integer
               example: 0
           required:
             - _id
-            - uid
-            - username
+            - pi_uid
+            - pi_alias
+            - user_name
             - __v
         token:
           type: string
@@ -62,19 +70,23 @@ components:
             _id:
               type: string
               example: "666bbae4a05bcc3d8dfab563"
-            uid:
+            pi_uid:
               type: string
               example: "0d367ba3-a2e8-4380-86c3-ab7c0b7890c0"
-            username:
+            pi_alias:
               type: string
-              example: "testuser"
+              example: "test_alias"
+            user_name:
+              type: string
+              example: "Test Alias"
             __v:
               type: integer
               example: 0
           required:
             - _id
-            - uid
-            - username
+            - pi_uid
+            - pi_alias
+            - user_name
             - __v       
       required:
         - user

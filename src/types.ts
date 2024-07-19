@@ -4,8 +4,9 @@ import { RatingScale } from "./models/enums/ratingScale";
 import { TrustMeterScale } from "./models/enums/trustMeterScale";
 
 export interface IUser extends Document {
-  uid: string;
-  username: string;
+  pi_uid: string;
+  pi_alias: string;
+  user_name: string;
 }
 
 export interface IUserSettings extends Document {
@@ -28,7 +29,7 @@ export interface ISeller extends Document {
   sale_items?: string;
   average_rating: Types.Decimal128;
   trust_meter_rating: TrustMeterScale;
-  coordinates?: {
+  sell_map_center?: {
     type: 'Point';
     coordinates: [number, number];
   };

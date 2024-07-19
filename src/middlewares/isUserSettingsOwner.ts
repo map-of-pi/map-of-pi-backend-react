@@ -11,7 +11,7 @@ export const isUserSettingsOwner = async (
       //@ts-ignore
       const currentUser = req.currentUser;
   
-      if (user_settings_id === currentUser.uid) {
+      if (user_settings_id === currentUser.pi_alias) {
         return next();
       } else {
         return res.status(401).json({

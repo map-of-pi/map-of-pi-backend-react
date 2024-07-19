@@ -40,7 +40,7 @@ const sellerSchema = new Schema<ISeller>(
       enum: Object.values(TrustMeterScale).filter(value => typeof value === 'number'),
       required: true,
     },
-    coordinates: {
+    sell_map_center: {
       type: {
         type: String,
         enum: ['Point'],

@@ -4,15 +4,15 @@ import { IUser } from "../types";
 export const authenticate = async (currentUser: IUser): Promise<IUser> => {
   try {
     const user = await User.findOne({
-      uid: currentUser.uid,
+      pi_uid: currentUser.pi_uid,
     }).exec();
 
     if (user) {
       return user;
     } else {
       const newUser = await User.create({
-        username: currentUser.username,
-        uid: currentUser.uid,
+        pi_alias: currentUser.pi_alias,
+        pi_uid: currentUser.pi_uid,
       });
       return newUser;
     }
@@ -22,12 +22,12 @@ export const authenticate = async (currentUser: IUser): Promise<IUser> => {
   }
 };
 
-export const getUser = async (uid: string): Promise<IUser | null> => {
+export const getUser = async (pi_alias: string): Promise<IUser | null> => {
   try {
-    const user = await User.findOne({ uid }).exec();
+    const user = await User.findOne({ pi_alias }).exec();
     return user ? user as IUser : null;
   } catch (error: any) {
-    console.error(`Error retrieving user with UID ${uid}:`, error.message);
+    console.error(`Error retrieving user with Pi alias ${pi_alias}:`, error.message);
     throw new Error(error.message);
   }
 };
