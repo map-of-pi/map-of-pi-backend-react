@@ -5,7 +5,8 @@ import Seller from "../models/Seller";
 
 
 const computeRatings = async (seller_id: string) => {
-  /*The value is set depending on the number of zero(0) ratings in the ReviewFeedback table where this user is review-receiver. 
+  /*
+    The value is set depending on the number of zero(0) ratings in the ReviewFeedback table where this user is review-receiver. 
     IF user has less than 2% zero ratings THEN set it to 100. 
     IF user has 2%-5% zero ratings THEN set it to 80. 
     IF user has 5%-10% zero ratings THEN set it to 50. 
@@ -14,35 +15,46 @@ const computeRatings = async (seller_id: string) => {
     then the value of “100” is displayed and saved to the DB.
   */
 
-  // Fetch all reviews for the seller
-  const reviewFeedbackList = await ReviewFeedback.find({ review_receiver_id: seller_id }).exec();
+  try {
+    // Fetch all reviews for the seller
+    const reviewFeedbackList = await ReviewFeedback.find({ review_receiver_id: seller_id }).exec();
+    if (reviewFeedbackList.length === 0) {
+      // Default value when there are no reviews
+      await Seller.findOneAndUpdate({ seller_id }, { trust_meter_rating: 100 });
+      return 100;
+    }
 
-  if (reviewFeedbackList.length === 0) {
-    return 100; // Default value when there are no reviews
+    // Calculate the total number of reviews and the number of zero ratings
+    const totalReviews = reviewFeedbackList.length;
+    const zeroRatingsCount = reviewFeedbackList.filter(review => review.rating === 0).length;
+
+    // Calculate the percentage of zero ratings
+    const zeroRatingsPercentage = (zeroRatingsCount / totalReviews) * 100;
+
+    // Determine the value based on the percentage of zero ratings
+    let value;
+    switch (true) {
+      case (zeroRatingsPercentage < 2):
+        value = 100;
+        break;
+      case (zeroRatingsPercentage >= 2 && zeroRatingsPercentage < 5):
+        value = 80;
+        break;
+      case (zeroRatingsPercentage >= 5 && zeroRatingsPercentage < 10):
+        value = 50;
+        break;
+      default:
+        value = 0;
+    }
+
+    // Update the seller's rating value in the database
+    await Seller.findOneAndUpdate({ seller_id }, { trust_meter_rating: value });
+
+    return value;
+  } catch (error) {
+    console.error(`Error computing ratings for seller_id ${seller_id}:`, error);
+    throw new Error(`Error computing ratings for seller_id ${seller_id}`);
   }
-
-  // Calculate the total number of reviews and the number of zero ratings
-  const totalReviews = reviewFeedbackList.length;
-  const zeroRatingsCount = reviewFeedbackList.filter(review => review.rating === 0).length;
-
-  // Calculate the percentage of zero ratings
-  const zeroRatingsPercentage = (zeroRatingsCount / totalReviews) * 100;
-
-  // Determine the value based on the percentage of zero ratings
-  let value;
-  if (zeroRatingsPercentage < 2) {
-    value = 100;
-  } else if (zeroRatingsPercentage >= 2 && zeroRatingsPercentage < 5) {
-    value = 80;
-  } else if (zeroRatingsPercentage >= 5 && zeroRatingsPercentage < 10) {
-    value = 50;
-  } else {
-    value = 0;
-  }
-
-  // Update the seller's rating value in the database
-  await Seller.findOneAndUpdate({ seller_id }, { trust_meter_rating: value });
-
 };
 
 
@@ -101,7 +113,8 @@ export const addReviewFeedback = async (reviewFeedbackData: IReviewFeedback): Pr
   try {
     const savedReviewFeedback = await newReviewFeedback.save();
 
-    computeRatings(review_receiver_id)// update receiver seller trust_meter_rating value.
+    computeRatings(review_receiver_id).then(value => console.log("Computed review:", value))
+    .catch(error => console.error("Error:", error)); // update receiver seller trust_meter_rating value.
 
     return savedReviewFeedback;
   } catch (error: any) {
