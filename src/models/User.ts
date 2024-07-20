@@ -9,7 +9,7 @@ const userSchema = new Schema<IUser>(
       required: true,
       unique: true,
     },
-    pi_alias: {
+    pi_username: {
       type: String,
       required: true,
     },

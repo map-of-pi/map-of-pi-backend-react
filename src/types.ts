@@ -5,7 +5,7 @@ import { TrustMeterScale } from "./models/enums/trustMeterScale";
 
 export interface IUser extends Document {
   pi_uid: string;
-  pi_alias: string;
+  pi_username: string;
   user_name: string;
 }
 
