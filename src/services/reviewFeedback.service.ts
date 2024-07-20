@@ -37,7 +37,7 @@ export const getReviewFeedback = async (review_receiver_id: string): Promise<IRe
 
 export const getReviewFeedbackById = async (review_id: string): Promise<IReviewFeedback | null> => {
   try {
-    const reviewFeedback = await ReviewFeedback.findById( review_id ).exec();
+    const reviewFeedback = await ReviewFeedback.findOne({ review_id } ).exec();
 
     if (!reviewFeedback) {
       return null;
@@ -58,7 +58,9 @@ export const getReviewFeedbackById = async (review_id: string): Promise<IReviewF
 
 export const addReviewFeedback = async (reviewFeedbackData: IReviewFeedback): Promise<IReviewFeedback> => {
   const { review_receiver_id, review_giver_id, reply_to_review_id } = reviewFeedbackData;
-  const date = new Date();
+  const date = new Date().toISOString();
+
+  console.log(reviewFeedbackData);
 
   const newReviewFeedback = new ReviewFeedback({
     ...reviewFeedbackData,

@@ -137,7 +137,7 @@ reviewFeedbackRoutes.get("/single/:review_id", reviewFeedbackController.getSingl
 reviewFeedbackRoutes.post(
   "/add",
   verifyToken,
-  upload.array("images"),
+  upload.array("image"),
   reviewFeedbackController.addReview
 );
 
