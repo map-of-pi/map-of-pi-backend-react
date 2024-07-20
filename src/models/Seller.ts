@@ -34,6 +34,7 @@ const sellerSchema = new Schema<ISeller>(
     average_rating: {
       type: Types.Decimal128,
       required: true,
+      default: 5.0,
     },
     trust_meter_rating: {
       type: Number,

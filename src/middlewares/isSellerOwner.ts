@@ -11,7 +11,7 @@ export const isSellerOwner = async (
     //@ts-ignore
     const currentUser = req.currentUser;
 
-    if (seller_id === currentUser.pi_alias) {
+    if (seller_id === currentUser.pi_uid) {
       return next();
     } else {
       return res.status(401).json({

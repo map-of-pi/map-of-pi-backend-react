@@ -11,8 +11,9 @@ export const authenticate = async (currentUser: IUser): Promise<IUser> => {
       return user;
     } else {
       const newUser = await User.create({
-        pi_alias: currentUser.pi_alias,
+        pi_alias: currentUser.user_name, // set to Pioneer username
         pi_uid: currentUser.pi_uid,
+        user_name: currentUser.user_name // pre-set to Pioneer username
       });
       return newUser;
     }
@@ -22,12 +23,12 @@ export const authenticate = async (currentUser: IUser): Promise<IUser> => {
   }
 };
 
-export const getUser = async (pi_alias: string): Promise<IUser | null> => {
+export const getUser = async (pi_uid: string): Promise<IUser | null> => {
   try {
-    const user = await User.findOne({ pi_alias }).exec();
+    const user = await User.findOne({ pi_uid }).exec();
     return user ? user as IUser : null;
   } catch (error: any) {
-    console.error(`Error retrieving user with Pi alias ${pi_alias}:`, error.message);
+    console.error(`Error retrieving user with Pi alias ${pi_uid}:`, error.message);
     throw new Error(error.message);
   }
 };

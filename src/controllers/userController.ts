@@ -39,8 +39,8 @@ export const autoLoginUser = async(req: Request, res: Response) => {
 
 export const getUser = async(req: Request, res: Response) => {
   try {
-    const { pi_alias } = req.params;
-    const currentUser: IUser | null = await userService.getUser(pi_alias);
+    const { pi_uid } = req.params;
+    const currentUser: IUser | null = await userService.getUser(pi_uid);
     if (!currentUser) {
       return res.status(404).json({ message: "User not found." });
     }

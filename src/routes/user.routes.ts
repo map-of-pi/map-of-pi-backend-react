@@ -58,18 +58,18 @@ userRoutes.get("/me", verifyToken, userController.autoLoginUser);
 
 /**
  * @swagger
- * /api/v1/users/{pi_alias}:
+ * /api/v1/users/{pi_uid}:
  *   get:
  *     tags:
  *       - User
- *     summary: Get a user by Pi alias
+ *     summary: Get a user by Pi uid
  *     parameters:
- *       - name: pi_alias
+ *       - name: pi_uid
  *         in: path
  *         required: true
  *         schema:
  *           type: string
- *         description: The Pi alias of the user to retrieve
+ *         description: The Pi uid of the user to retrieve
  *     responses:
  *       200:
  *         description: Successful response
@@ -84,6 +84,6 @@ userRoutes.get("/me", verifyToken, userController.autoLoginUser);
  *       500:
  *         description: Internal server error
  */
-userRoutes.get("/:pi_alias", userController.getUser);
+userRoutes.get("/:pi_uid", userController.getUser);
 
 export default userRoutes;

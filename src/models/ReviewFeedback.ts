@@ -8,7 +8,8 @@ const reviewFeedbackSchema = new Schema<IReviewFeedback>(
   {
     review_id: {
       type: String,
-      required: true
+      required: true,
+      unique: true,
     },
     review_receiver_id: {
       type: String,
