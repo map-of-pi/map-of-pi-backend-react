@@ -1,7 +1,7 @@
 import express from "express";
-import bodyParser from "body-parser";
 import cors from "cors"
 import path from "path";
+import dotenv from "dotenv";
 
 import docRouter from "../config/swagger";
 import requestLogger from "../middlewares/logger";
@@ -17,11 +17,10 @@ const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(bodyParser.json());
 app.use(requestLogger);
 
 app.use(cors({
-    origin:"http://localhost:4200",
+    origin: process.env.CORS_ORIGIN_URL,
     credentials: true
 }));
 
