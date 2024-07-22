@@ -21,7 +21,8 @@ app.use(bodyParser.json());
 app.use(requestLogger);
 
 app.use(cors({
-    origin:"*"
+    origin:"http://localhost:4200",
+    credentials: true
 }));
 
 // serve static files for Swagger documentation
