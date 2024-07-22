@@ -16,7 +16,6 @@ export const getAllSellers = async (origin?: { lat: number; lng: number }, radiu
     } else {
       sellers = await Seller.find().exec();
     }
-    console.log(sellers)
     return sellers;
   } catch (error: any) {
     console.error("Error retrieving sellers:", error.message);

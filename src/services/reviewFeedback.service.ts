@@ -1,8 +1,7 @@
-import ReviewFeedback from "../models/ReviewFeedback";
 import { IReviewFeedback } from "../types";
 import { getUser } from "./user.service";
+import ReviewFeedback from "../models/ReviewFeedback";
 import Seller from "../models/Seller";
-
 
 const computeRatings = async (seller_id: string) => {
   /*
@@ -52,11 +51,10 @@ const computeRatings = async (seller_id: string) => {
 
     return value;
   } catch (error) {
-    console.error(`Error computing ratings for seller_id ${seller_id}:`, error);
-    throw new Error(`Error computing ratings for seller_id ${seller_id}`);
+    console.error(`Error computing ratings for sellerID ${seller_id}:`, error);
+    throw new Error(`Error computing ratings for sellerID ${seller_id}`);
   }
 };
-
 
 export const getReviewFeedback = async (review_receiver_id: string): Promise<IReviewFeedback[]> => {
   try {
@@ -86,13 +84,13 @@ export const getReviewFeedbackById = async (review_id: string): Promise<IReviewF
       return null;
     }
 
-    console.log('review feedback', reviewFeedback)
+    console.log('Review feedback: ', reviewFeedback);
 
     // Update reviewFeedback with reviewer's username instead of ID
     const reviewer = await getUser(reviewFeedback.review_giver_id);
     reviewFeedback.review_giver_id = reviewer ? reviewer.user_name : '';
 
-    return reviewFeedback as IReviewFeedback; // Return the modified review feedback object
+    return reviewFeedback as IReviewFeedback;
   } catch (error: any) {
     console.error(`Error retrieving review feedback with reviewID ${review_id}:`, error.message);
     throw new Error(error.message);
@@ -113,8 +111,8 @@ export const addReviewFeedback = async (reviewFeedbackData: IReviewFeedback): Pr
   try {
     const savedReviewFeedback = await newReviewFeedback.save();
 
-    computeRatings(review_receiver_id).then(value => console.log("Computed review:", value))
-    .catch(error => console.error("Error:", error)); // update receiver seller trust_meter_rating value.
+    computeRatings(review_receiver_id).then(value => console.log("Computed review: ", value))
+    .catch(error => console.error("Error: ", error));
 
     return savedReviewFeedback;
   } catch (error: any) {

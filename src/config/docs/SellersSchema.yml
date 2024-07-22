@@ -49,7 +49,7 @@ components:
               - $numberDecimal
           trust_meter_rating:
             $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
-          coordinates:
+          sell_map_center:
             type: object
             properties:
               type:
@@ -78,6 +78,7 @@ components:
           - description
           - average_rating
           - trust_meter_rating
+          - sell_map_center
           - order_online_enabled_pref
           - _id
           - __v

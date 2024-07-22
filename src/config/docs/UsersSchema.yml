@@ -12,7 +12,7 @@ components:
                 pi_uid:
                   type: string
                   example: "0d367ba3-a2e8-4380-86c3-ab7c0b7890c0"
-                pi_alias:
+                pi_username:
                   type: string
                   example: "test_alias"
                 user_name:
@@ -20,7 +20,7 @@ components:
                   example: "Test Alias"
               required:
                 - pi_uid
-                - pi_alias
+                - pi_username
                 - user_name
           required:
             - user
@@ -39,7 +39,7 @@ components:
             pi_uid:
               type: string
               example: "0d367ba3-a2e8-4380-86c3-ab7c0b7890c0"
-            pi_alias:
+            pi_username:
               type: string
               example: "test_alias"
             user_name:
@@ -51,7 +51,7 @@ components:
           required:
             - _id
             - pi_uid
-            - pi_alias
+            - pi_username
             - user_name
             - __v
         token:
@@ -73,7 +73,7 @@ components:
             pi_uid:
               type: string
               example: "0d367ba3-a2e8-4380-86c3-ab7c0b7890c0"
-            pi_alias:
+            pi_username:
               type: string
               example: "test_alias"
             user_name:
@@ -85,7 +85,7 @@ components:
           required:
             - _id
             - pi_uid
-            - pi_alias
+            - pi_username
             - user_name
             - __v       
       required:

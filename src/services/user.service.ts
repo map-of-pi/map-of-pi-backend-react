@@ -11,8 +11,8 @@ export const authenticate = async (currentUser: IUser): Promise<IUser> => {
       return user;
     } else {
       const newUser = await User.create({
-        pi_alias: currentUser.user_name, // set to Pioneer username
         pi_uid: currentUser.pi_uid,
+        pi_username: currentUser.user_name, // set to Pioneer username
         user_name: currentUser.user_name // pre-set to Pioneer username
       });
       return newUser;

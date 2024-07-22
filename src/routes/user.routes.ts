@@ -13,7 +13,7 @@ import { verifyToken } from "../middlewares/verifyToken";
  *         pi_uid:
  *           type: string
  *           description: Pi user ID
- *         pi_alias:
+ *         pi_username:
  *           type: string
  *           description: Pi user alias
  *         user_name:
@@ -21,7 +21,7 @@ import { verifyToken } from "../middlewares/verifyToken";
  *           description: Name of Pi user; preset to Pi user alias
  *       required:
  *         - pi_uid
- *         - pi_alias
+ *         - pi_username
  *         - user_name
  */
 const userRoutes = Router();
