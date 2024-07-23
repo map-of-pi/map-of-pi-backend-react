@@ -99,7 +99,7 @@ export const getReviewFeedbackById = async (review_id: string): Promise<IReviewF
 
 export const addReviewFeedback = async (reviewFeedbackData: IReviewFeedback): Promise<IReviewFeedback> => {
   const { review_receiver_id, review_giver_id, reply_to_review_id } = reviewFeedbackData;
-  const date = new Date().toISOString();
+  const date = new Date();
 
   const newReviewFeedback = new ReviewFeedback({
     ...reviewFeedbackData,
