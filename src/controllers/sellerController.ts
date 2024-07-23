@@ -30,7 +30,7 @@ export const getSingleSeller = async (req: Request, res: Response) => {
 
 export const registerNewSeller = async (req: Request, res: Response) => {
   try {
-    const sellerData = req.body;
+    const sellerData: ISeller = req.body; // Ensure sellerData matches ISeller interface
     const newSeller = await sellerService.registerNewSeller(sellerData);
     return res.status(200).json({ newSeller });
   } catch (error: any) {
@@ -41,7 +41,7 @@ export const registerNewSeller = async (req: Request, res: Response) => {
 export const updateSeller = async (req: Request, res: Response) => {
   try {
     const { seller_id } = req.params;
-    const sellerData = req.body;
+    const sellerData: Partial<ISeller> = req.body; // Ensure sellerData matches ISeller interface
     const updatedSeller = await sellerService.updateSeller(seller_id, sellerData);
     return res.status(200).json({ updatedSeller });
   } catch (error: any) {
