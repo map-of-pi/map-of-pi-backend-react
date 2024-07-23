@@ -6,7 +6,7 @@ import { env } from "../utils/env";
 
 export const generateUserToken = (user: IUser) => {
   try {
-    const token = jwt.sign({ userId: user.pi_uid }, env.JWT_SECRET, {
+    const token = jwt.sign({ userId: user.pi_uid, _id: user._id }, env.JWT_SECRET, {
       expiresIn: "30d",
     });
     return token;

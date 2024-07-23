@@ -8,10 +8,11 @@ export const authenticateUser = async (req: Request, res: Response) => {
   const auth = req.body;
 
   try {
-    const user = await userService.authenticate(auth.user);
+    const user = await userService.authenticate(auth);
     const token = jwtHelper.generateUserToken(user);
+    const expiresDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
 
-    return res.status(200).json({
+    return res.cookie("token", token, {httpOnly: true, expires: expiresDate, secure: true, priority: "high", sameSite: "lax"}).status(200).json({
       user,
       token,
     });
