@@ -1,6 +1,4 @@
 import mongoose, { Schema, Types } from "mongoose";
-
-import { TrustMeterScale } from "./enums/trustMeterScale";
 import { ISeller } from "../types";
 
 // Defining the seller schema
@@ -21,26 +19,25 @@ const sellerSchema = new Schema<ISeller>(
     },
     image: {
       type: String,
-      required: false,
+      required: false, // Changed to required
     },
     address: {
       type: String,
-      required: false,
+      required: true, // Changed to required
     },
     sale_items: {
       type: String,
-      required: false,
+      required: true, // Changed to required
     },
     average_rating: {
       type: Types.Decimal128,
       required: true,
     },
     trust_meter_rating: {
-      type: Number,
-      enum: Object.values(TrustMeterScale).filter(value => typeof value === 'number'),
+      type: Number, // Changed to a number
       required: true,
     },
-    coordinates: {
+    sell_map_center: { // Renamed from coordinates to sell_map_center
       type: {
         type: String,
         enum: ['Point'],
@@ -61,7 +58,7 @@ const sellerSchema = new Schema<ISeller>(
 );
 
 // Creating a 2dsphere index for the coordinates field
-sellerSchema.index({ coordinates: '2dsphere' });
+sellerSchema.index({ 'sell_map_center.coordinates': '2dsphere' });
 
 // Creating the Seller model from the schema
 const Seller = mongoose.model<ISeller>("Seller", sellerSchema);
