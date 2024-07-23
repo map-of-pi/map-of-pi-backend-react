@@ -6,7 +6,7 @@ import { env } from "../utils/env";
 
 export const generateUserToken = (user: IUser) => {
   try {
-    const token = jwt.sign({ userId: user.uid }, env.JWT_SECRET, {
+    const token = jwt.sign({ userId: user.pi_uid, _id: user._id }, env.JWT_SECRET, {
       expiresIn: "30d",
     });
     return token;
@@ -22,7 +22,7 @@ export const decodeUserToken = async (token: string) => {
     if (!decoded.userId) {
       throw new Error("Invalid token: Missing userID");
     }
-    const associatedUser = await User.findOne({uid: decoded.userId});
+    const associatedUser = await User.findOne({pi_uid: decoded.userId});
     if (!associatedUser) {
       throw new Error("User not found");
     }

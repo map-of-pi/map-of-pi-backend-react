@@ -1,8 +1,9 @@
 import { Document, Types } from "mongoose";
 
 export interface IUser extends Document {
-  uid: string;
-  username: string;
+  pi_uid: string;
+  pi_username: string;
+  user_name: string;
 }
 
 export interface IUserSettings extends Document {
@@ -27,6 +28,7 @@ export interface ISeller extends Document {
   trust_meter_rating: number;
   sell_map_center: {
     type: string;
+
     coordinates: [number, number];
   };
   order_online_enabled_pref: boolean;
