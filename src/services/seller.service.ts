@@ -7,7 +7,7 @@ export const getAllSellers = async (origin?: { lat: number; lng: number }, radiu
     let sellers;
     if (origin && radius) {
       sellers = await Seller.find({
-        coordinates: {
+        sell_map_center: {
           $geoWithin: {
             $centerSphere: [[origin.lng, origin.lat], radius / 6378.1] // Radius in radians
           }

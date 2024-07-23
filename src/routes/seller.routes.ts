@@ -124,7 +124,7 @@ sellerRoutes.post("/fetch", sellerController.fetchSellersByLocation);
  *       500:
  *         description: Internal server error
  */
-sellerRoutes.get("/:seller_id", isSellerFound, sellerController.getSingleSeller);
+sellerRoutes.get("/:seller_id", sellerController.getSingleSeller);
 
 /**
  * @swagger

@@ -34,13 +34,14 @@ const sellerSchema = new Schema<ISeller>(
     average_rating: {
       type: Types.Decimal128,
       required: true,
+      default: 5.0,
     },
     trust_meter_rating: {
       type: Number,
       enum: Object.values(TrustMeterScale).filter(value => typeof value === 'number'),
       required: true,
     },
-    coordinates: {
+    sell_map_center: {
       type: {
         type: String,
         enum: ['Point'],
