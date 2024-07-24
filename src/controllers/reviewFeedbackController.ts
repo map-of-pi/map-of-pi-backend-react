@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 
 import * as reviewFeedbackService from "../services/reviewFeedback.service";
-import { IReviewFeedback } from '../types';
+import { IReviewFeedback, IUser } from '../types';
 
 export const getReviews = async (req: Request, res: Response) => {
   try {
@@ -29,7 +29,8 @@ export const getSingleReviewById = async (req: Request, res: Response) => {
 export const addReview = async (req: Request, res: Response) => {
   try {
     const reviewData = req.body;
-    const newReview = await reviewFeedbackService.addReviewFeedback(reviewData);
+    const authUser = req.currentUser;
+    const newReview = await reviewFeedbackService.addReviewFeedback(reviewData, authUser);
     return res.status(200).json({ newReview });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
