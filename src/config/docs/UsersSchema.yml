@@ -11,13 +11,13 @@ components:
               properties:
                 pi_uid:
                   type: string
-                  example: "0d367ba3-a2e8-4380-86c3-ab7c0b7890c0"
+                  example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
                 pi_username:
                   type: string
-                  example: "test_alias"
+                  example: test_alias
                 user_name:
                   type: string
-                  example: "Test Alias"
+                  example: Test Alias
               required:
                 - pi_uid
                 - pi_username
@@ -35,16 +35,16 @@ components:
           properties:
             _id:
               type: string
-              example: "666bbae4a05bcc3d8dfab563"
+              example: 666bbae4a05bcc3d8dfab563
             pi_uid:
               type: string
-              example: "0d367ba3-a2e8-4380-86c3-ab7c0b7890c0"
+              example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
             pi_username:
               type: string
-              example: "test_alias"
+              example: test_alias
             user_name:
               type: string
-              example: "Test Alias"
+              example: Test Alias
             __v:
               type: integer
               example: 0
@@ -56,7 +56,7 @@ components:
             - __v
         token:
           type: string
-          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjZiYmFlNGEwNWJjYzNkOGRmYWI1NjMiLCJpYXQiOjE3MTgzMzk0MDksImV4cCI6MTcyMDkzMTQwOX0.gFz-EdHoOqz3-AuFX5R4uGtruFaTMH8sTOXEX-3c7yw"
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjZiYmFlNGEwNWJjYzNkOGRmYWI1NjMiLCJpYXQiOjE3MTgzMzk0MDksImV4cCI6MTcyMDkzMTQwOX0.gFz-EdHoOqz3-AuFX5R4uGtruFaTMH8sTOXEX-3c7yw
       required:
         - user
         - token
@@ -69,16 +69,16 @@ components:
           properties:
             _id:
               type: string
-              example: "666bbae4a05bcc3d8dfab563"
+              example: 666bbae4a05bcc3d8dfab563
             pi_uid:
               type: string
-              example: "0d367ba3-a2e8-4380-86c3-ab7c0b7890c0"
+              example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
             pi_username:
               type: string
-              example: "test_alias"
+              example: test_alias
             user_name:
               type: string
-              example: "Test Alias"
+              example: Test Alias
             __v:
               type: integer
               example: 0

@@ -23,7 +23,7 @@ components:
         properties:
           seller_id:
             type: string
-            example: test_seller_id
+            example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
           name:
             type: string
             example: Test Seller
@@ -44,7 +44,7 @@ components:
             properties:
               $numberDecimal:
                 type: string
-                example: "4.5"
+                example: 4.5
             required:
               - $numberDecimal
           trust_meter_rating:
@@ -68,7 +68,7 @@ components:
             example: true
           _id:
             type: string
-            example: "666c84b9d77068c6efeeaa1a"
+            example: 666c84b9d77068c6efeeaa1a
           __v:
             type: number
             example: 0
@@ -88,7 +88,7 @@ components:
       properties:
         seller_id:
           type: string
-          example: test_seller_id
+          example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
         name:
           type: string
           example: Test Seller
@@ -109,7 +109,7 @@ components:
           properties:
             $numberDecimal:
               type: string
-              example: "4.5"
+              example: 4.5
           required:
             - $numberDecimal
         trust_meter_rating:
@@ -133,7 +133,7 @@ components:
           example: true
         _id:
           type: string
-          example: "666c84b9d77068c6efeeaa1a"
+          example: 666c84b9d77068c6efeeaa1a
         __v:
           type: number
           example: 0
@@ -153,7 +153,7 @@ components:
       properties:
         seller_id:
           type: string
-          example: test_seller_id
+          example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
         name:
           type: string
           example: Test Seller
@@ -174,7 +174,7 @@ components:
           properties:
             $numberDecimal:
               type: string
-              example: "4.5"
+              example: 4.5
           required:
             - $numberDecimal
         trust_meter_rating:
@@ -213,7 +213,7 @@ components:
           properties:
             seller_id:
               type: string
-              example: test_seller_id
+              example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
             name:
               type: string
               example: Test Seller
@@ -234,7 +234,7 @@ components:
               properties:
                 $numberDecimal:
                   type: string
-                  example: "4.5"
+                  example: 4.5
               required:
                 - $numberDecimal
             trust_meter_rating:
@@ -258,7 +258,7 @@ components:
               example: true
             _id:
               type: string
-              example: "666c8c2eac7df1b07197b5dd"
+              example: 666c8c2eac7df1b07197b5dd
             __v:
               type: number
               example: 0
@@ -278,6 +278,9 @@ components:
     UpdateSellerRq:
       type: object
       properties:
+        seller_id:
+          type: string
+          example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
         name:
           type: string
           example: Test Seller
@@ -319,7 +322,7 @@ components:
           properties:
             seller_id:
               type: string
-              example: test_seller_id
+              example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
             name:
               type: string
               example: Test Seller
@@ -340,7 +343,7 @@ components:
               properties:
                 $numberDecimal:
                   type: string
-                  example: "4.5"
+                  example: 4.5
               required:
                 - $numberDecimal
             trust_meter_rating:
@@ -364,7 +367,7 @@ components:
               example: true
             _id:
               type: string
-              example: "666c84b9d77068c6efeeaa1a"
+              example: 666c84b9d77068c6efeeaa1a
             __v:
               type: number
               example: 0
