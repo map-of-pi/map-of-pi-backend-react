@@ -7,31 +7,31 @@ components:
         properties:
           _id:
             type: string
-            example: "6674ecee2ac4de0d31e8c048"
+            example: 6674ecee2ac4de0d31e8c048
           review_id:
             type: string
-            example: "test_review_id_6674ecee2ac4de0d31e8c048"
+            example: test_review_id_6674ecee2ac4de0d31e8c048
           review_receiver_id:
             type: string
-            example: "test_review_receiver_id"
+            example: test_review_receiver_id
           review_giver_id:
             type: string
-            example: "test_review_giver_id"
+            example: test_review_giver_id
           reply_to_review_id:
             type: string
-            example: "test_reply_to_review_id"
+            example: test_reply_to_review_id
           rating:
             $ref: '/api/docs/enum/RatingScale.yml#/components/schemas/RatingScale'
           comment:
             type: string
-            example: "test comment"
+            example: test comment
           image:
             type: string
-            example: "http://example.com/image.jpg"
+            example: http://example.com/image.jpg
           review_date:
             type: string
             format: date-time
-            example: "2024-06-20T00:00:00.000Z"
+            example: 2024-06-20T00:00:00.000Z
           __v:
             type: number
             example: 0
@@ -50,31 +50,31 @@ components:
       properties:
         _id:
           type: string
-          example: "6674ecee2ac4de0d31e8c048"
+          example: 6674ecee2ac4de0d31e8c048
         review_id:
           type: string
-          example: "test_review_id_6674ecee2ac4de0d31e8c048"
+          example: test_review_id_6674ecee2ac4de0d31e8c048
         review_receiver_id:
           type: string
-          example: "test_review_receiver_id"
+          example: test_review_receiver_id
         review_giver_id:
           type: string
-          example: "test_review_giver_id"
+          example: test_review_giver_id
         reply_to_review_id:
           type: string
-          example: "test_reply_to_review_id"
+          example: test_reply_to_review_id
         rating:
           $ref: '/api/docs/enum/RatingScale.yml#/components/schemas/RatingScale'
         comment:
           type: string
-          example: "test comment"
+          example: test comment
         image:
           type: string
-          example: "http://example.com/image.jpg"
+          example: http://example.com/image.jpg
         review_date:
           type: string
           format: date-time
-          example: "2024-06-20T00:00:00.000Z"
+          example: 2024-06-20T00:00:00.000Z
         __v:
           type: number
           example: 0
@@ -93,28 +93,28 @@ components:
       properties:
         review_id:
           type: string
-          example: "test_review_id_6674ecee2ac4de0d31e8c048"
+          example: test_review_id_6674ecee2ac4de0d31e8c048
         review_receiver_id:
           type: string
-          example: "test_review_receiver_id"
+          example: test_review_receiver_id
         review_giver_id:
           type: string
-          example: "test_review_giver_id"
+          example: test_review_giver_id
         reply_to_review_id:
           type: string
-          example: "test_reply_to_review_id"
+          example: test_reply_to_review_id
         rating:
           $ref: '/api/docs/enum/RatingScale.yml#/components/schemas/RatingScale'
         comment:
           type: string
-          example: "This is a sample review comment."
+          example: This is a sample review comment.
         image:
           type: string
-          example: "http://example.com/image.jpg"
+          example: http://example.com/image.jpg
         review_date:
           type: string
           format: date-time
-          example: "2024-06-20T00:00:00.000Z"
+          example: 2024-06-20T00:00:00.000Z
       required:
         - review_id
         - review_receiver_id
@@ -131,31 +131,31 @@ components:
           properties:
             review_id:
               type: string
-              example: "test_review_id_6674ecee2ac4de0d31e8c048"
+              example: test_review_id_6674ecee2ac4de0d31e8c048
             review_receiver_id:
               type: string
-              example: "test_review_receiver_id"
+              example: test_review_receiver_id
             review_giver_id:
               type: string
-              example: "test_review_giver_id"
+              example: test_review_giver_id
             reply_to_review_id:
               type: string
-              example: "test_reply_to_review_id"
+              example: test_reply_to_review_id
             rating:
               $ref: '/api/docs/enum/RatingScale.yml#/components/schemas/RatingScale'
             comment:
               type: string
-              example: "test comment"
+              example: test comment
             image:
               type: string
-              example: "http://example.com/image.jpg"
+              example: http://example.com/image.jpg
             review_date:
               type: string
               format: date-time
-              example: "2024-06-20T00:00:00.000Z"
+              example: 2024-06-20T00:00:00.000Z
             _id:
               type: string
-              example: "6674ecee2ac4de0d31e8c048"
+              example: 6674ecee2ac4de0d31e8c048
             __v:
               type: number
               example: 0

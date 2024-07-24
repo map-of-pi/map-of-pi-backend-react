@@ -13,6 +13,8 @@ import userPreferencesRoutes from "../routes/userPreferences.routes";
 import sellerRoutes from "../routes/seller.routes";
 import reviewFeedbackRoutes from "../routes/reviewFeedback.routes";
 
+dotenv.config();
+
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
