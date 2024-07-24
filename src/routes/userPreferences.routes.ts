@@ -90,7 +90,7 @@ userPreferencesRoutes.post(
  *         required: true
  *         schema:
  *           type: string
- *         description: The ID of the user preferences to retrieve
+ *         description: The Pi UID of the user preferences to retrieve
  *     responses:
  *       200:
  *         description: Successful response

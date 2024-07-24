@@ -109,7 +109,7 @@ sellerRoutes.post("/fetch", sellerController.fetchSellersByLocation);
  *         required: true
  *         schema:
  *           type: string
- *         description: The ID of the seller to retrieve
+ *         description: The Pi UID of the seller to retrieve
  *     responses:
  *       200:
  *         description: Successful response
@@ -173,7 +173,7 @@ sellerRoutes.post(
  *         required: true
  *         schema:
  *           type: string
- *         description: The ID of the seller to update
+ *         description: The Pi UID of the seller to update
  *     requestBody:
  *       required: true
  *       content:
