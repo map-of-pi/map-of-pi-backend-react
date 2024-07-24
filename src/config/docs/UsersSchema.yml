@@ -2,30 +2,25 @@ components:
   schemas:
     AuthenticateUserRq:
       type: object
-      properties:
-        auth:
+      properties:   
+        user:
           type: object
           properties:
-            user:
-              type: object
-              properties:
-                pi_uid:
-                  type: string
-                  example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
-                pi_username:
-                  type: string
-                  example: test_alias
-                user_name:
-                  type: string
-                  example: Test Alias
-              required:
-                - pi_uid
-                - pi_username
-                - user_name
+            pi_uid:
+              type: string
+              example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
+            pi_username:
+              type: string
+              example: test_alias
+            user_name:
+              type: string
+              example: Test Alias
           required:
-            - user
+            - pi_uid
+            - pi_username
+            - user_name
       required:
-        - auth
+        - user
 
     AuthenticateUserRs:
       type: object
