@@ -1,5 +1,4 @@
 import { Document, Types } from "mongoose";
-
 import { RatingScale } from "./models/enums/ratingScale";
 import { TrustMeterScale } from "./models/enums/trustMeterScale";
 
@@ -29,7 +28,7 @@ export interface ISeller extends Document {
   sale_items?: string;
   average_rating: Types.Decimal128;
   trust_meter_rating: TrustMeterScale;
-  sell_map_center?: {
+  sell_map_center: { // Ensure sell_map_center is mandatory
     type: 'Point';
     coordinates: [number, number];
   };
