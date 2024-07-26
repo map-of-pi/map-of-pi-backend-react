@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import * as sellerService from "../services/seller.service";
 import { ISeller } from "../types";
+import { Types } from 'mongoose';
 
 export const fetchSellersByLocation = async (req: Request, res: Response) => {
   try {
@@ -28,10 +29,29 @@ export const getSingleSeller = async (req: Request, res: Response) => {
   }
 };
 
+export const getOwnSeller = async (req: Request, res: Response) => {
+  try {
+    
+    // check if user is authenticated and registered seller
+    if (!req.currentUser && !req.currentSeller){
+      return res.status(404).json({ message: "seller not register." });
+    }
+    const currentSeller = req.currentSeller;
+    res.status(200).json(currentSeller);
+
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const registerNewSeller = async (req: Request, res: Response) => {
   try {
-    const sellerData = req.body;
-    const newSeller = await sellerService.registerNewSeller(sellerData);
+    const authUser = req.currentUser;
+    const sellerData = JSON.parse(req.body.data);
+    // Construct the sell_map_center object
+
+   
+    const newSeller = await sellerService.registerNewSeller(sellerData, authUser);
     return res.status(200).json({ newSeller });
   } catch (error: any) {
     res.status(500).json({ message: error.message });

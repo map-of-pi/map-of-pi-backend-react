@@ -3,6 +3,12 @@ import { NextFunction, Request, Response } from "express";
 import Seller from "../models/Seller";
 import { ISeller } from "../types";
 
+declare module 'express-serve-static-core' {
+  interface Request {
+    currentSeller: ISeller;
+  }
+}
+
 export const isSellerFound = async (
   req: Request,
   res: Response,

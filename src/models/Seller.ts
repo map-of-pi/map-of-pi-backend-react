@@ -15,6 +15,11 @@ const sellerSchema = new Schema<ISeller>(
       type: String,
       required: true,
     },
+    seller_type: {
+      type: String,
+      required: true,
+      default: 'Pioneer',
+    },
     description: {
       type: String,
       required: true,

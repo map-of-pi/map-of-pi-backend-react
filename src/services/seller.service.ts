@@ -1,5 +1,5 @@
 import Seller from "../models/Seller";
-import { ISeller } from "../types";
+import { ISeller, IUser } from "../types";
 
 // Fetch all sellers or within a specific radius from a given origin
 export const getAllSellers = async (origin?: { lat: number; lng: number }, radius?: number): Promise<ISeller[]> => {
@@ -34,12 +34,31 @@ export const getSingleSellerById = async (seller_id: string): Promise<ISeller | 
   }
 };
 
-// Register a new seller
-export const registerNewSeller = async (sellerData: ISeller): Promise<ISeller> => {
+// Add or update seller
+export const registerNewSeller = async (sellerData: ISeller, authUser: IUser): Promise<ISeller> => {
+  
+
   try {
-    const newSeller = new Seller(sellerData);
-    const savedSeller = await newSeller.save();
-    return savedSeller as ISeller;
+    let seller = await Seller.findOne({ seller_id: authUser.pi_uid }).exec()
+    if (seller){
+      const updatedSeller = await Seller.findOneAndUpdate({ seller_id: authUser.pi_uid }, sellerData, { new: true })
+      console.log(updatedSeller);
+      return updatedSeller as ISeller;
+    }else{
+      const newSeller = new Seller({
+        ...sellerData,
+        seller_id: authUser.pi_uid,
+        trust_meter_rating: 100,
+        average_rating: 5.0,
+        order_online_enabled_pref: false,
+      });
+      const savedSeller = await newSeller.save();
+      console.log(savedSeller);
+      return savedSeller as ISeller;
+    }
+    
+    
+    
   } catch (error: any) {
     console.error("Error registering new seller:", error.message);
     throw new Error(error.message);

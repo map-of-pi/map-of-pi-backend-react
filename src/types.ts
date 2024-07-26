@@ -23,6 +23,7 @@ export interface IUserSettings extends Document {
 export interface ISeller extends Document {
   seller_id: string;
   name: string;
+  seller_type: string;
   description: string;
   image?: string;
   address?: string;
