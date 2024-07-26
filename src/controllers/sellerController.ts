@@ -32,8 +32,8 @@ export const getSingleSeller = async (req: Request, res: Response) => {
 export const getOwnSeller = async (req: Request, res: Response) => {
   try {
     
-    // check if user is authenticated and registered seller
-    if (!req.currentUser && !req.currentSeller){
+    // Ensure that req.currentUser and req.currentSeller are available
+    if (!req.currentUser || !req.currentSeller) {
       return res.status(404).json({ message: "seller not register." });
     }
     const currentSeller = req.currentSeller;

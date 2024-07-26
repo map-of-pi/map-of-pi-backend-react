@@ -128,10 +128,10 @@ sellerRoutes.get(
   "/:seller_id", 
   sellerController.getSingleSeller);
 
-sellerRoutes.get(
-  "/own-seller", 
+sellerRoutes.post(
+  "/own_seller", 
   verifyToken,
-  isSellerOwner,
+  isSellerFound,
   sellerController.getOwnSeller);
 
 /**
