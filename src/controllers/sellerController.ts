@@ -2,6 +2,11 @@ import { Request, Response } from "express";
 import * as sellerService from "../services/seller.service";
 import { ISeller } from "../types";
 
+/**
+ * Fetch sellers by location
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ */
 export const fetchSellersByLocation = async (req: Request, res: Response) => {
   try {
     const { origin, radius } = req.body;
@@ -15,6 +20,11 @@ export const fetchSellersByLocation = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * Get a single seller by ID
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ */
 export const getSingleSeller = async (req: Request, res: Response) => {
   try {
     const { seller_id } = req.params;
@@ -28,9 +38,14 @@ export const getSingleSeller = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * Register a new seller
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ */
 export const registerNewSeller = async (req: Request, res: Response) => {
   try {
-    const sellerData = req.body;
+    const sellerData: ISeller = req.body; // Ensure sellerData matches ISeller interface
     const newSeller = await sellerService.registerNewSeller(sellerData);
     return res.status(200).json({ newSeller });
   } catch (error: any) {
@@ -38,10 +53,15 @@ export const registerNewSeller = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * Update an existing seller
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ */
 export const updateSeller = async (req: Request, res: Response) => {
   try {
     const { seller_id } = req.params;
-    const sellerData = req.body;
+    const sellerData: Partial<ISeller> = req.body; // Ensure sellerData matches ISeller interface
     const updatedSeller = await sellerService.updateSeller(seller_id, sellerData);
     return res.status(200).json({ updatedSeller });
   } catch (error: any) {
