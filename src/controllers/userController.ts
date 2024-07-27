@@ -30,9 +30,9 @@ export const signoutUser = async (req: Request, res: Response) => {
 
 export const autoLoginUser = async(req: Request, res: Response) => {
   //@ts-ignore
-  const username = req.currentUser;
-  try{
-    res.status(200).json(username)
+  const currentUser = req.currentUser;
+  try {
+    res.status(200).json(currentUser);
   } catch (error: any) {
     res.status(500).json({message: error.message});
   }
