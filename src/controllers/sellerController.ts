@@ -48,8 +48,6 @@ export const registerNewSeller = async (req: Request, res: Response) => {
   try {
     const authUser = req.currentUser;
     const sellerData = JSON.parse(req.body.data);
-    // Construct the sell_map_center object
-
    
     const newSeller = await sellerService.registerNewSeller(sellerData, authUser);
     return res.status(200).json({ newSeller });
