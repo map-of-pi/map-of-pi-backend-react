@@ -78,15 +78,12 @@ export const getReviewFeedback = async (review_receiver_id: string): Promise<IRe
 
 export const getReviewFeedbackById = async (review_id: string): Promise<IReviewFeedback | null> => {
   try {
-    const reviewFeedback = await ReviewFeedback.findById({ _id: review_id } ).exec();
+    const reviewFeedback = await ReviewFeedback.findById({ _id: review_id }).exec();
 
     if (!reviewFeedback) {
       return null;
     }
-
     console.log('Review feedback: ', reviewFeedback);
-
-    // Update reviewFeedback with reviewer's username instead of ID
     const reviewer = await getUser(reviewFeedback.review_giver_id);
     reviewFeedback.review_giver_id = reviewer ? reviewer.user_name : '';
 

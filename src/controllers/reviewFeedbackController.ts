@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 
 import * as reviewFeedbackService from "../services/reviewFeedback.service";
-import { IReviewFeedback, IUser } from '../types';
+import { IReviewFeedback } from '../types';
 
 export const getReviews = async (req: Request, res: Response) => {
   try {

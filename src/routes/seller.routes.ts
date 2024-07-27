@@ -22,6 +22,9 @@ import upload from "../utils/multer";
  *         description:
  *           type: string
  *           description: Description of the seller
+ *         seller_type:
+ *           type: string
+ *           description: Type of the seller
  *         image:
  *           type: string
  *           description: Image of the seller
@@ -61,6 +64,7 @@ import upload from "../utils/multer";
  *         - seller_id
  *         - name
  *         - description
+ *         - seller_type
  *         - average_rating
  *         - trust_meter_rating
  *         - order_online_enabled_pref
@@ -128,32 +132,55 @@ sellerRoutes.get(
   "/:seller_id", 
   sellerController.getSingleSeller);
 
-sellerRoutes.post(
-  "/own_seller", 
-  verifyToken,
-  isSellerFound,
-  sellerController.getOwnSeller);
-
 /**
  * @swagger
- * /api/v1/sellers/register:
+ * /api/v1/sellers/me:
  *   post:
  *     tags:
  *       - Seller
- *     summary: Register a new seller *
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '/api/docs/SellersSchema.yml#/components/schemas/RegisterNewSellerRq'
+ *     summary: Fetch the user's seller registration using Bearer Auth token *
  *     responses:
  *       200:
  *         description: Successful response
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '/api/docs/SellersSchema.yml#/components/schemas/RegisterNewSellerRs'
+ *               $ref: '/api/docs/SellersSchema.yml#/components/schemas/GetSellerRegistrationRs'
+ *       404:
+ *         description: Seller registration not found
+ *       401:
+ *         description: Unauthorized
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */  
+sellerRoutes.post(
+  "/me", 
+  verifyToken,
+  isSellerFound,
+  sellerController.fetchSellerRegistration);
+
+/**
+ * @swagger
+ * /api/v1/sellers/register:
+ *   put:
+ *     tags:
+ *       - Seller
+ *     summary: Register a new seller or update existing seller *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '/api/docs/SellersSchema.yml#/components/schemas/RegisterSellerRq'
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '/api/docs/SellersSchema.yml#/components/schemas/RegisterSellerRs'
  *       401:
  *         description: Unauthorized
  *       400:
@@ -161,11 +188,11 @@ sellerRoutes.post(
  *       500:
  *         description: Internal server error
  */
-sellerRoutes.post(
+sellerRoutes.put(
   "/register",
   verifyToken,
   upload.array("images"),
-  sellerController.registerNewSeller
+  sellerController.registerSeller
 );
 
 /**

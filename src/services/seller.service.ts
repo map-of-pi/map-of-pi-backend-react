@@ -18,7 +18,7 @@ export const getAllSellers = async (origin?: { lat: number; lng: number }, radiu
     }
     return sellers;
   } catch (error: any) {
-    console.error("Error retrieving sellers:", error.message);
+    console.error("Error retrieving sellers: ", error.message);
     throw new Error(error.message);
   }
 };
@@ -29,22 +29,21 @@ export const getSingleSellerById = async (seller_id: string): Promise<ISeller | 
     const seller = await Seller.findOne({ seller_id }).exec();
     return seller ? seller as ISeller : null;
   } catch (error: any) {
-    console.error(`Error retrieving seller with sellerID ${seller_id}:`, error.message);
+    console.error(`Error retrieving seller with sellerID ${seller_id}: `, error.message);
     throw new Error(error.message);
   }
 };
 
 // Add or update seller
-export const registerNewSeller = async (sellerData: ISeller, authUser: IUser): Promise<ISeller> => {
-  
-
+export const registerOrUpdateSeller = async (sellerData: ISeller, authUser: IUser): Promise<ISeller> => {
   try {
-    let seller = await Seller.findOne({ seller_id: authUser.pi_uid }).exec()
-    if (seller){
+    let seller = await Seller.findOne({ seller_id: authUser.pi_uid }).exec();
+
+    if (seller) {
       const updatedSeller = await Seller.findOneAndUpdate({ seller_id: authUser.pi_uid }, sellerData, { new: true })
       console.log(updatedSeller);
       return updatedSeller as ISeller;
-    }else{
+    } else {
       const newSeller = new Seller({
         ...sellerData,
         seller_id: authUser.pi_uid,
@@ -56,11 +55,8 @@ export const registerNewSeller = async (sellerData: ISeller, authUser: IUser): P
       console.log(savedSeller);
       return savedSeller as ISeller;
     }
-    
-    
-    
   } catch (error: any) {
-    console.error("Error registering new seller:", error.message);
+    console.error("Error registering seller: ", error.message);
     throw new Error(error.message);
   }
 };

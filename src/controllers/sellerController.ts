@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
+
 import * as sellerService from "../services/seller.service";
 import { ISeller } from "../types";
-import { Types } from 'mongoose';
 
 export const fetchSellersByLocation = async (req: Request, res: Response) => {
   try {
@@ -29,12 +29,10 @@ export const getSingleSeller = async (req: Request, res: Response) => {
   }
 };
 
-export const getOwnSeller = async (req: Request, res: Response) => {
+export const fetchSellerRegistration = async (req: Request, res: Response) => {
   try {
-    
-    // Ensure that req.currentUser and req.currentSeller are available
     if (!req.currentUser || !req.currentSeller) {
-      return res.status(404).json({ message: "seller not register." });
+      return res.status(404).json({ message: "Seller registration not found." });
     }
     const currentSeller = req.currentSeller;
     res.status(200).json(currentSeller);
@@ -44,15 +42,12 @@ export const getOwnSeller = async (req: Request, res: Response) => {
   }
 };
 
-export const registerNewSeller = async (req: Request, res: Response) => {
+export const registerSeller = async (req: Request, res: Response) => {
   try {
     const authUser = req.currentUser;
-    const sellerData = JSON.parse(req.body.data);
-    // Construct the sell_map_center object
-
-   
-    const newSeller = await sellerService.registerNewSeller(sellerData, authUser);
-    return res.status(200).json({ newSeller });
+    const { seller } = req.body;
+    const registeredSeller = await sellerService.registerOrUpdateSeller(seller, authUser);
+    return res.status(200).json({ seller: registeredSeller });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
