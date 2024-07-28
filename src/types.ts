@@ -29,7 +29,7 @@ export interface ISeller extends Document {
   sale_items?: string;
   average_rating: Types.Decimal128;
   trust_meter_rating: TrustMeterScale;
-  sell_map_center?: {
+  sell_map_center: {
     type: 'Point';
     coordinates: [number, number];
   };
