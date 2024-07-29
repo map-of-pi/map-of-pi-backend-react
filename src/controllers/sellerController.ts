@@ -45,7 +45,7 @@ export const fetchSellerRegistration = async (req: Request, res: Response) => {
 export const registerSeller = async (req: Request, res: Response) => {
   try {
     const authUser = req.currentUser;
-    const { seller } = req.body;
+    const seller = JSON.parse(req.body.data);
     const registeredSeller = await sellerService.registerOrUpdateSeller(seller, authUser);
     return res.status(200).json({ seller: registeredSeller });
   } catch (error: any) {

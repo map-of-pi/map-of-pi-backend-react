@@ -188,7 +188,7 @@ sellerRoutes.post(
  *       500:
  *         description: Internal server error
  */
-sellerRoutes.put(
+sellerRoutes.post(
   "/register",
   verifyToken,
   upload.array("images"),
