@@ -39,6 +39,16 @@ export const registerNewSeller = async (req: Request, res: Response) => {
   }
 };
 
+export const deleteSeller = async (req: Request, res: Response) => {
+  try {
+    const { seller_id } = req.params;
+    const deletedSeller = await sellerService.deleteSeller(seller_id);
+    res.status(200).json({ message: "Seller deleted successfully.", deletedSeller });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const updateSeller = async (req: Request, res: Response) => {
   try {
     const { seller_id } = req.params;

@@ -204,4 +204,45 @@ sellerRoutes.put(
   sellerController.updateSeller
 );
 
+/**
+ * @swagger
+ * /api/v1/sellers/{seller_id}:
+ *   delete:
+ *     tags:
+ *       - Seller
+ *     summary: Delete a seller by seller ID *
+ *     parameters:
+ *       - name: seller_id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The Pi UID of the seller to delete
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Seller deleted successfully.
+ *       404:
+ *         description: Seller not found
+ *       401:
+ *         description: Unauthorized
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
+sellerRoutes.delete(
+  "/:seller_id",
+  verifyToken,
+  isSellerFound,
+  sellerController.deleteSeller
+);
+
 export default sellerRoutes;

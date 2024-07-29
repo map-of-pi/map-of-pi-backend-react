@@ -4,7 +4,8 @@ import { IUser } from "../types";
 export const authenticate = async (currentUser: IUser): Promise<IUser> => {
   try {
     const user = await User.findOne({
-      pi_uid: currentUser.pi_uid
+      pi_uid: currentUser.pi_uid,
+      pi_username: currentUser.pi_username
     }).exec();
 
     if (user) {

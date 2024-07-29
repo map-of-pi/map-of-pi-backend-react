@@ -32,7 +32,7 @@ const userRoutes = Router();
  *   post:
  *     tags:
  *       - User
- *     summary: Authenticate User
+ *     summary: Authenticate existing user or build new user
  *     requestBody:
  *       required: true
  *       content:
