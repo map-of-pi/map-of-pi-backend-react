@@ -29,7 +29,7 @@ export const getSingleSellerById = async (seller_id: string): Promise<ISeller | 
     const seller = await Seller.findOne({ seller_id }).exec();
     return seller ? seller as ISeller : null;
   } catch (error: any) {
-    console.error(`Error retrieving seller with sellerID ${seller_id}:`, error.message);
+    console.error(`Error retrieving seller with sellerID ${seller_id}: `, error.message);
     throw new Error(error.message);
   }
 };
@@ -52,7 +52,7 @@ export const deleteSeller = async (seller_id: string): Promise<ISeller | null> =
     const deletedSeller = await Seller.findOneAndDelete({ seller_id }).exec();
     return deletedSeller ? deletedSeller as ISeller : null;
   } catch (error: any) {
-    console.error(`Error deleting seller with sellerID ${seller_id}:`, error.message);
+    console.error(`Error deleting seller with sellerID ${seller_id}: `, error.message);
     throw new Error(error.message);
   }
 };

@@ -224,11 +224,7 @@ sellerRoutes.put(
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Seller deleted successfully.
+ *               $ref: '/api/docs/SellersSchema.yml#/components/schemas/DeleteSellerRs'
  *       404:
  *         description: Seller not found
  *       401:

@@ -62,7 +62,7 @@ userRoutes.get("/me", verifyToken, userController.autoLoginUser);
  *   get:
  *     tags:
  *       - User
- *     summary: Get a user by Pi uid
+ *     summary: Get a user by Pi UID
  *     parameters:
  *       - name: pi_uid
  *         in: path
@@ -85,5 +85,41 @@ userRoutes.get("/me", verifyToken, userController.autoLoginUser);
  *         description: Internal server error
  */
 userRoutes.get("/:pi_uid", userController.getUser);
+
+/**
+ * @swagger
+ * /api/v1/users/{pi_uid}:
+ *   delete:
+ *     tags:
+ *       - User
+ *     summary: Delete a user and user associated data by Pi UID *
+ *     parameters:
+ *       - name: pi_uid
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The Pi UID of the user to delete
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '/api/docs/UsersSchema.yml#/components/schemas/DeleteUserRs'
+ *       404:
+ *         description: User not found
+ *       401:
+ *         description: Unauthorized
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
+userRoutes.delete(
+  "/:pi_uid",
+  verifyToken,
+  userController.deleteUser
+);
 
 export default userRoutes;

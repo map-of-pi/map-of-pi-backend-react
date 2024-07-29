@@ -50,3 +50,13 @@ export const getUser = async(req: Request, res: Response) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const deleteUser = async (req: Request, res: Response) => {
+  try {
+    const { pi_uid } = req.params;
+    const deletedData = await userService.deleteUser(pi_uid);
+    res.status(200).json({ message: "User deleted successfully.", deletedData });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
