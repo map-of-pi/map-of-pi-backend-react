@@ -56,6 +56,7 @@ const sellerSchema = new Schema<ISeller>(
       coordinates: {
         type: [Number],
         required: true,
+        default: [0, 0]
       },
     },
     order_online_enabled_pref: {

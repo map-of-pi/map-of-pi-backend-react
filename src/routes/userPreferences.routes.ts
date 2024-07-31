@@ -70,12 +70,12 @@ const userPreferencesRoutes = Router();
  *       500:
  *         description: Internal server error
  */
-userPreferencesRoutes.post(
-  "/add",
-  verifyToken,
-  upload.array("images"),
-  userPreferencesController.addUserPreferences
-);
+// userPreferencesRoutes.post(
+//   "/add",
+//   verifyToken,
+//   upload.array("images"),
+//   userPreferencesController.addUserPreferences
+// );
 
 /**
  * @swagger
@@ -105,7 +105,7 @@ userPreferencesRoutes.post(
  *       500:
  *         description: Internal server error
  */
-userPreferencesRoutes.get("/:user_settings_id", userPreferencesController.getUserPreferences);
+userPreferencesRoutes.get("/me", userPreferencesController.getUserPreferences);
 
 /**
  * @swagger
@@ -142,12 +142,11 @@ userPreferencesRoutes.get("/:user_settings_id", userPreferencesController.getUse
  *       500:
  *         description: Internal server error
  */
-userPreferencesRoutes.put(
-  "/:user_settings_id",
+userPreferencesRoutes.post(
+  "/add",
   verifyToken,
-  isUserSettingsFound,
-  isUserSettingsOwner,
-  userPreferencesController.updateUserPreferences
+  upload.array("images"),
+  userPreferencesController.addUserPreferences
 );
 
 export default userPreferencesRoutes;

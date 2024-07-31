@@ -18,9 +18,13 @@ export const getUserPreferences = async (req: Request, res: Response) => {
 
 export const addUserPreferences = async (req: Request, res: Response) => {
   try {
-    const userSettingsData = req.body;
-    const newUserPreferences = await userSettingsService.addUserSettings(userSettingsData);
-    res.status(200).json({ newUserPreferences: newUserPreferences });
+    const authUser = req.currentUser
+    if (authUser) {
+      const userSettingsData = JSON.parse(req.body.json);
+      console.log(userSettingsData);
+      const userPreferences = await userSettingsService.addUserSettings(userSettingsData, authUser);
+      res.status(200).json({ settings: userPreferences });
+    }    
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }

@@ -1,11 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 
 import Seller from "../models/Seller";
-import { ISeller } from "../types";
+import { ISeller, IUser } from "../types";
 
 declare module 'express-serve-static-core' {
   interface Request {
-    currentUser?: any;
     currentSeller: ISeller;
   }
 }
@@ -15,7 +14,7 @@ export const isSellerFound = async (
   res: Response,
   next: NextFunction
 ) => {
-  const seller_id = req.currentUser.pi_uid;
+  const seller_id = req.currentUser?.pi_uid;
   console.log('seller ID', seller_id)
   try {
     const currentSeller: ISeller | null = await Seller.findOne({seller_id});

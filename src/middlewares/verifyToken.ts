@@ -1,10 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 
 import { decodeUserToken } from "../helpers/jwt";
+import { IUser } from "../types";
 
 declare module 'express-serve-static-core' {
   interface Request {
-    currentUser?: any;
+    currentUser?: IUser;
     token?: string;
   }
 }

@@ -12,7 +12,7 @@ export interface IUser extends Document {
 export interface IUserSettings extends Document {
   user_settings_id: string;
   email?: string;
-  phone_number?: number;
+  phone_number?: string;
   image?: string; 
   search_map_center?: {
     type: 'Point';
