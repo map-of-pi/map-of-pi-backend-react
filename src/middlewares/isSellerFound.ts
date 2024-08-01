@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 
 import Seller from "../models/Seller";
-import { ISeller, IUser } from "../types";
+import { ISeller } from "../types";
 
 declare module 'express-serve-static-core' {
   interface Request {

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { IUser, IUserSettings } from "../types";
+import { IUserSettings } from "../types";
 
 declare module 'express-serve-static-core' {
   interface Request {

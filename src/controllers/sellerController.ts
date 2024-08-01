@@ -50,7 +50,6 @@ export const registerSeller = async (req: Request, res: Response) => {
       const registeredSeller = await sellerService.registerOrUpdateSeller(seller, authUser);
       return res.status(200).json({ seller: registeredSeller });
     }
-    
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }

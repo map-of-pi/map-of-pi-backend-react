@@ -34,14 +34,15 @@ export const getSingleSellerById = async (seller_id: string): Promise<ISeller | 
   }
 };
 
-// Add or update seller
 export const registerOrUpdateSeller = async (sellerData: ISeller, authUser: IUser): Promise<ISeller> => {
   try {
     let seller = await Seller.findOne({ seller_id: authUser.pi_uid }).exec();
 
     if (seller) {
-      const updatedSeller = await Seller.findOneAndUpdate({ seller_id: authUser.pi_uid }, sellerData, { new: true })
-      console.log(updatedSeller);
+      const updatedSeller = await Seller.findOneAndUpdate(
+        { seller_id: authUser.pi_uid }, 
+        sellerData, { new: true }
+      )
       return updatedSeller as ISeller;
     } else {
       const newSeller = new Seller({
@@ -52,7 +53,6 @@ export const registerOrUpdateSeller = async (sellerData: ISeller, authUser: IUse
         order_online_enabled_pref: false,
       });
       const savedSeller = await newSeller.save();
-      console.log(savedSeller);
       return savedSeller as ISeller;
     }
   } catch (error: any) {

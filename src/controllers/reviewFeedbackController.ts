@@ -31,15 +31,13 @@ export const addReview = async (req: Request, res: Response) => {
     const reviewData = req.body;
     const authUser = req.currentUser;
 
-    if (authUser){
-      // check if reviewer is the same as user
-      if (authUser.pi_uid===reviewData.review_receiver_id){
-        return res.status(400).json({ message: "You can't add review to yourself" });
-      };
+    if (authUser) {
+      if (authUser.pi_uid === reviewData.review_receiver_id) {
+        return res.status(400).json({ message: "Self review is prohibited." });
+      }
       const newReview = await reviewFeedbackService.addReviewFeedback(reviewData, authUser);
       return res.status(200).json({ newReview });
     }
-    
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
