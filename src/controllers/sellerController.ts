@@ -58,7 +58,7 @@ export const registerSeller = async (req: Request, res: Response) => {
 export const updateSeller = async (req: Request, res: Response) => {
   try {
     const { seller_id } = req.params;
-    const sellerData = req.body;
+    const sellerData: Partial<ISeller> = req.body;
     const updatedSeller = await sellerService.updateSeller(seller_id, sellerData);
     return res.status(200).json({ updatedSeller });
   } catch (error: any) {

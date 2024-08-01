@@ -1,7 +1,6 @@
 import mongoose, { Schema, Types } from "mongoose";
-
-import { TrustMeterScale } from "./enums/trustMeterScale";
 import { ISeller } from "../types";
+import { TrustMeterScale } from "./enums/trustMeterScale"; // Ensure this import is correct
 
 // Defining the seller schema
 const sellerSchema = new Schema<ISeller>(
@@ -26,20 +25,20 @@ const sellerSchema = new Schema<ISeller>(
     },
     image: {
       type: String,
-      required: false,
+      required: false, // Optional as per schema
     },
     address: {
       type: String,
-      required: false,
+      required: false, // Optional as per schema
     },
     sale_items: {
       type: String,
-      required: false,
+      required: false, // Optional as per schema
     },
     average_rating: {
       type: Types.Decimal128,
       required: true,
-      default: 5.0,
+      default: 5.0, // Default value
     },
     trust_meter_rating: {
       type: Number,
@@ -67,8 +66,8 @@ const sellerSchema = new Schema<ISeller>(
   { timestamps: true } // Adds timestamps to track creation and update times
 );
 
-// Creating a 2dsphere index for the coordinates field
-sellerSchema.index({ coordinates: '2dsphere' });
+// Creating a 2dsphere index for the sell_map_center field
+sellerSchema.index({ 'sell_map_center.coordinates': '2dsphere' });
 
 // Creating the Seller model from the schema
 const Seller = mongoose.model<ISeller>("Seller", sellerSchema);
