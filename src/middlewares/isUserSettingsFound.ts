@@ -3,6 +3,12 @@ import { NextFunction, Request, Response } from "express";
 import UserSettings from "../models/UserSettings";
 import { IUserSettings } from "../types";
 
+declare module 'express-serve-static-core' {
+  interface Request {
+    currentUserSettings: IUserSettings;
+  }
+}
+
 export const isUserSettingsFound = async (
   req: Request,
   res: Response,

@@ -188,55 +188,11 @@ sellerRoutes.post(
  *       500:
  *         description: Internal server error
  */
-sellerRoutes.post(
+sellerRoutes.put(
   "/register",
   verifyToken,
   upload.array("images"),
   sellerController.registerSeller
-);
-
-/**
- * @swagger
- * /api/v1/sellers/{seller_id}:
- *   put:
- *     tags:
- *       - Seller
- *     summary: Update a seller *
- *     parameters:
- *       - name: seller_id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *         description: The Pi UID of the seller to update
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '/api/docs/SellersSchema.yml#/components/schemas/UpdateSellerRq'
- *     responses:
- *       200:
- *         description: Successful reponse
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '/api/docs/SellersSchema.yml#/components/schemas/UpdateSellerRs'
- *       404:
- *         description: Seller not found for update
- *       401:
- *         description: Unauthorized
- *       400:
- *         description: Bad request
- *       500:
- *         description: Internal server error
- */
-sellerRoutes.put(
-  "/:seller_id",
-  verifyToken,
-  isSellerFound,
-  isSellerOwner,
-  sellerController.updateSeller
 );
 
 export default sellerRoutes;

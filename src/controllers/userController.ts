@@ -21,13 +21,6 @@ export const authenticateUser = async (req: Request, res: Response) => {
   }
 };
 
-export const signoutUser = async (req: Request, res: Response) => {
-  try {
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
 export const autoLoginUser = async(req: Request, res: Response) => {
   //@ts-ignore
   const currentUser = req.currentUser;
