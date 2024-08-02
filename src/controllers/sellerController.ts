@@ -46,7 +46,7 @@ export const registerSeller = async (req: Request, res: Response) => {
   try {
     const authUser = req.currentUser;
     if (authUser){
-      const seller = JSON.parse(req.body.json);
+      const seller = req.body;
       const registeredSeller = await sellerService.registerOrUpdateSeller(seller, authUser);
       return res.status(200).json({ seller: registeredSeller });
     }

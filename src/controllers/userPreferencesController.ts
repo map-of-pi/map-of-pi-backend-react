@@ -33,7 +33,7 @@ export const addUserPreferences = async (req: Request, res: Response) => {
   try {
     const authUser = req.currentUser
     if (authUser) {
-      const userSettingsData = JSON.parse(req.body.json);
+      const userSettingsData = req.body;
       const userPreferences = await userSettingsService.addOrUpdateUserSettings(userSettingsData, authUser);
       res.status(200).json({ settings: userPreferences });
     }    
