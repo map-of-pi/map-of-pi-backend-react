@@ -3,14 +3,20 @@ import { NextFunction, Request, Response } from "express";
 import UserSettings from "../models/UserSettings";
 import { IUserSettings } from "../types";
 
+declare module 'express-serve-static-core' {
+  interface Request {
+    currentUserSettings: IUserSettings;
+  }
+}
+
 export const isUserSettingsFound = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const { user_settings_id } = req.params;
+  const userSettingsId = req.currentUser?.pi_uid;
   try {
-    const currentUserSettings: IUserSettings | null = await UserSettings.findOne({user_settings_id});
+    const currentUserSettings: IUserSettings | null = await UserSettings.findOne({user_settings_id: userSettingsId});
 
     if (currentUserSettings) {
       (req as any).currentUserSettings = currentUserSettings;

@@ -1,4 +1,4 @@
-import { IReviewFeedback } from "../types";
+import { IReviewFeedback, IUser } from "../types";
 import { getUser } from "./user.service";
 import ReviewFeedback from "../models/ReviewFeedback";
 import Seller from "../models/Seller";
@@ -78,15 +78,12 @@ export const getReviewFeedback = async (review_receiver_id: string): Promise<IRe
 
 export const getReviewFeedbackById = async (review_id: string): Promise<IReviewFeedback | null> => {
   try {
-    const reviewFeedback = await ReviewFeedback.findOne({ review_id } ).exec();
+    const reviewFeedback = await ReviewFeedback.findById({ _id: review_id }).exec();
 
     if (!reviewFeedback) {
       return null;
     }
-
     console.log('Review feedback: ', reviewFeedback);
-
-    // Update reviewFeedback with reviewer's username instead of ID
     const reviewer = await getUser(reviewFeedback.review_giver_id);
     reviewFeedback.review_giver_id = reviewer ? reviewer.user_name : '';
 
@@ -97,14 +94,14 @@ export const getReviewFeedbackById = async (review_id: string): Promise<IReviewF
   }
 };
 
-export const addReviewFeedback = async (reviewFeedbackData: IReviewFeedback): Promise<IReviewFeedback> => {
-  const { review_receiver_id, review_giver_id, reply_to_review_id } = reviewFeedbackData;
+export const addReviewFeedback = async (reviewFeedbackData: IReviewFeedback, authUser: IUser): Promise<IReviewFeedback> => {
+  const { review_receiver_id, reply_to_review_id } = reviewFeedbackData;
   const date = new Date();
 
   const newReviewFeedback = new ReviewFeedback({
     ...reviewFeedbackData,
     review_date: date,
-    review_id: `${review_receiver_id}_${review_giver_id}_${date}`,
+    review_giver_id: authUser.pi_uid,
     reply_to_review_id: reply_to_review_id || null,
   });
 

@@ -83,51 +83,46 @@ components:
     AddUserPreferencesRs:
       type: object
       properties:
-        newUserPreferences:
+        user_settings_id:
+          type: string
+          example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
+        email:
+          type: string
+          example: test_user_preferences@example.com
+        phone_number:
+          type: number
+          example: 1234567890
+        image:
+          type: string
+          example: https://example.com/image.jpg
+        search_map_center:
           type: object
           properties:
-            user_settings_id:
+            type:
               type: string
-              example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
-            email:
-              type: string
-              example: test_user_preferences@example.com
-            phone_number:
-              type: number
-              example: 1234567890
-            image:
-              type: string
-              example: https://example.com/image.jpg
-            search_map_center:
-              type: object
-              properties:
-                type:
-                  type: string
-                  example: Point
-                coordinates:
-                  type: array
-                  items:
-                    type: number
-                  example: [-73.856077, 40.848447]
-              required:
-                - type
-                - coordinates
-            _id:
-              type: string
-              example: 66741c62b175e7d059a2639e
-            __v:
-              type: number
-              example: 0
+              example: Point
+            coordinates:
+              type: array
+              items:
+                type: number
+              example: [-73.856077, 40.848447]
           required:
-            - user_settings_id
-            - email
-            - phone_number
-            - image
-            - search_map_center
-            - _id
-            - __v
+            - type
+            - coordinates
+        _id:
+          type: string
+          example: 66741c62b175e7d059a2639e
+        __v:
+          type: number
+          example: 0
       required:
-        - newUserPreferences
+        - user_settings_id
+        - email
+        - phone_number
+        - image
+        - search_map_center
+        - _id
+        - __v
 
     UpdateUserPreferencesRq:
       type: object
@@ -163,52 +158,3 @@ components:
         - phone_number
         - image
         - search_map_center
-
-    UpdateUserPreferencesRs:
-      type: object
-      properties:
-        updatedUserPreferences:
-          type: object
-          properties:
-            user_settings_id:
-              type: string
-              example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
-            email:
-              type: string
-              example: test_user_preferences@example.com
-            phone_number:
-              type: number
-              example: 1234567890
-            image:
-              type: string
-              example: https://example.com/image.jpg
-            search_map_center:
-              type: object
-              properties:
-                type:
-                  type: string
-                  example: Point
-                coordinates:
-                  type: array
-                  items:
-                    type: number
-                  example: [-73.856077, 40.848447]
-              required:
-                - type
-                - coordinates
-            _id:
-              type: string
-              example: 6673a08503852cb0c9b618d9
-            __v:
-              type: number
-              example: 0
-          required:
-            - user_settings_id
-            - email
-            - phone_number
-            - image
-            - search_map_center
-            - _id
-            - __v
-      required:
-        - updatedUserPreferences

@@ -1,5 +1,5 @@
 import UserSettings from "../models/UserSettings";
-import { IUserSettings } from "../types";
+import { IUser, IUserSettings } from "../types";
 
 export const getUserSettingsById = async (user_settings_id: string): Promise<IUserSettings | null> => {
   try {
@@ -11,13 +11,27 @@ export const getUserSettingsById = async (user_settings_id: string): Promise<IUs
   }
 };
 
-export const addUserSettings = async (userSettingsData: IUserSettings): Promise<IUserSettings> => {
+export const addOrUpdateUserSettings = async (userSettingsData: IUserSettings, authUser: IUser): Promise<IUserSettings> => {
   try {
-    const newUserSettings = new UserSettings(userSettingsData);
-    const savedUserSettings = await newUserSettings.save();
-    return savedUserSettings;
+    let userSettings = await UserSettings.findOne({user_settings_id: authUser.pi_uid}).exec();
+    
+    if (userSettings){
+      const updateUserSettings = await UserSettings.findOneAndUpdate(
+        {user_settings_id: authUser.pi_uid}, 
+        userSettingsData, {new: true}
+      )
+      return updateUserSettings as IUserSettings;
+    } else {
+      const newUserSettings = new UserSettings({
+        ...userSettingsData,
+        user_settings_id: authUser.pi_uid,      
+      });
+      const savedUserSettings = await newUserSettings.save();
+      return savedUserSettings as IUserSettings;
+    }
+    
   } catch (error: any) {
-    console.error("Error registering new user settings: ", error.message);
+    console.error("Error registering user settings: ", error.message);
     throw new Error(error.message);
   }
 };
