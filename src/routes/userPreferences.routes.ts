@@ -1,7 +1,6 @@
 import { Router } from "express";
 
 import * as userPreferencesController from "../controllers/userPreferencesController";
-import { isUserSettingsOwner } from "../middlewares/isUserSettingsOwner";
 import { verifyToken } from "../middlewares/verifyToken";
 import upload from "../utils/multer";
 import { isUserSettingsFound } from "../middlewares/isUserSettingsFound";
@@ -46,10 +45,10 @@ const userPreferencesRoutes = Router();
 /**
  * @swagger
  * /api/v1/user-preferences/add:
- *   post:
+ *   put:
  *     tags:
  *       - User Preferences
- *     summary: Add new user preferences *
+ *     summary: Add new user preferences or update existing user preferences *
  *     requestBody:
  *       required: true
  *       content:
@@ -70,7 +69,7 @@ const userPreferencesRoutes = Router();
  *       500:
  *         description: Internal server error
  */
-userPreferencesRoutes.post(
+userPreferencesRoutes.put(
   "/add",
   verifyToken,
   upload.array("images"),
@@ -109,45 +108,29 @@ userPreferencesRoutes.get("/:user_settings_id", userPreferencesController.getUse
 
 /**
  * @swagger
- * /api/v1/user-preferences/{user_settings_id}:
- *   put:
+ * /api/v1/user-preferences/me:
+ *   post:
  *     tags:
  *       - User Preferences
- *     summary: Update the user preferences *
- *     parameters:
- *       - name: user_settings_id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '/api/docs/UserPreferencesSchema.yml#/components/schemas/UpdateUserPreferencesRq'
+ *     summary: Fetch the user's preference using Bearer Auth token *
  *     responses:
  *       200:
  *         description: Successful response
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '/api/docs/UserPreferencesSchema.yml#/components/schemas/UpdateUserPreferencesRs'
+ *               $ref: '/api/docs/UserPreferencesSchema.yml#/components/schemas/GetUserPreferencesRs'
  *       404:
- *         description: User Preferences not found for update
- *       401:
- *         description: Unauthorized
+ *         description: User Preferences not found
  *       400:
  *         description: Bad request
  *       500:
  *         description: Internal server error
  */
-userPreferencesRoutes.put(
-  "/:user_settings_id",
+userPreferencesRoutes.post(
+  "/me", 
   verifyToken,
   isUserSettingsFound,
-  isUserSettingsOwner,
-  userPreferencesController.updateUserPreferences
-);
+  userPreferencesController.fetchUserPreferences);
 
 export default userPreferencesRoutes;

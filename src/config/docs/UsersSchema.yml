@@ -17,8 +17,6 @@ components:
               example: Test Alias
           required:
             - pi_uid
-            - pi_username
-            - user_name
       required:
         - user
 
