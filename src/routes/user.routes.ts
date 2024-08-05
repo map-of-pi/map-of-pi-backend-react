@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import * as userController from "../controllers/userController";
 import { verifyToken } from "../middlewares/verifyToken";
+import { isPioneerFound } from "../middlewares/isPioneerFound";
 
 /**
  * @swagger
@@ -51,7 +52,7 @@ const userRoutes = Router();
  *       500:
  *         description: Internal server error
  */
-userRoutes.post("/authenticate", userController.authenticateUser);
+userRoutes.post("/authenticate", isPioneerFound, userController.authenticateUser);
 
 /**
  * @swagger
