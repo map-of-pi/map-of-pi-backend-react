@@ -1,6 +1,7 @@
 import { Router } from "express";
 
 import * as userController from "../controllers/userController";
+import { isPioneerFound } from "../middlewares/isPioneerFound";
 import { verifyToken } from "../middlewares/verifyToken";
 
 /**
@@ -26,9 +27,47 @@ import { verifyToken } from "../middlewares/verifyToken";
  */
 const userRoutes = Router();
 
+// /**
+//  * @swagger
+//  * /api/v1/users/authenticate:
+//  *   post:
+//  *     tags:
+//  *       - User
+//  *     summary: Authenticate the user's access token
+//  *     requestBody:
+//  *       required: true
+//  *       content:
+//  *         application/json:
+//  *           schema:
+//  *             type: object
+//  *             properties: 
+//  *               pioneerAuth:
+//  *                 type: object
+//  *                 properties:
+//  *                   accessToken:  
+//  *                     type: string
+//  *                     example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjZiYmFlNGEwNWJjYzNkOGRmYWI1NjMiLCJpYXQiOjE3MTgzMzk0MDksImV4cCI6MTcyMDkzMTQwOX0.gFz-EdHoOqz3-AuFX5R4uGtruFaTMH8sTOXEX-3c7yw
+//  *                 required:
+//  *                   - pioneerAuth    
+//  *     responses:
+//  *       200:
+//  *         description: Successful response
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               $ref: '/api/docs/UsersSchema.yml#/components/schemas/AuthenticateUserRs'
+//  *       404:
+//  *         description: Pioneer not found
+//  *       400:
+//  *         description: Bad request
+//  *       500:
+//  *         description: Internal server error
+//  */
+userRoutes.post("/authenticate", isPioneerFound, userController.authenticateUser);
+
 /**
  * @swagger
- * /api/v1/users/authenticate:
+ * /api/v1/users/authenticate_:
  *   post:
  *     tags:
  *       - User
@@ -51,7 +90,7 @@ const userRoutes = Router();
  *       500:
  *         description: Internal server error
  */
-userRoutes.post("/authenticate", userController.authenticateUser);
+userRoutes.post("/authenticate_", userController.authenticateUser);
 
 /**
  * @swagger

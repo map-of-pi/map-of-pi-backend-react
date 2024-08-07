@@ -10,7 +10,7 @@
 /coverage
 
 # local env files
-.env*
+.env
 .vercel
 
 # local misc
