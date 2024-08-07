@@ -53,7 +53,29 @@ const userRoutes = Router();
  */
 userRoutes.post("/authenticate", userController.authenticateUser);
 
-userRoutes.post("/signout", userController.signoutUser);
+/**
+ * @swagger
+ * /api/v1/users/me:
+ *   get:
+ *     tags:
+ *       - User
+ *     summary: Fetch the user's information using Bearer Auth token *
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '/api/docs/UsersSchema.yml#/components/schemas/GetUserRs'
+ *       404:
+ *         description: User not found
+ *       401:
+ *         description: Unauthorized
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */  
 userRoutes.get("/me", verifyToken, userController.autoLoginUser); 
 
 /**

@@ -1,17 +1,24 @@
 import { NextFunction, Request, Response } from "express";
+import { IUserSettings } from "../types";
+
+declare module 'express-serve-static-core' {
+  interface Request {
+    currentUserSettings: IUserSettings;
+  }
+}
 
 export const isUserSettingsOwner = async (
     req: Request,
     res: Response,
     next: NextFunction
   ) => {
-    const { user_settings_id } = req.params;
-
+    
     try {
       //@ts-ignore
-      const currentUser = req.currentUser;
+      const currentUserId = req.currentUser?.pi_uid;
+      const userSettingsId = req.currentUserSettings.user_settings_id;
   
-      if (user_settings_id === currentUser.pi_uid) {
+      if (userSettingsId === currentUserId) {
         return next();
       } else {
         return res.status(401).json({
