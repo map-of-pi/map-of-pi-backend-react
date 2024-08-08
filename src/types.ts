@@ -46,3 +46,9 @@ export interface IReviewFeedback extends Document {
   image?: string;
   review_date: Date;
 }
+
+export interface IMapCenter extends Document {
+  pi_uid: string; // Unique user identifier
+  latitude: number; // Latitude of the map center
+  longitude: number; // Longitude of the map center
+}
