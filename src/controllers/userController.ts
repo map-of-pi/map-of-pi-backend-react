@@ -10,7 +10,7 @@ export const authenticateUser = async (req: Request, res: Response) => {
   try {
     const user = await userService.authenticate(auth.user);
     const token = jwtHelper.generateUserToken(user);
-    const expiresDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+    const expiresDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
     return res.cookie("token", token, {httpOnly: true, expires: expiresDate, secure: true, priority: "high", sameSite: "lax"}).status(200).json({
       user,
@@ -21,18 +21,11 @@ export const authenticateUser = async (req: Request, res: Response) => {
   }
 };
 
-export const signoutUser = async (req: Request, res: Response) => {
-  try {
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
 export const autoLoginUser = async(req: Request, res: Response) => {
   //@ts-ignore
   const currentUser = req.currentUser;
-  try{
-    res.status(200).json(currentUser)
+  try {
+    res.status(200).json(currentUser);
   } catch (error: any) {
     res.status(500).json({message: error.message});
   }
