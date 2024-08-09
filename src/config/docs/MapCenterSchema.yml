@@ -1,0 +1,51 @@
+components:
+  schemas:
+    GetMapCenterRs:
+      type: object
+      properties:
+        origin:
+          type: object
+          properties:
+            pi_uid:
+              type: string
+              example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
+            latitude:
+              type: number
+              example: 40.7128
+            longitude:
+              type: number
+              example: -74.0060
+
+    SaveMapCenterRq:
+      type: object
+      properties:
+        pi_uid:
+          type: string
+          example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
+        latitude:
+          type: number
+          example: 40.7128
+        longitude:
+          type: number
+          example: -74.0060
+      required:
+        - pi_uid
+        - latitude
+        - longitude
+
+    SaveMapCenterRs:
+      type: object
+      properties:
+        pi_uid:
+          type: string
+          example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
+        latitude:
+          type: number
+          example: 40.7128
+        longitude:
+          type: number
+          example: -74.0060
+      required:
+        - pi_uid
+        - latitude
+        - longitude
