@@ -82,7 +82,7 @@ mapCenterRoutes.get('/:pi_uid', mapCenterController.getMapCenter);
  *       500:
  *         description: Internal server error
  */
-mapCenterRoutes.post(
+mapCenterRoutes.put(
   '/save', 
   verifyToken, 
   mapCenterController.saveMapCenter

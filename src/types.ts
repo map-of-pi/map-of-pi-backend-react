@@ -49,7 +49,7 @@ export interface IReviewFeedback extends Document {
 }
 
 export interface IMapCenter extends Document {
-  pi_uid: string; // Unique user identifier
-  latitude: number; // Latitude of the map center
-  longitude: number; // Longitude of the map center
+  pi_uid: string;
+  latitude: number;
+  longitude: number;
 }
