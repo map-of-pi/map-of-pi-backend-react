@@ -44,6 +44,7 @@ The Map of Pi Back End is a [Node.js](https://nodejs.org/) project.
 
 ### Execute the Development Server
 
+- Create .env file from the .env.development template and replace placeholders with actual values.
 - Execute `npm run dev` to connect to nodemon and MongoDB server.
 - Navigate to http://localhost:8001/ in your browser.
 - Execute **[Frontend Local Execution](https://github.com/map-of-pi/map-of-pi-frontend-react/blob/dev/README.md#frontend-local-execution)** for integration testing. Alternatively, utilize API tools like Insomnia or Postman to execute the API endpoints.
