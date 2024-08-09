@@ -53,7 +53,7 @@ const mapCenterRoutes = Router();
  *       500:
  *         description: Internal server error
  */
-mapCenterRoutes.get('/:pi_uid', mapCenterController.getMapCenter);
+mapCenterRoutes.get('/', verifyToken, mapCenterController.getMapCenter);
 
 /**
  * @swagger
