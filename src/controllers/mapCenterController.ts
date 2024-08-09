@@ -31,7 +31,7 @@ export const getMapCenter = async (req: Request, res: Response) => {
       if (!mapCenter) {
         return res.status(404).json({ message: 'Map center not found.' });
       }
-      return res.status(200).json({ mapCenter });
+      return res.status(200).json(mapCenter);
     }
   } catch (error: any) {
       res.status(500).json({ message: error.message });

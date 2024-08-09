@@ -45,9 +45,11 @@ export const registerOrUpdateSeller = async (sellerData: ISeller, authUser: IUse
       )
       return updatedSeller as ISeller;
     } else {
+      const businessName = !sellerData.name ? authUser.user_name : sellerData.name;
       const newSeller = new Seller({
         ...sellerData,
         seller_id: authUser.pi_uid,
+        name: businessName,
         trust_meter_rating: 100,
         average_rating: 5.0,
         order_online_enabled_pref: false,

@@ -23,7 +23,7 @@ export const isUserSettingsFound = async (
       return next();
     } else {
       return res.status(404).json({
-        message: "User Settings not found",
+        message: "User Settings not found"
       });
     }
   } catch (error: any) {
