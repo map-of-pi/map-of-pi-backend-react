@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+
 import MapCenter from '../models/MapCenter';
 import * as MapCenterService from '../services/mapCenter.service'; 
 
@@ -11,15 +12,9 @@ export const saveMapCenter = async (req: Request, res: Response) => {
   try {
     const mapCenter = await MapCenterService.createOrUpdateMapCenter(pi_uid, latitude, longitude);
     res.status(200).json({ message: 'Map center saved successfully', mapCenter });
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-    console.error('Error saving map center:', error.message);
-    res.status(500).json({ message: 'Error saving map center', error: error.message });
-  } else {
-    console.error('Unknown error occurred while saving map center');
-    res.status(500).json({ message: 'Unknown error occurred while saving map center'});
-    }
-  }
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  } 
 };
 
 export const getMapCenter = async (req: Request, res: Response) => {
@@ -35,8 +30,8 @@ export const getMapCenter = async (req: Request, res: Response) => {
     res.status(200).json(mapCenter);
   } catch (error) {
     if (isError(error)) {
-      console.error('Error retrieving map center:', error.message);
-      res.status(500).json({ message: 'Error retrieving map center', error: error.message });
+      console.error('Error retrieving map center: ', error.message);
+      res.status(500).json({ message: 'Error retrieving map center ', error: error.message });
     } else {
       console.error('Unknown error occurred while retrieving map center');
       res.status(500).json({ message: 'Unknown error occurred while retrieving map center' });

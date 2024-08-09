@@ -8,5 +8,4 @@ const MapCenterSchema: Schema<IMapCenter> = new Schema({
   longitude: { type: Number, required: true },
 });
 
-// Export the model for use in the application
-export default mongoose.model<IMapCenter>('MapCenter', MapCenterSchema);
+export default mongoose.model<IMapCenter>('MapCenter', mapCenterSchema);
