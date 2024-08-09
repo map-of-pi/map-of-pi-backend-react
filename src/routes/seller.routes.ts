@@ -1,7 +1,6 @@
 import { Router } from "express";
 
 import * as sellerController from "../controllers/sellerController";
-import { isSellerOwner } from "../middlewares/isSellerOwner";
 import { isSellerFound } from "../middlewares/isSellerFound";
 import { verifyToken } from "../middlewares/verifyToken";
 import upload from "../utils/multer";
