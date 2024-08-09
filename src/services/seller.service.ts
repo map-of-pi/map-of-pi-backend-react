@@ -61,6 +61,17 @@ export const registerOrUpdateSeller = async (sellerData: ISeller, authUser: IUse
   }
 };
 
+// Delete existing seller
+export const deleteSeller = async (seller_id: string): Promise<ISeller | null> => {
+  try {
+    const deletedSeller = await Seller.findOneAndDelete({ seller_id }).exec();
+    return deletedSeller ? deletedSeller as ISeller : null;
+  } catch (error: any) {
+    console.error(`Error deleting seller with sellerID ${seller_id}: `, error.message);
+    throw new Error(error.message);
+  }
+};
+
 // Update an existing seller
 export const updateSeller = async (seller_id: string, sellerData: Partial<ISeller>): Promise<ISeller | null> => {
   try {

@@ -1,14 +1,14 @@
 import mongoose, { Schema, Types } from "mongoose";
+
 import { ISeller } from "../types";
 import { TrustMeterScale } from "./enums/trustMeterScale"; // Ensure this import is correct
 
-// Defining the seller schema
 const sellerSchema = new Schema<ISeller>(
   {
     seller_id: {
       type: String,
       required: true,
-      unique: true, // Ensures unique seller_id
+      unique: true,
     },
     name: {
       type: String,
@@ -25,20 +25,20 @@ const sellerSchema = new Schema<ISeller>(
     },
     image: {
       type: String,
-      required: false, // Optional as per schema
+      required: false,
     },
     address: {
       type: String,
-      required: false, // Optional as per schema
+      required: false,
     },
     sale_items: {
       type: String,
-      required: false, // Optional as per schema
+      required: false,
     },
     average_rating: {
       type: Types.Decimal128,
       required: true,
-      default: 5.0, // Default value
+      default: 5.0,
     },
     trust_meter_rating: {
       type: Number,
