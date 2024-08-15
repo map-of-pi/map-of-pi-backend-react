@@ -11,6 +11,7 @@ export const env = {
   PLATFORM_API_URL: process.env.PLATFORM_API_URL || '',
   UPLOAD_PATH: process.env.UPLOAD_PATH || '',
   MONGODB_URL: process.env.MONGODB_URL || '',
+  SENTRY_DSN: process.env.SENTRY_DSN || '',
   CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || '',
   CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY || '',
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET || '',

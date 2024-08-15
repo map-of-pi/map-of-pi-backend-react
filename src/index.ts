@@ -1,4 +1,6 @@
 import dotenv from "dotenv";
+
+import "./config/loggingConnection";
 import { connectDB } from "./config/dbConnection";
 import app from "./utils/app";
 import { env } from "./utils/env";
