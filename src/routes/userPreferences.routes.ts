@@ -69,7 +69,7 @@ const userPreferencesRoutes = Router();
  *       500:
  *         description: Internal server error
  */
-userPreferencesRoutes.post(
+userPreferencesRoutes.put(
   "/add",
   verifyToken,
   upload.array("images"),
