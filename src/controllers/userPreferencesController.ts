@@ -18,10 +18,10 @@ export const getUserPreferences = async (req: Request, res: Response) => {
 
 export const fetchUserPreferences = async (req: Request, res: Response) => {
   try {
-    if (!req.currentUser || !req.currentUserSettings) {
+    const currentUserPreferences = req.currentUserSettings;
+    if (!req.currentUser || !currentUserPreferences) {
       return res.status(404).json({ message: "User Preferences not found." });
     }
-    const currentUserPreferences = req.currentUserSettings;
     res.status(200).json(currentUserPreferences);
 
   } catch (error: any) {
@@ -33,7 +33,7 @@ export const addUserPreferences = async (req: Request, res: Response) => {
   try {
     const authUser = req.currentUser
     if (authUser) {
-      const userSettingsData = req.body;
+      const userSettingsData = JSON.parse(req.body.json);
       const userPreferences = await userSettingsService.addOrUpdateUserSettings(userSettingsData, authUser);
       res.status(200).json({ settings: userPreferences });
     }    
