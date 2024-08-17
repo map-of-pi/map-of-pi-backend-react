@@ -13,6 +13,7 @@
     "test": "jest --detectOpenHandles --coverage"
   },
   "dependencies": {
+    "@sentry/integrations": "^7.114.0",
     "@sentry/node": "^8.26.0",
     "@sentry/profiling-node": "^8.26.0",
     "axios": "^1.6.8",
@@ -28,7 +29,8 @@
     "nodemailer": "^6.9.13",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-dist": "^5.17.14",
-    "swagger-ui-express": "^5.0.0"
+    "swagger-ui-express": "^5.0.0",
+    "winston": "^3.14.2"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.7",
