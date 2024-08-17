@@ -21,7 +21,7 @@ const sellerSchema = new Schema<ISeller>(
     },
     description: {
       type: String,
-      required: true,
+      required: false,
     },
     image: {
       type: String,

@@ -27,18 +27,11 @@ const mapCenterRoutes = Router();
 
 /**
  * @swagger
- * /api/v1/map-center/{pi_uid}:
+ * /api/v1/map-center:
  *   get:
  *     tags:
  *       - Map Center
- *     summary: Get the user's map center
- *     parameters:
- *       - name: pi_uid
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *         description: The Pi uid of the map center to retrieve
+ *     summary: Get the user's map center *
  *     responses:
  *       200:
  *         description: Successful response
@@ -53,7 +46,11 @@ const mapCenterRoutes = Router();
  *       500:
  *         description: Internal server error
  */
-mapCenterRoutes.get('/:pi_uid', mapCenterController.getMapCenter);
+mapCenterRoutes.get(
+  '/', 
+  verifyToken, 
+  mapCenterController.getMapCenter
+);
 
 /**
  * @swagger
@@ -75,6 +72,8 @@ mapCenterRoutes.get('/:pi_uid', mapCenterController.getMapCenter);
  *           application/json:
  *             schema:
  *               $ref: '/api/docs/MapCenterSchema.yml#/components/schemas/SaveMapCenterRs'
+ *       404:
+ *         description: User not found; Map Center failed to save
  *       401:
  *         description: Unauthorized
  *       400:
