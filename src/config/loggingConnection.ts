@@ -3,25 +3,28 @@ import * as Sentry from "@sentry/node";
 import { nodeProfilingIntegration } from "@sentry/profiling-node";
 import { createLogger, format, transports, Logger } from "winston";
 
-try {
-  console.log("Connecting to Sentry with DNS:", env.SENTRY_DSN);
+// initialize Sentry only in production environment
+if (env.NODE_ENV === 'production') {
+  try {
+    console.log("Connecting to Sentry with DNS:", env.SENTRY_DSN);
 
-  // initialize Sentry
-  Sentry.init({
-    dsn: env.SENTRY_DSN,
-    integrations: [
-      nodeProfilingIntegration(),
-    ],
-    tracesSampleRate: 1.0, // adjust this based on your need for performance monitoring
-    profilesSampleRate: 1.0
-  });
+    // initialize Sentry
+    Sentry.init({
+      dsn: env.SENTRY_DSN,
+      integrations: [
+        nodeProfilingIntegration(),
+      ],
+      tracesSampleRate: 1.0, // adjust this based on your need for performance monitoring
+      profilesSampleRate: 1.0
+    });
 
-  console.log("Successful connection to Sentry");
-} catch (error: any) {
-  console.log("Failed connection to Sentry:", error.message);
+    console.log("Successful connection to Sentry");
+  } catch (error: any) {
+    console.log("Failed connection to Sentry:", error.message);
+  }
 }
 
-// create a custom Sentry transport for Winston
+// create a custom Sentry transport for Winston in production
 class SentryTransport extends transports.Stream {
   log(info: any, callback: () => void) {
     setImmediate(() => this.emit('logged', info));
@@ -34,21 +37,28 @@ class SentryTransport extends transports.Stream {
   }
 }
 
-const sentryTransport = new SentryTransport({
-  stream: process.stdout
-});
+const loggerTransports = [];
+let logLevel = 'error'; // default log level for production
+
+// add transport method based on server environment
+if (env.NODE_ENV === 'development' || env.NODE_ENV === 'sandbox') {
+  logLevel = 'debug';
+  loggerTransports.push(new transports.Console());
+} else if (env.NODE_ENV === 'production') {
+  const sentryTransport = new SentryTransport({
+    stream: process.stdout
+  });
+  loggerTransports.push(sentryTransport);
+}
 
 // set up Winston logger with Sentry integration
 const logger: Logger = createLogger({
-  level: 'error',
+  level: logLevel,
   format: format.combine(
     format.timestamp(),
     format.json()
   ),
-  transports: [
-    new transports.Console(),
-    sentryTransport
-  ],
+  transports: loggerTransports
 });
 
 export default logger;
