@@ -22,26 +22,25 @@ try {
 }
 
 // create a custom Sentry transport for Winston
-const sentryTransport = new transports.Stream({
-  stream: {
-    write: (message: string) => {
-      // parse the message to JSON, if possible
-      try {
-        const logObject = JSON.parse(message);
-        if (logObject.level === 'error') {
-          Sentry.captureMessage(logObject.message, 'error');
-        }
-      } catch (error) {
-        // If message is not JSON or parsing fails, log it as an error
-        Sentry.captureMessage(message, 'error');
-      }
-    },
-  },
+class SentryTransport extends transports.Stream {
+  log(info: any, callback: () => void) {
+    setImmediate(() => this.emit('logged', info));
+
+    if (info.level === 'error') {
+      Sentry.captureMessage(info.message, 'error');
+    }
+    callback();
+    return true;
+  }
+}
+
+const sentryTransport = new SentryTransport({
+  stream: process.stdout
 });
 
 // set up Winston logger with Sentry integration
 const logger: Logger = createLogger({
-  level: 'info',
+  level: 'error',
   format: format.combine(
     format.timestamp(),
     format.json()
