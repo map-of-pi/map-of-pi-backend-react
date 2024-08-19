@@ -163,7 +163,7 @@ userRoutes.get("/:pi_uid", userController.getUser);
  *         description: The Pi UID of the user to delete
  *     responses:
  *       200:
- *         description: Successful response
+ *         description: Successful response | User deleted successfully
  *         content:
  *           application/json:
  *             schema:

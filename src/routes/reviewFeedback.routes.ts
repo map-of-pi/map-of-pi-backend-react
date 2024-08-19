@@ -128,9 +128,9 @@ reviewFeedbackRoutes.get("/single/:review_id", reviewFeedbackController.getSingl
  *             schema:
  *               $ref: '/api/docs/ReviewFeedbackSchema.yml#/components/schemas/AddReviewRs'
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized | Unauthorized user
  *       400:
- *         description: Bad request
+ *         description: Self review is prohibited
  *       500:
  *         description: Internal server error
  */

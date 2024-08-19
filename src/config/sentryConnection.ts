@@ -6,8 +6,6 @@ import { transports } from "winston";
 // initialize Sentry only in production environment
 if (env.NODE_ENV === 'production') {
   try {
-    console.log(`Connecting to Sentry with DNS: ${env.SENTRY_DSN}`);
-
     // initialize Sentry
     Sentry.init({
       dsn: env.SENTRY_DSN,
@@ -18,9 +16,8 @@ if (env.NODE_ENV === 'production') {
       profilesSampleRate: 1.0
     });
 
-    console.log("Successful connection to Sentry.");
   } catch (error: any) {
-    console.log(`Failed connection to Sentry: ${error.message}`);
+    throw new Error(`Failed connection to Sentry: ${error.message}`);
   }
 }
 

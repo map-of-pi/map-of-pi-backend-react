@@ -92,6 +92,8 @@ const sellerRoutes = Router();
  *               type: array
  *               items:
  *                 $ref: '/api/docs/SellersSchema.yml#/components/schemas/GetAllSellersRs'
+ *       404:
+ *         description: Sellers not found
  *       400:
  *         description: Bad request
  *       500:
@@ -181,7 +183,7 @@ sellerRoutes.post(
  *             schema:
  *               $ref: '/api/docs/SellersSchema.yml#/components/schemas/RegisterSellerRs'
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized | Unauthorized user
  *       400:
  *         description: Bad request
  *       500:
@@ -210,7 +212,7 @@ sellerRoutes.put(
  *         description: The Pi UID of the seller to delete
  *     responses:
  *       200:
- *         description: Successful response
+ *         description: Successful response | Seller deleted successfully
  *         content:
  *           application/json:
  *             schema:

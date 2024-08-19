@@ -40,7 +40,7 @@ const mapCenterRoutes = Router();
  *             schema:
  *               $ref: '/api/docs/MapCenterSchema.yml#/components/schemas/GetMapCenterRs'
  *       404:
- *         description: Map Center not found
+ *         description: Map Center not found | User not found    
  *       400:
  *         description: Bad request
  *       500:
