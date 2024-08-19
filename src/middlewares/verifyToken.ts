@@ -3,6 +3,8 @@ import { NextFunction, Request, Response } from "express";
 import { decodeUserToken } from "../helpers/jwt";
 import { IUser } from "../types";
 
+import logger from "../config/loggingConfig";
+
 declare module 'express-serve-static-core' {
   interface Request {
     currentUser?: IUser;
@@ -19,26 +21,23 @@ export const verifyToken = async (
   const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
-    return res.status(401).json({
-      message: "Authentication token is required",
-    });
+    logger.warn("Authentication token is missing.");
+    return res.status(401).json({message: "Authentication token is required"});
   }
 
   try {
     const currentUser = await decodeUserToken(token);
 
     if (!currentUser) {
-      return res.status(401).json({
-        message: "Authentication token is invalid or expired",
-      });
+      logger.warn("Authentication token is invalid or expired.");
+      return res.status(401).json({message: "Authentication token is invalid or expired"});
     }
 
     //@ts-ignore
     req.currentUser = currentUser;
     next();
   } catch (error: any) {
-    return res
-      .status(401)
-      .json({ error: "Unauthorized due to invalid token", message: error.message });
+    logger.error("Failed to verify token:", error);
+    return res.status(500).json({ message: error.message });
   }
 };
