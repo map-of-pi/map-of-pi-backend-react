@@ -1,4 +1,7 @@
 import dotenv from "dotenv";
+
+import "./config/sentryConnection";
+import logger from "./config/loggingConfig";
 import { connectDB } from "./config/dbConnection";
 import app from "./utils/app";
 import { env } from "./utils/env";
@@ -6,7 +9,7 @@ import { env } from "./utils/env";
 dotenv.config();
 
 const startServer = async () => {
-  console.log("Starting server setup...");
+  logger.info("Initiating server setup...");
   try {
     // Establish connection to MongoDB
     await connectDB();
@@ -16,16 +19,16 @@ const startServer = async () => {
       await new Promise<void>((resolve) => {
         // Start listening on the specified port
         app.listen(env.PORT, () => {
-          console.log(`Server is running on port ${env.PORT}`);
+          logger.info(`Server is running on port ${env.PORT}`);
           resolve();
         });
       });
     }
 
-    console.log("Server setup initiated");
+    logger.info("Server setup initiated.");
   } catch (error: any) {
     // Log any errors that occur during server setup
-    console.error("Server failed to run", error.message);
+    logger.error(`Server failed to initiate: ${error.message}`);
   }
 };
 

@@ -40,7 +40,9 @@ const mapCenterRoutes = Router();
  *             schema:
  *               $ref: '/api/docs/MapCenterSchema.yml#/components/schemas/GetMapCenterRs'
  *       404:
- *         description: Map Center not found
+ *         description: Map Center not found | User not found
+ *       401:
+ *         description: Unauthorized | Authentication token is required | Authentication token is invalid or expired    
  *       400:
  *         description: Bad request
  *       500:
@@ -75,7 +77,7 @@ mapCenterRoutes.get(
  *       404:
  *         description: User not found; Map Center failed to save
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized | Authentication token is required | Authentication token is invalid or expired
  *       400:
  *         description: Bad request
  *       500:
