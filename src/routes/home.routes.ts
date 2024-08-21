@@ -11,7 +11,7 @@ const homeRoutes = Router()
  *       - Home
  *     responses:
  *       200:
- *         description: Server is running
+ *         description: Successful response | Server is running
  *         content:
  *           application/json:
  *             schema:

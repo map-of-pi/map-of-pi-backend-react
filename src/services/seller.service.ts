@@ -1,6 +1,8 @@
 import Seller from "../models/Seller";
 import { ISeller, IUser } from "../types";
 
+import logger from "../config/loggingConfig";
+
 // Fetch all sellers or within a specific radius from a given origin
 export const getAllSellers = async (origin?: { lat: number; lng: number }, radius?: number): Promise<ISeller[]> => {
   try {
@@ -18,7 +20,7 @@ export const getAllSellers = async (origin?: { lat: number; lng: number }, radiu
     }
     return sellers;
   } catch (error: any) {
-    console.error("Error retrieving sellers: ", error.message);
+    logger.error(`Error retrieving sellers: ${error.message}`);
     throw new Error(error.message);
   }
 };
@@ -29,7 +31,7 @@ export const getSingleSellerById = async (seller_id: string): Promise<ISeller | 
     const seller = await Seller.findOne({ seller_id }).exec();
     return seller ? seller as ISeller : null;
   } catch (error: any) {
-    console.error(`Error retrieving seller with sellerID ${seller_id}: `, error.message);
+    logger.error(`Error retrieving seller with sellerID ${seller_id}: ${error.message}`);
     throw new Error(error.message);
   }
 };
@@ -58,7 +60,7 @@ export const registerOrUpdateSeller = async (sellerData: ISeller, authUser: IUse
       return savedSeller as ISeller;
     }
   } catch (error: any) {
-    console.error("Error registering seller: ", error.message);
+    logger.error(`Error registering seller: ${error.message}`);
     throw new Error(error.message);
   }
 };
@@ -69,7 +71,7 @@ export const deleteSeller = async (seller_id: string): Promise<ISeller | null> =
     const deletedSeller = await Seller.findOneAndDelete({ seller_id }).exec();
     return deletedSeller ? deletedSeller as ISeller : null;
   } catch (error: any) {
-    console.error(`Error deleting seller with sellerID ${seller_id}: `, error.message);
+    logger.error(`Error deleting seller with sellerID ${seller_id}: ${error.message}`);
     throw new Error(error.message);
   }
 };
@@ -80,7 +82,7 @@ export const updateSeller = async (seller_id: string, sellerData: Partial<ISelle
     const updatedSeller = await Seller.findOneAndUpdate({ seller_id }, sellerData, { new: true }).exec();
     return updatedSeller ? updatedSeller as ISeller : null;
   } catch (error: any) {
-    console.error(`Error updating seller for sellerID ${seller_id}: `, error.message);
+    logger.error(`Error updating seller for sellerID ${seller_id}: ${error.message}`);
     throw new Error(error.message);
   }
 };
