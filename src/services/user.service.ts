@@ -3,6 +3,8 @@ import Seller from "../models/Seller";
 import UserSettings from "../models/UserSettings";
 import { ISeller, IUser, IUserSettings } from "../types";
 
+import logger from "../config/loggingConfig";
+
 export const authenticate = async (currentUser: IUser): Promise<IUser> => {
   try {
     const user = await User.findOne({
@@ -21,8 +23,8 @@ export const authenticate = async (currentUser: IUser): Promise<IUser> => {
       return newUser;
     }
   } catch (error: any) {
-    console.log("Error during authentication", error.message);
-    throw new Error(error);
+    logger.error(`Error during authentication: ${error.message}`);
+    throw new Error(error.message);
   }
 };
 
@@ -31,16 +33,11 @@ export const getUser = async (pi_uid: string): Promise<IUser | null> => {
     const user = await User.findOne({ pi_uid }).exec();
     return user ? user as IUser : null;
   } catch (error: any) {
-    console.error(`Error retrieving user with Pi alias ${pi_uid}:`, error.message);
+    logger.error(`Error retrieving user with Pi alias ${pi_uid}: ${error.message}`);
     throw new Error(error.message);
   }
 };
 
-/**
- * Delete a user by pi_uid and remove associated records Seller and User Settings.
- * @param pi_uid The Pi UID of the user to delete.
- * @returns An object containing the deleted data associated with the user.
- */
 export const deleteUser = async (pi_uid: string): Promise<{ user: IUser | null, sellers: ISeller[], userSetting: IUserSettings }> => {
   try {
     // delete any association with Seller
@@ -58,7 +55,7 @@ export const deleteUser = async (pi_uid: string): Promise<{ user: IUser | null, 
       userSetting: deletedUserSettings as IUserSettings
     }
   } catch (error: any) {
-    console.error(`Error deleting user and/ or user association with userID ${pi_uid}: `, error.message);
+    logger.error(`Error deleting user and/ or user associations with userID ${pi_uid}: ${error.message}`);
     throw new Error(error.message);
   }
 };

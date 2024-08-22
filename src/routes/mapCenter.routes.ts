@@ -27,18 +27,11 @@ const mapCenterRoutes = Router();
 
 /**
  * @swagger
- * /api/v1/map-center/{pi_uid}:
+ * /api/v1/map-center:
  *   get:
  *     tags:
  *       - Map Center
- *     summary: Get the user's map center
- *     parameters:
- *       - name: pi_uid
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *         description: The Pi uid of the map center to retrieve
+ *     summary: Get the user's map center *
  *     responses:
  *       200:
  *         description: Successful response
@@ -47,13 +40,19 @@ const mapCenterRoutes = Router();
  *             schema:
  *               $ref: '/api/docs/MapCenterSchema.yml#/components/schemas/GetMapCenterRs'
  *       404:
- *         description: Map Center not found
+ *         description: Map Center not found | User not found
+ *       401:
+ *         description: Unauthorized | Authentication token is required | Authentication token is invalid or expired    
  *       400:
  *         description: Bad request
  *       500:
  *         description: Internal server error
  */
-mapCenterRoutes.get('/', verifyToken, mapCenterController.getMapCenter);
+mapCenterRoutes.get(
+  '/', 
+  verifyToken, 
+  mapCenterController.getMapCenter
+);
 
 /**
  * @swagger
@@ -75,8 +74,10 @@ mapCenterRoutes.get('/', verifyToken, mapCenterController.getMapCenter);
  *           application/json:
  *             schema:
  *               $ref: '/api/docs/MapCenterSchema.yml#/components/schemas/SaveMapCenterRs'
+ *       404:
+ *         description: User not found; Map Center failed to save
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized | Authentication token is required | Authentication token is invalid or expired
  *       400:
  *         description: Bad request
  *       500:

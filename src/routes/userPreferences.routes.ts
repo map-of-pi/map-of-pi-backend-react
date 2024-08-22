@@ -63,13 +63,13 @@ const userPreferencesRoutes = Router();
  *             schema:
  *               $ref: '/api/docs/UserPreferencesSchema.yml#/components/schemas/AddUserPreferencesRs'
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized | Authentication token is required | Authentication token is invalid or expired
  *       400:
  *         description: Bad request
  *       500:
  *         description: Internal server error
  */
-userPreferencesRoutes.post(
+userPreferencesRoutes.put(
   "/add",
   verifyToken,
   upload.array("images"),
@@ -121,7 +121,9 @@ userPreferencesRoutes.get("/:user_settings_id", userPreferencesController.getUse
  *             schema:
  *               $ref: '/api/docs/UserPreferencesSchema.yml#/components/schemas/GetUserPreferencesRs'
  *       404:
- *         description: User Preferences not found
+ *         description: User Preferences not found | User Settings not found
+ *       401:
+ *         description: Unauthorized | Authentication token is required | Authentication token is invalid or expired
  *       400:
  *         description: Bad request
  *       500:

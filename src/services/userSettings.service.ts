@@ -1,12 +1,14 @@
 import UserSettings from "../models/UserSettings";
 import { IUser, IUserSettings } from "../types";
 
+import logger from "../config/loggingConfig";
+
 export const getUserSettingsById = async (user_settings_id: string): Promise<IUserSettings | null> => {
   try {
     const userSettings = await UserSettings.findOne({ user_settings_id }).exec();
     return userSettings;
   } catch (error: any) {
-    console.error(`Error retrieving user settings for userID ${user_settings_id}: `, error.message);
+    logger.error(`Error retrieving user settings for userID ${user_settings_id}: ${error.message}`);
     throw new Error(error.message);
   }
 };
@@ -31,7 +33,7 @@ export const addOrUpdateUserSettings = async (userSettingsData: IUserSettings, a
     }
     
   } catch (error: any) {
-    console.error("Error registering user settings: ", error.message);
+    logger.error(`Error registering user settings: ${error.message}`);
     throw new Error(error.message);
   }
 };
@@ -41,7 +43,7 @@ export const updateUserSettings = async (user_settings_id: string, userSettingsD
     const updatedUserSettings = await UserSettings.findOneAndUpdate({ user_settings_id }, userSettingsData, { new: true }).exec();
     return updatedUserSettings;
   } catch (error: any) {
-    console.error(`Error updating user settings for user ID ${user_settings_id}: `, error.message);
+    logger.error(`Error updating user settings for user ID ${user_settings_id}: ${error.message}`);
     throw new Error(error.message);
   }
 };
