@@ -1,7 +1,9 @@
 import Seller from "../models/Seller";
-import { ISeller, IUser } from "../types";
+import { ISeller, IUser, IUserSettings } from "../types";
 
 import logger from "../config/loggingConfig";
+import User from "../models/User";
+import UserSettings from "../models/UserSettings";
 
 // Fetch all sellers or within a specific radius from a given origin
 export const getAllSellers = async (origin?: { lat: number; lng: number }, radius?: number): Promise<ISeller[]> => {
@@ -28,8 +30,21 @@ export const getAllSellers = async (origin?: { lat: number; lng: number }, radiu
 // Fetch a single seller by ID
 export const getSingleSellerById = async (seller_id: string): Promise<ISeller | null> => {
   try {
-    const seller = await Seller.findOne({ seller_id }).exec();
-    return seller ? seller as ISeller : null;
+    const [seller, userSettings, user] = await Promise.all([
+      Seller.findOne({ seller_id }).exec(),
+      UserSettings.findOne({ user_settings_id: seller_id }).exec(),
+      User.findOne({ pi_uid: seller_id }).exec()
+    ]);
+
+    if (!seller && !userSettings && !user) {
+      return null;
+    }
+
+    return {
+      sellerShopInfo: seller as ISeller,
+      sellerSettings: userSettings as IUserSettings,
+      sellerInfo: user as IUser,
+    } as any;
   } catch (error: any) {
     logger.error(`Error retrieving seller with sellerID ${seller_id}: ${error.message}`);
     throw new Error(error.message);

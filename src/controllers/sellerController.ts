@@ -24,7 +24,7 @@ export const fetchSellersByLocation = async (req: Request, res: Response) => {
 export const getSingleSeller = async (req: Request, res: Response) => {
   const { seller_id } = req.params;
   try {
-    const currentSeller: ISeller | null = await sellerService.getSingleSellerById(seller_id);
+    const currentSeller = await sellerService.getSingleSellerById(seller_id);
     if (!currentSeller) {
       logger.warn(`Seller with ID ${seller_id} not found.`);
       return res.status(404).json({ message: "Seller not found" });
