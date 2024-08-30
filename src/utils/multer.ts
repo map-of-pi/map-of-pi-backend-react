@@ -21,7 +21,7 @@ const fileFilter = (
   if (!(extension === ".jpg" || extension === ".jpeg" || extension === ".png")) {
     const error: any = {
       code: "INVALID_FILE_TYPE",
-      message: "Wrong format for file",
+      message: "Wrong format | Please upload an image with one of the following formats: .jpg, .jpeg, or .png.",
     };
     cb(new Error(error.message));
     return;

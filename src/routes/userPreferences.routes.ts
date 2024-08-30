@@ -1,9 +1,9 @@
 import { Router } from "express";
 
 import * as userPreferencesController from "../controllers/userPreferencesController";
+import { isUserSettingsFound } from "../middlewares/isUserSettingsFound";
 import { verifyToken } from "../middlewares/verifyToken";
 import upload from "../utils/multer";
-import { isUserSettingsFound } from "../middlewares/isUserSettingsFound";
 
 /**
  * @swagger

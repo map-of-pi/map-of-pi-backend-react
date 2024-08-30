@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 
 import * as reviewFeedbackService from "../services/reviewFeedback.service";
+import { uploadImage } from '../services/misc/image.service';
 import { IReviewFeedback } from '../types';
 
 import logger from '../config/loggingConfig';
@@ -38,17 +39,24 @@ export const addReview = async (req: Request, res: Response) => {
     const reviewData = req.body;
     const authUser = req.currentUser;
 
-    if (authUser) {
-      if (authUser.pi_uid === reviewData.review_receiver_id) {
-        logger.warn(`Attempted self review by user ${authUser.pi_uid}`);
-        return res.status(400).json({ message: "Self review is prohibited" });
-      }
-      const newReview = await reviewFeedbackService.addReviewFeedback(reviewData, authUser);
-      logger.info(`Added new review by user ${authUser.pi_uid} for receiver ID ${reviewData.review_receiver_id}`);
-      return res.status(200).json({ newReview });
+    if (!authUser) {
+      logger.warn("No authenticated user found for adding review.");
+      return res.status(401).json({ message: "Unauthorized user" });
+    } else if (authUser.pi_uid === reviewData.review_receiver_id) {
+      logger.warn(`Attempted self review by user ${authUser.pi_uid}`);
+      return res.status(400).json({ message: "Self review is prohibited" });
     }
-    logger.warn('No authenticated user found for adding review.');
-    return res.status(401).json({ message: "Unauthorized user" });
+
+    const reviewFeedback = JSON.parse(req.body.json);
+
+    if (req.file) {
+      const imageUrl = await uploadImage(req.file);
+      reviewFeedback.image = imageUrl;
+    }
+
+    const newReview = await reviewFeedbackService.addReviewFeedback(reviewData, authUser);
+    logger.info(`Added new review by user ${authUser.pi_uid} for receiver ID ${reviewData.review_receiver_id}`);
+    return res.status(200).json({ newReview });
   } catch (error: any) {
     logger.error(`Failed to add review: ${error.message}`);
     res.status(500).json({ message: error.message });
