@@ -3,7 +3,8 @@ import { Request, Response } from "express";
 import * as sellerService from "../services/seller.service";
 import { uploadImage } from "../services/misc/image.service";
 
-import logger from '../config/loggingConfig';
+import { env } from "../utils/env";
+import logger from "../config/loggingConfig";
 
 export const fetchSellersByLocation = async (req: Request, res: Response) => {
   try {
@@ -57,7 +58,6 @@ export const registerSeller = async (req: Request, res: Response) => {
   try {
     const authUser = req.currentUser;
 
-    // double-check middleware
     if (!authUser) {
       logger.warn("No authenticated user found for registering.");
       return res.status(401).json({ message: "Unauthorized user" });
@@ -65,11 +65,8 @@ export const registerSeller = async (req: Request, res: Response) => {
 
     const seller = JSON.parse(req.body.json);
 
-    // handle single image upload
-    if (req.file) {
-      const imageUrl = await uploadImage(req.file, 'seller-registration');
-      seller.image = imageUrl;
-    }
+    // handle single image upload and set placeholder if no image is uploaded
+    seller.image = req.file ? await uploadImage(req.file, 'seller-registration') : env.CLOUDINARY_PLACEHOLDER_URL;
 
     const registeredSeller = await sellerService.registerOrUpdateSeller(seller, authUser);
     logger.info(`Registered or updated seller for user ${authUser.pi_uid}`);

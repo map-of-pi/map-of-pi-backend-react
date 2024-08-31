@@ -1,10 +1,11 @@
-import { Request, Response } from 'express';
+import { Request, Response } from "express";
 
 import * as reviewFeedbackService from "../services/reviewFeedback.service";
-import { uploadImage } from '../services/misc/image.service';
-import { IReviewFeedback } from '../types';
+import { uploadImage } from "../services/misc/image.service";
+import { IReviewFeedback } from "../types";
 
-import logger from '../config/loggingConfig';
+import { env } from "../utils/env";
+import logger from "../config/loggingConfig";
 
 export const getReviews = async (req: Request, res: Response) => {
   const { review_receiver_id } = req.params;
@@ -49,10 +50,8 @@ export const addReview = async (req: Request, res: Response) => {
 
     const reviewFeedback = JSON.parse(req.body.json);
 
-    if (req.file) {
-      const imageUrl = await uploadImage(req.file, 'review-feedback');
-      reviewFeedback.image = imageUrl;
-    }
+    // handle single image upload and set placeholder if no image is uploaded
+    reviewFeedback.image = req.file ? await uploadImage(req.file, 'review-feedback') : env.CLOUDINARY_PLACEHOLDER_URL;
 
     const newReview = await reviewFeedbackService.addReviewFeedback(reviewData, authUser);
     logger.info(`Added new review by user ${authUser.pi_uid} for receiver ID ${reviewData.review_receiver_id}`);

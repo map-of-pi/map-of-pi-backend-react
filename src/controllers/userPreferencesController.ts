@@ -1,10 +1,11 @@
 import { Request, Response } from "express";
 
-import * as userSettingsService from '../services/userSettings.service';
+import * as userSettingsService from "../services/userSettings.service";
 import { uploadImage } from "../services/misc/image.service";
-import { IUserSettings } from '../types';
+import { IUserSettings } from "../types";
 
-import logger from '../config/loggingConfig';
+import { env } from "../utils/env";
+import logger from "../config/loggingConfig";
 
 export const getUserPreferences = async (req: Request, res: Response) => {
   const { user_settings_id } = req.params;
@@ -49,10 +50,8 @@ export const addUserPreferences = async (req: Request, res: Response) => {
 
     const userSettingsData = JSON.parse(req.body.json);
 
-    if (req.file) {
-      const imageUrl = await uploadImage(req.file, 'user-preferences');
-      userSettingsData.image = imageUrl;
-    }
+    // handle single image upload and set placeholder if no image is uploaded
+    userSettingsData.image = req.file ? await uploadImage(req.file, 'user-preferences') : env.CLOUDINARY_PLACEHOLDER_URL;
 
     const userPreferences = await userSettingsService.addOrUpdateUserSettings(userSettingsData, authUser);
     logger.info(`Added or updated User Preferences for user with ID: ${authUser.pi_uid}`);
