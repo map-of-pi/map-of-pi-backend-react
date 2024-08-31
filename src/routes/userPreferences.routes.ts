@@ -72,7 +72,7 @@ const userPreferencesRoutes = Router();
 userPreferencesRoutes.put(
   "/add",
   verifyToken,
-  upload.array("images"),
+  upload.single("image"),
   userPreferencesController.addUserPreferences
 );
 

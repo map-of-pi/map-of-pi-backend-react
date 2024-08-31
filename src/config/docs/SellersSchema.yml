@@ -243,6 +243,10 @@ components:
     RegisterSellerRq:
       type: object
       properties:
+        image:
+          type: string
+          format: binary
+          example: http://example.com/image.jpg
         json:
           type: object
           properties:
@@ -258,9 +262,6 @@ components:
             seller_type:
               type: string
               example: Pioneer
-            image:
-              type: string
-              example: http://example.com/image.jpg
             address:
               type: string
               example: 1234 Test St, Test City, SC 12345

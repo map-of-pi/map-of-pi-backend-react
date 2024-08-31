@@ -50,7 +50,7 @@ export const addReview = async (req: Request, res: Response) => {
     const reviewFeedback = JSON.parse(req.body.json);
 
     if (req.file) {
-      const imageUrl = await uploadImage(req.file);
+      const imageUrl = await uploadImage(req.file, 'review-feedback');
       reviewFeedback.image = imageUrl;
     }
 

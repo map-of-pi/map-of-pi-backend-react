@@ -50,7 +50,7 @@ export const addUserPreferences = async (req: Request, res: Response) => {
     const userSettingsData = JSON.parse(req.body.json);
 
     if (req.file) {
-      const imageUrl = await uploadImage(req.file);
+      const imageUrl = await uploadImage(req.file, 'user-preferences');
       userSettingsData.image = imageUrl;
     }
 

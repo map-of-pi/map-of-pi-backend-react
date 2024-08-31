@@ -67,7 +67,7 @@ export const registerSeller = async (req: Request, res: Response) => {
 
     // handle single image upload
     if (req.file) {
-      const imageUrl = await uploadImage(req.file);
+      const imageUrl = await uploadImage(req.file, 'seller-registration');
       seller.image = imageUrl;
     }
 

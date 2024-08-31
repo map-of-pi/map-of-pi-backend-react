@@ -14,6 +14,7 @@ export const authenticate = async (currentUser: IUser): Promise<IUser> => {
 
     if (user) {
       return user;
+    //  TODO: Revisit and review this implementation; seems contrary to authentication.
     } else {
       const newUser = await User.create({
         pi_uid: currentUser.pi_uid,
