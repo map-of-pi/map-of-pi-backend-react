@@ -129,9 +129,37 @@ sellerRoutes.post("/fetch", sellerController.fetchSellersByLocation);
  *       500:
  *         description: Internal server error
  */
-sellerRoutes.get(
-  "/:seller_id", 
-  sellerController.getSingleSeller);
+sellerRoutes.get("/:seller_id", sellerController.getSingleSeller);
+
+/**
+ * @swagger
+ * /api/v1/sellers/search/{search_query}:
+ *   get:
+ *     tags:
+ *       - Seller
+ *     summary: Get sellers based on search criteria
+ *     parameters:
+ *       - name: search_query
+ *         in: path
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: The search query used to filter sellers 
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '/api/docs/SellersSchema.yml#/components/schemas/GetAllSellersRs'
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
+sellerRoutes.get("/search/:search_query", sellerController.getSellers);
 
 /**
  * @swagger
@@ -160,7 +188,8 @@ sellerRoutes.post(
   "/me", 
   verifyToken,
   isSellerFound,
-  sellerController.fetchSellerRegistration);
+  sellerController.fetchSellerRegistration
+);
 
 /**
  * @swagger
