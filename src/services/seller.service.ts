@@ -1,9 +1,18 @@
 import Seller from "../models/Seller";
 import { ISeller, IUser, IUserSettings } from "../types";
-
 import logger from "../config/loggingConfig";
 import User from "../models/User";
 import UserSettings from "../models/UserSettings";
+
+interface SearchCriteria {
+  name?: string;
+  category?: string;
+  origin?: {
+    lat: number;
+    lng: number;
+  };
+  radius?: number;
+}
 
 // Fetch all sellers or within a specific radius from a given origin
 export const getAllSellers = async (origin?: { lat: number; lng: number }, radius?: number): Promise<ISeller[]> => {
@@ -23,6 +32,40 @@ export const getAllSellers = async (origin?: { lat: number; lng: number }, radiu
     return sellers;
   } catch (error: any) {
     logger.error(`Error retrieving sellers: ${error.message}`);
+    throw new Error(error.message);
+  }
+};
+
+// Fetch sellers by search criteria
+export const getSellersByCriteria = async (searchCriteria: SearchCriteria): Promise<ISeller[]> => {
+  try {
+    const query: any = {};
+
+    // Filter by name
+    if (searchCriteria.name) {
+      query.name = { $regex: searchCriteria.name, $options: 'i' };
+    }
+
+    // Filter by category
+    if (searchCriteria.category) {
+      query.category = searchCriteria.category;
+    }
+
+    // Filter by location and radius
+    if (searchCriteria.origin && typeof searchCriteria.radius === 'number') {
+      const { lat, lng } = searchCriteria.origin;
+      const radiusInRadians = searchCriteria.radius / 6378.1; // Convert radius to radians
+      query.sell_map_center = {
+        $geoWithin: {
+          $centerSphere: [[lng, lat], radiusInRadians]
+        }
+      };
+    }
+
+    const sellers = await Seller.find(query).exec();
+    return sellers;
+  } catch (error: any) {
+    logger.error(`Error retrieving sellers with criteria: ${JSON.stringify(searchCriteria)} - ${error.message}`);
     throw new Error(error.message);
   }
 };
@@ -59,7 +102,7 @@ export const registerOrUpdateSeller = async (sellerData: ISeller, authUser: IUse
       const updatedSeller = await Seller.findOneAndUpdate(
         { seller_id: authUser.pi_uid }, 
         sellerData, { new: true }
-      )
+      );
       return updatedSeller as ISeller;
     } else {
       const shopName = !sellerData.name ? authUser.user_name : sellerData.name;
@@ -87,17 +130,6 @@ export const deleteSeller = async (seller_id: string): Promise<ISeller | null> =
     return deletedSeller ? deletedSeller as ISeller : null;
   } catch (error: any) {
     logger.error(`Error deleting seller with sellerID ${seller_id}: ${error.message}`);
-    throw new Error(error.message);
-  }
-};
-
-// Update an existing seller
-export const updateSeller = async (seller_id: string, sellerData: Partial<ISeller>): Promise<ISeller | null> => {
-  try {
-    const updatedSeller = await Seller.findOneAndUpdate({ seller_id }, sellerData, { new: true }).exec();
-    return updatedSeller ? updatedSeller as ISeller : null;
-  } catch (error: any) {
-    logger.error(`Error updating seller for sellerID ${seller_id}: ${error.message}`);
     throw new Error(error.message);
   }
 };

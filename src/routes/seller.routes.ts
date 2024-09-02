@@ -5,6 +5,8 @@ import { isSellerFound } from "../middlewares/isSellerFound";
 import { verifyToken } from "../middlewares/verifyToken";
 import upload from "../utils/multer";
 
+const sellerRoutes = Router();
+
 /**
  * @swagger
  * components:
@@ -68,7 +70,7 @@ import upload from "../utils/multer";
  *         - trust_meter_rating
  *         - order_online_enabled_pref
  */
-const sellerRoutes = Router();
+sellerRoutes.get("/search", sellerController.getSellers);
 
 /**
  * @swagger
@@ -103,35 +105,53 @@ sellerRoutes.post("/fetch", sellerController.fetchSellersByLocation);
 
 /**
  * @swagger
- * /api/v1/sellers/{seller_id}:
+ * /api/v1/sellers/search:
  *   get:
  *     tags:
  *       - Seller
- *     summary: Get a single seller by seller ID
+ *     summary: Search for sellers based on various criteria
  *     parameters:
- *       - name: seller_id
- *         in: path
- *         required: true
+ *       - name: name
+ *         in: query
+ *         required: false
  *         schema:
  *           type: string
- *         description: The Pi UID of the seller to retrieve
+ *         description: The name of the seller to search for
+ *       - name: category
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: The category of the seller to search for
+ *       - name: origin
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: Origin coordinates in the format "lat,lng" (e.g., "37.7749,-122.4194")
+ *       - name: radius
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: number
+ *         description: The radius in kilometers to search within
  *     responses:
  *       200:
  *         description: Successful response
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '/api/docs/SellersSchema.yml#/components/schemas/GetSingleSellerRs'
+ *               type: array
+ *               items:
+ *                 $ref: '/api/docs/SellersSchema.yml#/components/schemas/GetAllSellersRs'
  *       404:
- *         description: Seller not found
+ *         description: Sellers not found
  *       400:
  *         description: Bad request
  *       500:
  *         description: Internal server error
  */
-sellerRoutes.get(
-  "/:seller_id", 
-  sellerController.getSingleSeller);
+sellerRoutes.get("/search", sellerController.getSellers);
 
 /**
  * @swagger
@@ -160,7 +180,8 @@ sellerRoutes.post(
   "/me", 
   verifyToken,
   isSellerFound,
-  sellerController.fetchSellerRegistration);
+  sellerController.fetchSellerRegistration
+);
 
 /**
  * @swagger
@@ -232,5 +253,35 @@ sellerRoutes.delete(
   isSellerFound,
   sellerController.deleteSeller
 );
+
+/**
+ * @swagger
+ * /api/v1/sellers/{seller_id}:
+ *   get:
+ *     tags:
+ *       - Seller
+ *     summary: Get a single seller by seller ID
+ *     parameters:
+ *       - name: seller_id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The Pi UID of the seller to retrieve
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '/api/docs/SellersSchema.yml#/components/schemas/GetSingleSellerRs'
+ *       404:
+ *         description: Seller not found
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
+sellerRoutes.get("/:seller_id", sellerController.getSingleSeller);
 
 export default sellerRoutes;
