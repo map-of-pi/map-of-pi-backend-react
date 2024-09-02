@@ -51,7 +51,7 @@ export const getSingleSellerById = async (seller_id: string): Promise<ISeller | 
   }
 };
 
-export const registerOrUpdateSeller = async (sellerData: ISeller, authUser: IUser): Promise<ISeller> => {
+export const registerOrUpdateSeller = async (sellerData: Partial<ISeller>, authUser: IUser): Promise<ISeller> => {
   try {
     let seller = await Seller.findOne({ seller_id: authUser.pi_uid }).exec();
 

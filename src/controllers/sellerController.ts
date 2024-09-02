@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 
 import * as sellerService from "../services/seller.service";
 import { uploadImage } from "../services/misc/image.service";
+import { ISeller } from "../types";
 
 import { env } from "../utils/env";
 import logger from "../config/loggingConfig";
@@ -63,10 +64,27 @@ export const registerSeller = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Unauthorized user" });
     }
 
-    const seller = JSON.parse(req.body.json);
+    // file handling
+    const file = req.file;
+    const image = file ? await uploadImage(file, 'seller-registration') : '';
+    const formData = req.body;
 
-    // handle single image upload and set placeholder if no image is uploaded
-    seller.image = req.file ? await uploadImage(req.file, 'seller-registration') : env.CLOUDINARY_PLACEHOLDER_URL;
+    const sellMapCenter = formData.sell_map_center ? JSON.parse(formData.sell_map_center) : { type: 'Point', coordinates: [0, 0] };
+
+    // fetch existing seller data
+    const existingSeller = authUser.pi_uid ? await sellerService.getSingleSellerById(authUser.pi_uid) : null;
+
+    // construct seller object
+    const seller: Partial<ISeller> = {
+      ...existingSeller,
+      name: formData.name || existingSeller?.name || '',
+      seller_type: formData.seller_type || existingSeller?.seller_type || '',
+      description: formData.description || existingSeller?.description || '',
+      address: formData.address || existingSeller?.address || '',
+      sale_items: formData.sale_items || existingSeller?.sale_items || '',
+      image: image || existingSeller?.image || env.CLOUDINARY_PLACEHOLDER_URL,
+      sell_map_center: sellMapCenter || existingSeller?.sell_map_center || { type: 'Point', coordinates: [0, 0] }
+    };
 
     const registeredSeller = await sellerService.registerOrUpdateSeller(seller, authUser);
     logger.info(`Registered or updated seller for user ${authUser.pi_uid}`);
