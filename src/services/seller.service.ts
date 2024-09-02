@@ -1,6 +1,5 @@
 import Seller from "../models/Seller";
 import { ISeller, IUser, IUserSettings } from "../types";
-
 import logger from "../config/loggingConfig";
 import User from "../models/User";
 import UserSettings from "../models/UserSettings";
@@ -23,6 +22,26 @@ export const getAllSellers = async (origin?: { lat: number; lng: number }, radiu
     return sellers;
   } catch (error: any) {
     logger.error(`Error retrieving sellers: ${error.message}`);
+    throw new Error(error.message);
+  }
+};
+
+export const getSellers = async (search_query: string): Promise<ISeller[] | null> => {
+  try {
+    const searchCriteria = search_query
+      ? {
+          $or: [
+            { name: { $regex: search_query, $options: 'i' } },
+            { description: { $regex: search_query, $options: 'i' } },
+            { sale_items: { $regex: search_query, $options: 'i' } },
+          ],
+        }
+      : {};
+
+      const sellers = await Seller.find(searchCriteria).exec();
+      return sellers.length ? sellers : null; 
+  } catch (error: any) {
+    logger.error(`Error retrieving sellers matching search query "${search_query}": ${error.message}`);
     throw new Error(error.message);
   }
 };
@@ -59,7 +78,7 @@ export const registerOrUpdateSeller = async (sellerData: ISeller, authUser: IUse
       const updatedSeller = await Seller.findOneAndUpdate(
         { seller_id: authUser.pi_uid }, 
         sellerData, { new: true }
-      )
+      );
       return updatedSeller as ISeller;
     } else {
       const shopName = !sellerData.name ? authUser.user_name : sellerData.name;
@@ -87,17 +106,6 @@ export const deleteSeller = async (seller_id: string): Promise<ISeller | null> =
     return deletedSeller ? deletedSeller as ISeller : null;
   } catch (error: any) {
     logger.error(`Error deleting seller with sellerID ${seller_id}: ${error.message}`);
-    throw new Error(error.message);
-  }
-};
-
-// Update an existing seller
-export const updateSeller = async (seller_id: string, sellerData: Partial<ISeller>): Promise<ISeller | null> => {
-  try {
-    const updatedSeller = await Seller.findOneAndUpdate({ seller_id }, sellerData, { new: true }).exec();
-    return updatedSeller ? updatedSeller as ISeller : null;
-  } catch (error: any) {
-    logger.error(`Error updating seller for sellerID ${seller_id}: ${error.message}`);
     throw new Error(error.message);
   }
 };
