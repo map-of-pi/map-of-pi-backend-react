@@ -5,8 +5,6 @@ import { isSellerFound } from "../middlewares/isSellerFound";
 import { verifyToken } from "../middlewares/verifyToken";
 import upload from "../utils/multer";
 
-const sellerRoutes = Router();
-
 /**
  * @swagger
  * components:
@@ -70,7 +68,7 @@ const sellerRoutes = Router();
  *         - trust_meter_rating
  *         - order_online_enabled_pref
  */
-sellerRoutes.get("/search", sellerController.getSellers);
+const sellerRoutes = Router();
 
 /**
  * @swagger
@@ -105,36 +103,48 @@ sellerRoutes.post("/fetch", sellerController.fetchSellersByLocation);
 
 /**
  * @swagger
- * /api/v1/sellers/search:
+ * /api/v1/sellers/{seller_id}:
  *   get:
  *     tags:
  *       - Seller
- *     summary: Search for sellers based on various criteria
+ *     summary: Get a single seller by seller ID
  *     parameters:
- *       - name: name
- *         in: query
+ *       - name: seller_id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The Pi UID of the seller to retrieve
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '/api/docs/SellersSchema.yml#/components/schemas/GetSingleSellerRs'
+ *       404:
+ *         description: Seller not found
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
+sellerRoutes.get("/:seller_id", sellerController.getSingleSeller);
+
+/**
+ * @swagger
+ * /api/v1/sellers/search/{search_query}:
+ *   get:
+ *     tags:
+ *       - Seller
+ *     summary: Get sellers based on search criteria
+ *     parameters:
+ *       - name: search_query
+ *         in: path
  *         required: false
  *         schema:
  *           type: string
- *         description: The name of the seller to search for
- *       - name: category
- *         in: query
- *         required: false
- *         schema:
- *           type: string
- *         description: The category of the seller to search for
- *       - name: origin
- *         in: query
- *         required: false
- *         schema:
- *           type: string
- *         description: Origin coordinates in the format "lat,lng" (e.g., "37.7749,-122.4194")
- *       - name: radius
- *         in: query
- *         required: false
- *         schema:
- *           type: number
- *         description: The radius in kilometers to search within
+ *         description: The search query used to filter sellers 
  *     responses:
  *       200:
  *         description: Successful response
@@ -144,14 +154,12 @@ sellerRoutes.post("/fetch", sellerController.fetchSellersByLocation);
  *               type: array
  *               items:
  *                 $ref: '/api/docs/SellersSchema.yml#/components/schemas/GetAllSellersRs'
- *       404:
- *         description: Sellers not found
  *       400:
  *         description: Bad request
  *       500:
  *         description: Internal server error
  */
-sellerRoutes.get("/search", sellerController.getSellers);
+sellerRoutes.get("/search/:search_query", sellerController.getSellers);
 
 /**
  * @swagger
@@ -253,35 +261,5 @@ sellerRoutes.delete(
   isSellerFound,
   sellerController.deleteSeller
 );
-
-/**
- * @swagger
- * /api/v1/sellers/{seller_id}:
- *   get:
- *     tags:
- *       - Seller
- *     summary: Get a single seller by seller ID
- *     parameters:
- *       - name: seller_id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *         description: The Pi UID of the seller to retrieve
- *     responses:
- *       200:
- *         description: Successful response
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '/api/docs/SellersSchema.yml#/components/schemas/GetSingleSellerRs'
- *       404:
- *         description: Seller not found
- *       400:
- *         description: Bad request
- *       500:
- *         description: Internal server error
- */
-sellerRoutes.get("/:seller_id", sellerController.getSingleSeller);
 
 export default sellerRoutes;

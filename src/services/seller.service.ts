@@ -4,16 +4,6 @@ import logger from "../config/loggingConfig";
 import User from "../models/User";
 import UserSettings from "../models/UserSettings";
 
-interface SearchCriteria {
-  name?: string;
-  category?: string;
-  origin?: {
-    lat: number;
-    lng: number;
-  };
-  radius?: number;
-}
-
 // Fetch all sellers or within a specific radius from a given origin
 export const getAllSellers = async (origin?: { lat: number; lng: number }, radius?: number): Promise<ISeller[]> => {
   try {
@@ -36,36 +26,22 @@ export const getAllSellers = async (origin?: { lat: number; lng: number }, radiu
   }
 };
 
-// Fetch sellers by search criteria
-export const getSellersByCriteria = async (searchCriteria: SearchCriteria): Promise<ISeller[]> => {
+export const getSellers = async (search_query: string): Promise<ISeller[] | null> => {
   try {
-    const query: any = {};
-
-    // Filter by name
-    if (searchCriteria.name) {
-      query.name = { $regex: searchCriteria.name, $options: 'i' };
-    }
-
-    // Filter by category
-    if (searchCriteria.category) {
-      query.category = searchCriteria.category;
-    }
-
-    // Filter by location and radius
-    if (searchCriteria.origin && typeof searchCriteria.radius === 'number') {
-      const { lat, lng } = searchCriteria.origin;
-      const radiusInRadians = searchCriteria.radius / 6378.1; // Convert radius to radians
-      query.sell_map_center = {
-        $geoWithin: {
-          $centerSphere: [[lng, lat], radiusInRadians]
+    const searchCriteria = search_query
+      ? {
+          $or: [
+            { name: { $regex: search_query, $options: 'i' } },
+            { description: { $regex: search_query, $options: 'i' } },
+            { sale_items: { $regex: search_query, $options: 'i' } },
+          ],
         }
-      };
-    }
+      : {};
 
-    const sellers = await Seller.find(query).exec();
-    return sellers;
+      const sellers = await Seller.find(searchCriteria).exec();
+      return sellers.length ? sellers : null; 
   } catch (error: any) {
-    logger.error(`Error retrieving sellers with criteria: ${JSON.stringify(searchCriteria)} - ${error.message}`);
+    logger.error(`Error retrieving sellers matching search query "${search_query}": ${error.message}`);
     throw new Error(error.message);
   }
 };

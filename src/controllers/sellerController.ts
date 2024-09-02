@@ -2,13 +2,6 @@ import { Request, Response } from "express";
 import * as sellerService from "../services/seller.service";
 import logger from '../config/loggingConfig';
 
-interface SearchCriteria {
-  name?: string;
-  category?: string;
-  origin?: { lat: number; lng: number };
-  radius?: number;
-}
-
 export const fetchSellersByLocation = async (req: Request, res: Response) => {
   try {
     const { origin, radius } = req.body;
@@ -21,6 +14,17 @@ export const fetchSellersByLocation = async (req: Request, res: Response) => {
     res.status(200).json(sellers);
   } catch (error: any) {
     logger.error(`Failed to fetch sellers by location: ${error.message}`);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const getSellers = async (req: Request, res: Response) => {
+  const { search_query = '' } = req.params; // default to empty string if not provided
+  try {
+    const sellers = await sellerService.getSellers(search_query);
+    res.status(200).json(sellers);
+  } catch (error: any) {
+    logger.error(`Failed to get sellers with search query "${search_query}": ${error.message}`);
     res.status(500).json({ message: error.message });
   }
 };
@@ -81,32 +85,6 @@ export const deleteSeller = async (req: Request, res: Response) => {
     res.status(200).json({ message: "Seller deleted successfully", deletedSeller });
   } catch (error: any) {
     logger.error(`Failed to delete seller with ID ${seller_id}: ${error.message}`);
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// New function to handle searches
-export const getSellers = async (req: Request, res: Response) => {
-  try {
-    const searchCriteria: SearchCriteria = {
-      name: req.query.name as string,
-      category: req.query.category as string,
-      origin: req.query.origin ? JSON.parse(req.query.origin as string) : undefined,
-      radius: req.query.radius ? parseFloat(req.query.radius as string) : undefined,
-    };
-
-    const sellers = await sellerService.getSellersByCriteria(searchCriteria);
-
-    if (!sellers || sellers.length === 0) {
-      logger.warn(`No sellers found matching criteria: ${JSON.stringify(searchCriteria)}`);
-      return res.status(404).json({ message: "Sellers not found" });
-    }
-
-    logger.info(`Fetched ${sellers.length} sellers matching criteria: ${JSON.stringify(searchCriteria)}`);
-    res.status(200).json(sellers);
-  } catch (error: any) {
-    const searchCriteria = { /* define search criteria object here */ };
-    logger.error(`Failed to fetch sellers with criteria ${JSON.stringify(searchCriteria)}: ${error.message}`);
     res.status(500).json({ message: error.message });
   }
 };
