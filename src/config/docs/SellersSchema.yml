@@ -247,67 +247,58 @@ components:
           type: string
           format: binary
           example: http://example.com/image.jpg
-        json:
+        name:
+          type: string
+          example: Test Seller
+        description:
+          type: string
+          example: This is a sample seller description.
+        seller_type:
+          type: string
+          example: Pioneer
+        address:
+          type: string
+          example: 1234 Test St, Test City, SC 12345
+        sale_items:
+          type: string
+          example: Test Item 1, Test Item 2
+        average_rating:
           type: object
           properties:
-            seller_id:
+            $numberDecimal:
               type: string
-              example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
-            name:
-              type: string
-              example: Test Seller
-            description:
-              type: string
-              example: This is a sample seller description.
-            seller_type:
-              type: string
-              example: Pioneer
-            address:
-              type: string
-              example: 1234 Test St, Test City, SC 12345
-            sale_items:
-              type: string
-              example: Test Item 1, Test Item 2
-            average_rating:
-              type: object
-              properties:
-                $numberDecimal:
-                  type: string
-                  example: 4.5
-              required:
-                - $numberDecimal
-            trust_meter_rating:
-              $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
-            sell_map_center:
-              type: object
-              properties:
-                type:
-                  type: string
-                  example: Point
-                coordinates:
-                  type: array
-                  items:
-                    type: number
-                  example: [-73.856077, 40.848447]
-              required:
-                - type
-                - coordinates
-            order_online_enabled_pref:
-              type: boolean
-              example: true
+              example: 4.5
           required:
-            - seller_id
-            - name
-            - description
-            - seller_type
-            - average_rating
-            - trust_meter_rating
-            - sell_map_center
-            - order_online_enabled_pref
-            - _id
-            - __v
+            - $numberDecimal
+        trust_meter_rating:
+          $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
+        sell_map_center:
+          type: object
+          properties:
+            type:
+              type: string
+              example: Point
+            coordinates:
+              type: array
+              items:
+                type: number
+              example: [-73.856077, 40.848447]
+          required:
+            - type
+            - coordinates
+        order_online_enabled_pref:
+          type: boolean
+          example: true
       required:
-        - json
+        - name
+        - description
+        - seller_type
+        - average_rating
+        - trust_meter_rating
+        - sell_map_center
+        - order_online_enabled_pref
+        - _id
+        - __v
 
     RegisterSellerRs:
       type: object
