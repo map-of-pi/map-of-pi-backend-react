@@ -60,7 +60,8 @@ export const addUserPreferences = async (req: Request, res: Response) => {
 
     // construct user settings object
     const userSettings: Partial<IUserSettings> = {
-      ...existingUserSettings,
+      ...existingUserSettings, // Ensures existing values are preserved; provides a fallback in case new fields are added later. 
+      user_settings_id: authUser.pi_uid || existingUserSettings?.user_settings_id,
       email: formData.email || existingUserSettings?.email || '',
       phone_number: formData.phone_number || existingUserSettings?.phone_number || '',
       image: image || existingUserSettings?.image || env.CLOUDINARY_PLACEHOLDER_URL,

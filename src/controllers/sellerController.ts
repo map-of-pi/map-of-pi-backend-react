@@ -85,14 +85,16 @@ export const registerSeller = async (req: Request, res: Response) => {
 
     // construct seller object
     const seller: Partial<ISeller> = {
-      ...existingSeller,
+      ...existingSeller, // Ensures existing values are preserved; provides a fallback in case new fields are added later. 
+      seller_id: authUser.pi_uid || existingSeller?.seller_id,
       name: formData.name || existingSeller?.name || '',
-      seller_type: formData.seller_type || existingSeller?.seller_type || '',
       description: formData.description || existingSeller?.description || '',
+      seller_type: formData.seller_type || existingSeller?.seller_type || '',
+      image: image || existingSeller?.image || env.CLOUDINARY_PLACEHOLDER_URL,
       address: formData.address || existingSeller?.address || '',
       sale_items: formData.sale_items || existingSeller?.sale_items || '',
-      image: image || existingSeller?.image || env.CLOUDINARY_PLACEHOLDER_URL,
-      sell_map_center: sellMapCenter || existingSeller?.sell_map_center || { type: 'Point', coordinates: [0, 0] }
+      sell_map_center: sellMapCenter || existingSeller?.sell_map_center || { type: 'Point', coordinates: [0, 0] },
+      order_online_enabled_pref: formData.order_online_enabled_pref || existingSeller?.order_online_enabled_pref || ''
     };
 
     const registeredSeller = await sellerService.registerOrUpdateSeller(seller, authUser);

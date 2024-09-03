@@ -110,6 +110,7 @@ components:
           example: This is a sample review comment.
         image:
           type: string
+          format: binary
           example: http://example.com/image.jpg
         review_date:
           type: string

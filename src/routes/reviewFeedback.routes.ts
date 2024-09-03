@@ -117,7 +117,7 @@ reviewFeedbackRoutes.get("/single/:review_id", reviewFeedbackController.getSingl
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             $ref: '/api/docs/ReviewFeedbackSchema.yml#/components/schemas/AddReviewRq'
  *     responses:

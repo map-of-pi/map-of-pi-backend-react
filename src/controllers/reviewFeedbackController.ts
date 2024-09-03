@@ -48,13 +48,28 @@ export const addReview = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Self review is prohibited" });
     }
 
-    const reviewFeedback = JSON.parse(req.body.json);
+    // file handling
+    const file = req.file;
+    const image = file ? await uploadImage(file, 'review-feedback') : '';
+    const formData = req.body;
 
-    // handle single image upload and set placeholder if no image is uploaded
-    reviewFeedback.image = req.file ? await uploadImage(req.file, 'review-feedback') : env.CLOUDINARY_PLACEHOLDER_URL;
+    // fetch existing review feedback data
+    const existingReviewFeedback = authUser.pi_uid ? await reviewFeedbackService.getReviewFeedbackById(formData.review_id) : null;
 
-    const newReview = await reviewFeedbackService.addReviewFeedback(reviewData, authUser);
-    logger.info(`Added new review by user ${authUser.pi_uid} for receiver ID ${reviewData.review_receiver_id}`);
+    // construct review feedback object
+    const reviewFeedback: Partial<IReviewFeedback> = {
+      _id: formData.review_id || existingReviewFeedback?._id,
+      review_receiver_id: formData.review_receiver_id || '',
+      review_giver_id: formData.review_giver_id || authUser.pi_uid,
+      reply_to_review_id: formData.reply_to_review_id || '',
+      rating: formData.rating || '',
+      comment: formData.comment || '',
+      image: image || env.CLOUDINARY_PLACEHOLDER_URL,
+      review_date: formData.review_date || ''
+    };
+
+    const newReview = await reviewFeedbackService.addReviewFeedback(reviewFeedback, authUser);
+    logger.info(`Added new review by user ${authUser.pi_uid} for receiver ID ${reviewFeedback.review_receiver_id}`);
     return res.status(200).json({ newReview });
   } catch (error: any) {
     logger.error(`Failed to add review: ${error.message}`);
