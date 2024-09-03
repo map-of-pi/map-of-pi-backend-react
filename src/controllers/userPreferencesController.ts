@@ -48,12 +48,26 @@ export const addUserPreferences = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Unauthorized user" });
     }
 
-    const userSettingsData = JSON.parse(req.body.json);
+    // file handling
+    const file = req.file;
+    const image = file ? await uploadImage(file, 'user-preferences') : '';
+    const formData = req.body;
 
-    // handle single image upload and set placeholder if no image is uploaded
-    userSettingsData.image = req.file ? await uploadImage(req.file, 'user-preferences') : env.CLOUDINARY_PLACEHOLDER_URL;
+    const searchMapCenter = formData.search_map_center ? JSON.parse(formData.search_map_center) : { type: 'Point', coordinates: [0, 0] };
 
-    const userPreferences = await userSettingsService.addOrUpdateUserSettings(userSettingsData, authUser);
+    // fetch existing user settings data
+    const existingUserSettings = authUser.pi_uid ? await userSettingsService.getUserSettingsById(authUser.pi_uid) : null;
+
+    // construct user settings object
+    const userSettings: Partial<IUserSettings> = {
+      ...existingUserSettings,
+      email: formData.email || existingUserSettings?.email || '',
+      phone_number: formData.phone_number || existingUserSettings?.phone_number || '',
+      image: image || existingUserSettings?.image || env.CLOUDINARY_PLACEHOLDER_URL,
+      search_map_center: searchMapCenter || existingUserSettings?.search_map_center || { type: 'Point', coordinates: [0, 0] }
+    };
+
+    const userPreferences = await userSettingsService.addOrUpdateUserSettings(userSettings, authUser);
     logger.info(`Added or updated User Preferences for user with ID: ${authUser.pi_uid}`);
     res.status(200).json({ settings: userPreferences });    
   } catch (error: any) {

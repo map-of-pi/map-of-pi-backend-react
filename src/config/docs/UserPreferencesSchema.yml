@@ -58,6 +58,7 @@ components:
           example: 1234567890
         image:
           type: string
+          format: binary
           example: https://example.com/image.jpg
         search_map_center:
           type: object

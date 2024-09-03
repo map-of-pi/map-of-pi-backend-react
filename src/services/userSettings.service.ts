@@ -13,7 +13,7 @@ export const getUserSettingsById = async (user_settings_id: string): Promise<IUs
   }
 };
 
-export const addOrUpdateUserSettings = async (userSettingsData: IUserSettings, authUser: IUser): Promise<IUserSettings> => {
+export const addOrUpdateUserSettings = async (userSettingsData: Partial<IUserSettings>, authUser: IUser): Promise<IUserSettings> => {
   try {
     let userSettings = await UserSettings.findOne({user_settings_id: authUser.pi_uid}).exec();
     
