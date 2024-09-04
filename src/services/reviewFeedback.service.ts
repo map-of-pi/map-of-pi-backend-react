@@ -93,20 +93,14 @@ export const getReviewFeedbackById = async (review_id: string): Promise<IReviewF
 };
 
 export const addReviewFeedback = async (reviewFeedbackData: Partial<IReviewFeedback>, authUser: IUser): Promise<IReviewFeedback> => {
-  const { review_receiver_id, reply_to_review_id } = reviewFeedbackData;
-  const date = new Date();
-
   const newReviewFeedback = new ReviewFeedback({
-    ...reviewFeedbackData,
-    review_date: date,
-    review_giver_id: authUser.pi_uid,
-    reply_to_review_id: reply_to_review_id || null,
+    ...reviewFeedbackData
   });
 
   try {
     const savedReviewFeedback = await newReviewFeedback.save();
 
-    computeRatings(review_receiver_id)
+    computeRatings(savedReviewFeedback.review_receiver_id)
       .then(value => logger.info(`Computed review rating: ${value}`))
       .catch(error => logger.error(`Error computing review rating: ${error.message}`));
 

@@ -289,16 +289,6 @@ components:
         order_online_enabled_pref:
           type: boolean
           example: true
-      required:
-        - name
-        - description
-        - seller_type
-        - average_rating
-        - trust_meter_rating
-        - sell_map_center
-        - order_online_enabled_pref
-        - _id
-        - __v
 
     RegisterSellerRs:
       type: object

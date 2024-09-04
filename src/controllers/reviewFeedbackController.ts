@@ -60,12 +60,12 @@ export const addReview = async (req: Request, res: Response) => {
     const reviewFeedback: Partial<IReviewFeedback> = {
       _id: formData.review_id || existingReviewFeedback?._id,
       review_receiver_id: formData.review_receiver_id || '',
-      review_giver_id: formData.review_giver_id || authUser.pi_uid,
-      reply_to_review_id: formData.reply_to_review_id || '',
+      review_giver_id: authUser.pi_uid,
+      reply_to_review_id: formData.reply_to_review_id || null,
       rating: formData.rating || '',
       comment: formData.comment || '',
       image: image || env.CLOUDINARY_PLACEHOLDER_URL,
-      review_date: formData.review_date || ''
+      review_date: new Date()
     };
 
     const newReview = await reviewFeedbackService.addReviewFeedback(reviewFeedback, authUser);

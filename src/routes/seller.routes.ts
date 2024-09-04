@@ -59,14 +59,6 @@ import upload from "../utils/multer";
  *         order_online_enabled_pref:
  *           type: boolean
  *           description: Preference for online ordering availability
- *       required:
- *         - seller_id
- *         - name
- *         - description
- *         - seller_type
- *         - average_rating
- *         - trust_meter_rating
- *         - order_online_enabled_pref
  */
 const sellerRoutes = Router();
 

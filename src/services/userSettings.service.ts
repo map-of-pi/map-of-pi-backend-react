@@ -37,13 +37,3 @@ export const addOrUpdateUserSettings = async (userSettingsData: Partial<IUserSet
     throw new Error(error.message);
   }
 };
-
-export const updateUserSettings = async (user_settings_id: string, userSettingsData: Partial<IUserSettings>): Promise<IUserSettings | null> => {
-  try {
-    const updatedUserSettings = await UserSettings.findOneAndUpdate({ user_settings_id }, userSettingsData, { new: true }).exec();
-    return updatedUserSettings;
-  } catch (error: any) {
-    logger.error(`Error updating user settings for user ID ${user_settings_id}: ${error.message}`);
-    throw new Error(error.message);
-  }
-};

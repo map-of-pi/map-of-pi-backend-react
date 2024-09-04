@@ -67,37 +67,18 @@ export const fetchSellerRegistration = async (req: Request, res: Response) => {
 export const registerSeller = async (req: Request, res: Response) => {
   try {
     const authUser = req.currentUser;
+    const formData = req.body;
 
     if (!authUser) {
       logger.warn("No authenticated user found for registering.");
       return res.status(401).json({ message: "Unauthorized user" });
     }
 
-    // file handling
+    // image file handling
     const file = req.file;
     const image = file ? await uploadImage(file, 'seller-registration') : '';
-    const formData = req.body;
-
-    const sellMapCenter = formData.sell_map_center ? JSON.parse(formData.sell_map_center) : { type: 'Point', coordinates: [0, 0] };
-
-    // fetch existing seller data
-    const existingSeller = authUser.pi_uid ? await sellerService.getSingleSellerById(authUser.pi_uid) : null;
-
-    // construct seller object
-    const seller: Partial<ISeller> = {
-      ...existingSeller, // Ensures existing values are preserved; provides a fallback in case new fields are added later. 
-      seller_id: authUser.pi_uid || existingSeller?.seller_id,
-      name: formData.name || existingSeller?.name || '',
-      description: formData.description || existingSeller?.description || '',
-      seller_type: formData.seller_type || existingSeller?.seller_type || '',
-      image: image || existingSeller?.image || env.CLOUDINARY_PLACEHOLDER_URL,
-      address: formData.address || existingSeller?.address || '',
-      sale_items: formData.sale_items || existingSeller?.sale_items || '',
-      sell_map_center: sellMapCenter || existingSeller?.sell_map_center || { type: 'Point', coordinates: [0, 0] },
-      order_online_enabled_pref: formData.order_online_enabled_pref || existingSeller?.order_online_enabled_pref || ''
-    };
-
-    const registeredSeller = await sellerService.registerOrUpdateSeller(seller, authUser);
+    
+    const registeredSeller = await sellerService.registerOrUpdateSeller(authUser, formData, image);
     logger.info(`Registered or updated seller for user ${authUser.pi_uid}`);
     return res.status(200).json({ seller: registeredSeller });
   } catch (error: any) {
