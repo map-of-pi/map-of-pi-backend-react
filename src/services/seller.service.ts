@@ -77,13 +77,13 @@ export const registerOrUpdateSeller = async (authUser: IUser, formData: any, ima
   try {
     const existingSeller = await Seller.findOne({ seller_id: authUser.pi_uid }).exec();
 
-    const sellMapCenter: { type: "Point"; coordinates: [number, number] } = formData.sell_map_center 
-      ? formData.sell_map_center 
+    // parse sell_map_center from String into JSON object.
+    const sellMapCenter = formData.sell_map_center 
+      ? JSON.parse(formData.sell_map_center)
       : { type: 'Point', coordinates: [0, 0] };
     
     // construct seller object
     const sellerData: Partial<ISeller> = {
-      ...existingSeller, // Ensures existing values are preserved; provides a fallback in case new fields are added later. 
       seller_id: authUser.pi_uid,
       name: formData.name || existingSeller?.name || authUser.user_name,
       description: formData.description || existingSeller?.description || '',
@@ -97,8 +97,9 @@ export const registerOrUpdateSeller = async (authUser: IUser, formData: any, ima
 
     if (existingSeller) {
       const updatedSeller = await Seller.findOneAndUpdate(
-        { seller_id: authUser.pi_uid }, 
-        sellerData, { new: true }
+        { seller_id: authUser.pi_uid },
+        { $set: sellerData },
+        { new: true }
       ).exec();
       return updatedSeller as ISeller;
     } else {

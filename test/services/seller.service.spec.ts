@@ -20,14 +20,19 @@ const formData = {
   image: 'http://example.com/iamge.jpg',
   address: '123 Test Ave. Test City',
   sale_items: 'Test Sale Items',
-  sell_map_center: { type: 'Point', coordinates: [-73.856077, 40.848447] },
+  sell_map_center: JSON.stringify({ type: 'Point', coordinates: [-73.856077, 40.848447] }),
   order_online_enabled_pref: true
 };
 
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
-  const uri = mongoServer.getUri();
-  await mongoose.connect(uri, { dbName: 'test' });
+  try {
+    mongoServer = await MongoMemoryServer.create();
+    const uri = mongoServer.getUri();
+    await mongoose.connect(uri, { dbName: 'test' });
+  } catch (error) {
+    console.error('Failed to start MongoMemoryServer', error);
+    throw error;
+  }
 });
 
 afterAll(async () => {
@@ -36,10 +41,6 @@ afterAll(async () => {
 });
 
 describe('registerOrUpdateSeller function', () => {
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
   it('should register a new seller', async () => {
     jest.spyOn(Seller, 'findOne').mockReturnValue({
       exec: jest.fn().mockResolvedValue(null) // Return null to simulate no existing seller
