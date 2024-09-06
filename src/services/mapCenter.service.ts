@@ -20,14 +20,15 @@ export const createOrUpdateMapCenter = async (
   type: 'search' | 'sell'  // Add the type parameter to indicate search or sell
 ): Promise<IMapCenter> => {
   try {
+    // Choose the correct field to update based on the type (search or sell)
     const updateField = type === 'search' 
-      ? { search_map_center: { latitude, longitude } } 
-      : { sell_map_center: { latitude, longitude } };
+      ? { 'search_map_center.latitude': latitude, 'search_map_center.longitude': longitude } 
+      : { 'sell_map_center.latitude': latitude, 'sell_map_center.longitude': longitude };
 
     const mapCenter = await MapCenter.findOneAndUpdate(
       { pi_uid },
-      updateField,  // Dynamically update the correct field
-      { new: true, upsert: true }
+      { $set: updateField },  // Use $set to update only the specific field
+      { new: true, upsert: true }  // upsert: true ensures that a new record is created if it doesn't exist
     );
     return mapCenter as IMapCenter;
   } catch (error: any) {
@@ -35,3 +36,4 @@ export const createOrUpdateMapCenter = async (
     throw new Error(error.message);
   }
 };
+
