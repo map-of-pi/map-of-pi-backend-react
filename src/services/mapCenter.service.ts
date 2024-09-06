@@ -13,11 +13,20 @@ export const getMapCenterById = async (pi_uid: string): Promise<IMapCenter | nul
   }
 };
 
-export const createOrUpdateMapCenter = async (pi_uid: string, latitude: number, longitude: number): Promise<IMapCenter> => {
+export const createOrUpdateMapCenter = async (
+  pi_uid: string, 
+  latitude: number, 
+  longitude: number,
+  type: 'search' | 'sell'  // Add the type parameter to indicate search or sell
+): Promise<IMapCenter> => {
   try {
+    const updateField = type === 'search' 
+      ? { search_map_center: { latitude, longitude } } 
+      : { sell_map_center: { latitude, longitude } };
+
     const mapCenter = await MapCenter.findOneAndUpdate(
       { pi_uid },
-      { latitude, longitude },
+      updateField,  // Dynamically update the correct field
       { new: true, upsert: true }
     );
     return mapCenter as IMapCenter;
