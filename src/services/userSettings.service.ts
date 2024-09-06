@@ -45,7 +45,7 @@ export const addOrUpdateUserSettings = async (authUser: IUser, formData: any, im
       return savedUserSettings as IUserSettings;
     }
   } catch (error: any) {
-    logger.error(`Error registering user settings: ${error.message}`);
+    logger.error(`Error adding or updating user settings: ${error.message}`);
     throw new Error(error.message);
   }
 };

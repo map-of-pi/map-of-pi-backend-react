@@ -281,6 +281,7 @@ components:
               example: Test Item 1, Test Item 2
             image:
               type: string
+              format: binary
               example: http://example.com/image.jpg
             sell_map_center:
               type: object

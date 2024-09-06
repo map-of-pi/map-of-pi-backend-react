@@ -37,42 +37,26 @@ export const getSingleReviewById = async (req: Request, res: Response) => {
 
 export const addReview = async (req: Request, res: Response) => {
   try {
-    const reviewData = req.body;
     const authUser = req.currentUser;
+    const formData = req.body;
 
     if (!authUser) {
       logger.warn("No authenticated user found for adding review.");
       return res.status(401).json({ message: "Unauthorized user" });
-    } else if (authUser.pi_uid === reviewData.review_receiver_id) {
+    } else if (authUser.pi_uid === formData.review_receiver_id) {
       logger.warn(`Attempted self review by user ${authUser.pi_uid}`);
       return res.status(400).json({ message: "Self review is prohibited" });
     }
 
-    // file handling
+    // image file handling
     const file = req.file;
     const image = file ? await uploadImage(file, 'review-feedback') : '';
-    const formData = req.body;
 
-    // fetch existing review feedback data
-    const existingReviewFeedback = authUser.pi_uid ? await reviewFeedbackService.getReviewFeedbackById(formData.review_id) : null;
-
-    // construct review feedback object
-    const reviewFeedback: Partial<IReviewFeedback> = {
-      _id: formData.review_id || existingReviewFeedback?._id,
-      review_receiver_id: formData.review_receiver_id || '',
-      review_giver_id: authUser.pi_uid,
-      reply_to_review_id: formData.reply_to_review_id || null,
-      rating: formData.rating || '',
-      comment: formData.comment || '',
-      image: image || env.CLOUDINARY_PLACEHOLDER_URL,
-      review_date: new Date()
-    };
-
-    const newReview = await reviewFeedbackService.addReviewFeedback(reviewFeedback, authUser);
-    logger.info(`Added new review by user ${authUser.pi_uid} for receiver ID ${reviewFeedback.review_receiver_id}`);
+    const newReview = await reviewFeedbackService.addReviewFeedback(authUser, formData, image);
+    logger.info(`Added new review by user ${authUser.pi_uid} for receiver ID ${newReview.review_receiver_id}`);
     return res.status(200).json({ newReview });
   } catch (error: any) {
-    logger.error(`Failed to add review: ${error.message}`);
+    logger.error(`Failed to add Review Feedback for user with ID ${req.currentUser?.pi_uid}: ${error.message}`);
     res.status(500).json({ message: error.message });
   }
 };

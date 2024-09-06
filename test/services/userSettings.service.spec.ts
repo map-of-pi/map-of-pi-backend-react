@@ -49,7 +49,7 @@ describe('addOrUpdateUserSettings function', () => {
       exec: jest.fn().mockResolvedValue(null) // Return null to simulate no existing user settings
     } as any);
 
-    // mock the save function to return the newly created seller
+    // mock the save function to return the newly created user settings
     const mockSave = jest.fn().mockResolvedValue({
       ...formData,
       user_settings_id: mockUser.pi_uid
@@ -70,7 +70,7 @@ describe('addOrUpdateUserSettings function', () => {
       exec: jest.fn().mockResolvedValue(existingUserSettingsData)
     } as any);
 
-    const updatedSellerData = {
+    const updatedUserSettingsData = {
       ...existingUserSettingsData,
       email: formData.email,
       phone_number: formData.phone_number,
@@ -79,15 +79,15 @@ describe('addOrUpdateUserSettings function', () => {
     };
 
     jest.spyOn(UserSettings, 'findOneAndUpdate').mockReturnValue({
-      exec: jest.fn().mockResolvedValue(updatedSellerData)
+      exec: jest.fn().mockResolvedValue(updatedUserSettingsData)
     } as any);
 
-    const result = await addOrUpdateUserSettings(mockUser, updatedSellerData, updatedSellerData.image);
+    const result = await addOrUpdateUserSettings(mockUser, updatedUserSettingsData, updatedUserSettingsData.image);
 
     expect(result).toHaveProperty('user_settings_id', mockUser.pi_uid);
-    expect(result).toHaveProperty('email', updatedSellerData.email);
-    expect(result).toHaveProperty('phone_number', updatedSellerData.phone_number);
-    expect(result).toHaveProperty('image', updatedSellerData.image);
-    expect(result).toHaveProperty('search_map_center', updatedSellerData.search_map_center);
+    expect(result).toHaveProperty('email', updatedUserSettingsData.email);
+    expect(result).toHaveProperty('phone_number', updatedUserSettingsData.phone_number);
+    expect(result).toHaveProperty('image', updatedUserSettingsData.image);
+    expect(result).toHaveProperty('search_map_center', updatedUserSettingsData.search_map_center);
   });
 });
