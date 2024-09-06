@@ -6,22 +6,24 @@ import { IMapCenter } from '../types';
 import logger from '../config/loggingConfig';
 
 export const saveMapCenter = async (req: Request, res: Response) => {
-  let authUser = req.currentUser;
+  const authUser = req.currentUser;
   try {  
     if (authUser) {    
       const pi_uid = authUser.pi_uid;
-      const { latitude, longitude } = req.body;
-      const mapCenter = await mapCenterService.createOrUpdateMapCenter(pi_uid, latitude, longitude);
-      logger.info(`Map Center saved successfully for user ${pi_uid} with Latitude: ${latitude}, Longitude: ${longitude}`);
+      const { latitude, longitude, type } = req.body;  // Extract 'type' from request body
+
+      const mapCenter = await mapCenterService.createOrUpdateMapCenter(pi_uid, latitude, longitude, type);  // Call the single service function
+      logger.info(`${type === 'search' ? 'Search' : 'Sell'} Center saved successfully for user ${pi_uid} with Latitude: ${latitude}, Longitude: ${longitude}`);
+      
       return res.status(200).json(mapCenter);
     } else {
-      logger.warn('User not found; Map Center failed to save.');
-      return res.status(404).json({ message: "User not found; Map Center failed to save" });
+      logger.warn('User not found; Map Center failed to save');
+      return res.status(404).json({ message: 'User not found: Map center failed to save' });
     }
   } catch (error: any) {
     logger.error(`Failed to save Map Center: ${error.message}`);
     res.status(500).json({ message: error.message });
-  } 
+  }
 };
 
 export const getMapCenter = async (req: Request, res: Response) => {
