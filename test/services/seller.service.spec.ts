@@ -13,15 +13,26 @@ const mockUser = {
 } as IUser;
 
 const formData = {
-  seller_id: mockUser.pi_uid,
   name: 'New Test Seller',
   description: 'New Test Description',
-  seller_type: 'Test Seller',
-  image: 'http://example.com/iamge.jpg',
-  address: '123 Test Ave. Test City',
-  sale_items: 'Test Sale Items',
+  seller_type: 'Pioneer',
+  image: 'http://example.com/image_new.jpg',
+  address: '123 New Test Ave. Test City',
+  sale_items: 'Test New Sale Items',
   sell_map_center: JSON.stringify({ type: 'Point', coordinates: [-73.856077, 40.848447] }),
   order_online_enabled_pref: true
+};
+
+const existingSellerData: Partial<ISeller> = {
+  seller_id: mockUser.pi_uid,
+  name: 'Existing Test Seller',
+  description: 'Existing Test Description',
+  seller_type: 'Test Seller',
+  image: 'http://example.com/image_existing.jpg',
+  address: '123 Existing Test Ave. Test City',
+  sale_items: 'Test Existing Sale Items',
+  sell_map_center: { type: 'Point', coordinates: [-83.856077, 50.848447] },
+  order_online_enabled_pref: false
 };
 
 beforeAll(async () => {
@@ -49,6 +60,7 @@ describe('registerOrUpdateSeller function', () => {
     // mock the save function to return the newly created seller
     const mockSave = jest.fn().mockResolvedValue({
       ...formData,
+      seller_id: mockUser.pi_uid,
       trust_meter_rating: 100,
       average_rating: mongoose.Types.Decimal128.fromString('5.0')
     })
@@ -68,18 +80,6 @@ describe('registerOrUpdateSeller function', () => {
   });
 
   it('should update an existing seller', async () => {
-    const existingSellerData: Partial<ISeller> = {
-      seller_id: mockUser.pi_uid,
-      name: 'Existing Test Seller',
-      description: 'Existing Test Description',
-      seller_type: 'Existing Test Seller',
-      image: 'http://example.com/iamge.jpg',
-      address: '123 Test Ave. Test City',
-      sale_items: 'Test Sale Items',
-      sell_map_center: { type: 'Point', coordinates: [-73.856077, 40.848447] },
-      order_online_enabled_pref: false
-    };
-
     jest.spyOn(Seller, 'findOne').mockReturnValue({
       exec: jest.fn().mockResolvedValue(existingSellerData)
     } as any);

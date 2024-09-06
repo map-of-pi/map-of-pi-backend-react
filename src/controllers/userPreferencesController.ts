@@ -42,33 +42,18 @@ export const fetchUserPreferences = async (req: Request, res: Response) => {
 export const addUserPreferences = async (req: Request, res: Response) => {
   try {
     const authUser = req.currentUser
+    const formData = req.body;
 
     if (!authUser) {
       logger.warn("No authenticated user found for user preferences.");
       return res.status(401).json({ message: "Unauthorized user" });
     }
 
-    // file handling
+    // image file handling
     const file = req.file;
     const image = file ? await uploadImage(file, 'user-preferences') : '';
-    const formData = req.body;
 
-    const searchMapCenter = formData.search_map_center ? JSON.parse(formData.search_map_center) : { type: 'Point', coordinates: [0, 0] };
-
-    // fetch existing user settings data
-    const existingUserSettings = authUser.pi_uid ? await userSettingsService.getUserSettingsById(authUser.pi_uid) : null;
-
-    // construct user settings object
-    const userSettings: Partial<IUserSettings> = {
-      ...existingUserSettings, // Ensures existing values are preserved; provides a fallback in case new fields are added later. 
-      user_settings_id: authUser.pi_uid || existingUserSettings?.user_settings_id,
-      email: formData.email || existingUserSettings?.email || '',
-      phone_number: formData.phone_number || existingUserSettings?.phone_number || '',
-      image: image || existingUserSettings?.image || env.CLOUDINARY_PLACEHOLDER_URL,
-      search_map_center: searchMapCenter || existingUserSettings?.search_map_center || { type: 'Point', coordinates: [0, 0] }
-    };
-
-    const userPreferences = await userSettingsService.addOrUpdateUserSettings(userSettings, authUser);
+    const userPreferences = await userSettingsService.addOrUpdateUserSettings(authUser, formData, image);
     logger.info(`Added or updated User Preferences for user with ID: ${authUser.pi_uid}`);
     res.status(200).json({ settings: userPreferences });    
   } catch (error: any) {

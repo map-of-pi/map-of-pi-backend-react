@@ -1,6 +1,7 @@
 import UserSettings from "../models/UserSettings";
 import { IUser, IUserSettings } from "../types";
 
+import { env } from "../utils/env";
 import logger from "../config/loggingConfig";
 
 export const getUserSettingsById = async (user_settings_id: string): Promise<IUserSettings | null> => {
@@ -13,25 +14,36 @@ export const getUserSettingsById = async (user_settings_id: string): Promise<IUs
   }
 };
 
-export const addOrUpdateUserSettings = async (userSettingsData: Partial<IUserSettings>, authUser: IUser): Promise<IUserSettings> => {
+export const addOrUpdateUserSettings = async (authUser: IUser, formData: any, image: string): Promise<IUserSettings> => {
   try {
-    let userSettings = await UserSettings.findOne({user_settings_id: authUser.pi_uid}).exec();
+    const existingUserSettings = await UserSettings.findOne({ user_settings_id: authUser.pi_uid }).exec();
     
-    if (userSettings){
-      const updateUserSettings = await UserSettings.findOneAndUpdate(
-        {user_settings_id: authUser.pi_uid}, 
-        userSettingsData, {new: true}
-      )
-      return updateUserSettings as IUserSettings;
+    // parse search_map_center from String into JSON object.
+    const searchMapCenter = formData.search_map_center 
+      ? JSON.parse(formData.search_map_center)
+      : { type: 'Point', coordinates: [0, 0] };
+
+    // construct user settings object
+    const userSettingsData: Partial<IUserSettings> = {
+      user_settings_id: authUser.pi_uid,
+      email: formData.email || existingUserSettings?.email || '',
+      phone_number: formData.phone_number || existingUserSettings?.phone_number || '',
+      image: image || existingUserSettings?.image || env.CLOUDINARY_PLACEHOLDER_URL,
+      search_map_center: searchMapCenter || existingUserSettings?.search_map_center || { type: 'Point', coordinates: [0, 0] }
+    };
+
+    if (existingUserSettings){
+      const updatedUserSettings = await UserSettings.findOneAndUpdate(
+        { user_settings_id: authUser.pi_uid },
+        { $set: userSettingsData },
+        { new: true }
+      ).exec();
+      return updatedUserSettings as IUserSettings;
     } else {
-      const newUserSettings = new UserSettings({
-        ...userSettingsData,
-        user_settings_id: authUser.pi_uid,      
-      });
+      const newUserSettings = new UserSettings(userSettingsData);
       const savedUserSettings = await newUserSettings.save();
       return savedUserSettings as IUserSettings;
     }
-    
   } catch (error: any) {
     logger.error(`Error registering user settings: ${error.message}`);
     throw new Error(error.message);
