@@ -8,17 +8,30 @@ const mapCenterSchema = new Schema<IMapCenter>(
       required: true, 
       unique: true 
     },
-    latitude: { 
-      type: Number, 
-      required: true 
+    search_map_center: { 
+      latitude: { 
+        type: Number, 
+        required: false 
+      },
+      longitude: { 
+        type: Number, 
+        required: false 
+      }
     },
-    longitude: { 
-      type: Number, 
-      required: true 
+    sell_map_center: { 
+      latitude: { 
+        type: Number, 
+        required: false 
+      },
+      longitude: { 
+        type: Number, 
+        required: false 
+      }
     }
   }
 );
 
-const MapCenter = mongoose.model<IMapCenter>("MapCenter", mapCenterSchema);
+const MapCenter = mongoose.model<IMapCenter>('MapCenter', mapCenterSchema);
 
 export default MapCenter;
+
