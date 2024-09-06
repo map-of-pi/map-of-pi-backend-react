@@ -49,3 +49,14 @@ export const addOrUpdateUserSettings = async (authUser: IUser, formData: any, im
     throw new Error(error.message);
   }
 };
+
+// Delete existing user settings
+export const deleteUserSettings = async (user_settings_id: string): Promise<IUserSettings | null> => {
+  try {
+    const deletedUserSettings = await UserSettings.findOneAndDelete({ user_settings_id: user_settings_id }).exec();
+    return deletedUserSettings ? deletedUserSettings as IUserSettings : null;
+  } catch (error: any) {
+    logger.error(`Error deleting user settings with userSettingsID ${user_settings_id}: ${error.message}`);
+    throw new Error(error.message);
+  }
+};

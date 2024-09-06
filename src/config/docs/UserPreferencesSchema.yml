@@ -35,14 +35,6 @@ components:
         __v:
           type: number
           example: 0
-      required:
-        - user_settings_id
-        - email
-        - phone_number
-        - image
-        - search_map_center
-        - _id
-        - __v
 
     AddUserPreferencesRq:
       type: object
@@ -74,12 +66,6 @@ components:
           required:
             - type
             - coordinates
-      required:
-        - user_settings_id
-        - email
-        - phone_number
-        - image
-        - search_map_center
 
     AddUserPreferencesRs:
       type: object
@@ -116,46 +102,47 @@ components:
         __v:
           type: number
           example: 0
-      required:
-        - user_settings_id
-        - email
-        - phone_number
-        - image
-        - search_map_center
-        - _id
-        - __v
 
-    UpdateUserPreferencesRq:
-      type: object
-      properties:
-        user_settings_id:
-          type: string
-          example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
-        email:
-          type: string
-          example: test_user_preferences@example.com
-        phone_number:
-          type: number
-          example: 1234567890
-        image:
-          type: string
-          example: https://example.com/image.jpg
-        search_map_center:
-          type: object
-          properties:
-            type:
-              type: string
-              example: Point
-            coordinates:
-              type: array
-              items:
+    DeleteUserPreferencesRs:
+        type: object
+        properties:
+          message:
+            type: string
+            example: User Preferences deleted successfully.
+          deletedUserPreferences:
+            type: object
+            properties:
+              user_settings_id:
+                type: string
+                example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
+              email:
+                type: string
+                example: example@test.com
+              phone_number:
+                type: string
+                example: +1 123 456 7890
+              image:
+                type: string
+                format: binary
+                example: http://example.com/image.jpg
+              search_map_center:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: Point
+                  coordinates:
+                    type: array
+                    items:
+                      type: number
+                    example: [-73.856077, 40.848447]
+                required:
+                  - type
+                  - coordinates
+              _id:
+                type: string
+                example: 666c84b9d77068c6efeeaa1a
+              __v:
                 type: number
-              example: [-73.856077, 40.848447]
-          required:
-            - type
-            - coordinates
-      required:
-        - email
-        - phone_number
-        - image
-        - search_map_center
+                example: 0
+  

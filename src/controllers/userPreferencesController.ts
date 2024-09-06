@@ -61,3 +61,15 @@ export const addUserPreferences = async (req: Request, res: Response) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const deleteUserPreferences = async (req: Request, res: Response) => {
+  const { user_settings_id: user_settings_id } = req.params;
+  try {
+    const deletedUserSettings = await userSettingsService.deleteUserSettings(user_settings_id);
+    logger.info(`Deleted user preferences with ID ${user_settings_id}`);
+    res.status(200).json({ message: "User Preferences deleted successfully", deletedUserSettings: deletedUserSettings });
+  } catch (error: any) {
+    logger.error(`Failed to delete user preferences with ID ${user_settings_id}: ${error.message}`);
+    res.status(500).json({ message: error.message });
+  }
+};
