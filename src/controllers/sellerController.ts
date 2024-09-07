@@ -1,9 +1,7 @@
 import { Request, Response } from "express";
 import * as sellerService from "../services/seller.service";
 import { uploadImage } from "../services/misc/image.service";
-import { ISeller } from "../types";
 
-import { env } from "../utils/env";
 import logger from "../config/loggingConfig";
 
 export const fetchSellersByLocation = async (req: Request, res: Response) => {
@@ -11,10 +9,10 @@ export const fetchSellersByLocation = async (req: Request, res: Response) => {
     const { origin, radius } = req.body;
     const sellers = await sellerService.getAllSellers(origin, radius);
     if (!sellers || sellers.length === 0) {
-      logger.warn(`No sellers found within ${radius}km of ${origin}`);
+      logger.warn(`No sellers found within ${radius}km of ${JSON.stringify(origin)}`);
       return res.status(404).json({ message: "Sellers not found" });
     }
-    logger.info(`Fetched ${sellers.length} sellers within ${radius}km of ${origin}`);
+    logger.info(`Fetched ${sellers.length} sellers within ${radius}km of ${JSON.stringify(origin)}`);
     res.status(200).json(sellers);
   } catch (error: any) {
     logger.error(`Failed to fetch sellers by location: ${error.message}`);
