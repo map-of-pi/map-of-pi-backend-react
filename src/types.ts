@@ -11,9 +11,11 @@ export interface IUser extends Document {
 
 export interface IUserSettings extends Document {
   user_settings_id: string;
+  user_name: string;
   email?: string;
   phone_number?: string;
   image?: string; 
+  findme: string;
   search_map_center?: {
     type: 'Point';
     coordinates: [number, number];
