@@ -5,11 +5,19 @@ import User from "../models/User";
 import UserSettings from "../models/UserSettings";
 
 // Fetch all sellers or within a specific radius from a given origin
-export const getAllSellers = async (origin?: { lat: number; lng: number }, radius?: number): Promise<ISeller[]> => {
+export const getAllSellers = async (
+  origin?: { lat: number; lng: number },
+  radius?: number
+): Promise<ISeller[]> => {
   try {
     let sellers;
+    const query = {
+      seller_type: { $ne: 'CurrentlyNotSelling' } // Exclude sellers with type 'CurrentlyNotSelling'
+    };
+
     if (origin && radius) {
       sellers = await Seller.find({
+        ...query,
         sell_map_center: {
           $geoWithin: {
             $centerSphere: [[origin.lng, origin.lat], radius / 6378.1] // Radius in radians
@@ -17,8 +25,9 @@ export const getAllSellers = async (origin?: { lat: number; lng: number }, radiu
         }
       }).exec();
     } else {
-      sellers = await Seller.find().exec();
+      sellers = await Seller.find(query).exec();
     }
+
     return sellers;
   } catch (error: any) {
     logger.error(`Error retrieving sellers: ${error.message}`);
@@ -35,8 +44,9 @@ export const getSellers = async (search_query: string): Promise<ISeller[] | null
             { description: { $regex: search_query, $options: 'i' } },
             { sale_items: { $regex: search_query, $options: 'i' } },
           ],
+          seller_type: { $ne: 'CurrentlyNotSelling' },
         }
-      : {};
+      : { seller_type: { $ne: 'CurrentlyNotSelling' } };
 
       const sellers = await Seller.find(searchCriteria).exec();
       return sellers.length ? sellers : null; 

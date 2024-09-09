@@ -6,6 +6,9 @@ components:
         user_settings_id:
           type: string
           example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
+        user_name:
+          type: string
+          example: Test User
         email:
           type: string
           example: test_user_preferences@example.com
@@ -15,6 +18,12 @@ components:
         image:
           type: string
           example: https://example.com/image.jpg
+        findme_preference:
+          type: string
+          example: deviceGPS
+        user_name:
+          type: string
+          example: Test User
         search_map_center:
           type: object
           properties:
@@ -50,6 +59,9 @@ components:
         user_settings_id:
           type: string
           example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
+        user_name:
+          type: string
+          example: Test User
         email:
           type: string
           example: test_user_preferences@example.com
@@ -59,6 +71,9 @@ components:
         image:
           type: string
           example: https://example.com/image.jpg
+        findme_preference:
+          type: string
+          example: deviceGPS
         search_map_center:
           type: object
           properties:
@@ -86,6 +101,9 @@ components:
         user_settings_id:
           type: string
           example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
+        user_name:
+          type: string
+          example: Test User
         email:
           type: string
           example: test_user_preferences@example.com
@@ -95,6 +113,9 @@ components:
         image:
           type: string
           example: https://example.com/image.jpg
+        findme_preference:
+          type: string
+          example: deviceGPS
         search_map_center:
           type: object
           properties:
@@ -130,6 +151,9 @@ components:
         user_settings_id:
           type: string
           example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
+        user_name:
+          type: string
+          example: Test User
         email:
           type: string
           example: test_user_preferences@example.com
@@ -139,6 +163,9 @@ components:
         image:
           type: string
           example: https://example.com/image.jpg
+        findme_preference:
+          type: string
+          example: deviceGPS
         search_map_center:
           type: object
           properties:
