@@ -101,7 +101,7 @@ export const addReviewFeedback = async (authUser: IUser, formData: any, image: s
       reply_to_review_id: formData.reply_to_review_id || null,
       rating: formData.rating || '',
       comment: formData.comment || '',
-      image: image || env.CLOUDINARY_PLACEHOLDER_URL,
+      image: image || '',
       review_date: new Date()
     };
     const newReviewFeedback = new ReviewFeedback(reviewFeedbackData);

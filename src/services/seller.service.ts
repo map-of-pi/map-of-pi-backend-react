@@ -88,7 +88,7 @@ export const registerOrUpdateSeller = async (authUser: IUser, formData: any, ima
       name: formData.name || existingSeller?.name || authUser.user_name,
       description: formData.description || existingSeller?.description || '',
       seller_type: formData.seller_type || existingSeller?.seller_type || '',
-      image: image || existingSeller?.image || env.CLOUDINARY_PLACEHOLDER_URL,
+      image: image || existingSeller?.image || '',
       address: formData.address || existingSeller?.address || '',
       sale_items: formData.sale_items || existingSeller?.sale_items || '',
       sell_map_center: sellMapCenter || existingSeller?.sell_map_center || { type: 'Point', coordinates: [0, 0] },

@@ -28,7 +28,7 @@ export const addOrUpdateUserSettings = async (authUser: IUser, formData: any, im
       user_settings_id: authUser.pi_uid,
       email: formData.email || existingUserSettings?.email || '',
       phone_number: formData.phone_number || existingUserSettings?.phone_number || '',
-      image: image || existingUserSettings?.image || env.CLOUDINARY_PLACEHOLDER_URL,
+      image: image || existingUserSettings?.image || '',
       search_map_center: searchMapCenter || existingUserSettings?.search_map_center || { type: 'Point', coordinates: [0, 0] }
     };
 
