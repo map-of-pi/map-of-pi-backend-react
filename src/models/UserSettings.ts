@@ -25,7 +25,7 @@ const userSettingsSchema = new Schema<IUserSettings>(
       type: String,
       required: false,
     },
-    findme: {
+    findme_preference: {
       type: String,
       required: true,
       default: 'deviceGPS'

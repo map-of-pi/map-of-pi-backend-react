@@ -35,7 +35,6 @@ export const getAllSellers = async (
   }
 };
 
-
 export const getSellers = async (search_query: string): Promise<ISeller[] | null> => {
   try {
     const searchCriteria = search_query

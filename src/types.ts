@@ -15,7 +15,7 @@ export interface IUserSettings extends Document {
   email?: string;
   phone_number?: string;
   image?: string; 
-  findme: string;
+  findme_preference: string;
   search_map_center?: {
     type: 'Point';
     coordinates: [number, number];
