@@ -21,9 +21,6 @@ components:
         findme_preference:
           type: string
           example: deviceGPS
-        user_name:
-          type: string
-          example: Test User
         search_map_center:
           type: object
           properties:
