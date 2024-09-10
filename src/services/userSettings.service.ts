@@ -1,7 +1,7 @@
 import UserSettings from "../models/UserSettings";
+import User from "../models/User";
 import { IUser, IUserSettings } from "../types";
 
-import { env } from "../utils/env";
 import logger from "../config/loggingConfig";
 
 export const getUserSettingsById = async (user_settings_id: string): Promise<IUserSettings | null> => {
@@ -14,10 +14,27 @@ export const getUserSettingsById = async (user_settings_id: string): Promise<IUs
   }
 };
 
-export const addOrUpdateUserSettings = async (authUser: IUser, formData: any, image: string): Promise<IUserSettings> => {
+export const addOrUpdateUserSettings = async (
+  authUser: IUser, 
+  formData: any, 
+  image: string
+): Promise<IUserSettings> => {
   try {
-    const existingUserSettings = await UserSettings.findOne({ user_settings_id: authUser.pi_uid }).exec();
-    
+    // Update the user_name if it's empty
+    if (formData.user_name.trim() === "") {
+      formData.user_name = authUser.pi_username;
+
+      await User.findOneAndUpdate(
+        { pi_uid: authUser.pi_uid },
+        { user_name: formData.user_name },
+        { new: true }
+      ).exec();
+    }
+
+    let existingUserSettings = await UserSettings.findOne({
+      user_settings_id: authUser.pi_uid
+    }).exec();
+
     // parse search_map_center from String into JSON object.
     const searchMapCenter = formData.search_map_center 
       ? JSON.parse(formData.search_map_center)
@@ -26,20 +43,24 @@ export const addOrUpdateUserSettings = async (authUser: IUser, formData: any, im
     // construct user settings object
     const userSettingsData: Partial<IUserSettings> = {
       user_settings_id: authUser.pi_uid,
+      user_name: formData.user_name || '',
       email: formData.email || existingUserSettings?.email || '',
       phone_number: formData.phone_number || existingUserSettings?.phone_number || '',
       image: image || existingUserSettings?.image || '',
       search_map_center: searchMapCenter || existingUserSettings?.search_map_center || { type: 'Point', coordinates: [0, 0] }
-    };
+    };    
 
-    if (existingUserSettings){
+    if (existingUserSettings) {
       const updatedUserSettings = await UserSettings.findOneAndUpdate(
         { user_settings_id: authUser.pi_uid },
-        { $set: userSettingsData },
+        { $set: userSettingsData }, // Include the potentially updated user_name
         { new: true }
       ).exec();
+
       return updatedUserSettings as IUserSettings;
+
     } else {
+      // If no existing user settings, create a new record
       const newUserSettings = new UserSettings(userSettingsData);
       const savedUserSettings = await newUserSettings.save();
       return savedUserSettings as IUserSettings;

@@ -15,6 +15,9 @@ import upload from "../utils/multer";
  *         user_settings_id:
  *           type: string
  *           description: Pi user ID
+ *         user_name: 
+ *           type: string
+ *           description: Name of the user
  *         email:
  *           type: string
  *           description: Email address of the user
@@ -24,6 +27,9 @@ import upload from "../utils/multer";
  *         image:
  *           type: string
  *           description: Image of the user
+ *         findme_preference:
+ *           type: string
+ *           description: FindMe preference of the user
  *         search_map_center:
  *           type: object
  *           description: Geographical coordinates of the user's search center location

@@ -9,7 +9,7 @@ let mongoServer: MongoMemoryServer;
 
 const mockUser = {
   pi_uid: '123-456-7890',
-  user_name: 'TestUser',
+  pi_username: 'TestUser',
 } as IUser;
 
 const formData = {

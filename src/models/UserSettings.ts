@@ -9,6 +9,10 @@ const userSettingsSchema = new Schema<IUserSettings>(
       required: true,
       unique: true
     },
+    user_name: {
+      type: String,
+      required: true,
+    },
     email: {
       type: String,
       required: false,
@@ -20,6 +24,11 @@ const userSettingsSchema = new Schema<IUserSettings>(
     image: {
       type: String,
       required: false,
+    },
+    findme_preference: {
+      type: String,
+      required: true,
+      default: 'deviceGPS'
     },
     search_map_center: {
       type: {

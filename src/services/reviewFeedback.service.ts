@@ -1,9 +1,8 @@
-import { IReviewFeedback, IUser } from "../types";
-import { getUser } from "./user.service";
 import ReviewFeedback from "../models/ReviewFeedback";
 import Seller from "../models/Seller";
+import { IReviewFeedback, IUser } from "../types";
+import { getUser } from "./user.service";
 
-import { env } from "../utils/env";
 import logger from "../config/loggingConfig";
 
 /**
