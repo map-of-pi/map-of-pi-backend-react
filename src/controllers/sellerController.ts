@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import * as sellerService from "../services/seller.service";
+
 import logger from '../config/loggingConfig';
 
 export const fetchSellersByCriteria = async (req: Request, res: Response) => {
@@ -14,17 +15,6 @@ export const fetchSellersByCriteria = async (req: Request, res: Response) => {
     res.status(200).json(sellers);
   } catch (error: any) {
     logger.error(`Failed to fetch sellers by criteria: ${error.message}`);
-    res.status(500).json({ message: error.message });
-  }
-};
-
-export const getSellers = async (req: Request, res: Response) => {
-  const { search_query = '' } = req.params; // default to empty string if not provided
-  try {
-    const sellers = await sellerService.getSellers(search_query);
-    res.status(200).json(sellers);
-  } catch (error: any) {
-    logger.error(`Failed to get sellers with search query "${search_query}": ${error.message}`);
     res.status(500).json({ message: error.message });
   }
 };

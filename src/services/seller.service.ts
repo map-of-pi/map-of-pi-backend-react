@@ -51,27 +51,6 @@ export const getAllSellers = async (
   }
 };
 
-export const getSellers = async (search_query: string): Promise<ISeller[] | null> => {
-  try {
-    const searchCriteria = search_query
-      ? {
-          $or: [
-            { name: { $regex: search_query, $options: 'i' } },
-            { description: { $regex: search_query, $options: 'i' } },
-            { sale_items: { $regex: search_query, $options: 'i' } },
-          ],
-          seller_type: { $ne: 'CurrentlyNotSelling' },
-        }
-      : { seller_type: { $ne: 'CurrentlyNotSelling' } };
-
-      const sellers = await Seller.find(searchCriteria).exec();
-      return sellers.length ? sellers : null; 
-  } catch (error: any) {
-    logger.error(`Error retrieving sellers matching search query "${search_query}": ${error.message}`);
-    throw new Error(error.message);
-  }
-};
-
 // Fetch a single seller by ID
 export const getSingleSellerById = async (seller_id: string): Promise<ISeller | null> => {
   try {
