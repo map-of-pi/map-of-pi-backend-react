@@ -2,18 +2,18 @@ import { Request, Response } from "express";
 import * as sellerService from "../services/seller.service";
 import logger from '../config/loggingConfig';
 
-export const fetchSellersByLocation = async (req: Request, res: Response) => {
+export const fetchSellersByCriteria = async (req: Request, res: Response) => {
   try {
-    const { origin, radius } = req.body;
-    const sellers = await sellerService.getAllSellers(origin, radius);
+    const { origin, radius, search_query} = req.body;
+    const sellers = await sellerService.getAllSellers(origin, radius, search_query);
     if (!sellers || sellers.length === 0) {
-      logger.warn(`No sellers found within ${radius}km of ${origin}`);
+      logger.warn(`No sellers found within ${radius}km of ${origin} with "${search_query}"`);
       return res.status(404).json({ message: "Sellers not found" });
     }
-    logger.info(`Fetched ${sellers.length} sellers within ${radius}km of ${origin}`);
+    logger.info(`Fetched ${sellers.length} sellers within ${radius}km of ${origin} with "${search_query}"`);
     res.status(200).json(sellers);
   } catch (error: any) {
-    logger.error(`Failed to fetch sellers by location: ${error.message}`);
+    logger.error(`Failed to fetch sellers by criteria: ${error.message}`);
     res.status(500).json({ message: error.message });
   }
 };
