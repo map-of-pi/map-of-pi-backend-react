@@ -31,6 +31,7 @@ export const getAllSellers = async (
     // merge criterias
     const aggregatedCriteria = { ...baseCriteria, ...searchCriteria };
 
+    // conditional to apply geospatial filtering
     if (origin && radius) {
       sellers = await Seller.find({
         ...aggregatedCriteria,

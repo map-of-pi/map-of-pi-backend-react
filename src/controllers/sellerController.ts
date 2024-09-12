@@ -7,11 +7,13 @@ export const fetchSellersByCriteria = async (req: Request, res: Response) => {
   try {
     const { origin, radius, search_query} = req.body;
     const sellers = await sellerService.getAllSellers(origin, radius, search_query);
+    const originString = origin ? `(${origin.lat}, ${origin.lng})` : 'undefined';
+
     if (!sellers || sellers.length === 0) {
-      logger.warn(`No sellers found within ${radius}km of ${origin} with "${search_query}"`);
+      logger.warn(`No sellers found within ${radius ?? 'undefined'} km of ${originString} with "${search_query ?? 'undefined'}"`);
       return res.status(404).json({ message: "Sellers not found" });
     }
-    logger.info(`Fetched ${sellers.length} sellers within ${radius}km of ${origin} with "${search_query}"`);
+    logger.info(`Fetched ${sellers.length} sellers within ${radius ?? 'undefined'} km of ${originString} with "${search_query ?? 'undefined'}"`);
     res.status(200).json(sellers);
   } catch (error: any) {
     logger.error(`Failed to fetch sellers by criteria: ${error.message}`);
