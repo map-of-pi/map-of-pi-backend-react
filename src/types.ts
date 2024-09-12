@@ -16,6 +16,7 @@ export interface IUserSettings extends Document {
   phone_number?: string;
   image?: string; 
   findme: string;
+  trust_meter_rating: TrustMeterScale;
   search_map_center?: {
     type: 'Point';
     coordinates: [number, number];
@@ -29,9 +30,7 @@ export interface ISeller extends Document {
   description: string;
   image?: string;
   address?: string;
-  sale_items?: string;
   average_rating: Types.Decimal128;
-  trust_meter_rating: TrustMeterScale;
   sell_map_center: {
     type: 'Point';
     coordinates: [number, number];
@@ -55,3 +54,15 @@ export interface IMapCenter extends Document {
   latitude: number;
   longitude: number;
 }
+
+// Interface representing the selected fields from IUserSettings
+export interface PartialUserSettings {
+  set_name: string;
+  email?: string;
+  phone_number?: string;
+  findme: string;
+  trust_meter_rating: TrustMeterScale;
+}
+
+// Combined interface representing a seller with selected user settings
+export interface ISellerWithSettings extends ISeller, PartialUserSettings {}

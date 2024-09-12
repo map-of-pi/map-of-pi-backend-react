@@ -3,18 +3,49 @@ import { ISeller, IUser, IUserSettings } from "../types";
 import logger from "../config/loggingConfig";
 import User from "../models/User";
 import UserSettings from "../models/UserSettings";
+import { getUserSettingsById } from "./userSettings.service";
+import { ISellerWithSettings } from "../types";
+
+
+// Helper function to get settings for all sellers and merge them into seller objects
+const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSettings[]> => {
+  const sellersWithSettings = await Promise.all(
+    sellers.map(async (seller) => {
+      // Convert the seller document to a plain object
+      const sellerObject = seller.toObject();
+
+      // Fetch the user settings for the seller
+      const sellerSetting = await getUserSettingsById(seller.seller_id);
+      
+      // Merge seller and settings into a single object
+      return {
+        ...sellerObject, // Spread seller fields as a plain object
+        trust_meter_rating: sellerSetting?.trust_meter_rating,
+        set_name: sellerSetting?.user_name,
+        findme: sellerSetting?.findme,
+        email: sellerSetting?.email,
+        phone_number: sellerSetting?.phone_number
+      } as ISellerWithSettings;
+    })
+  );
+
+  console.log(sellersWithSettings);
+  return sellersWithSettings;
+};
+
 
 // Fetch all sellers or within a specific radius from a given origin
 export const getAllSellers = async (
   origin?: { lat: number; lng: number },
   radius?: number
-): Promise<ISeller[]> => {
+): Promise<ISellerWithSettings[]> => {
   try {
-    let sellers;
+    let sellers: ISeller[];
     const query = {
       seller_type: { $ne: 'CurrentlyNotSelling' } // Exclude sellers with type 'CurrentlyNotSelling'
     };
 
+    // If origin and radius are provided, find sellers within the specified radius
     if (origin && radius) {
       sellers = await Seller.find({
         ...query,
@@ -25,37 +56,49 @@ export const getAllSellers = async (
         }
       }).exec();
     } else {
+      // Otherwise, return all sellers
       sellers = await Seller.find(query).exec();
     }
 
-    return sellers;
+    // Fetch and merge the settings for each seller
+    const sellersWithSettings = await resolveSellerSettings(sellers);
+
+    // Return sellers with their settings merged
+    return sellersWithSettings;
   } catch (error: any) {
     logger.error(`Error retrieving sellers: ${error.message}`);
     throw new Error(error.message);
   }
 };
 
-
-export const getSellers = async (search_query: string): Promise<ISeller[] | null> => {
+// Fetch sellers matching a search query
+export const getSellers = async (search_query: string): Promise<ISellerWithSettings[]> => {
   try {
+    // Construct the search criteria
     const searchCriteria = search_query
       ? {
           $or: [
-            { name: { $regex: search_query, $options: 'i' } },
-            { description: { $regex: search_query, $options: 'i' } },
-            { sale_items: { $regex: search_query, $options: 'i' } },
+            { name: { $regex: search_query, $options: 'i' } },          // Search by name
+            { description: { $regex: search_query, $options: 'i' } },   // Search by description
+            { sale_items: { $regex: search_query, $options: 'i' } },    // Search by sale items
           ],
-          seller_type: { $ne: 'CurrentlyNotSelling' },
+          seller_type: { $ne: 'CurrentlyNotSelling' },                  // Exclude "CurrentlyNotSelling" sellers
         }
-      : { seller_type: { $ne: 'CurrentlyNotSelling' } };
+      : { seller_type: { $ne: 'CurrentlyNotSelling' } };                // Default criteria if no search query
 
-      const sellers = await Seller.find(searchCriteria).exec();
-      return sellers.length ? sellers : null; 
+    // Fetch sellers based on criteria
+    const sellers = await Seller.find(searchCriteria).exec();
+
+    // Fetch settings for each seller and merge into the seller object
+    const sellersWithSettings = await resolveSellerSettings(sellers);
+    
+    return sellersWithSettings;
   } catch (error: any) {
     logger.error(`Error retrieving sellers matching search query "${search_query}": ${error.message}`);
     throw new Error(error.message);
   }
 };
+
 
 // Fetch a single seller by ID
 export const getSingleSellerById = async (seller_id: string): Promise<ISeller | null> => {
@@ -97,7 +140,6 @@ export const registerOrUpdateSeller = async (sellerData: ISeller, authUser: IUse
         ...sellerData,
         seller_id: authUser.pi_uid,
         name: shopName,
-        trust_meter_rating: 100,
         average_rating: 5.0,
         order_online_enabled_pref: false,
       });

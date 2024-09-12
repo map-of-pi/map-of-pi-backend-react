@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 
 import { IUserSettings } from "../types";
+import { TrustMeterScale } from "./enums/trustMeterScale"; // Ensure this import is correct
 
 const userSettingsSchema = new Schema<IUserSettings>(
   {
@@ -29,6 +30,12 @@ const userSettingsSchema = new Schema<IUserSettings>(
       type: String,
       required: true,
       default: 'deviceGPS'
+    },
+    trust_meter_rating: {
+      type: Number,
+      enum: Object.values(TrustMeterScale).filter(value => typeof value === 'number'),
+      required: true,
+      default: TrustMeterScale.HUNDRED
     },
     search_map_center: {
       type: {
