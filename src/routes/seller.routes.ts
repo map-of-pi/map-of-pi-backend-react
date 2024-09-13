@@ -59,14 +59,6 @@ import upload from "../utils/multer";
  *         order_online_enabled_pref:
  *           type: boolean
  *           description: Preference for online ordering availability
- *       required:
- *         - seller_id
- *         - name
- *         - description
- *         - seller_type
- *         - average_rating
- *         - trust_meter_rating
- *         - order_online_enabled_pref
  */
 const sellerRoutes = Router();
 
@@ -76,7 +68,7 @@ const sellerRoutes = Router();
  *   post:
  *     tags:
  *       - Seller
- *     summary: Fetch all sellers within given coordinates and radius, or all sellers if coordinates and radius are not provided
+ *     summary: Fetch all sellers within given coordinates, radius, and search criteria, or all sellers if no parameters are not provided
  *     requestBody:
  *       required: false
  *       content:
@@ -99,7 +91,7 @@ const sellerRoutes = Router();
  *       500:
  *         description: Internal server error
  */
-sellerRoutes.post("/fetch", sellerController.fetchSellersByLocation);
+sellerRoutes.post("/fetch", sellerController.fetchSellersByCriteria);
 
 /**
  * @swagger
@@ -130,36 +122,6 @@ sellerRoutes.post("/fetch", sellerController.fetchSellersByLocation);
  *         description: Internal server error
  */
 sellerRoutes.get("/:seller_id", sellerController.getSingleSeller);
-
-/**
- * @swagger
- * /api/v1/sellers/search/{search_query}:
- *   get:
- *     tags:
- *       - Seller
- *     summary: Get sellers based on search criteria
- *     parameters:
- *       - name: search_query
- *         in: path
- *         required: false
- *         schema:
- *           type: string
- *         description: The search query used to filter sellers 
- *     responses:
- *       200:
- *         description: Successful response
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '/api/docs/SellersSchema.yml#/components/schemas/GetAllSellersRs'
- *       400:
- *         description: Bad request
- *       500:
- *         description: Internal server error
- */
-sellerRoutes.get("/search/:search_query", sellerController.getSellers);
 
 /**
  * @swagger

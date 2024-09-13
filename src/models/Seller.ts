@@ -44,6 +44,7 @@ const sellerSchema = new Schema<ISeller>(
       type: Number,
       enum: Object.values(TrustMeterScale).filter(value => typeof value === 'number'),
       required: true,
+      default: TrustMeterScale.HUNDRED,
     },
     sell_map_center: {
       type: {
@@ -60,7 +61,7 @@ const sellerSchema = new Schema<ISeller>(
     },
     order_online_enabled_pref: {
       type: Boolean,
-      required: true,
+      required: false,
     }
   },
   { timestamps: true } // Adds timestamps to track creation and update times
