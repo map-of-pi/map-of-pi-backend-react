@@ -1,42 +1,23 @@
 import Seller from "../models/Seller";
-import { ISeller, IUser, IUserSettings } from "../types";
-import logger from "../config/loggingConfig";
 import User from "../models/User";
 import UserSettings from "../models/UserSettings";
+import { ISeller, IUser, IUserSettings } from "../types";
 
-// Fetch all sellers or within a specific radius from a given origin
+import logger from "../config/loggingConfig";
+
+// Fetch all sellers or within a specific radius from a given origin; optional search query.
 export const getAllSellers = async (
   origin?: { lat: number; lng: number },
-  radius?: number
+  radius?: number,
+  search_query?: string
 ): Promise<ISeller[]> => {
   try {
     let sellers;
-    const query = {
-      seller_type: { $ne: 'CurrentlyNotSelling' } // Exclude sellers with type 'CurrentlyNotSelling'
-    };
 
-    if (origin && radius) {
-      sellers = await Seller.find({
-        ...query,
-        sell_map_center: {
-          $geoWithin: {
-            $centerSphere: [[origin.lng, origin.lat], radius / 6378.1] // Radius in radians
-          }
-        }
-      }).exec();
-    } else {
-      sellers = await Seller.find(query).exec();
-    }
+    // always apply this condition to exclude 'CurrentlyNotSelling' sellers
+    const baseCriteria = { seller_type: { $ne: 'CurrentlyNotSelling' } };
 
-    return sellers;
-  } catch (error: any) {
-    logger.error(`Error retrieving sellers: ${error.message}`);
-    throw new Error(error.message);
-  }
-};
-
-export const getSellers = async (search_query: string): Promise<ISeller[] | null> => {
-  try {
+    // if search_query is provided, add search conditions
     const searchCriteria = search_query
       ? {
           $or: [
@@ -44,14 +25,29 @@ export const getSellers = async (search_query: string): Promise<ISeller[] | null
             { description: { $regex: search_query, $options: 'i' } },
             { sale_items: { $regex: search_query, $options: 'i' } },
           ],
-          seller_type: { $ne: 'CurrentlyNotSelling' },
         }
-      : { seller_type: { $ne: 'CurrentlyNotSelling' } };
+      : {};
 
-      const sellers = await Seller.find(searchCriteria).exec();
-      return sellers.length ? sellers : null; 
+    // merge criterias
+    const aggregatedCriteria = { ...baseCriteria, ...searchCriteria };
+
+    // conditional to apply geospatial filtering
+    if (origin && radius) {
+      sellers = await Seller.find({
+        ...aggregatedCriteria,
+        sell_map_center: {
+          $geoWithin: {
+            $centerSphere: [[origin.lng, origin.lat], radius / 6378.1] // Radius in radians
+          }
+        }
+      }).exec();
+    } else {
+      sellers = await Seller.find(aggregatedCriteria).exec();
+    }
+
+    return sellers;
   } catch (error: any) {
-    logger.error(`Error retrieving sellers matching search query "${search_query}": ${error.message}`);
+    logger.error(`Error retrieving sellers: ${error.message}`);
     throw new Error(error.message);
   }
 };
