@@ -15,6 +15,9 @@ components:
         radius:
           type: number
           example: 15
+        search_query:
+          type: string
+          example: test
 
     GetAllSellersRs:
       type: array
