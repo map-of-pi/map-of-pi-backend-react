@@ -3,7 +3,7 @@ import { IMapCenter } from '../types';
 
 const mapCenterSchema = new Schema<IMapCenter>(
   {
-    pi_uid: { 
+    map_center_id: { 
       type: String, 
       required: true, 
       unique: true 
@@ -34,4 +34,3 @@ const mapCenterSchema = new Schema<IMapCenter>(
 const MapCenter = mongoose.model<IMapCenter>('MapCenter', mapCenterSchema);
 
 export default MapCenter;
-

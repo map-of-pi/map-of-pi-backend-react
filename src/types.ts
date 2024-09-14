@@ -51,7 +51,7 @@ export interface IReviewFeedback extends Document {
 }
 
 export interface IMapCenter extends Document {
-  pi_uid: string;
+  map_center_id: string;
   search_map_center?: {
     latitude: number;
     longitude: number;
