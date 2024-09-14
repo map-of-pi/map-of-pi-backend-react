@@ -50,7 +50,7 @@ const sellerSchema = new Schema<ISeller>(
     },
     order_online_enabled_pref: {
       type: Boolean,
-      required: true,
+      required: false,
     }
   },
   { timestamps: true } // Adds timestamps to track creation and update times

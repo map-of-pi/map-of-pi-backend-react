@@ -1,11 +1,10 @@
 import Seller from "../models/Seller";
-import { ISeller, IUser, IUserSettings } from "../types";
-import logger from "../config/loggingConfig";
 import User from "../models/User";
 import UserSettings from "../models/UserSettings";
 import { getUserSettingsById } from "./userSettings.service";
-import { ISellerWithSettings } from "../types";
+import { ISeller, IUser, IUserSettings, ISellerWithSettings } from "../types";
 
+import logger from "../config/loggingConfig";
 
 // Helper function to get settings for all sellers and merge them into seller objects
 const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSettings[]> => {
@@ -29,26 +28,40 @@ const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSet
     })
   );
 
-  console.log(sellersWithSettings);
+  logger.debug(sellersWithSettings);
   return sellersWithSettings;
 };
 
-
-// Fetch all sellers or within a specific radius from a given origin
+// Fetch all sellers or within a specific radius from a given origin; optional search query.
 export const getAllSellers = async (
   origin?: { lat: number; lng: number },
-  radius?: number
+  radius?: number,
+  search_query?: string
 ): Promise<ISellerWithSettings[]> => {
   try {
     let sellers: ISeller[];
-    const query = {
-      seller_type: { $ne: 'CurrentlyNotSelling' } // Exclude sellers with type 'CurrentlyNotSelling'
-    };
 
-    // If origin and radius are provided, find sellers within the specified radius
+    // always apply this condition to exclude 'CurrentlyNotSelling' sellers
+    const baseCriteria = { seller_type: { $ne: 'CurrentlyNotSelling' } };
+
+    // if search_query is provided, add search conditions
+    const searchCriteria = search_query
+      ? {
+          $or: [
+            { name: { $regex: search_query, $options: 'i' } },
+            { description: { $regex: search_query, $options: 'i' } },
+            { sale_items: { $regex: search_query, $options: 'i' } },
+          ],
+        }
+      : {};
+
+    // merge criterias
+    const aggregatedCriteria = { ...baseCriteria, ...searchCriteria };
+
+    // conditional to apply geospatial filtering
     if (origin && radius) {
       sellers = await Seller.find({
-        ...query,
+        ...aggregatedCriteria,
         sell_map_center: {
           $geoWithin: {
             $centerSphere: [[origin.lng, origin.lat], radius / 6378.1] // Radius in radians
@@ -56,8 +69,7 @@ export const getAllSellers = async (
         }
       }).exec();
     } else {
-      // Otherwise, return all sellers
-      sellers = await Seller.find(query).exec();
+      sellers = await Seller.find(aggregatedCriteria).exec();
     }
 
     // Fetch and merge the settings for each seller
@@ -70,35 +82,6 @@ export const getAllSellers = async (
     throw new Error(error.message);
   }
 };
-
-// Fetch sellers matching a search query
-export const getSellers = async (search_query: string): Promise<ISellerWithSettings[]> => {
-  try {
-    // Construct the search criteria
-    const searchCriteria = search_query
-      ? {
-          $or: [
-            { name: { $regex: search_query, $options: 'i' } },          // Search by name
-            { description: { $regex: search_query, $options: 'i' } },   // Search by description
-            { sale_items: { $regex: search_query, $options: 'i' } },    // Search by sale items
-          ],
-          seller_type: { $ne: 'CurrentlyNotSelling' },                  // Exclude "CurrentlyNotSelling" sellers
-        }
-      : { seller_type: { $ne: 'CurrentlyNotSelling' } };                // Default criteria if no search query
-
-    // Fetch sellers based on criteria
-    const sellers = await Seller.find(searchCriteria).exec();
-
-    // Fetch settings for each seller and merge into the seller object
-    const sellersWithSettings = await resolveSellerSettings(sellers);
-    
-    return sellersWithSettings;
-  } catch (error: any) {
-    logger.error(`Error retrieving sellers matching search query "${search_query}": ${error.message}`);
-    throw new Error(error.message);
-  }
-};
-
 
 // Fetch a single seller by ID
 export const getSingleSellerById = async (seller_id: string): Promise<ISeller | null> => {
