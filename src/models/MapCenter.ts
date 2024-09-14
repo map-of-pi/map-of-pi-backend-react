@@ -10,31 +10,29 @@ const mapCenterSchema = new Schema<IMapCenter>(
     },
     search_map_center: {
       type: {
-        $type: String,
+        type: String, // Corrected to use `type` directly
         enum: ['Point'],
         default: 'Point',
       },
       coordinates: {
-        $type: [Number],
+        type: [Number], // Corrected to use `type` directly
         index: '2dsphere',
       },
     },
     sell_map_center: {
       type: {
-        $type: String,
+        type: String, // Corrected to use `type` directly
         enum: ['Point'],
         default: 'Point',
       },
       coordinates: {
-        $type: [Number],
+        type: [Number], // Corrected to use `type` directly
         index: '2dsphere',
       },
     },
-  },
-  { typeKey: '$type' } // This ensures Mongoose uses $type instead of type
+  }
 );
 
 const MapCenter = mongoose.model<IMapCenter>('MapCenter', mapCenterSchema);
 
 export default MapCenter;
-
