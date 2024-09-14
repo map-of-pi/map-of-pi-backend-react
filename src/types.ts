@@ -10,9 +10,11 @@ export interface IUser extends Document {
 
 export interface IUserSettings extends Document {
   user_settings_id: string;
+  user_name: string;
   email?: string;
   phone_number?: string;
   image?: string; 
+  findme_preference: string;
   search_map_center?: {
     type: 'Point';
     coordinates: [number, number];
@@ -48,7 +50,7 @@ export interface IReviewFeedback extends Document {
 }
 
 export interface IMapCenter extends Document {
-  pi_uid: string;
+  map_center_id: string;
   search_map_center?: {
     type: 'Point';
     coordinates: [number, number];
