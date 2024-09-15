@@ -1,18 +1,42 @@
 import Seller from "../models/Seller";
 import User from "../models/User";
 import UserSettings from "../models/UserSettings";
-import { ISeller, IUser, IUserSettings } from "../types";
+import { getUserSettingsById } from "./userSettings.service";
+import { ISeller, IUser, IUserSettings, ISellerWithSettings } from "../types";
 
 import logger from "../config/loggingConfig";
+
+// Helper function to get settings for all sellers and merge them into seller objects
+const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSettings[]> => {
+  const sellersWithSettings = await Promise.all(
+    sellers.map(async (seller) => {
+      const sellerObject = seller.toObject();
+
+      // Fetch the user settings for the seller
+      const userSettings = await getUserSettingsById(seller.seller_id);
+      
+      // Merge seller and settings into a single object
+      return {
+        ...sellerObject,
+        trust_meter_rating: userSettings?.trust_meter_rating,
+        user_name: userSettings?.user_name,
+        findme: userSettings?.findme,
+        email: userSettings?.email,
+        phone_number: userSettings?.phone_number
+      } as ISellerWithSettings;
+    })
+  );
+  return sellersWithSettings;
+};
 
 // Fetch all sellers or within a specific radius from a given origin; optional search query.
 export const getAllSellers = async (
   origin?: { lat: number; lng: number },
   radius?: number,
   search_query?: string
-): Promise<ISeller[]> => {
+): Promise<ISellerWithSettings[]> => {
   try {
-    let sellers;
+    let sellers: ISeller[];
 
     // always apply this condition to exclude 'CurrentlyNotSelling' sellers
     const baseCriteria = { seller_type: { $ne: 'CurrentlyNotSelling' } };
@@ -45,7 +69,11 @@ export const getAllSellers = async (
       sellers = await Seller.find(aggregatedCriteria).exec();
     }
 
-    return sellers;
+    // Fetch and merge the settings for each seller
+    const sellersWithSettings = await resolveSellerSettings(sellers);
+
+    // Return sellers with their settings merged
+    return sellersWithSettings;
   } catch (error: any) {
     logger.error(`Error retrieving sellers: ${error.message}`);
     throw new Error(error.message);
@@ -92,7 +120,6 @@ export const registerOrUpdateSeller = async (sellerData: ISeller, authUser: IUse
         ...sellerData,
         seller_id: authUser.pi_uid,
         name: shopName,
-        trust_meter_rating: 100,
         average_rating: 5.0,
         order_online_enabled_pref: false,
       });

@@ -21,6 +21,8 @@ components:
         findme_preference:
           type: string
           example: deviceGPS
+        trust_meter_rating:
+          $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
         search_map_center:
           type: object
           properties:
@@ -43,12 +45,6 @@ components:
           example: 0
       required:
         - user_settings_id
-        - email
-        - phone_number
-        - image
-        - search_map_center
-        - _id
-        - __v
 
     AddUserPreferencesRq:
       type: object
@@ -71,6 +67,8 @@ components:
         findme_preference:
           type: string
           example: deviceGPS
+        trust_meter_rating:
+          $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
         search_map_center:
           type: object
           properties:
@@ -87,10 +85,6 @@ components:
             - coordinates
       required:
         - user_settings_id
-        - email
-        - phone_number
-        - image
-        - search_map_center
 
     AddUserPreferencesRs:
       type: object
@@ -113,6 +107,8 @@ components:
         findme_preference:
           type: string
           example: deviceGPS
+        trust_meter_rating:
+          $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
         search_map_center:
           type: object
           properties:
@@ -135,12 +131,6 @@ components:
           example: 0
       required:
         - user_settings_id
-        - email
-        - phone_number
-        - image
-        - search_map_center
-        - _id
-        - __v
 
     UpdateUserPreferencesRq:
       type: object
@@ -163,6 +153,8 @@ components:
         findme_preference:
           type: string
           example: deviceGPS
+        trust_meter_rating:
+          $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
         search_map_center:
           type: object
           properties:
@@ -178,7 +170,4 @@ components:
             - type
             - coordinates
       required:
-        - email
-        - phone_number
-        - image
-        - search_map_center
+        - user_settings_id

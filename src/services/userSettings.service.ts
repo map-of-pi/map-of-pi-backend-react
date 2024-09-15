@@ -50,6 +50,7 @@ export const addOrUpdateUserSettings = async (
       const newUserSettings = new UserSettings({
         ...userSettingsData,
         user_settings_id: authUser.pi_uid,
+        trust_meter_rating: 100,
       });
 
       const savedUserSettings = await newUserSettings.save();

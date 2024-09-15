@@ -30,9 +30,6 @@ import upload from "../utils/multer";
  *         address:
  *           type: string
  *           description: Address of the seller
- *         sale_items:
- *           type: string
- *           description: Sale items/descriptions offered by the seller
  *         average_rating:
  *           type: object
  *           description: Average rating of the seller
@@ -41,8 +38,6 @@ import upload from "../utils/multer";
  *               type: string
  *           required:
  *             - $numberDecimal
- *         trust_meter_rating:
- *           $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
  *         sell_map_center:
  *           type: object
  *           description: Geographical coordinates of the seller's location

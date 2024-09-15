@@ -42,9 +42,6 @@ components:
           address:
             type: string
             example: 1234 Test St, Test City, SC 12345
-          sale_items:
-            type: string
-            example: Test Item 1, Test Item 2
           average_rating:
             type: object
             properties:
@@ -53,8 +50,6 @@ components:
                 example: 4.5
             required:
               - $numberDecimal
-          trust_meter_rating:
-            $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
           sell_map_center:
             type: object
             properties:
@@ -79,16 +74,7 @@ components:
             type: number
             example: 0
         required:
-          - seller_id
-          - name
-          - description
-          - seller_type
-          - average_rating
-          - trust_meter_rating
-          - sell_map_center
-          - order_online_enabled_pref
-          - _id
-          - __v
+        - seller_id
 
     GetSingleSellerRs:
       type: object
@@ -111,9 +97,6 @@ components:
         address:
           type: string
           example: 1234 Test St, Test City, SC 12345
-        sale_items:
-          type: string
-          example: Test Item 1, Test Item 2
         average_rating:
           type: object
           properties:
@@ -122,8 +105,6 @@ components:
               example: 4.5
           required:
             - $numberDecimal
-        trust_meter_rating:
-          $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
         sell_map_center:
           type: object
           properties:
@@ -149,15 +130,6 @@ components:
           example: 0
       required:
         - seller_id
-        - name
-        - description
-        - seller_type
-        - average_rating
-        - trust_meter_rating
-        - sell_map_center
-        - order_online_enabled_pref
-        - _id
-        - __v
 
     GetSellerRegistrationRq:
       type: object
@@ -195,9 +167,6 @@ components:
             address:
               type: string
               example: 1234 Test St, Test City, SC 12345
-            sale_items:
-              type: string
-              example: Test Item 1, Test Item 2
             average_rating:
               type: object
               properties:
@@ -206,8 +175,6 @@ components:
                   example: 4.5
               required:
                 - $numberDecimal
-            trust_meter_rating:
-              $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
             sell_map_center:
               type: object
               properties:
@@ -233,15 +200,6 @@ components:
               example: 0
           required:
             - seller_id
-            - name
-            - description
-            - seller_type
-            - average_rating
-            - trust_meter_rating
-            - sell_map_center
-            - order_online_enabled_pref
-            - _id
-            - __v
       
     RegisterSellerRq:
       type: object
@@ -267,9 +225,6 @@ components:
             address:
               type: string
               example: 1234 Test St, Test City, SC 12345
-            sale_items:
-              type: string
-              example: Test Item 1, Test Item 2
             average_rating:
               type: object
               properties:
@@ -278,8 +233,6 @@ components:
                   example: 4.5
               required:
                 - $numberDecimal
-            trust_meter_rating:
-              $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
             sell_map_center:
               type: object
               properties:
@@ -299,17 +252,6 @@ components:
               example: true
           required:
             - seller_id
-            - name
-            - description
-            - seller_type
-            - average_rating
-            - trust_meter_rating
-            - sell_map_center
-            - order_online_enabled_pref
-            - _id
-            - __v
-      required:
-        - json
 
     RegisterSellerRs:
       type: object
@@ -332,9 +274,6 @@ components:
             address:
               type: string
               example: 1234 Test St, Test City, SC 12345
-            sale_items:
-              type: string
-              example: Test Item 1, Test Item 2
             sell_map_center:
               type: object
               properties:
@@ -377,9 +316,6 @@ components:
               address:
                 type: string
                 example: 1234 Test St, Test City, SC 12345
-              sale_items:
-                type: string
-                example: Test Item 1, Test Item 2
               average_rating:
                 type: object
                 properties:
@@ -388,8 +324,6 @@ components:
                     example: 4.5
                 required:
                   - $numberDecimal
-              trust_meter_rating:
-                $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
               sell_map_center:
                 type: object
                 properties:
@@ -415,11 +349,3 @@ components:
                 example: 0
             required:
               - seller_id
-              - name
-              - description
-              - average_rating
-              - trust_meter_rating
-              - sell_map_center
-              - order_online_enabled_pref
-              - _id
-              - __v
