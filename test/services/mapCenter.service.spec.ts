@@ -10,25 +10,13 @@ let mongoServer: MongoMemoryServer;
 const mockMapCenters = [
   {
     map_center_id: '0a0a0a-0a0a-0a0a',
-    search_map_center: {
-      latitude: 40.7128,
-      longitude: -74.0060
-    },
-    sell_map_center: {
-      latitude: 34.0522,
-      longitude: -118.2437
-    }
+    search_map_center: { type: 'Point', coordinates: [-74.0060, 40.7128] },
+    sell_map_center: { type: 'Point', coordinates: [-118.2437, 34.0522] }
   },
   {
     map_center_id: '0b0b0b-0b0b-0b0b',
-    search_map_center: {
-      latitude: 41.8781,
-      longitude: -87.6298
-    },
-    sell_map_center: {
-      latitude: 37.7749,
-      longitude: -122.4194
-    }
+    search_map_center: { type: 'Point', coordinates: [-87.6298, 41.8781] },
+    sell_map_center: { type: 'Point', coordinates: [-122.4194, 37.7749] }
   }
  ] as IMapCenter[];
 
@@ -90,10 +78,10 @@ describe('createOrUpdateMapCenter function', () => {
     expect(result).toBeDefined();
     // assert if result matches the expected map center object
     expect(result.map_center_id).toEqual(mockMapCenters[1].map_center_id);
-    expect(result.search_map_center).toEqual(expect.objectContaining({
-      latitude: updatedSearchMapCenter.latitude,
-      longitude: updatedSearchMapCenter.longitude
-    }));
+    // assert GeoJSON coordinates directly
+    expect(result.search_map_center?.coordinates).toEqual([
+      updatedSearchMapCenter.longitude, updatedSearchMapCenter.latitude
+    ]);
   });
 
   it('should update the appropriate sell_map_center instance if the entry type is sell', async () => {
@@ -113,9 +101,9 @@ describe('createOrUpdateMapCenter function', () => {
     expect(result).toBeDefined();
     // assert if result matches the expected map center object
     expect(result.map_center_id).toEqual(mockMapCenters[1].map_center_id);
-    expect(result.sell_map_center).toEqual(expect.objectContaining({
-      latitude: updatedSellMapCenter.latitude,
-      longitude: updatedSellMapCenter.longitude
-    }));
+    // assert GeoJSON coordinates directly
+    expect(result.search_map_center?.coordinates).toEqual([
+      updatedSellMapCenter.longitude, updatedSellMapCenter.latitude
+    ]);
   });
 });
