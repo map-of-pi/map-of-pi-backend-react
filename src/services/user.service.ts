@@ -20,6 +20,10 @@ export const authenticate = async (currentUser: IUser): Promise<IUser> => {
         pi_username: currentUser.pi_username,
         user_name: currentUser.user_name
       });
+      const uerSettings = await UserSettings.create({
+        user_settings_id: currentUser.pi_uid
+      })
+      
       return newUser;
     }
   } catch (error: any) {
