@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 
 import { IUserSettings } from "../types";
-import { TrustMeterScale } from "./enums/trustMeterScale"; // Ensure this import is correct
+import { TrustMeterScale } from "./enums/trustMeterScale";
 
 const userSettingsSchema = new Schema<IUserSettings>(
   {

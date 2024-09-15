@@ -10,25 +10,22 @@ import logger from "../config/loggingConfig";
 const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSettings[]> => {
   const sellersWithSettings = await Promise.all(
     sellers.map(async (seller) => {
-      // Convert the seller document to a plain object
       const sellerObject = seller.toObject();
 
       // Fetch the user settings for the seller
-      const sellerSetting = await getUserSettingsById(seller.seller_id);
+      const userSettings = await getUserSettingsById(seller.seller_id);
       
       // Merge seller and settings into a single object
       return {
-        ...sellerObject, // Spread seller fields as a plain object
-        trust_meter_rating: sellerSetting?.trust_meter_rating,
-        set_name: sellerSetting?.user_name,
-        findme: sellerSetting?.findme,
-        email: sellerSetting?.email,
-        phone_number: sellerSetting?.phone_number
+        ...sellerObject,
+        trust_meter_rating: userSettings?.trust_meter_rating,
+        user_name: userSettings?.user_name,
+        findme: userSettings?.findme,
+        email: userSettings?.email,
+        phone_number: userSettings?.phone_number
       } as ISellerWithSettings;
     })
   );
-
-  logger.debug(sellersWithSettings);
   return sellersWithSettings;
 };
 
