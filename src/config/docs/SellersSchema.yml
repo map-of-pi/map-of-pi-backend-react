@@ -15,6 +15,9 @@ components:
         radius:
           type: number
           example: 15
+        search_query:
+          type: string
+          example: test
 
     GetAllSellersRs:
       type: array
@@ -30,18 +33,23 @@ components:
           description:
             type: string
             example: This is a sample seller description.
+          seller_type:
+            $ref: '/api/docs/enum/SellerType.yml#/components/schemas/SellerType'
           address:
             type: string
             example: 1234 Test St, Test City, SC 12345
-          seller_type:
-            $ref: '/api/docs/enum/SellerType.yml#/components/schemas/SellerType'
-          sale_items:
-            type: string
-            example: Test Item 1, Test Item 2
           image:
             type: string
             format: binary
             example: http://example.com/image.jpg
+          average_rating:
+            type: object
+            properties:
+              $numberDecimal:
+                type: string
+                example: 4.5
+            required:
+              - $numberDecimal
           sell_map_center:
             type: object
             properties:
@@ -59,22 +67,14 @@ components:
           order_online_enabled_pref:
             type: boolean
             example: true
-          average_rating:
-            type: object
-            properties:
-              $numberDecimal:
-                type: string
-                example: 4.5
-            required:
-              - $numberDecimal
-          trust_meter_rating:
-            $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
           _id:
             type: string
             example: 666c84b9d77068c6efeeaa1a
           __v:
             type: number
             example: 0
+        required:
+        - seller_id
 
     GetSingleSellerRs:
       type: object
@@ -88,18 +88,23 @@ components:
         description:
           type: string
           example: This is a sample seller description.
+        seller_type:
+          $ref: '/api/docs/enum/SellerType.yml#/components/schemas/SellerType'
         address:
           type: string
           example: 1234 Test St, Test City, SC 12345
-        seller_type:
-          $ref: '/api/docs/enum/SellerType.yml#/components/schemas/SellerType'
-        sale_items:
-          type: string
-          example: Test Item 1, Test Item 2
         image:
           type: string
           format: binary
           example: http://example.com/image.jpg
+        average_rating:
+          type: object
+          properties:
+            $numberDecimal:
+              type: string
+              example: 4.5
+          required:
+            - $numberDecimal
         sell_map_center:
           type: object
           properties:
@@ -117,22 +122,14 @@ components:
         order_online_enabled_pref:
           type: boolean
           example: true
-        average_rating:
-          type: object
-          properties:
-            $numberDecimal:
-              type: string
-              example: 4.5
-          required:
-            - $numberDecimal
-        trust_meter_rating:
-          $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
         _id:
           type: string
           example: 666c84b9d77068c6efeeaa1a
         __v:
           type: number
           example: 0
+      required:
+        - seller_id
 
     GetSellerRegistrationRq:
       type: object
@@ -163,16 +160,13 @@ components:
               example: This is a sample seller description.
             seller_type:
               $ref: '/api/docs/enum/SellerType.yml#/components/schemas/SellerType'
+            address:
+              type: string
+              example: 1234 Test St, Test City, SC 12345
             image:
               type: string
               format: binary
               example: http://example.com/image.jpg
-            address:
-              type: string
-              example: 1234 Test St, Test City, SC 12345
-            sale_items:
-              type: string
-              example: Test Item 1, Test Item 2
             average_rating:
               type: object
               properties:
@@ -181,8 +175,6 @@ components:
                   example: 4.5
               required:
                 - $numberDecimal
-            trust_meter_rating:
-              $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
             sell_map_center:
               type: object
               properties:
@@ -206,6 +198,8 @@ components:
             __v:
               type: number
               example: 0
+          required:
+            - seller_id
       
     RegisterSellerRq:
       type: object
@@ -216,18 +210,21 @@ components:
         description:
           type: string
           example: This is a sample seller description.
+        seller_type:
+          $ref: '/api/docs/enum/SellerType.yml#/components/schemas/SellerType'
         address:
           type: string
           example: 1234 Test St, Test City, SC 12345
-        seller_type:
-          $ref: '/api/docs/enum/SellerType.yml#/components/schemas/SellerType'
-        sale_items:
-          type: string
-          example: Test Item 1, Test Item 2
         image:
           type: string
           format: binary
           example: http://example.com/image.jpg
+        average_rating:
+          type: object
+          properties:
+            $numberDecimal:
+              type: string
+              example: 4.5
         sell_map_center:
           type: object
           properties:
@@ -245,16 +242,8 @@ components:
         order_online_enabled_pref:
           type: boolean
           example: true
-        average_rating:
-          type: object
-          properties:
-            $numberDecimal:
-              type: string
-              example: 4.5
           required:
-            - $numberDecimal
-        trust_meter_rating:
-          $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
+            - seller_id
 
     RegisterSellerRs:
       type: object
@@ -271,18 +260,23 @@ components:
             description:
               type: string
               example: This is a sample seller description.
+            seller_type:
+              $ref: '/api/docs/enum/SellerType.yml#/components/schemas/SellerType'
             address:
               type: string
               example: 1234 Test St, Test City, SC 12345
-            seller_type:
-              $ref: '/api/docs/enum/SellerType.yml#/components/schemas/SellerType'
-            sale_items:
-              type: string
-              example: Test Item 1, Test Item 2
             image:
               type: string
               format: binary
               example: http://example.com/image.jpg
+            average_rating:
+              type: object
+              properties:
+                $numberDecimal:
+                  type: string
+                  example: 4.5
+              required:
+                - $numberDecimal
             sell_map_center:
               type: object
               properties:
@@ -300,16 +294,6 @@ components:
             order_online_enabled_pref:
               type: boolean
               example: true
-            average_rating:
-              type: object
-              properties:
-                $numberDecimal:
-                  type: string
-                  example: 4.5
-              required:
-                - $numberDecimal
-            trust_meter_rating:
-              $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
 
       DeleteSellerRs:
         type: object
@@ -329,18 +313,23 @@ components:
               description:
                 type: string
                 example: This is a sample seller description.
+              seller_type:
+                $ref: '/api/docs/enum/SellerType.yml#/components/schemas/SellerType'
               address:
                 type: string
                 example: 1234 Test St, Test City, SC 12345
-              seller_type:
-                $ref: '/api/docs/enum/SellerType.yml#/components/schemas/SellerType'
-              sale_items:
-                type: string
-                example: Test Item 1, Test Item 2
               image:
                 type: string
                 format: binary
                 example: http://example.com/image.jpg
+              average_rating:
+                type: object
+                properties:
+                  $numberDecimal:
+                    type: string
+                    example: 4.5
+                required:
+                  - $numberDecimal
               sell_map_center:
                 type: object
                 properties:
@@ -358,19 +347,11 @@ components:
               order_online_enabled_pref:
                 type: boolean
                 example: true
-              average_rating:
-                type: object
-                properties:
-                  $numberDecimal:
-                    type: string
-                    example: 4.5
-                required:
-                  - $numberDecimal
-              trust_meter_rating:
-                $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
               _id:
                 type: string
                 example: 666c84b9d77068c6efeeaa1a
               __v:
                 type: number
                 example: 0
+            required:
+              - seller_id

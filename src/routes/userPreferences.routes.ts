@@ -30,6 +30,8 @@ import upload from "../utils/multer";
  *         findme_preference:
  *           type: string
  *           description: FindMe preference of the user
+ *         trust_meter_rating:
+ *           $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
  *         search_map_center:
  *           type: object
  *           description: Geographical coordinates of the user's search center location

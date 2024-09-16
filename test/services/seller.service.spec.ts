@@ -1,38 +1,119 @@
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 
-import { registerOrUpdateSeller } from '../../src/services/seller.service';
+import { getAllSellers } from '../../src/services/seller.service';
 import Seller from '../../src/models/Seller';
-import { IUser, ISeller } from '../../src/types';
+import UserSettings from '../../src/models/UserSettings';
+import { ISeller, ISellerWithSettings, IUserSettings } from '../../src/types';
+import { TrustMeterScale } from '../../src/models/enums/trustMeterScale';
 
 let mongoServer: MongoMemoryServer;
 
-const mockUser = {
-  pi_uid: '123-456-7890',
-  user_name: 'TestUser',
-} as IUser;
+const mockSellers = [
+  {
+    seller_id: '0a0a0a-0a0a-0a0a',
+    name: 'Test Seller 1',
+    description: 'Test Seller 1 Description',
+    seller_type: 'TestSeller',
+    sell_map_center: { type: 'Point', coordinates: [-74.0060, 40.7128] }
+  },
+  {
+    seller_id: '0b0b0b-0b0b-0b0b',
+    name: 'Test Vendor 2',
+    description: 'Test Vendor 2 Description',
+    seller_type: 'CurrentlyNotSelling',
+    sell_map_center: { type: 'Point', coordinates: [-118.2437, 34.0522] }
+  },
+  {
+    seller_id: '0c0c0c-0c0c-0c0c',
+    name: 'Test Vendor 3',
+    description: 'Test Vendor 3 Description',
+    seller_type: 'Pioneer',
+    sell_map_center: { type: 'Point', coordinates: [-87.6298, 41.8781] }
+  },
+  {
+    seller_id: '0d0d0d-0d0d-0d0d',
+    name: 'Test Seller 4',
+    description: 'Test Seller 4 Description',
+    seller_type: 'CurrentlyNotSelling',
+    sell_map_center: { type: 'Point', coordinates: [-122.4194, 37.7749] }
+  },
+  {
+    seller_id: '0e0e0e-0e0e-0e0e',
+    name: 'Test Vendor 5',
+    description: 'Test Vendor 5 Description',
+    seller_type: 'TestSeller',
+    sell_map_center: { type: 'Point', coordinates: [-95.3698, 29.7604] }
+  }
+] as ISeller[];
 
-const formData = {
-  name: 'New Test Seller',
-  description: 'New Test Description',
-  seller_type: 'Pioneer',
-  image: 'http://example.com/image_new.jpg',
-  address: '123 New Test Ave. Test City',
-  sale_items: 'Test New Sale Items',
-  sell_map_center: JSON.stringify({ type: 'Point', coordinates: [-73.856077, 40.848447] }),
-  order_online_enabled_pref: true
-};
+const mockUserSettings = [
+  {
+    user_settings_id: '0a0a0a-0a0a-0a0a',
+    user_name: 'Test One',
+    email: 'test-one@test.com',
+    phone_number: '111-111-1111',
+    findme: 'deviceGPS',
+    trust_meter_rating: TrustMeterScale.HUNDRED
+  },
+  {
+    user_settings_id: '0b0b0b-0b0b-0b0b',
+    user_name: 'Test Two',
+    email: 'test-two@test.com',
+    phone_number: '222-222-2222',
+    findme: 'deviceGPS',
+    trust_meter_rating: TrustMeterScale.EIGHTY
+  },
+  {
+    user_settings_id: '0c0c0c-0c0c-0c0c',
+    user_name: 'Test Three',
+    email: 'test-three@test.com',
+    phone_number: '333-333-3333',
+    findme: 'deviceGPS',
+    trust_meter_rating: TrustMeterScale.FIFTY
+  },
+  {
+    user_settings_id: '0d0d0d-0d0d-0d0d',
+    user_name: 'Test Four',
+    email: 'test-four@test.com',
+    phone_number: '444-444-4444',
+    findme: 'deviceGPS',
+    trust_meter_rating: TrustMeterScale.HUNDRED
+  },
+  {
+    user_settings_id: '0e0e0e-0e0e-0e0e',
+    user_name: 'Test Five',
+    email: 'test-five@test.com',
+    phone_number: '555-555-5555',
+    findme: 'deviceGPS',
+    trust_meter_rating: TrustMeterScale.EIGHTY
+  }
+] as IUserSettings[];
 
-const existingSellerData: Partial<ISeller> = {
-  seller_id: mockUser.pi_uid,
-  name: 'Existing Test Seller',
-  description: 'Existing Test Description',
-  seller_type: 'Test Seller',
-  image: 'http://example.com/image_existing.jpg',
-  address: '123 Existing Test Ave. Test City',
-  sale_items: 'Test Existing Sale Items',
-  sell_map_center: { type: 'Point', coordinates: [-83.856077, 50.848447] },
-  order_online_enabled_pref: false
+// Helper function to assert that sellers and their user settings are correctly merged
+const assertSellersWithSettings = (
+  result: ISellerWithSettings[],
+  expectedSellers: ISeller[],
+  mockUserSettings: IUserSettings[]
+) => {
+  expectedSellers.forEach((seller) => {
+    const correspondingUserSettings = mockUserSettings.find(
+      (settings) => settings.user_settings_id === seller.seller_id
+    );
+
+    expect(result).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          ...seller,
+          user_name: correspondingUserSettings?.user_name,
+          email: correspondingUserSettings?.email,
+          phone_number: correspondingUserSettings?.phone_number,
+          findme: correspondingUserSettings?.findme,
+          trust_meter_rating: correspondingUserSettings?.trust_meter_rating
+        }),
+      ])
+    );
+  });
 };
 
 beforeAll(async () => {
@@ -40,6 +121,10 @@ beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
     const uri = mongoServer.getUri();
     await mongoose.connect(uri, { dbName: 'test' });
+
+    // initialize in-memory MongoDB by inserting mock data records
+    await Seller.insertMany(mockSellers);
+    await UserSettings.insertMany(mockUserSettings);
   } catch (error) {
     console.error('Failed to start MongoMemoryServer', error);
     throw error;
@@ -51,65 +136,72 @@ afterAll(async () => {
   await mongoServer.stop();
 });
 
-describe('registerOrUpdateSeller function', () => {
-  it('should register a new seller', async () => {
-    jest.spyOn(Seller, 'findOne').mockReturnValue({
-      exec: jest.fn().mockResolvedValue(null) // Return null to simulate no existing seller
-    } as any);
+describe('getAllSellers function', () => {
+  it('should fetch all sellers when all parameters are empty', async () => {
+    // filter seller records to exclude those with seller_type "CurrentlyNotSelling"
+    const expectedMockSellers = mockSellers.filter(
+      seller => seller.seller_type !== 'CurrentlyNotSelling'
+    );
 
-    // mock the save function to return the newly created seller
-    const mockSave = jest.fn().mockResolvedValue({
-      ...formData,
-      seller_id: mockUser.pi_uid,
-      trust_meter_rating: 100,
-      average_rating: mongoose.Types.Decimal128.fromString('5.0')
-    })
-    jest.spyOn(Seller.prototype, 'save').mockImplementation(mockSave);
+    const result = await getAllSellers();
 
-    const result = await registerOrUpdateSeller(mockUser, formData, formData.image);
-    
-    expect(result).toHaveProperty('seller_id', mockUser.pi_uid);
-    expect(result).toHaveProperty('name', formData.name);
-    expect(result).toHaveProperty('description', formData.description);
-    expect(result).toHaveProperty('seller_type', formData.seller_type);
-    expect(result).toHaveProperty('image', formData.image);
-    expect(result).toHaveProperty('address', formData.address);
-    expect(result).toHaveProperty('sale_items', formData.sale_items);
-    expect(result).toHaveProperty('sell_map_center', formData.sell_map_center);
-    expect(result).toHaveProperty('order_online_enabled_pref', formData.order_online_enabled_pref);
+    expect(result).toHaveLength(3);
+
+    // invoke the helper function to assert that sellers are merged with settings
+    assertSellersWithSettings(result, expectedMockSellers, mockUserSettings);
   });
 
-  it('should update an existing seller', async () => {
-    jest.spyOn(Seller, 'findOne').mockReturnValue({
-      exec: jest.fn().mockResolvedValue(existingSellerData)
-    } as any);
+  it('should fetch all applicable sellers when search query is provided and origin + radius params are empty', async () => {
+    /* filter seller records to include those with description "Vendor" 
+       + exclude those with seller_type "CurrentlyNotSelling" */
+    const expectedMockSellers = mockSellers.filter(
+      seller => seller.description.includes('Vendor') && 
+      seller.seller_type !== 'CurrentlyNotSelling'
+    );
 
-    const updatedSellerData = {
-      ...existingSellerData,
-      name: formData.name,
-      description: formData.description,
-      seller_type: formData.seller_type,
-      image: formData.image,
-      address: formData.address,
-      sale_items: formData.sale_items,
-      sell_map_center: formData.sell_map_center,
-      order_online_enabled_pref: formData.order_online_enabled_pref
-    };
+    const result = await getAllSellers(undefined, undefined, 'Vendor');
 
-    jest.spyOn(Seller, 'findOneAndUpdate').mockReturnValue({
-      exec: jest.fn().mockResolvedValue(updatedSellerData)
-    } as any);
+    expect(result).toHaveLength(2);
 
-    const result = await registerOrUpdateSeller(mockUser, updatedSellerData, updatedSellerData.image);
+    // invoke the helper function to assert that sellers are merged with settings
+    assertSellersWithSettings(result, expectedMockSellers, mockUserSettings);
+  });
 
-    expect(result).toHaveProperty('seller_id', mockUser.pi_uid);
-    expect(result).toHaveProperty('name', updatedSellerData.name);
-    expect(result).toHaveProperty('description', updatedSellerData.description);
-    expect(result).toHaveProperty('seller_type', updatedSellerData.seller_type);
-    expect(result).toHaveProperty('image', updatedSellerData.image);
-    expect(result).toHaveProperty('address', updatedSellerData.address);
-    expect(result).toHaveProperty('sale_items', updatedSellerData.sale_items);
-    expect(result).toHaveProperty('sell_map_center', updatedSellerData.sell_map_center);
-    expect(result).toHaveProperty('order_online_enabled_pref', updatedSellerData.order_online_enabled_pref);
+  it('should fetch all applicable sellers when origin + radius are provided and search query param is empty', async () => { 
+    /* filter seller records to exclude those with seller_type "CurrentlyNotSelling" 
+       + include those with sell_map_center within geospatial radius */
+    const expectedMockSellers = mockSellers.filter(
+      seller => seller.seller_type !== 'CurrentlyNotSelling' &&
+      seller.sell_map_center.type === 'Point' &&
+      seller.sell_map_center.coordinates[0] === -74.0060 &&
+      seller.sell_map_center.coordinates[1] === 40.7128
+    );
+
+    const result = await getAllSellers({ lat: 40.7128, lng: -74.0060 }, 10, undefined);
+
+    expect(result).toHaveLength(1);
+
+    // invoke the helper function to assert that sellers are merged with settings
+    assertSellersWithSettings(result, expectedMockSellers, mockUserSettings);
+  });
+
+  it('should fetch all applicable sellers when all parameters are provided', async () => { 
+    /* filter seller records to exclude those with seller_type "CurrentlyNotSelling" 
+       + include those with description "Vendor"
+       + include those with sell_map_center within geospatial radius */
+    const expectedMockSellers = mockSellers.filter(
+      seller => seller.seller_type !== 'CurrentlyNotSelling' &&
+      seller.description.includes('Vendor') &&
+      seller.sell_map_center.type === 'Point' &&
+      seller.sell_map_center.coordinates[0] === -74.0060 &&
+      seller.sell_map_center.coordinates[1] === 40.7128
+    );
+
+    const result = await getAllSellers({ lat: 40.7128, lng: -74.0060 }, 10, 'Vendor');
+
+    expect(result).toHaveLength(0);
+
+    // invoke the helper function to assert that sellers are merged with settings
+    assertSellersWithSettings(result, expectedMockSellers, mockUserSettings);
   });
 });

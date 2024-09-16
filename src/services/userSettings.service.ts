@@ -60,8 +60,13 @@ export const addOrUpdateUserSettings = async (
       return updatedUserSettings as IUserSettings;
 
     } else {
-      // If no existing user settings, create a new record
-      const newUserSettings = new UserSettings(userSettingsData);
+      // If no existing user settings, create new ones
+      const newUserSettings = new UserSettings({
+        ...userSettingsData,
+        user_settings_id: authUser.pi_uid,
+        trust_meter_rating: 100,
+      });
+
       const savedUserSettings = await newUserSettings.save();
       return savedUserSettings as IUserSettings;
     }

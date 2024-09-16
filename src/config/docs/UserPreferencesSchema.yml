@@ -19,9 +19,11 @@ components:
           type: string
           format: binary
           example: https://example.com/image.jpg
-        findme_preference:
+        findme:
           type: string
           example: deviceGPS
+        trust_meter_rating:
+          $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
         search_map_center:
           type: object                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
           properties:
@@ -42,6 +44,8 @@ components:
         __v:
           type: number
           example: 0
+      required:
+        - user_settings_id
 
     AddUserPreferencesRq:
       type: object
@@ -65,6 +69,8 @@ components:
         findme_preference:
           type: string
           example: deviceGPS
+        trust_meter_rating:
+          $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
         search_map_center:
           type: object
           properties:
@@ -79,6 +85,8 @@ components:
           required:
             - type
             - coordinates
+      required:
+        - user_settings_id
 
     AddUserPreferencesRs:
       type: object
@@ -102,6 +110,8 @@ components:
         findme_preference:
           type: string
           example: deviceGPS
+        trust_meter_rating:
+          $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
         search_map_center:
           type: object
           properties:
@@ -122,6 +132,8 @@ components:
         __v:
           type: number
           example: 0
+      required:
+        - user_settings_id
 
     DeleteUserPreferencesRs:
         type: object
