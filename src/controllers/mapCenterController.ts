@@ -18,7 +18,7 @@ export const saveMapCenter = async (req: Request, res: Response) => {
       return res.status(200).json(mapCenter);
     } else {
       logger.warn('User not found; Map Center failed to save');
-      return res.status(404).json({ message: 'User not found: Map center failed to save' });
+      return res.status(404).json({ message: 'User not found: Map Center failed to save' });
     }
   } catch (error: any) {
     logger.error(`Failed to save Map Center: ${error.message}`);

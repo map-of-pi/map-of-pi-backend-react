@@ -31,9 +31,6 @@ components:
     SaveMapCenterRq:
       type: object
       properties:
-        map_center_id:
-          type: string
-          example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
         latitude:
           type: number
           example: 40.7128

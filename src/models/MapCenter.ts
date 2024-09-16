@@ -10,23 +10,23 @@ const mapCenterSchema = new Schema<IMapCenter>(
     },
     search_map_center: {
       type: {
-        type: String, // Corrected to use `type` directly
+        type: String,
         enum: ['Point'],
         default: 'Point',
       },
       coordinates: {
-        type: [Number], // Corrected to use `type` directly
+        type: [Number],
         index: '2dsphere',
       },
     },
     sell_map_center: {
       type: {
-        type: String, // Corrected to use `type` directly
+        type: String,
         enum: ['Point'],
         default: 'Point',
       },
       coordinates: {
-        type: [Number], // Corrected to use `type` directly
+        type: [Number],
         index: '2dsphere',
       },
     },
