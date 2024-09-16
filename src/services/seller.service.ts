@@ -122,7 +122,6 @@ export const registerOrUpdateSeller = async (authUser: IUser, formData: any, ima
       seller_type: formData.seller_type || existingSeller?.seller_type || '',
       image: image || existingSeller?.image || '',
       address: formData.address || existingSeller?.address || '',
-      sale_items: formData.sale_items || existingSeller?.sale_items || '',
       sell_map_center: sellMapCenter || existingSeller?.sell_map_center || { type: 'Point', coordinates: [0, 0] },
       order_online_enabled_pref: formData.order_online_enabled_pref || existingSeller?.order_online_enabled_pref || ''
     };

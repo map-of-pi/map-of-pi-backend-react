@@ -18,7 +18,7 @@ const formData = {
   email: 'example-new@test.com',
   phone_number: '123-456-7890',
   image: 'http://example.com/image_new.jpg',
-  findme_preference: 'deviceGPS',
+  findme: 'deviceGPS',
   search_map_center: JSON.stringify({ type: 'Point', coordinates: [-73.856077, 40.848447] })
 };
 
@@ -28,7 +28,7 @@ const existingUserSettingsData: Partial<IUserSettings> = {
   email: 'example-existing@test.com',
   phone_number: '987-654-3210',
   image: 'http://example.com/image-existing.jpg',
-  findme_preference: 'searchCenter',
+  findme: 'searchCenter',
   search_map_center: { type: 'Point', coordinates: [-83.856077, 50.848447] }
 };
 
@@ -68,7 +68,7 @@ describe('addOrUpdateUserSettings function', () => {
     expect(result).toHaveProperty('email', formData.email);
     expect(result).toHaveProperty('phone_number', formData.phone_number);
     expect(result).toHaveProperty('image', formData.image);
-    expect(result).toHaveProperty('findme_preference', formData.findme_preference);
+    expect(result).toHaveProperty('findme', formData.findme);
     expect(result).toHaveProperty('search_map_center', formData.search_map_center);
   });
 
@@ -103,7 +103,7 @@ describe('addOrUpdateUserSettings function', () => {
     expect(result).toHaveProperty('email', formData.email);
     expect(result).toHaveProperty('phone_number', formData.phone_number);
     expect(result).toHaveProperty('image', formData.image);
-    expect(result).toHaveProperty('findme_preference', formData.findme_preference);
+    expect(result).toHaveProperty('findme', formData.findme);
     expect(result).toHaveProperty('search_map_center', formData.search_map_center);
   });
 
@@ -118,7 +118,7 @@ describe('addOrUpdateUserSettings function', () => {
       email: formData.email,
       phone_number: formData.phone_number,
       image: formData.image,
-      findme_preference: formData.findme_preference,
+      findme: formData.findme,
       search_map_center: formData.search_map_center
     };
 
@@ -133,7 +133,7 @@ describe('addOrUpdateUserSettings function', () => {
     expect(result).toHaveProperty('email', updatedUserSettingsData.email);
     expect(result).toHaveProperty('phone_number', updatedUserSettingsData.phone_number);
     expect(result).toHaveProperty('image', updatedUserSettingsData.image);
-    expect(result).toHaveProperty('findme_preference', updatedUserSettingsData.findme_preference);
+    expect(result).toHaveProperty('findme', updatedUserSettingsData.findme);
     expect(result).toHaveProperty('search_map_center', updatedUserSettingsData.search_map_center);
   });
 });

@@ -3,12 +3,12 @@ import { IMapCenter } from "../types";
 
 import logger from "../config/loggingConfig";
 
-export const getMapCenterById = async (pi_uid: string): Promise<IMapCenter | null> => {
+export const getMapCenterById = async (map_center_id: string): Promise<IMapCenter | null> => {
   try {
-    const mapCenter = await MapCenter.findOne({ pi_uid }).exec();
+    const mapCenter = await MapCenter.findOne({ map_center_id }).exec();
     return mapCenter ? mapCenter as IMapCenter : null;
   } catch (error: any) {
-    logger.error(`Error retrieving map center with PI_UID ${pi_uid}: ${error.message}`);
+    logger.error(`Error retrieving map center with PI_UID ${map_center_id}: ${error.message}`);
     throw new Error(error.message);
   }
 };
