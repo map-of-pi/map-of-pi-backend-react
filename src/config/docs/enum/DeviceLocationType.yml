@@ -1,0 +1,8 @@
+components:
+  schemas:
+    DeviceLocationType:
+      type: string
+      enum:
+        - deviceGPS
+        - searchCenter
+      description: The type of FindMe device location.

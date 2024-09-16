@@ -20,8 +20,7 @@ components:
           format: binary
           example: https://example.com/image.jpg
         findme:
-          type: string
-          example: deviceGPS
+          $ref: '/api/docs/enum/DeviceLocationType.yml#/components/schemas/DeviceLocationType'
         trust_meter_rating:
           $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
         search_map_center:
@@ -66,11 +65,8 @@ components:
           type: string
           format: binary
           example: https://example.com/image.jpg
-        findme_preference:
-          type: string
-          example: deviceGPS
-        trust_meter_rating:
-          $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
+        findme:
+          $ref: '/api/docs/enum/DeviceLocationType.yml#/components/schemas/DeviceLocationType'
         search_map_center:
           type: object
           properties:
@@ -107,9 +103,8 @@ components:
           type: string
           format: binary
           example: https://example.com/image.jpg
-        findme_preference:
-          type: string
-          example: deviceGPS
+        findme:
+          $ref: '/api/docs/enum/DeviceLocationType.yml#/components/schemas/DeviceLocationType'
         trust_meter_rating:
           $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
         search_map_center:
@@ -160,9 +155,10 @@ components:
                 type: string
                 format: binary
                 example: http://example.com/image.jpg
-              findme_preference:
-                type: string
-                example: deviceGPS
+              findme:
+                $ref: '/api/docs/enum/DeviceLocationType.yml#/components/schemas/DeviceLocationType'
+              trust_meter_rating:
+                $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
               search_map_center:
                 type: object
                 properties:
