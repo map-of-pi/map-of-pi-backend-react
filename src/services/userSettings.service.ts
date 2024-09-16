@@ -3,6 +3,7 @@ import { IUser, IUserSettings } from "../types";
 
 import logger from "../config/loggingConfig";
 import User from "../models/User";
+import { getMapCenterById } from "./mapCenter.service";
 
 export const getUserSettingsById = async (user_settings_id: string): Promise<IUserSettings | null> => {
   try {
@@ -19,6 +20,15 @@ export const addOrUpdateUserSettings = async (
   authUser: IUser
 ): Promise<IUserSettings> => {
   try {
+    const searchCenter = await getMapCenterById(authUser.pi_uid);
+    // Add search_map_center field only if userSettings is available
+    if (searchCenter) {
+      userSettingsData.search_map_center = {
+        type: 'Point' as const,
+        coordinates: [searchCenter.latitude, searchCenter.longitude] as [number, number]
+      };
+    };
+    
     // Update the user_name if it's empty
     if (userSettingsData.user_name.trim() === "") {
       userSettingsData.user_name = authUser.pi_username;

@@ -5,6 +5,7 @@ import { getUserSettingsById } from "./userSettings.service";
 import { ISeller, IUser, IUserSettings, ISellerWithSettings } from "../types";
 
 import logger from "../config/loggingConfig";
+import { getMapCenterById } from "./mapCenter.service";
 
 // Helper function to get settings for all sellers and merge them into seller objects
 const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSettings[]> => {
@@ -106,12 +107,21 @@ export const getSingleSellerById = async (seller_id: string): Promise<ISeller | 
 
 export const registerOrUpdateSeller = async (sellerData: ISeller, authUser: IUser): Promise<ISeller> => {
   try {
+    const sellCenter = await getMapCenterById(authUser.pi_uid);
+    // Add sell_map_center field only if sellCenter is available
+    if (sellCenter) {
+      sellerData.sell_map_center = {
+        type: 'Point' as const,
+        coordinates: [sellCenter.latitude, sellCenter.longitude] as [number, number]
+      };
+    };
     let seller = await Seller.findOne({ seller_id: authUser.pi_uid }).exec();
 
     if (seller) {
       const updatedSeller = await Seller.findOneAndUpdate(
         { seller_id: authUser.pi_uid }, 
-        sellerData, { new: true }
+        sellerData,
+        { new: true }
       );
       return updatedSeller as ISeller;
     } else {
