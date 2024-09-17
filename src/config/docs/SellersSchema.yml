@@ -35,7 +35,7 @@ components:
             example: This is a sample seller description.
           seller_type:
             type: string
-            example: Pioneer
+            example: Real Merchant - actively selling
           image:
             type: string
             example: http://example.com/image.jpg
@@ -90,7 +90,7 @@ components:
           example: This is a sample seller description.
         seller_type:
           type: string
-          example: Pioneer
+          example: Real merchant - not currently selling 
         image:
           type: string
           example: http://example.com/image.jpg
@@ -160,7 +160,7 @@ components:
               example: This is a sample seller description.
             seller_type:
               type: string
-              example: Pioneer
+              example: Test seller
             image:
               type: string
               example: http://example.com/image.jpg
@@ -218,7 +218,7 @@ components:
               example: This is a sample seller description.
             seller_type:
               type: string
-              example: Pioneer
+              example: Test seller
             image:
               type: string
               example: http://example.com/image.jpg
