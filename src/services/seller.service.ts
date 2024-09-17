@@ -3,6 +3,7 @@ import User from "../models/User";
 import UserSettings from "../models/UserSettings";
 import { getUserSettingsById } from "./userSettings.service";
 import { ISeller, IUser, IUserSettings, ISellerWithSettings } from "../types";
+import { SellerType } from '../models/enums/sellerType'
 
 import logger from "../config/loggingConfig";
 
@@ -38,9 +39,9 @@ export const getAllSellers = async (
   try {
     let sellers: ISeller[];
 
-    // always apply this condition to exclude 'CurrentlyNotSelling' sellers
-    const baseCriteria = { seller_type: { $ne: 'CurrentlyNotSelling' } };
-
+    // always apply this condition to exclude 'Inactive' (was 'CurrentlyNotSelling') sellers
+    const baseCriteria = { seller_type: { $ne: SellerType.Inactive } };
+    
     // if search_query is provided, add search conditions
     const searchCriteria = search_query
       ? {
@@ -106,6 +107,8 @@ export const getSingleSellerById = async (seller_id: string): Promise<ISeller | 
 
 export const registerOrUpdateSeller = async (sellerData: ISeller, authUser: IUser): Promise<ISeller> => {
   try {
+    console.log('Received Payload:', sellerData); // Log the incoming seller data
+
     let seller = await Seller.findOne({ seller_id: authUser.pi_uid }).exec();
 
     if (seller) {
