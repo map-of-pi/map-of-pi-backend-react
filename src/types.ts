@@ -2,6 +2,7 @@ import { Document, Types } from "mongoose";
 
 import { RatingScale } from "./models/enums/ratingScale";
 import { TrustMeterScale } from "./models/enums/trustMeterScale";
+import { SellerType } from "./models/enums/sellerType";
 
 export interface IUser extends Document {
   pi_uid: string;
@@ -26,7 +27,7 @@ export interface IUserSettings extends Document {
 export interface ISeller extends Document {
   seller_id: string;
   name: string;
-  seller_type: string;
+  seller_type: SellerType;
   description: string;
   image?: string;
   address?: string;
