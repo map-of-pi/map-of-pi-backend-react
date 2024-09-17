@@ -6,46 +6,62 @@ components:
         origin:
           type: object
           properties:
-            pi_uid:
+            map_center_id:
               type: string
               example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
+            search_map_center:
+              type: object
+              properties:
+                latitude:
+                  type: number
+                  example: 40.7128
+                longitude:
+                  type: number
+                  example: -74.0060
+            sell_map_center:
+              type: object
+              properties:
+                latitude:
+                  type: number
+                  example: 34.0522
+                longitude:
+                  type: number
+                  example: -118.2437
+
+    SaveMapCenterRq:
+      type: object
+      properties:
+        latitude:
+          type: number
+          example: 40.7128
+        longitude:
+          type: number
+          example: -74.0060
+        type:
+          type: string
+          example: search
+
+    SaveMapCenterRs:
+      type: object
+      properties:
+        map_center_id:
+          type: string
+          example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
+        search_map_center:
+          type: object
+          properties:
             latitude:
               type: number
               example: 40.7128
             longitude:
               type: number
               example: -74.0060
-
-    SaveMapCenterRq:
-      type: object
-      properties:
-        pi_uid:
-          type: string
-          example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
-        latitude:
-          type: number
-          example: 40.7128
-        longitude:
-          type: number
-          example: -74.0060
-      required:
-        - pi_uid
-        - latitude
-        - longitude
-
-    SaveMapCenterRs:
-      type: object
-      properties:
-        pi_uid:
-          type: string
-          example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
-        latitude:
-          type: number
-          example: 40.7128
-        longitude:
-          type: number
-          example: -74.0060
-      required:
-        - pi_uid
-        - latitude
-        - longitude
+        sell_map_center:
+          type: object
+          properties:
+            latitude:
+              type: number
+              example: 34.0522
+            longitude:
+              type: number
+              example: -118.2437

@@ -39,12 +39,12 @@ const sellerSchema = new Schema<ISeller>(
       type: {
         type: String,
         enum: ['Point'],
-        required: true,
+        required: false,
         default: 'Point',
       },
       coordinates: {
         type: [Number],
-        required: true,
+        required: false,
         default: [0, 0]
       },
     },
