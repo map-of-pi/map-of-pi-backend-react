@@ -20,7 +20,6 @@ export const addOrUpdateUserSettings = async (
   image: string
 ): Promise<IUserSettings> => {
   try {
-    // Update the user_name if it's empty
     if (formData.user_name.trim() === "") {
       formData.user_name = authUser.pi_username;
 
