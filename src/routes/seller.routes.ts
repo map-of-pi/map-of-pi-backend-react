@@ -23,7 +23,12 @@ import upload from "../utils/multer";
  *           description: Description of the seller
  *         seller_type:
  *           type: string
- *           description: Type of the seller
+ *           description: Type of the seller (active, inactive, test, other) // Update description here
+ *           enum:
+ *             - active
+ *             - inactive
+ *             - test
+ *             - other
  *         image:
  *           type: string
  *           description: Image of the seller
