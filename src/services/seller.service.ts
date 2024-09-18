@@ -1,10 +1,10 @@
 import Seller from "../models/Seller";
 import User from "../models/User";
-import UserSettings from "../models/UserSettings";
 import { getUserSettingsById } from "./userSettings.service";
 import { ISeller, IUser, IUserSettings, ISellerWithSettings } from "../types";
+import UserSettings from "../models/UserSettings";
+import { SellerType } from '../models/enums/sellerType'
 
-import mongoose from "mongoose";
 import logger from "../config/loggingConfig";
 
 // Helper function to get settings for all sellers and merge them into seller objects
@@ -39,9 +39,9 @@ export const getAllSellers = async (
   try {
     let sellers: ISeller[];
 
-    // always apply this condition to exclude 'CurrentlyNotSelling' sellers
-    const baseCriteria = { seller_type: { $ne: 'CurrentlyNotSelling' } };
-
+    // always apply this condition to exclude 'Inactive sellers'
+    const baseCriteria = { seller_type: { $ne: SellerType.Inactive } };
+    
     // if search_query is provided, add search conditions
     const searchCriteria = search_query
       ? {

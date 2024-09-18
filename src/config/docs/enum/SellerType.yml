@@ -3,8 +3,7 @@ components:
     SellerType:
       type: string
       enum:
-        - Pioneer
-        - Currently Not Selling
-        - Test Seller
-        - Other
+        - activeSeller
+        - inactiveSeller
+        - testSeller
       description: The type of seller.
