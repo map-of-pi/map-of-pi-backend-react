@@ -1,7 +1,6 @@
 export enum SellerType {
-    Active = 'active',
-    Inactive = 'inactive',
-    Test = 'test',
-    Other = 'other'
+    Active = 'Active seller',
+    Inactive = 'Inactive seller',
+    Test = 'Test seller'
   }
   

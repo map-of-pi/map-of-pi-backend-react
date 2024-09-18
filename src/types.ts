@@ -1,7 +1,7 @@
 import { Document, Types } from "mongoose";
 import { RatingScale } from "./models/enums/ratingScale";
-import { TrustMeterScale } from "./models/enums/trustMeterScale";
 import { SellerType } from "./models/enums/sellerType";
+import { TrustMeterScale } from "./models/enums/trustMeterScale";
 
 export interface IUser extends Document {
   pi_uid: string;
