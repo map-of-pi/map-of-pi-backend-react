@@ -4,14 +4,16 @@ import fs from "fs";
 
 import { env } from "./env";
 
-// ensure the directory exists
-const uploadPath = path.join(__dirname, env.UPLOAD_PATH);
-if (!fs.existsSync(uploadPath)) {
-  fs.mkdirSync(uploadPath, { recursive: true });
-}
-
+// define the storage configuration but delay directory creation until needed
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
+    const uploadPath = path.join('/tmp', env.UPLOAD_PATH); // Use `/tmp` for serverless environments i.e., Vercel
+
+    // ensure the directory exists at runtime
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+
     cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
