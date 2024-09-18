@@ -12,6 +12,9 @@ components:
             pi_username:
               type: string
               example: test_alias
+            user_name:
+              type: string
+              example: Test Alias
           required:
             - pi_uid
       required:

@@ -3,22 +3,36 @@ import { IMapCenter } from '../types';
 
 const mapCenterSchema = new Schema<IMapCenter>(
   {
-    pi_uid: { 
+    map_center_id: { 
       type: String, 
       required: true, 
       unique: true 
     },
-    latitude: { 
-      type: Number, 
-      required: true 
+    search_map_center: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point',
+      },
+      coordinates: {
+        type: [Number],
+        index: '2dsphere',
+      },
     },
-    longitude: { 
-      type: Number, 
-      required: true 
-    }
+    sell_map_center: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point',
+      },
+      coordinates: {
+        type: [Number],
+        index: '2dsphere',
+      },
+    },
   }
 );
 
-const MapCenter = mongoose.model<IMapCenter>("MapCenter", mapCenterSchema);
+const MapCenter = mongoose.model<IMapCenter>('MapCenter', mapCenterSchema);
 
 export default MapCenter;
