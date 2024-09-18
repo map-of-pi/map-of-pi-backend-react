@@ -11,7 +11,7 @@ import upload from "../utils/multer";
  *     ReviewFeedbackSchema:
  *       type: object
  *       properties:
- *         review_id:
+ *         _id:
  *           type: string
  *           description: Unique ID of the review
  *         review_receiver_id:
@@ -35,13 +35,6 @@ import upload from "../utils/multer";
  *           type: string
  *           format: date-time
  *           description: Date when the review was given
- *       required:
- *         - review_id
- *         - review_receiver_id
- *         - review_giver_id
- *         - reply_to_review_id
- *         - rating
- *         - review_date
  */
 const reviewFeedbackRoutes = Router();
 
@@ -117,7 +110,7 @@ reviewFeedbackRoutes.get("/single/:review_id", reviewFeedbackController.getSingl
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             $ref: '/api/docs/ReviewFeedbackSchema.yml#/components/schemas/AddReviewRq'
  *     responses:
@@ -137,7 +130,7 @@ reviewFeedbackRoutes.get("/single/:review_id", reviewFeedbackController.getSingl
 reviewFeedbackRoutes.post(
   "/add",
   verifyToken,
-  upload.array("image"),
+  upload.single("image"),
   reviewFeedbackController.addReview
 );
 

@@ -1,9 +1,11 @@
-import { Request, Response } from 'express';
+import { Request, Response } from "express";
 
 import * as reviewFeedbackService from "../services/reviewFeedback.service";
-import { IReviewFeedback } from '../types';
+import { uploadImage } from "../services/misc/image.service";
+import { IReviewFeedback } from "../types";
 
-import logger from '../config/loggingConfig';
+import { env } from "../utils/env";
+import logger from "../config/loggingConfig";
 
 export const getReviews = async (req: Request, res: Response) => {
   const { review_receiver_id } = req.params;
@@ -35,22 +37,26 @@ export const getSingleReviewById = async (req: Request, res: Response) => {
 
 export const addReview = async (req: Request, res: Response) => {
   try {
-    const reviewData = req.body;
     const authUser = req.currentUser;
+    const formData = req.body;
 
-    if (authUser) {
-      if (authUser.pi_uid === reviewData.review_receiver_id) {
-        logger.warn(`Attempted self review by user ${authUser.pi_uid}`);
-        return res.status(400).json({ message: "Self review is prohibited" });
-      }
-      const newReview = await reviewFeedbackService.addReviewFeedback(reviewData, authUser);
-      logger.info(`Added new review by user ${authUser.pi_uid} for receiver ID ${reviewData.review_receiver_id}`);
-      return res.status(200).json({ newReview });
+    if (!authUser) {
+      logger.warn("No authenticated user found for adding review.");
+      return res.status(401).json({ message: "Unauthorized user" });
+    } else if (authUser.pi_uid === formData.review_receiver_id) {
+      logger.warn(`Attempted self review by user ${authUser.pi_uid}`);
+      return res.status(400).json({ message: "Self review is prohibited" });
     }
-    logger.warn('No authenticated user found for adding review.');
-    return res.status(401).json({ message: "Unauthorized user" });
+
+    // image file handling
+    const file = req.file;
+    const image = file ? await uploadImage(file, 'review-feedback') : '';
+
+    const newReview = await reviewFeedbackService.addReviewFeedback(authUser, formData, image);
+    logger.info(`Added new review by user ${authUser.pi_uid} for receiver ID ${newReview.review_receiver_id}`);
+    return res.status(200).json({ newReview });
   } catch (error: any) {
-    logger.error(`Failed to add review: ${error.message}`);
+    logger.error(`Failed to add Review Feedback for user with ID ${req.currentUser?.pi_uid}: ${error.message}`);
     res.status(500).json({ message: error.message });
   }
 };

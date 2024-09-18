@@ -17,11 +17,7 @@ import { verifyToken } from '../middlewares/verifyToken';
  *           description: Latitude of the map center
  *         longitude:
  *           type: string
- *           description: Longitude of the map|s center
- *       required:
- *         - map_center_id
- *         - latitude
- *         - longitude
+ *           description: Longitude of the map center
  */
 const mapCenterRoutes = Router();
 
