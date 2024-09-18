@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import * as sellerService from "../services/seller.service";
+import { uploadImage } from "../services/misc/image.service";
 
-import logger from '../config/loggingConfig';
+import logger from "../config/loggingConfig";
 
 export const fetchSellersByCriteria = async (req: Request, res: Response) => {
   try {
@@ -55,14 +56,20 @@ export const fetchSellerRegistration = async (req: Request, res: Response) => {
 export const registerSeller = async (req: Request, res: Response) => {
   try {
     const authUser = req.currentUser;
-    if (authUser) {
-      const seller = JSON.parse(req.body.json);
-      const registeredSeller = await sellerService.registerOrUpdateSeller(seller, authUser);
-      logger.info(`Registered or updated seller for user ${authUser.pi_uid}`);
-      return res.status(200).json({ seller: registeredSeller });
+    const formData = req.body;
+
+    if (!authUser) {
+      logger.warn("No authenticated user found for registering.");
+      return res.status(401).json({ message: "Unauthorized user" });
     }
-    logger.warn('No authenticated user found for seller registration.');
-    return res.status(401).json({ message: "Unauthorized user" });
+
+    // image file handling
+    const file = req.file;
+    const image = file ? await uploadImage(file, 'seller-registration') : '';
+    
+    const registeredSeller = await sellerService.registerOrUpdateSeller(authUser, formData, image);
+    logger.info(`Registered or updated seller for user ${authUser.pi_uid}`);
+    return res.status(200).json({ seller: registeredSeller });
   } catch (error: any) {
     logger.error(`Failed to register seller: ${error.message}`);
     res.status(500).json({ message: error.message });

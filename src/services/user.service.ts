@@ -14,6 +14,7 @@ export const authenticate = async (currentUser: IUser): Promise<IUser> => {
 
     if (user) {
       return user;
+    //  TODO: Revisit and review this implementation; seems contrary to authentication.
     } else {
       const newUser = await User.create({
         pi_uid: currentUser.pi_uid,
@@ -45,11 +46,11 @@ export const getUser = async (pi_uid: string): Promise<IUser | null> => {
 export const deleteUser = async (pi_uid: string): Promise<{ user: IUser | null, sellers: ISeller[], userSetting: IUserSettings }> => {
   try {
     // delete any association with Seller
-    const deletedSellers = await Seller.find({ pi_uid }).exec();
-    await Seller.deleteMany({ pi_uid }).exec();
+    const deletedSellers = await Seller.find({ seller_id: pi_uid }).exec();
+    await Seller.deleteMany({ seller_id: pi_uid }).exec();
 
     // delete any association with User Settings
-    const deletedUserSettings = await UserSettings.findOneAndDelete({ pi_uid }).exec();
+    const deletedUserSettings = await UserSettings.findOneAndDelete({ user_settings_id: pi_uid }).exec();
 
     // delete the user
     const deletedUser = await User.findOneAndDelete({ pi_uid }).exec();

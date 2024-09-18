@@ -163,7 +163,7 @@ sellerRoutes.post(
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             $ref: '/api/docs/SellersSchema.yml#/components/schemas/RegisterSellerRq'
  *     responses:
@@ -183,7 +183,7 @@ sellerRoutes.post(
 sellerRoutes.put(
   "/register",
   verifyToken,
-  upload.array("images"),
+  upload.single("image"),
   sellerController.registerSeller
 );
 

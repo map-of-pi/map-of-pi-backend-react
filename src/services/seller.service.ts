@@ -5,6 +5,7 @@ import { getUserSettingsById } from "./userSettings.service";
 import { ISeller, IUser, IUserSettings, ISellerWithSettings } from "../types";
 import { SellerType } from '../models/enums/sellerType'
 
+import mongoose from "mongoose";
 import logger from "../config/loggingConfig";
 
 // Helper function to get settings for all sellers and merge them into seller objects
@@ -105,17 +106,33 @@ export const getSingleSellerById = async (seller_id: string): Promise<ISeller | 
   }
 };
 
-export const registerOrUpdateSeller = async (sellerData: ISeller, authUser: IUser): Promise<ISeller> => {
+export const registerOrUpdateSeller = async (authUser: IUser, formData: any, image: string): Promise<ISeller> => {
   try {
-    console.log('Received Payload:', sellerData); // Log the incoming seller data
+    const existingSeller = await Seller.findOne({ seller_id: authUser.pi_uid }).exec();
 
-    let seller = await Seller.findOne({ seller_id: authUser.pi_uid }).exec();
+    // parse sell_map_center from String into JSON object.
+    const sellMapCenter = formData.sell_map_center 
+      ? JSON.parse(formData.sell_map_center)
+      : { type: 'Point', coordinates: [0, 0] };
+    
+    // construct seller object
+    const sellerData: Partial<ISeller> = {
+      seller_id: authUser.pi_uid,
+      name: formData.name || existingSeller?.name || authUser.user_name,
+      description: formData.description || existingSeller?.description || '',
+      seller_type: formData.seller_type || existingSeller?.seller_type || '',
+      image: image || existingSeller?.image || '',
+      address: formData.address || existingSeller?.address || '',
+      sell_map_center: sellMapCenter || existingSeller?.sell_map_center || { type: 'Point', coordinates: [0, 0] },
+      order_online_enabled_pref: formData.order_online_enabled_pref || existingSeller?.order_online_enabled_pref || ''
+    };
 
-    if (seller) {
+    if (existingSeller) {
       const updatedSeller = await Seller.findOneAndUpdate(
-        { seller_id: authUser.pi_uid }, 
-        sellerData, { new: true }
-      );
+        { seller_id: authUser.pi_uid },
+        { $set: sellerData },
+        { new: true }
+      ).exec();
       return updatedSeller as ISeller;
     } else {
       const shopName = !sellerData.name ? authUser.user_name : sellerData.name;

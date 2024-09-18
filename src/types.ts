@@ -1,5 +1,4 @@
 import { Document, Types } from "mongoose";
-
 import { RatingScale } from "./models/enums/ratingScale";
 import { TrustMeterScale } from "./models/enums/trustMeterScale";
 import { SellerType } from "./models/enums/sellerType";
@@ -51,9 +50,15 @@ export interface IReviewFeedback extends Document {
 }
 
 export interface IMapCenter extends Document {
-  pi_uid: string;
-  latitude: number;
-  longitude: number;
+  map_center_id: string;
+  search_map_center?: {
+    type: 'Point';
+    coordinates: [number, number];
+  };
+  sell_map_center?: {
+    type: 'Point';
+    coordinates: [number, number];
+  };
 }
 
 // Select specific fields from IUserSettings

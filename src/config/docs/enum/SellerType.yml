@@ -1,0 +1,10 @@
+components:
+  schemas:
+    SellerType:
+      type: string
+      enum:
+        - Pioneer
+        - Currently Not Selling
+        - Test Seller
+        - Other
+      description: The type of seller.

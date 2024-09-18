@@ -2,6 +2,7 @@ import { getUser } from "./user.service";
 import ReviewFeedback from "../models/ReviewFeedback";
 import UserSettings from "../models/UserSettings";
 import { IReviewFeedback, IUser } from "../types";
+
 import logger from "../config/loggingConfig";
 
 /**
@@ -91,28 +92,27 @@ export const getReviewFeedbackById = async (review_id: string): Promise<IReviewF
   }
 };
 
-export const addReviewFeedback = async (reviewFeedbackData: IReviewFeedback, authUser: IUser): Promise<IReviewFeedback> => {
-  const { review_receiver_id, reply_to_review_id } = reviewFeedbackData;
-  const date = new Date();
-
-  const newReviewFeedback = new ReviewFeedback({
-    ...reviewFeedbackData,
-    review_date: date,
-    review_giver_id: authUser.pi_uid,
-    reply_to_review_id: reply_to_review_id || null,
-  });
-
+export const addReviewFeedback = async (authUser: IUser, formData: any, image: string): Promise<IReviewFeedback> => {
   try {
+    const reviewFeedbackData: Partial<IReviewFeedback> = {
+      review_receiver_id: formData.review_receiver_id || '',
+      review_giver_id: authUser.pi_uid,
+      reply_to_review_id: formData.reply_to_review_id || null,
+      rating: formData.rating || '',
+      comment: formData.comment || '',
+      image: image || '',
+      review_date: new Date()
+    };
+    const newReviewFeedback = new ReviewFeedback(reviewFeedbackData);
     const savedReviewFeedback = await newReviewFeedback.save();
 
-    computeRatings(review_receiver_id)
+    computeRatings(savedReviewFeedback.review_receiver_id)
       .then(value => logger.info(`Computed review rating: ${value}`))
       .catch(error => logger.error(`Error computing review rating: ${error.message}`));
 
-    return savedReviewFeedback;
+    return savedReviewFeedback as IReviewFeedback;
   } catch (error: any) {
-    const errorMessage = error?.message || 'Unknown error occurred';
-    logger.error(`Error adding new review feedback: ${errorMessage}`);
-    throw new Error(errorMessage);
+    logger.error(`Error adding review feedback: ${error.message}`);
+    throw new Error(error.message);
   }
 };
