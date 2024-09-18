@@ -4,11 +4,13 @@ import fs from "fs";
 
 import { env } from "./env";
 
+const isProduction = process.env.NODE_ENV === 'production';
+
+const uploadPath = isProduction ? path.join('/tmp', env.UPLOAD_PATH) : path.join(__dirname, env.UPLOAD_PATH);
+
 // define the storage configuration but delay directory creation until needed
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = path.join('/tmp', env.UPLOAD_PATH); // Use `/tmp` for serverless environments i.e., Vercel
-
     // ensure the directory exists at runtime
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
