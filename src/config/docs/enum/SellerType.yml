@@ -3,7 +3,7 @@ components:
     SellerType:
       type: string
       enum:
-        - Active seller
-        - Inactive seller
-        - Test seller
+        - activeSeller
+        - inactiveSeller
+        - testSeller
       description: The type of seller.
