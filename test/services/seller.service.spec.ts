@@ -6,6 +6,7 @@ import Seller from '../../src/models/Seller';
 import UserSettings from '../../src/models/UserSettings';
 import { ISeller, ISellerWithSettings, IUserSettings } from '../../src/types';
 import { TrustMeterScale } from '../../src/models/enums/trustMeterScale';
+import { SellerType } from '../../src/models/enums/sellerType';
 
 let mongoServer: MongoMemoryServer;
 
@@ -14,35 +15,35 @@ const mockSellers = [
     seller_id: '0a0a0a-0a0a-0a0a',
     name: 'Test Seller 1',
     description: 'Test Seller 1 Description',
-    seller_type: 'TestSeller',
+    seller_type: SellerType.Test, // Updated enum value for 'Test seller'
     sell_map_center: { type: 'Point', coordinates: [-74.0060, 40.7128] }
   },
   {
     seller_id: '0b0b0b-0b0b-0b0b',
     name: 'Test Vendor 2',
     description: 'Test Vendor 2 Description',
-    seller_type: 'CurrentlyNotSelling',
+    seller_type: SellerType.Inactive, // Updated to 'Real merchant - not currently selling'
     sell_map_center: { type: 'Point', coordinates: [-118.2437, 34.0522] }
   },
   {
     seller_id: '0c0c0c-0c0c-0c0c',
     name: 'Test Vendor 3',
     description: 'Test Vendor 3 Description',
-    seller_type: 'Pioneer',
+    seller_type: SellerType.Active, // Updated enum value for 'Real merchant - actively selling'
     sell_map_center: { type: 'Point', coordinates: [-87.6298, 41.8781] }
   },
   {
     seller_id: '0d0d0d-0d0d-0d0d',
     name: 'Test Seller 4',
     description: 'Test Seller 4 Description',
-    seller_type: 'CurrentlyNotSelling',
+    seller_type: SellerType.Inactive, // Updated to 'Real merchant - not currently selling'
     sell_map_center: { type: 'Point', coordinates: [-122.4194, 37.7749] }
   },
   {
     seller_id: '0e0e0e-0e0e-0e0e',
     name: 'Test Vendor 5',
     description: 'Test Vendor 5 Description',
-    seller_type: 'TestSeller',
+    seller_type: SellerType.Test, // Updated enum value for 'Test seller'
     sell_map_center: { type: 'Point', coordinates: [-95.3698, 29.7604] }
   }
 ] as ISeller[];
@@ -140,7 +141,7 @@ describe('getAllSellers function', () => {
   it('should fetch all sellers when all parameters are empty', async () => {
     // filter seller records to exclude those with seller_type "CurrentlyNotSelling"
     const expectedMockSellers = mockSellers.filter(
-      seller => seller.seller_type !== 'CurrentlyNotSelling'
+      seller => seller.seller_type !== SellerType.Inactive
     );
 
     const result = await getAllSellers();
@@ -156,7 +157,7 @@ describe('getAllSellers function', () => {
        + exclude those with seller_type "CurrentlyNotSelling" */
     const expectedMockSellers = mockSellers.filter(
       seller => seller.description.includes('Vendor') && 
-      seller.seller_type !== 'CurrentlyNotSelling'
+      seller.seller_type !== SellerType.Inactive
     );
 
     const result = await getAllSellers(undefined, undefined, 'Vendor');
@@ -171,7 +172,7 @@ describe('getAllSellers function', () => {
     /* filter seller records to exclude those with seller_type "CurrentlyNotSelling" 
        + include those with sell_map_center within geospatial radius */
     const expectedMockSellers = mockSellers.filter(
-      seller => seller.seller_type !== 'CurrentlyNotSelling' &&
+      seller => seller.seller_type !== SellerType.Inactive &&
       seller.sell_map_center.type === 'Point' &&
       seller.sell_map_center.coordinates[0] === -74.0060 &&
       seller.sell_map_center.coordinates[1] === 40.7128
@@ -190,7 +191,7 @@ describe('getAllSellers function', () => {
        + include those with description "Vendor"
        + include those with sell_map_center within geospatial radius */
     const expectedMockSellers = mockSellers.filter(
-      seller => seller.seller_type !== 'CurrentlyNotSelling' &&
+      seller => seller.seller_type !== SellerType.Inactive &&
       seller.description.includes('Vendor') &&
       seller.sell_map_center.type === 'Point' &&
       seller.sell_map_center.coordinates[0] === -74.0060 &&
