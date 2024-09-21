@@ -139,6 +139,8 @@ userRoutes.get("/:pi_uid", userController.getUser);
  *               $ref: '/api/docs/UsersSchema.yml#/components/schemas/DeleteUserRs'
  *       404:
  *         description: User not found
+ *       403:
+ *         description: User deletion is only restricted to the account owner
  *       401:
  *         description: Unauthorized | Authentication token is required | Authentication token is invalid or expired
  *       400:
