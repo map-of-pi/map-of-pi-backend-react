@@ -20,64 +20,31 @@ import { verifyToken } from "../middlewares/verifyToken";
  *         user_name:
  *           type: string
  *           description: Name of Pi user; preset to Pi user alias
- *       required:
- *         - pi_uid
- *         - pi_username
- *         - user_name
  */
 const userRoutes = Router();
 
-// /**
-//  * @swagger
-//  * /api/v1/users/authenticate:
-//  *   post:
-//  *     tags:
-//  *       - User
-//  *     summary: Authenticate the user's access token
-//  *     requestBody:
-//  *       required: true
-//  *       content:
-//  *         application/json:
-//  *           schema:
-//  *             type: object
-//  *             properties: 
-//  *               pioneerAuth:
-//  *                 type: object
-//  *                 properties:
-//  *                   accessToken:  
-//  *                     type: string
-//  *                     example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjZiYmFlNGEwNWJjYzNkOGRmYWI1NjMiLCJpYXQiOjE3MTgzMzk0MDksImV4cCI6MTcyMDkzMTQwOX0.gFz-EdHoOqz3-AuFX5R4uGtruFaTMH8sTOXEX-3c7yw
-//  *                 required:
-//  *                   - pioneerAuth    
-//  *     responses:
-//  *       200:
-//  *         description: Successful response
-//  *         content:
-//  *           application/json:
-//  *             schema:
-//  *               $ref: '/api/docs/UsersSchema.yml#/components/schemas/AuthenticateUserRs'
-//  *       404:
-//  *         description: Pioneer not found
-//  *       400:
-//  *         description: Bad request
-//  *       500:
-//  *         description: Internal server error
-//  */
-userRoutes.post("/authenticate", isPioneerFound, userController.authenticateUser);
-
 /**
  * @swagger
- * /api/v1/users/authenticate_:
+ * /api/v1/users/authenticate:
  *   post:
  *     tags:
  *       - User
- *     summary: Authenticate existing user or build new user
+ *     summary: Authenticate the user's access token
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '/api/docs/UsersSchema.yml#/components/schemas/AuthenticateUserRq'
+ *             type: object
+ *             properties: 
+ *               pioneerAuth:
+ *                 type: object
+ *                 properties:
+ *                   accessToken:  
+ *                     type: string
+ *                     example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjZiYmFlNGEwNWJjYzNkOGRmYWI1NjMiLCJpYXQiOjE3MTgzMzk0MDksImV4cCI6MTcyMDkzMTQwOX0.gFz-EdHoOqz3-AuFX5R4uGtruFaTMH8sTOXEX-3c7yw
+ *                 required:
+ *                   - pioneerAuth    
  *     responses:
  *       200:
  *         description: Successful response
@@ -85,12 +52,14 @@ userRoutes.post("/authenticate", isPioneerFound, userController.authenticateUser
  *           application/json:
  *             schema:
  *               $ref: '/api/docs/UsersSchema.yml#/components/schemas/AuthenticateUserRs'
+ *       404:
+ *         description: Pioneer not found
  *       400:
  *         description: Bad request
  *       500:
  *         description: Internal server error
  */
-userRoutes.post("/authenticate_", userController.authenticateUser);
+userRoutes.post("/authenticate", isPioneerFound, userController.authenticateUser);
 
 /**
  * @swagger
