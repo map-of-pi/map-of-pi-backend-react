@@ -1,0 +1,9 @@
+components:
+  schemas:
+    SellerType:
+      type: string
+      enum:
+        - activeSeller
+        - inactiveSeller
+        - testSeller
+      description: The type of seller.

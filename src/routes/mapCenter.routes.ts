@@ -9,7 +9,7 @@ import { verifyToken } from '../middlewares/verifyToken';
  *     MapCenterSchema:
  *       type: object
  *       properties:
- *         pi_uid:
+ *         map_center_id:
  *           type: string
  *           description: Pi user ID
  *         latitude:
@@ -18,10 +18,6 @@ import { verifyToken } from '../middlewares/verifyToken';
  *         longitude:
  *           type: string
  *           description: Longitude of the map center
- *       required:
- *         - pi_uid
- *         - latitude
- *         - longitude
  */
 const mapCenterRoutes = Router();
 

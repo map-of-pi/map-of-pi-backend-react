@@ -23,7 +23,12 @@ import upload from "../utils/multer";
  *           description: Description of the seller
  *         seller_type:
  *           type: string
- *           description: Type of the seller
+ *           description: Type of the seller (active, inactive, test, other) // Update description here
+ *           enum:
+ *             - active
+ *             - inactive
+ *             - test
+ *             - other
  *         image:
  *           type: string
  *           description: Image of the seller
@@ -158,7 +163,7 @@ sellerRoutes.post(
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             $ref: '/api/docs/SellersSchema.yml#/components/schemas/RegisterSellerRq'
  *     responses:
@@ -178,7 +183,7 @@ sellerRoutes.post(
 sellerRoutes.put(
   "/register",
   verifyToken,
-  upload.array("images"),
+  upload.single("image"),
   sellerController.registerSeller
 );
 
