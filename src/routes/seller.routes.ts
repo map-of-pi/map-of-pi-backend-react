@@ -218,7 +218,7 @@ sellerRoutes.put(
  *         description: Internal server error
  */
 sellerRoutes.delete(
-  "/:seller_id",
+  "/delete",
   verifyToken,
   isSellerFound,
   sellerController.deleteSeller

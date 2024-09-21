@@ -67,33 +67,6 @@ userRoutes.post("/authenticate", isPioneerFound, userController.authenticateUser
 
 /**
  * @swagger
- * /api/v1/users/authenticate_:
- *   post:
- *     tags:
- *       - User
- *     summary: Authenticate existing user or build new user
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '/api/docs/UsersSchema.yml#/components/schemas/AuthenticateUserRq'
- *     responses:
- *       200:
- *         description: Successful response
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '/api/docs/UsersSchema.yml#/components/schemas/AuthenticateUserRs'
- *       400:
- *         description: Bad request
- *       500:
- *         description: Internal server error
- */
-userRoutes.post("/authenticate_", userController.authenticateUser);
-
-/**
- * @swagger
  * /api/v1/users/me:
  *   get:
  *     tags:
@@ -178,7 +151,7 @@ userRoutes.get("/:pi_uid", userController.getUser);
  *         description: Internal server error
  */
 userRoutes.delete(
-  "/:pi_uid",
+  "/delete",
   verifyToken,
   userController.deleteUser
 );

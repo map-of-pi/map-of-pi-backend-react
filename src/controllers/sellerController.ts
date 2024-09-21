@@ -3,6 +3,7 @@ import * as sellerService from "../services/seller.service";
 import { uploadImage } from "../services/misc/image.service";
 
 import logger from "../config/loggingConfig";
+import { ISeller } from "../types";
 
 export const fetchSellersByCriteria = async (req: Request, res: Response) => {
   try {
@@ -56,7 +57,7 @@ export const fetchSellerRegistration = async (req: Request, res: Response) => {
 export const registerSeller = async (req: Request, res: Response) => {
   try {
     const authUser = req.currentUser;
-    const formData = req.body;
+    const formData = req.body as ISeller;
 
     if (!authUser) {
       logger.warn("No authenticated user found for registering.");
@@ -66,8 +67,10 @@ export const registerSeller = async (req: Request, res: Response) => {
     // image file handling
     const file = req.file;
     const image = file ? await uploadImage(file, 'seller-registration') : '';
+
+    formData.image = image;
     
-    const registeredSeller = await sellerService.registerOrUpdateSeller(authUser, formData, image);
+    const registeredSeller = await sellerService.registerOrUpdateSeller(authUser, formData);
     logger.info(`Registered or updated seller for user ${authUser.pi_uid}`);
     return res.status(200).json({ seller: registeredSeller });
   } catch (error: any) {
