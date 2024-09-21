@@ -1,11 +1,11 @@
 import Seller from "../models/Seller";
 import User from "../models/User";
-import UserSettings from "../models/UserSettings";
 import { getUserSettingsById } from "./userSettings.service";
 import { ISeller, IUser, IUserSettings, ISellerWithSettings } from "../types";
+import UserSettings from "../models/UserSettings";
+import { SellerType } from '../models/enums/sellerType'
 
 import logger from "../config/loggingConfig";
-import { getMapCenterById } from "./mapCenter.service";
 
 // Helper function to get settings for all sellers and merge them into seller objects
 const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSettings[]> => {
@@ -39,9 +39,9 @@ export const getAllSellers = async (
   try {
     let sellers: ISeller[];
 
-    // always apply this condition to exclude 'CurrentlyNotSelling' sellers
-    const baseCriteria = { seller_type: { $ne: 'CurrentlyNotSelling' } };
-
+    // always apply this condition to exclude 'Inactive sellers'
+    const baseCriteria = { seller_type: { $ne: SellerType.Inactive } };
+    
     // if search_query is provided, add search conditions
     const searchCriteria = search_query
       ? {
@@ -105,24 +105,33 @@ export const getSingleSellerById = async (seller_id: string): Promise<ISeller | 
   }
 };
 
-export const registerOrUpdateSeller = async (sellerData: ISeller, authUser: IUser): Promise<ISeller> => {
+export const registerOrUpdateSeller = async (authUser: IUser, formData: any, image: string): Promise<ISeller> => {
   try {
-    const sellCenter = await getMapCenterById(authUser.pi_uid);
-    // Add sell_map_center field only if sellCenter is available
-    if (sellCenter) {
-      sellerData.sell_map_center = {
-        type: 'Point' as const,
-        coordinates: [sellCenter.latitude, sellCenter.longitude] as [number, number]
-      };
-    };
-    let seller = await Seller.findOne({ seller_id: authUser.pi_uid }).exec();
+    const existingSeller = await Seller.findOne({ seller_id: authUser.pi_uid }).exec();
 
-    if (seller) {
+    // parse sell_map_center from String into JSON object.
+    const sellMapCenter = formData.sell_map_center 
+      ? JSON.parse(formData.sell_map_center)
+      : { type: 'Point', coordinates: [0, 0] };
+    
+    // construct seller object
+    const sellerData: Partial<ISeller> = {
+      seller_id: authUser.pi_uid,
+      name: formData.name || existingSeller?.name || authUser.user_name,
+      description: formData.description || existingSeller?.description || '',
+      seller_type: formData.seller_type || existingSeller?.seller_type || '',
+      image: image || existingSeller?.image || '',
+      address: formData.address || existingSeller?.address || '',
+      sell_map_center: sellMapCenter || existingSeller?.sell_map_center || { type: 'Point', coordinates: [0, 0] },
+      order_online_enabled_pref: formData.order_online_enabled_pref || existingSeller?.order_online_enabled_pref || ''
+    };
+
+    if (existingSeller) {
       const updatedSeller = await Seller.findOneAndUpdate(
-        { seller_id: authUser.pi_uid }, 
-        sellerData,
+        { seller_id: authUser.pi_uid },
+        { $set: sellerData },
         { new: true }
-      );
+      ).exec();
       return updatedSeller as ISeller;
     } else {
       const shopName = !sellerData.name ? authUser.user_name : sellerData.name;

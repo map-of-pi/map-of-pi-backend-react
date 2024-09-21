@@ -1,7 +1,8 @@
 import { getUser } from "./user.service";
 import ReviewFeedback from "../models/ReviewFeedback";
 import UserSettings from "../models/UserSettings";
-import { IReviewFeedback, IReviewFeedbackOutput, IUser } from "../types";
+import { IReviewFeedback, IUser } from "../types";
+
 import logger from "../config/loggingConfig";
 
 /**
@@ -55,31 +56,20 @@ const computeRatings = async (user_settings_id: string) => {
   }
 };
 
-export const getReviewFeedback = async (review_receiver_id: string): Promise<IReviewFeedbackOutput[]> => {
+export const getReviewFeedback = async (review_receiver_id: string): Promise<IReviewFeedback[]> => {
   try {
-    const reviewFeedbackList = await ReviewFeedback.find({
-      $or: [
-        { review_receiver_id: review_receiver_id },
-        { review_giver_id: review_receiver_id }
-      ]
-    }).exec();
+    const reviewFeedbackList = await ReviewFeedback.find({ review_receiver_id }).exec();
 
-    // Update each reviewFeedback item with the reviewer's and receiver's usernames
+    // Update each reviewFeedback item with the reviewer's username instead of ID
     const updatedReviewFeedbackList = await Promise.all(
       reviewFeedbackList.map(async (reviewFeedback) => {
-        // Retrieve user details for both giver and receiver
         const reviewer = await getUser(reviewFeedback.review_giver_id);
-        const receiver = await getUser(reviewFeedback.review_receiver_id);
-
-        const giverName = reviewer ? reviewer.user_name : '';
-        const receiverName = receiver ? receiver.user_name : '';
-
-        // Return the updated review feedback object
-        return { ...reviewFeedback.toObject(), giver: giverName, receiver: receiverName };
+        const username = reviewer ? reviewer.user_name : '';
+        return { ...reviewFeedback.toObject(), review_giver_id: username };
       })
     );
 
-    return updatedReviewFeedbackList as IReviewFeedbackOutput[];
+    return updatedReviewFeedbackList as IReviewFeedback[] ;
   } catch (error: any) {
     logger.error(`Error retrieving review feedback collection for userID ${review_receiver_id}: ${error.message}`);
     throw new Error(error.message);

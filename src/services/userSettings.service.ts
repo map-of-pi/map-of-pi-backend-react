@@ -3,11 +3,6 @@ import User from "../models/User";
 import { IUser, IUserSettings } from "../types";
 
 import logger from "../config/loggingConfig";
-<<<<<<< HEAD
-import User from "../models/User";
-import { getMapCenterById } from "./mapCenter.service";
-=======
->>>>>>> e5e9c50543f184b7e28b2651aa471b992e6afc51
 
 export const getUserSettingsById = async (user_settings_id: string): Promise<IUserSettings | null> => {
   try {
@@ -25,20 +20,6 @@ export const addOrUpdateUserSettings = async (
   image: string
 ): Promise<IUserSettings> => {
   try {
-<<<<<<< HEAD
-    const searchCenter = await getMapCenterById(authUser.pi_uid);
-    // Add search_map_center field only if userSettings is available
-    if (searchCenter) {
-      userSettingsData.search_map_center = {
-        type: 'Point' as const,
-        coordinates: [searchCenter.latitude, searchCenter.longitude] as [number, number]
-      };
-    };
-    
-    // Update the user_name if it's empty
-    if (userSettingsData.user_name.trim() === "") {
-      userSettingsData.user_name = authUser.pi_username;
-=======
     if (formData.user_name.trim() === "") {
       formData.user_name = authUser.pi_username;
 
@@ -47,7 +28,6 @@ export const addOrUpdateUserSettings = async (
         { user_name: formData.user_name },
         { new: true }
       ).exec();
->>>>>>> e5e9c50543f184b7e28b2651aa471b992e6afc51
     }
 
     let existingUserSettings = await UserSettings.findOne({

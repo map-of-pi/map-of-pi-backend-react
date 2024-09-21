@@ -1,6 +1,6 @@
 import { Document, Types } from "mongoose";
-
 import { RatingScale } from "./models/enums/ratingScale";
+import { SellerType } from "./models/enums/sellerType";
 import { TrustMeterScale } from "./models/enums/trustMeterScale";
 
 export interface IUser extends Document {
@@ -26,7 +26,7 @@ export interface IUserSettings extends Document {
 export interface ISeller extends Document {
   seller_id: string;
   name: string;
-  seller_type: string;
+  seller_type: SellerType;
   description: string;
   image?: string;
   address?: string;
@@ -50,9 +50,15 @@ export interface IReviewFeedback extends Document {
 }
 
 export interface IMapCenter extends Document {
-  pi_uid: string;
-  latitude: number;
-  longitude: number;
+  map_center_id: string;
+  search_map_center?: {
+    type: 'Point';
+    coordinates: [number, number];
+  };
+  sell_map_center?: {
+    type: 'Point';
+    coordinates: [number, number];
+  };
 }
 
 // Select specific fields from IUserSettings
@@ -60,10 +66,3 @@ export type PartialUserSettings = Pick<IUserSettings, 'user_name' | 'email' | 'p
 
 // Combined interface representing a seller with selected user settings
 export interface ISellerWithSettings extends ISeller, PartialUserSettings {}
-
-export type PartialReview = {
-  giver: string;
-  receiver: string;
-}
-
-export interface IReviewFeedbackOutput extends IReviewFeedback, PartialReview {}

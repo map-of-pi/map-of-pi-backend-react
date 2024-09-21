@@ -12,7 +12,7 @@ export const authenticateUser = async (req: Request, res: Response) => {
   try {
     const user = await userService.authenticate(auth.user);
     const token = jwtHelper.generateUserToken(user);
-    const expiresDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const expiresDate = new Date(Date.now() + 1 * 24 * 60 * 60 * 1000); // 1 day
 
     logger.info(`User authenticated: ${user.pi_uid}`);
 
