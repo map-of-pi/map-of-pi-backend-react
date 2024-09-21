@@ -41,12 +41,6 @@ components:
             __v:
               type: integer
               example: 0
-          required:
-            - _id
-            - pi_uid
-            - pi_username
-            - user_name
-            - __v
         token:
           type: string
           example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjZiYmFlNGEwNWJjYzNkOGRmYWI1NjMiLCJpYXQiOjE3MTgzMzk0MDksImV4cCI6MTcyMDkzMTQwOX0.gFz-EdHoOqz3-AuFX5R4uGtruFaTMH8sTOXEX-3c7yw
@@ -74,13 +68,7 @@ components:
               example: Test Alias
             __v:
               type: integer
-              example: 0
-          required:
-            - _id
-            - pi_uid
-            - pi_username
-            - user_name
-            - __v       
+              example: 0    
       required:
         - user
 
@@ -111,12 +99,6 @@ components:
                 __v:
                   type: integer
                   example: 0
-              required:
-                - _id
-                - pi_uid
-                - pi_username
-                - user_name
-                - __v
             sellers:
               type: array
               items:
