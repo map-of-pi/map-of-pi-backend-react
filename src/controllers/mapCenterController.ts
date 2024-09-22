@@ -3,6 +3,8 @@ import { Request, Response } from 'express';
 import * as mapCenterService from '../services/mapCenter.service'; 
 import { IMapCenter } from '../types';
 
+import Seller from '../models/Seller';
+
 import logger from '../config/loggingConfig';
 
 export const saveMapCenter = async (req: Request, res: Response) => {
@@ -11,9 +13,30 @@ export const saveMapCenter = async (req: Request, res: Response) => {
     if (authUser) {    
       const map_center_id = authUser.pi_uid;
       const { latitude, longitude, type } = req.body;
-
       const mapCenter = await mapCenterService.createOrUpdateMapCenter(map_center_id, latitude, longitude, type);
       logger.info(`${type === 'search' ? 'Search' : 'Sell'} Center saved successfully for user ${map_center_id} with Latitude: ${latitude}, Longitude: ${longitude}`);
+      
+      // If type is 'sell', update the seller's sell_map_center
+      if (type === 'sell') {
+        // Create the sellMapCenter object
+        const sellMapCenter = {
+          type: 'Point',
+          coordinates: [latitude, longitude],
+        };
+
+        // Update the seller's sell_map_center
+        const updatedSeller = await Seller.findOneAndUpdate(
+          { seller_id: map_center_id },
+          { $set: { sell_map_center: sellMapCenter } },
+          { new: true }
+        ).exec();
+
+        if (updatedSeller) {
+          logger.info(`Seller's sell_map_center updated for seller_id: ${map_center_id}`, { updatedSeller });
+        } else {
+          logger.warn(`Seller not found for seller_id: ${map_center_id}. sell_map_center not updated.`);
+        }
+      }
       
       return res.status(200).json(mapCenter);
     } else {
