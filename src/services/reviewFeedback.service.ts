@@ -1,7 +1,7 @@
 import { getUser } from "./user.service";
 import ReviewFeedback from "../models/ReviewFeedback";
 import UserSettings from "../models/UserSettings";
-import { IReviewFeedback, IUser } from "../types";
+import { IReviewFeedback, IUser, IReviewFeedbackOutput } from "../types";
 
 import logger from "../config/loggingConfig";
 
