@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 
+import Seller from '../models/Seller';
 import * as mapCenterService from '../services/mapCenter.service'; 
 import { IMapCenter } from '../types';
 
@@ -8,21 +9,43 @@ import logger from '../config/loggingConfig';
 export const saveMapCenter = async (req: Request, res: Response) => {
   try {  
     const authUser = req.currentUser;
-    if (authUser) {    
-      const map_center_id = authUser.pi_uid;
-      const { latitude, longitude, type } = req.body;
-
-      const mapCenter = await mapCenterService.createOrUpdateMapCenter(map_center_id, latitude, longitude, type);
-      logger.info(`${type === 'search' ? 'Search' : 'Sell'} Center saved successfully for user ${map_center_id} with Latitude: ${latitude}, Longitude: ${longitude}`);
-      
-      return res.status(200).json(mapCenter);
-    } else {
+    // early authentication check
+    if (!authUser) {
       logger.warn('User not found; Map Center failed to save');
       return res.status(404).json({ message: 'User not found: Map Center failed to save' });
     }
+
+    const map_center_id = authUser.pi_uid;
+    const { latitude, longitude, type } = req.body;
+    const mapCenter = await mapCenterService.createOrUpdateMapCenter(map_center_id, latitude, longitude, type);
+    logger.info(`${type === 'search' ? 'Search' : 'Sell'} Center saved successfully for user ${map_center_id} with Latitude: ${latitude}, Longitude: ${longitude}`);
+    
+    if (type === 'sell') {
+      const sellMapCenter = {
+        type: 'Point',
+        coordinates: [latitude, longitude],
+      };
+
+      // Update the seller's sell_map_center
+      const updatedSeller = await Seller.findOneAndUpdate(
+        { seller_id: map_center_id },
+        { $set: { sell_map_center: sellMapCenter } },
+        { new: true }
+      ).exec();
+
+      if (updatedSeller) {
+        logger.info(`Seller's sell_map_center updated for seller_id: ${map_center_id}`, { updatedSeller });
+      } else {
+        logger.warn(`Seller not found for seller_id: ${map_center_id}. sell_map_center not updated.`);
+        return res.status(404).json({ message: 'Seller not found: Map Center failed to save' });
+      }
+    }
+    return res.status(200).json(mapCenter);
+
   } catch (error: any) {
-    logger.error(`Failed to save Map Center: ${error.message}`);
-    res.status(500).json({ message: error.message });
+    const errorMessage = 'An error occurred while saving the map center; please try again later';
+    logger.error(`${errorMessage}: ${error}`);
+    return res.status(500).json({ message: errorMessage });
   }
 };
 
