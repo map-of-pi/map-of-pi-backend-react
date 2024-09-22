@@ -3,6 +3,7 @@ import * as sellerService from "../services/seller.service";
 import { uploadImage } from "../services/misc/image.service";
 
 import logger from "../config/loggingConfig";
+import { ISeller } from "../types";
 
 export const fetchSellersByCriteria = async (req: Request, res: Response) => {
   try {
@@ -56,7 +57,7 @@ export const fetchSellerRegistration = async (req: Request, res: Response) => {
 export const registerSeller = async (req: Request, res: Response) => {
   try {
     const authUser = req.currentUser;
-    const formData = req.body;
+    const formData = req.body as ISeller;
 
     if (!authUser) {
       logger.warn("No authenticated user found for registering.");
@@ -65,7 +66,9 @@ export const registerSeller = async (req: Request, res: Response) => {
 
     // image file handling
     const file = req.file;
-    const image = file ? await uploadImage(file, 'seller-registration') : '';
+    const image = file ? await uploadImage(authUser.pi_uid, file, 'seller-registration') : '';
+
+    formData.image = image;
     
     const registeredSeller = await sellerService.registerOrUpdateSeller(authUser, formData, image);
     logger.info(`Registered or updated seller for user ${authUser.pi_uid}`);
@@ -77,13 +80,13 @@ export const registerSeller = async (req: Request, res: Response) => {
 };
 
 export const deleteSeller = async (req: Request, res: Response) => {
-  const { seller_id } = req.params;
+  const authUser = req.currentUser;
   try {
-    const deletedSeller = await sellerService.deleteSeller(seller_id);
-    logger.info(`Deleted seller with ID ${seller_id}`);
+    const deletedSeller = await sellerService.deleteSeller(authUser?.pi_uid);
+    logger.info(`Deleted seller with ID ${authUser?.pi_uid}`);
     res.status(200).json({ message: "Seller deleted successfully", deletedSeller });
   } catch (error: any) {
-    logger.error(`Failed to delete seller with ID ${seller_id}: ${error.message}`);
+    logger.error(`Failed to delete seller with ID ${authUser?.pi_uid}: ${error.message}`);
     res.status(500).json({ message: error.message });
   }
 };

@@ -51,7 +51,7 @@ export const addUserPreferences = async (req: Request, res: Response) => {
 
     // image file handling
     const file = req.file;
-    const image = file ? await uploadImage(file, 'user-preferences') : '';
+    const image = file ? await uploadImage(authUser.pi_uid, file, 'user-preferences') : '';
 
     const userPreferences = await userSettingsService.addOrUpdateUserSettings(authUser, formData, image);
     logger.info(`Added or updated User Preferences for user with ID: ${authUser.pi_uid}`);
