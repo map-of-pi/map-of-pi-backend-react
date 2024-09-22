@@ -70,7 +70,7 @@ export const registerSeller = async (req: Request, res: Response) => {
 
     formData.image = image;
     
-    const registeredSeller = await sellerService.registerOrUpdateSeller(authUser, formData);
+    const registeredSeller = await sellerService.registerOrUpdateSeller(authUser, formData, image);
     logger.info(`Registered or updated seller for user ${authUser.pi_uid}`);
     return res.status(200).json({ seller: registeredSeller });
   } catch (error: any) {

@@ -10,7 +10,7 @@ export const generateUserToken = (user: IUser) => {
   try {
     logger.info(`Generating token for user: ${user.pi_uid}`);
     const token = jwt.sign({ userId: user.pi_uid, _id: user._id }, env.JWT_SECRET, {
-      expiresIn: "30d",
+      expiresIn: "1d", // 1 day
     });
     logger.info(`Successfully generated token for user: ${user.pi_uid}`);
     return token;
