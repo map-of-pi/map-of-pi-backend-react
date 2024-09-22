@@ -71,7 +71,7 @@ mapCenterRoutes.get(
  *             schema:
  *               $ref: '/api/docs/MapCenterSchema.yml#/components/schemas/SaveMapCenterRs'
  *       404:
- *         description: User not found; Map Center failed to save
+ *         description: User not found | Seller not found; Map Center failed to save
  *       401:
  *         description: Unauthorized | Authentication token is required | Authentication token is invalid or expired
  *       400:

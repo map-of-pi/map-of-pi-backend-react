@@ -133,7 +133,7 @@ export const registerOrUpdateSeller = async (authUser: IUser, formData: any, ima
         { $set: sellerData },
         { new: true }
       ).exec();
-      logger.info('Seller updated in the database:', updatedSeller); // Keep critical logs
+      logger.info('Seller updated in the database:', updatedSeller);
       return updatedSeller as ISeller;
     } else {
       const shopName = sellerData.name || authUser.user_name;
@@ -144,12 +144,13 @@ export const registerOrUpdateSeller = async (authUser: IUser, formData: any, ima
         order_online_enabled_pref: false,
       });
       const savedSeller = await newSeller.save();
-      logger.info('New seller created in the database:', savedSeller); // Keep critical logs
+      logger.info('New seller created in the database:', savedSeller);
       return savedSeller as ISeller;
     }
   } catch (error: any) {
-    logger.error('Error registering or updating seller:', error); // Keep error logs
-    throw new Error('Seller registration/update failed');
+    const errorMessage = 'An error occurred while registering or updating seller; please try again later';
+    logger.error(`${errorMessage}: ${error}`);
+    throw new Error(errorMessage);
   }
 };
 
