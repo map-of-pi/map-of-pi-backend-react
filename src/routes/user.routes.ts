@@ -118,11 +118,18 @@ userRoutes.get("/:pi_uid", userController.getUser);
 
 /**
  * @swagger
- * /api/v1/users/delete:
+ * /api/v1/users/{pi_uid}:
  *   delete:
  *     tags:
  *       - User
  *     summary: Delete a user and user associated data by Pi UID *
+ *     parameters:
+ *       - name: pi_uid
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The Pi UID of the user to delete
  *     responses:
  *       200:
  *         description: Successful response | User deleted successfully
@@ -142,7 +149,7 @@ userRoutes.get("/:pi_uid", userController.getUser);
  *         description: Internal server error
  */
 userRoutes.delete(
-  "/delete",
+  "/:pi_uid",
   verifyToken,
   userController.deleteUser
 );

@@ -80,13 +80,13 @@ export const registerSeller = async (req: Request, res: Response) => {
 };
 
 export const deleteSeller = async (req: Request, res: Response) => {
-  const { seller_id } = req.params;
+  const authUser = req.currentUser;
   try {
-    const deletedSeller = await sellerService.deleteSeller(seller_id);
-    logger.info(`Deleted seller with ID ${seller_id}`);
+    const deletedSeller = await sellerService.deleteSeller(authUser?.pi_uid);
+    logger.info(`Deleted seller with ID ${authUser?.pi_uid}`);
     res.status(200).json({ message: "Seller deleted successfully", deletedSeller });
   } catch (error: any) {
-    logger.error(`Failed to delete seller with ID ${seller_id}: ${error.message}`);
+    logger.error(`Failed to delete seller with ID ${authUser?.pi_uid}: ${error.message}`);
     res.status(500).json({ message: error.message });
   }
 };
