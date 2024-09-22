@@ -66,7 +66,7 @@ export const registerSeller = async (req: Request, res: Response) => {
 
     // image file handling
     const file = req.file;
-    const image = file ? await uploadImage(file, 'seller-registration') : '';
+    const image = file ? await uploadImage(authUser.pi_uid, file, 'seller-registration') : '';
 
     formData.image = image;
     
