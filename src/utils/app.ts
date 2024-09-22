@@ -13,6 +13,7 @@ import userPreferencesRoutes from "../routes/userPreferences.routes";
 import sellerRoutes from "../routes/seller.routes";
 import reviewFeedbackRoutes from "../routes/reviewFeedback.routes";
 import mapCenterRoutes from "../routes/mapCenter.routes";
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.use(cors({
     origin: process.env.CORS_ORIGIN_URL,
     credentials: true
 }));
+app.use(cookieParser());
 
 // serve static files for Swagger documentation
 app.use('/api/docs', express.static(path.join(__dirname, '../config/docs')));
