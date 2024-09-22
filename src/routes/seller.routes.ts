@@ -189,18 +189,11 @@ sellerRoutes.put(
 
 /**
  * @swagger
- * /api/v1/sellers/{seller_id}:
+ * /api/v1/sellers/delete:
  *   delete:
  *     tags:
  *       - Seller
  *     summary: Delete a seller by seller ID *
- *     parameters:
- *       - name: seller_id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *         description: The Pi UID of the seller to delete
  *     responses:
  *       200:
  *         description: Successful response | Seller deleted successfully
@@ -218,7 +211,7 @@ sellerRoutes.put(
  *         description: Internal server error
  */
 sellerRoutes.delete(
-  "/:seller_id",
+  "/delete",
   verifyToken,
   isSellerFound,
   sellerController.deleteSeller

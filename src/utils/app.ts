@@ -1,7 +1,8 @@
 import express from "express";
+import cookieParser from 'cookie-parser';
 import cors from "cors"
-import path from "path";
 import dotenv from "dotenv";
+import path from "path";
 
 import docRouter from "../config/swagger";
 import requestLogger from "../middlewares/logger";
@@ -26,6 +27,7 @@ app.use(cors({
     origin: process.env.CORS_ORIGIN_URL,
     credentials: true
 }));
+app.use(cookieParser());
 
 // serve static files for Swagger documentation
 app.use('/api/docs', express.static(path.join(__dirname, '../config/docs')));

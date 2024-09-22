@@ -152,7 +152,7 @@ export const registerOrUpdateSeller = async (authUser: IUser, formData: any, ima
 };
 
 // Delete existing seller
-export const deleteSeller = async (seller_id: string): Promise<ISeller | null> => {
+export const deleteSeller = async (seller_id: string | undefined): Promise<ISeller | null> => {
   try {
     const deletedSeller = await Seller.findOneAndDelete({ seller_id }).exec();
     return deletedSeller ? deletedSeller as ISeller : null;
