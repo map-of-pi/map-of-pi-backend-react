@@ -15,8 +15,8 @@ export const getMapCenterById = async (map_center_id: string): Promise<IMapCente
 
 export const createOrUpdateMapCenter = async (
   map_center_id: string, 
-  latitude: number, 
   longitude: number,
+  latitude: number, 
   type: 'search' | 'sell'
   
 ): Promise<IMapCenter> => {

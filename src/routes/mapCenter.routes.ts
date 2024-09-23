@@ -12,12 +12,12 @@ import { verifyToken } from '../middlewares/verifyToken';
  *         map_center_id:
  *           type: string
  *           description: Pi user ID
- *         latitude:
- *           type: string
- *           description: Latitude of the map center
  *         longitude:
  *           type: string
  *           description: Longitude of the map center
+ *         latitude:
+ *           type: string
+ *           description: Latitude of the map center
  */
 const mapCenterRoutes = Router();
 

@@ -32,7 +32,7 @@ const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSet
 
 // Fetch all sellers or within a specific radius from a given origin; optional search query.
 export const getAllSellers = async (
-  origin?: { lat: number; lng: number },
+  origin?: { lng: number, lat: number },
   radius?: number,
   search_query?: string
 ): Promise<ISellerWithSettings[]> => {
