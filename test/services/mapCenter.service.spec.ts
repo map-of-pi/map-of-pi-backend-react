@@ -64,14 +64,14 @@ describe('createOrUpdateMapCenter function', () => {
   it('should update the appropriate search_map_center instance if the entry type is search', async () => {
     const updatedSearchMapCenter = {
       map_center_id: '0b0b0b-0b0b-0b0b',
-      latitude: 42.8781,
-      longitude: -88.6298
+      longitude: -88.6298,
+      latitude: 42.8781
     };
 
     const result = await createOrUpdateMapCenter(
       '0b0b0b-0b0b-0b0b',
-      updatedSearchMapCenter.latitude,
       updatedSearchMapCenter.longitude,
+      updatedSearchMapCenter.latitude,
       'search'
     ); 
 
@@ -87,14 +87,14 @@ describe('createOrUpdateMapCenter function', () => {
   it('should update the appropriate sell_map_center instance if the entry type is sell', async () => {
     const updatedSellMapCenter = {
       map_center_id: '0b0b0b-0b0b-0b0b',
-      latitude: 42.8781,
-      longitude: -88.6298
+      longitude: -88.6298,
+      latitude: 42.8781
     };
 
     const result = await createOrUpdateMapCenter(
       '0b0b0b-0b0b-0b0b',
-      updatedSellMapCenter.latitude,
       updatedSellMapCenter.longitude,
+      updatedSellMapCenter.latitude,
       'sell'
     ); 
 
