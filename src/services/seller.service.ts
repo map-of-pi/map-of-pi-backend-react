@@ -32,7 +32,7 @@ const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSet
 
 // Fetch all sellers or within a specific radius from a given origin; optional search query.
 export const getAllSellers = async (
-  origin?: { lat: number; lng: number },
+  origin?: { lng: number, lat: number },
   radius?: number,
   search_query?: string
 ): Promise<ISellerWithSettings[]> => {
@@ -109,12 +109,12 @@ export const registerOrUpdateSeller = async (authUser: IUser, formData: any, ima
   try {
     const existingSeller = await Seller.findOne({ seller_id: authUser.pi_uid }).exec();
 
-    // parse sell_map_center from String into JSON object.
+    // Parse and validate sell_map_center from formData
     const sellMapCenter = formData.sell_map_center 
       ? JSON.parse(formData.sell_map_center)
-      : { type: 'Point', coordinates: [0, 0] };
-    
-    // construct seller object
+      : existingSeller?.sell_map_center || { type: 'Point', coordinates: [0, 0] };
+
+    // Construct seller object while merging with existing data if necessary
     const sellerData: Partial<ISeller> = {
       seller_id: authUser.pi_uid,
       name: formData.name || existingSeller?.name || authUser.user_name,
@@ -122,37 +122,40 @@ export const registerOrUpdateSeller = async (authUser: IUser, formData: any, ima
       seller_type: formData.seller_type || existingSeller?.seller_type || '',
       image: image || existingSeller?.image || '',
       address: formData.address || existingSeller?.address || '',
-      sell_map_center: sellMapCenter || existingSeller?.sell_map_center || { type: 'Point', coordinates: [0, 0] },
+      sell_map_center: sellMapCenter,
       order_online_enabled_pref: formData.order_online_enabled_pref || existingSeller?.order_online_enabled_pref || ''
     };
 
+    // Update existing seller or create a new one
     if (existingSeller) {
       const updatedSeller = await Seller.findOneAndUpdate(
         { seller_id: authUser.pi_uid },
         { $set: sellerData },
         { new: true }
       ).exec();
+      logger.info('Seller updated in the database:', updatedSeller);
       return updatedSeller as ISeller;
     } else {
-      const shopName = !sellerData.name ? authUser.user_name : sellerData.name;
+      const shopName = sellerData.name || authUser.user_name;
       const newSeller = new Seller({
         ...sellerData,
-        seller_id: authUser.pi_uid,
         name: shopName,
         average_rating: 5.0,
         order_online_enabled_pref: false,
       });
       const savedSeller = await newSeller.save();
+      logger.info('New seller created in the database:', savedSeller);
       return savedSeller as ISeller;
     }
   } catch (error: any) {
-    logger.error(`Error registering seller: ${error.message}`);
-    throw new Error(error.message);
+    const errorMessage = 'An error occurred while registering or updating seller; please try again later';
+    logger.error(`${errorMessage}: ${error}`);
+    throw new Error(errorMessage);
   }
 };
 
 // Delete existing seller
-export const deleteSeller = async (seller_id: string): Promise<ISeller | null> => {
+export const deleteSeller = async (seller_id: string | undefined): Promise<ISeller | null> => {
   try {
     const deletedSeller = await Seller.findOneAndDelete({ seller_id }).exec();
     return deletedSeller ? deletedSeller as ISeller : null;

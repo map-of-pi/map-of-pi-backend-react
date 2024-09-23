@@ -1,7 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import { decodeUserToken } from "../helpers/jwt";
 import { IUser } from "../types";
+
 import logger from "../config/loggingConfig";
+
 declare module 'express-serve-static-core' {
   interface Request {
     currentUser?: IUser;

@@ -1,7 +1,8 @@
 import express from "express";
+import cookieParser from 'cookie-parser';
 import cors from "cors"
-import path from "path";
 import dotenv from "dotenv";
+import path from "path";
 
 import docRouter from "../config/swagger";
 import requestLogger from "../middlewares/logger";
@@ -13,7 +14,6 @@ import userPreferencesRoutes from "../routes/userPreferences.routes";
 import sellerRoutes from "../routes/seller.routes";
 import reviewFeedbackRoutes from "../routes/reviewFeedback.routes";
 import mapCenterRoutes from "../routes/mapCenter.routes";
-import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
