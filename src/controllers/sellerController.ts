@@ -9,7 +9,7 @@ export const fetchSellersByCriteria = async (req: Request, res: Response) => {
   try {
     const { origin, radius, search_query} = req.body;
     const sellers = await sellerService.getAllSellers(origin, radius, search_query);
-    const originString = origin ? `(${origin.lat}, ${origin.lng})` : 'undefined';
+    const originString = origin ? `(${origin.lng}, ${origin.lat})` : 'undefined';
 
     if (!sellers || sellers.length === 0) {
       logger.warn(`No sellers found within ${radius ?? 'undefined'} km of ${originString} with "${search_query ?? 'undefined'}"`);

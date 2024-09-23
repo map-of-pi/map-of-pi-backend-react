@@ -178,7 +178,7 @@ describe('getAllSellers function', () => {
       seller.sell_map_center.coordinates[1] === 40.7128
     );
 
-    const result = await getAllSellers({ lat: 40.7128, lng: -74.0060 }, 10, undefined);
+    const result = await getAllSellers({ lng: -74.0060, lat: 40.7128 }, 10, undefined);
 
     expect(result).toHaveLength(1);
 
@@ -198,7 +198,7 @@ describe('getAllSellers function', () => {
       seller.sell_map_center.coordinates[1] === 40.7128
     );
 
-    const result = await getAllSellers({ lat: 40.7128, lng: -74.0060 }, 10, 'Vendor');
+    const result = await getAllSellers({ lng: -74.0060, lat: 40.7128 }, 10, 'Vendor');
 
     expect(result).toHaveLength(0);
 

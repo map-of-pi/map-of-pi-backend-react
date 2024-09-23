@@ -16,14 +16,14 @@ export const saveMapCenter = async (req: Request, res: Response) => {
     }
 
     const map_center_id = authUser.pi_uid;
-    const { latitude, longitude, type } = req.body;
-    const mapCenter = await mapCenterService.createOrUpdateMapCenter(map_center_id, latitude, longitude, type);
-    logger.info(`${type === 'search' ? 'Search' : 'Sell'} Center saved successfully for user ${map_center_id} with Latitude: ${latitude}, Longitude: ${longitude}`);
+    const { longitude, latitude, type } = req.body;
+    const mapCenter = await mapCenterService.createOrUpdateMapCenter(map_center_id, longitude, latitude, type);
+    logger.info(`${type === 'search' ? 'Search' : 'Sell'} Center saved successfully for user ${map_center_id} with Longitude: ${longitude}, Latitude: ${latitude} `);
     
     if (type === 'sell') {
       const sellMapCenter = {
         type: 'Point',
-        coordinates: [latitude, longitude],
+        coordinates: [longitude, latitude],
       };
 
       // Update the seller's sell_map_center
