@@ -50,7 +50,7 @@ export const addReview = async (req: Request, res: Response) => {
 
     // image file handling
     const file = req.file;
-    const image = file ? await uploadImage(file, 'review-feedback') : '';
+    const image = file ? await uploadImage(authUser.pi_uid, file, 'review-feedback') : '';
 
     const newReview = await reviewFeedbackService.addReviewFeedback(authUser, formData, image);
     logger.info(`Added new review by user ${authUser.pi_uid} for receiver ID ${newReview.review_receiver_id}`);

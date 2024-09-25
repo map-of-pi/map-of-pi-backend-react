@@ -12,12 +12,12 @@ import { verifyToken } from '../middlewares/verifyToken';
  *         map_center_id:
  *           type: string
  *           description: Pi user ID
- *         latitude:
- *           type: string
- *           description: Latitude of the map center
  *         longitude:
  *           type: string
  *           description: Longitude of the map center
+ *         latitude:
+ *           type: string
+ *           description: Latitude of the map center
  */
 const mapCenterRoutes = Router();
 
@@ -71,7 +71,7 @@ mapCenterRoutes.get(
  *             schema:
  *               $ref: '/api/docs/MapCenterSchema.yml#/components/schemas/SaveMapCenterRs'
  *       404:
- *         description: User not found; Map Center failed to save
+ *         description: User not found | Seller not found; Map Center failed to save
  *       401:
  *         description: Unauthorized | Authentication token is required | Authentication token is invalid or expired
  *       400:

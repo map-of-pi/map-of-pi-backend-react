@@ -149,7 +149,7 @@ userRoutes.get("/:pi_uid", userController.getUser);
  *         description: Internal server error
  */
 userRoutes.delete(
-  "/delete",
+  "/:pi_uid",
   verifyToken,
   userController.deleteUser
 );
