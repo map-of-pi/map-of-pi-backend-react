@@ -58,8 +58,20 @@ export const getMapCenter = async (req: Request, res: Response) => {
         logger.warn(`Map Center not found for user ${map_center_id}`);
         return res.status(404).json({ message: "Map Center not found" });
       }
+
+      // Safely check if sell_map_center and coordinates exist
+      const hasSellCenter = mapCenter.sell_map_center && mapCenter.sell_map_center.coordinates?.length > 0;
+
+      // Fallback: If sell_map_center is empty or not set, default to search_map_center
+      const finalSellCenter = hasSellCenter 
+        ? mapCenter.sell_map_center 
+        : mapCenter.search_map_center;
+
       logger.info(`Map Center retrieved successfully for user ${map_center_id}`);
-      return res.status(200).json(mapCenter);
+      return res.status(200).json({
+        sell_map_center: finalSellCenter,
+        search_map_center: mapCenter.search_map_center
+      });
     } else {
       logger.warn('No user found; cannot retrieve Map Center.');
       return res.status(404).json({ message: "User not found" });
@@ -69,3 +81,5 @@ export const getMapCenter = async (req: Request, res: Response) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
