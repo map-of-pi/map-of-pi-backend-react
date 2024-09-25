@@ -65,7 +65,7 @@ export const getReviewFeedback = async (review_receiver_id: string): Promise<IRe
       ]
     }).exec();
 
-    // Update each reviewFeedback item with the reviewer's and receiver's usernames
+    // Update each reviewFeedback item with the reviewer's and receiver's username
     const updatedReviewFeedbackList = await Promise.all(
       reviewFeedbackList.map(async (reviewFeedback) => {
         // Retrieve user details for both giver and receiver
