@@ -43,7 +43,7 @@ export const getUser = async (pi_uid: string): Promise<IUser | null> => {
   }
 };
 
-export const deleteUser = async (pi_uid: string): Promise<{ user: IUser | null, sellers: ISeller[], userSetting: IUserSettings }> => {
+export const deleteUser = async (pi_uid: string | undefined): Promise<{ user: IUser | null, sellers: ISeller[], userSetting: IUserSettings }> => {
   try {
     // delete any association with Seller
     const deletedSellers = await Seller.find({ seller_id: pi_uid }).exec();
