@@ -55,20 +55,13 @@ export const getUser = async(req: Request, res: Response) => {
 };
 
 export const deleteUser = async (req: Request, res: Response) => {
-  const { pi_uid } = req.params;
   const currentUser = req.currentUser;
-
-  if (currentUser?.pi_uid !== pi_uid) {
-    logger.warn(`User ${currentUser?.pi_uid} attempted to delete another user's account ${pi_uid}.`);
-    return res.status(403).json({ message: "User deletion is only restricted to the account owner" });
-  }
-
   try {
-    const deletedData = await userService.deleteUser(pi_uid);
-    logger.info(`Deleted user with PI_UID: ${pi_uid}`);
+    const deletedData = await userService.deleteUser(currentUser?.pi_uid);
+    logger.info(`Deleted user with PI_UID: ${currentUser?.pi_uid}`);
     res.status(200).json({ message: "User deleted successfully", deletedData });
   } catch (error: any) {
-    logger.error(`Failed to delete user with PI_UID ${pi_uid}: ${error.message}`);
+    logger.error(`Failed to delete user with PI_UID ${currentUser?.pi_uid}: ${error.message}`);
     res.status(500).json({ message: error.message });
   }
 };
