@@ -32,13 +32,12 @@ const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSet
 
 // Fetch all sellers or within a specific radius from a given origin; optional search query.
 export const getAllSellers = async (
-  origin?: { lng: number, lat: number },
+  origin?: [number, number],
   radius?: number,
   search_query?: string
 ): Promise<ISellerWithSettings[]> => {
   try {
     let sellers: ISeller[];
-
     // always apply this condition to exclude 'Inactive sellers'
     const baseCriteria = { seller_type: { $ne: SellerType.Inactive } };
     
@@ -62,7 +61,7 @@ export const getAllSellers = async (
         ...aggregatedCriteria,
         sell_map_center: {
           $geoWithin: {
-            $centerSphere: [[origin.lng, origin.lat], radius / 6378.1] // Radius in radians
+            $centerSphere: [origin, radius / 6378.1] // Radius in radians
           }
         }
       }).exec();

@@ -66,3 +66,10 @@ export type PartialUserSettings = Pick<IUserSettings, 'user_name' | 'email' | 'p
 
 // Combined interface representing a seller with selected user settings
 export interface ISellerWithSettings extends ISeller, PartialUserSettings {}
+
+export type PartialReview = {
+  giver: string;
+  receiver: string;
+}
+
+export interface IReviewFeedbackOutput extends IReviewFeedback, PartialReview {}

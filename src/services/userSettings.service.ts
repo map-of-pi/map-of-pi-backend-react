@@ -4,6 +4,74 @@ import { IUser, IUserSettings } from "../types";
 
 import logger from "../config/loggingConfig";
 
+// Get device location, first trying GPS and then falling back to IP-based geolocation
+export const getDeviceLocation = async (): Promise<{ lat: number; lng: number }> => {
+  if (navigator.geolocation) {
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) =>
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0,
+        })
+      );
+      return { lat: position.coords.latitude, lng: position.coords.longitude };
+    } catch (error) {
+      console.warn("GPS location error:", (error as GeolocationPositionError).message);
+      // Fall back to IP-based geolocation
+    }
+  }
+
+  return getLocationByIP(); // Fallback to IP if GPS fails or is not supported
+};
+
+// Helper function to get location by IP address
+const getLocationByIP = async (): Promise<{ lat: number; lng: number }> => {
+  try {
+    const response = await fetch('https://ipapi.co/json/');
+    const data = await response.json();
+
+    if (data.latitude && data.longitude) {
+      return { lat: data.latitude, lng: data.longitude };
+    }
+    throw new Error('Unable to retrieve location from IP address.');
+  } catch (error: any) {
+    throw new Error('Failed to retrieve location by IP: ' + error.message);
+  }
+};
+
+// Function to check user search center and return appropriate location
+export const userLocation = async (uid: string): Promise<{ lat: number; lng: number } | null> => {
+  const userSettings = await UserSettings.findOne({ user_settings_id: uid }).exec();
+
+  if (!userSettings) {
+    console.warn("User settings not found");
+    return null;
+  }
+
+  if (userSettings.findme === 'auto') {
+    try {
+      const location = await getDeviceLocation();
+      console.log("User location from GPS/IP:", location);
+      return location;
+    } catch (error) {
+      console.error("Failed to retrieve device location:", error);
+      return null;
+    }
+  }
+
+  if (userSettings.findme === 'searchCenter' && userSettings.search_map_center?.coordinates) {
+    const searchCenter = userSettings.search_map_center.coordinates;
+    const location = { lat: searchCenter[0], lng: searchCenter[1] }
+    console.log("User location from search center:", location);
+    return location as { lat: number; lng: number };
+  }
+
+  console.warn("Location not found");
+  return null;
+};
+
+
 export const getUserSettingsById = async (user_settings_id: string): Promise<IUserSettings | null> => {
   try {
     const userSettings = await UserSettings.findOne({ user_settings_id }).exec();

@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 
 import * as userSettingsService from "../services/userSettings.service";
 import { uploadImage } from "../services/misc/image.service";
-import { IUserSettings } from "../types";
+import { IUser, IUserSettings } from "../types";
 
 import { env } from "../utils/env";
 import logger from "../config/loggingConfig";
@@ -73,3 +73,25 @@ export const deleteUserPreferences = async (req: Request, res: Response) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const getUserLocation = async (req: Request, res: Response) => {
+  console.log('???????????????????????')
+  let origin: { lat: number; lng: number };
+  
+  // Default map center (example: New York City)
+  const defaultMapCenter: { lat: number; lng: number } = { lat: 20, lng: -74.006 };
+  try {
+    const authUser = req.currentUser;
+    const radius = 2
+    if (authUser){
+      let location = await userSettingsService.userLocation(authUser?.pi_uid); 
+      origin = location? location: defaultMapCenter;
+    } else {
+      origin = defaultMapCenter;
+    }
+    return res.status(200).json({ origin: origin, radius: radius });
+  } catch (error: any) {
+    logger.error(`Failed to find user location: ${error.message}`);
+    res.status(500).json({ message: error.message });
+  }
+}

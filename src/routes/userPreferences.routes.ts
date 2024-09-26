@@ -178,4 +178,10 @@ userPreferencesRoutes.delete(
   userPreferencesController.deleteUserPreferences
 );
 
+userPreferencesRoutes.get(
+  '/location',
+  verifyToken,
+  userPreferencesController.getUserLocation
+)
+
 export default userPreferencesRoutes;

@@ -6,7 +6,7 @@ import logger from "../config/loggingConfig";
 import { ISeller } from "../types";
 
 export const fetchSellersByCriteria = async (req: Request, res: Response) => {
-  try {
+  try { 
     const { origin, radius, search_query} = req.body;
     const sellers = await sellerService.getAllSellers(origin, radius, search_query);
     const originString = origin ? `(${origin.lng}, ${origin.lat})` : 'undefined';
