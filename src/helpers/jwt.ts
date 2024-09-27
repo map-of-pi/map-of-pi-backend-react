@@ -15,8 +15,12 @@ export const generateUserToken = (user: IUser) => {
     logger.info(`Successfully generated token for user: ${user.pi_uid}`);
     return token;
   } catch (error: any) {
-    logger.error(`Error generating user token for user ${user.pi_uid}: ${error.message}`);
-    throw new Error(error.message);
+    logger.error(`Failed to generate user token for piUID ${ user.pi_uid }:`, { 
+      message: error.message,
+      config: error.config,
+      stack: error.stack
+    });
+    throw new Error('Failed to generate user token; please try again');
   }
 };
 
@@ -37,7 +41,11 @@ export const decodeUserToken = async (token: string) => {
     logger.info(`Successfully decoded token and found user: ${associatedUser.pi_uid}`);
     return associatedUser;
   } catch (error: any) {
-    logger.error(`Error decoding user token: ${error.message}`);
-    throw new Error(error.message);
+    logger.error('Failed to decode user token:', { 
+      message: error.message,
+      config: error.config,
+      stack: error.stack
+    });
+    throw new Error('Failed to decode user token; please try again');
   }
 };

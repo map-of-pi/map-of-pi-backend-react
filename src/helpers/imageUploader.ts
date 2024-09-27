@@ -18,8 +18,12 @@ export const uploadMultipleImages = async (files: any) => {
     logger.info(`Successfully uploaded ${uploadedImages.length} images`);
     return uploadedImages;
   } catch (error: any) {
-    logger.error(`Failed to upload multiple images to Cloudinary: ${error.message}`);
-    throw new Error("Failed to upload images to Cloudinary: " + error.message);
+    logger.error('Failed to upload multiple images to Cloudinary:', { 
+      message: error.message,
+      config: error.config,
+      stack: error.stack
+    });
+    throw new Error('Failed to upload images; please try again');
   }
 };
 
@@ -33,7 +37,11 @@ export const uploadSingleImage = async (file: any) => {
     logger.info(`Successfully uploaded single image: ${result.secure_url}`);
     return result.secure_url;
   } catch (error: any) {
-    logger.error(`Failed to upload single image to Cloudinary: ${error.message}`);
-    throw new Error("Failed to upload images to Cloudinary: " + error.message);
+    logger.error(`Failed to upload single image to Cloudinary:`, { 
+      message: error.message,
+      config: error.config,
+      stack: error.stack
+    });
+    throw new Error('Failed to upload single image; please try again');
   }
 };
