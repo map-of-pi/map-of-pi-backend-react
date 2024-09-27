@@ -9,16 +9,16 @@ export const getUserSettingsById = async (user_settings_id: string): Promise<IUs
     const userSettings = await UserSettings.findOne({ user_settings_id }).exec();
     return userSettings;
   } catch (error: any) {
-    logger.error(`Error retrieving user settings for userID ${user_settings_id}: ${error.message}`);
-    throw new Error(error.message);
+    logger.error(`Failed to retrieve user settings for userSettingsID ${ user_settings_id }:`, { 
+      message: error.message,
+      config: error.config,
+      stack: error.stack
+    });
+    throw new Error('Failed to get user settings; please try again later');
   }
 };
 
-export const addOrUpdateUserSettings = async (
-  authUser: IUser, 
-  formData: any, 
-  image: string
-): Promise<IUserSettings> => {
+export const addOrUpdateUserSettings = async (authUser: IUser, formData: any, image: string): Promise<IUserSettings> => {
   try {
     if (formData.user_name.trim() === "") {
       formData.user_name = authUser.pi_username;
@@ -70,8 +70,12 @@ export const addOrUpdateUserSettings = async (
       return savedUserSettings as IUserSettings;
     }
   } catch (error: any) {
-    logger.error(`Error adding or updating user settings: ${error.message}`);
-    throw new Error(error.message);
+    logger.error('Failed to add or update user settings:', { 
+      message: error.message,
+      config: error.config,
+      stack: error.stack
+    });
+    throw new Error('Failed to add or update user settings; please try again later');
   }
 };
 
@@ -81,7 +85,11 @@ export const deleteUserSettings = async (user_settings_id: string): Promise<IUse
     const deletedUserSettings = await UserSettings.findOneAndDelete({ user_settings_id: user_settings_id }).exec();
     return deletedUserSettings ? deletedUserSettings as IUserSettings : null;
   } catch (error: any) {
-    logger.error(`Error deleting user settings with userSettingsID ${user_settings_id}: ${error.message}`);
-    throw new Error(error.message);
+    logger.error(`Failed to delete user settings for userSettingsID ${ user_settings_id }:`, { 
+      message: error.message,
+      config: error.config,
+      stack: error.stack
+    });
+    throw new Error('Failed to delete user settings; please try again later');
   }
 };

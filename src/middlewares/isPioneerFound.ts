@@ -31,8 +31,12 @@ export const isPioneerFound = async (
         return res.status(404).json({message: "Pioneer not found"});
       }
     } catch (error: any) {
-      logger.error(`Error in isPioneerFound middleware: ${error.message}`);
-      res.status(500).json({ message: error.message });
+      logger.error('Failed to identify pioneer:', { 
+        message: error.message,
+        config: error.config,
+        stack: error.stack
+      });
+      res.status(500).json({ message: 'Failed to identify | pioneer not found; please try again later'});
     }
   };
   

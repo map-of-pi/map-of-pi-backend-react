@@ -21,20 +21,27 @@ export const authenticateUser = async (req: Request, res: Response) => {
       token,
     });
   } catch (error: any) {
-    logger.error(`Failed to authenticate user: ${error.message}`);
-    res.status(500).json({ message: error.message });
+    logger.error('Failed to authenticate user:', { 
+      message: error.message,
+      config: error.config,
+      stack: error.stack
+    });
+    return res.status(500).json({ message: 'An error occurred while authenticating user; please try again later' });
   }
 };
 
 export const autoLoginUser = async(req: Request, res: Response) => {
-  //@ts-ignore
-  const currentUser = req.currentUser;
   try {
+    const currentUser = req.currentUser;
     logger.info(`Auto-login successful for user: ${currentUser?.pi_uid || "NULL"}`);
     res.status(200).json(currentUser);
   } catch (error: any) {
-    logger.error(`Failed to auto-login user: ${error.message}`);
-    res.status(500).json({message: error.message});
+    logger.error(`Failed to auto-login user for userID ${ req.currentUser?.pi_uid }:`, { 
+      message: error.message,
+      config: error.config,
+      stack: error.stack
+    });
+    return res.status(500).json({ message: 'An error occurred while auto-logging the user; please try again later' });
   }
 };
 
@@ -49,8 +56,12 @@ export const getUser = async(req: Request, res: Response) => {
     logger.info(`Fetched user with PI_UID: ${pi_uid}`);
     res.status(200).json(currentUser);
   } catch (error: any) {
-    logger.error(`Failed to fetch user with PI_UID ${pi_uid}: ${error.message}`);
-    res.status(500).json({ message: error.message });
+    logger.error(`Failed to fetch user for userID ${ pi_uid }:`, { 
+      message: error.message,
+      config: error.config,
+      stack: error.stack
+    });
+    return res.status(500).json({ message: 'An error occurred while getting user; please try again later' });
   }
 };
 
@@ -61,7 +72,11 @@ export const deleteUser = async (req: Request, res: Response) => {
     logger.info(`Deleted user with PI_UID: ${currentUser?.pi_uid}`);
     res.status(200).json({ message: "User deleted successfully", deletedData });
   } catch (error: any) {
-    logger.error(`Failed to delete user with PI_UID ${currentUser?.pi_uid}: ${error.message}`);
-    res.status(500).json({ message: error.message });
+    logger.error(`Failed to delete user for userID ${ currentUser?.pi_uid }:`, { 
+      message: error.message,
+      config: error.config,
+      stack: error.stack
+    });
+    return res.status(500).json({ message: 'An error occurred while deleting user; please try again later' });
   }
 };
