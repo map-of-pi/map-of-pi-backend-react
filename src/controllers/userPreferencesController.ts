@@ -4,7 +4,6 @@ import * as userSettingsService from "../services/userSettings.service";
 import { uploadImage } from "../services/misc/image.service";
 import { IUserSettings } from "../types";
 
-import { env } from "../utils/env";
 import logger from "../config/loggingConfig";
 
 export const getUserPreferences = async (req: Request, res: Response) => {
@@ -18,8 +17,12 @@ export const getUserPreferences = async (req: Request, res: Response) => {
     logger.info(`Fetched User Preferences for ID: ${user_settings_id}`);
     res.status(200).json(userPreferences);
   } catch (error: any) {
-    logger.error(`Failed to fetch User Preferences for ID ${user_settings_id}: ${error.message}`);
-    res.status(500).json({ message: error.message });
+    logger.error(`Failed to fetch user preferences for userSettingsID ${ user_settings_id }:`, { 
+      message: error.message,
+      config: error.config,
+      stack: error.stack
+    });
+    return res.status(500).json({ message: 'An error occurred while getting user preferences; please try again later' });
   }
 };
 
@@ -34,8 +37,12 @@ export const fetchUserPreferences = async (req: Request, res: Response) => {
     res.status(200).json(currentUserPreferences);
 
   } catch (error: any) {
-    logger.error(`Failed to fetch User Preferences for user with ID ${req.currentUser?.pi_uid}: ${error.message}`);
-    res.status(500).json({ message: error.message });
+    logger.error(`Failed to fetch user preferences for userID ${ req.currentUser?.pi_uid }:`, { 
+      message: error.message,
+      config: error.config,
+      stack: error.stack
+    });
+    return res.status(500).json({ message: 'An error occurred while fetching user preferences; please try again later' });
   }
 };
 
@@ -57,8 +64,12 @@ export const addUserPreferences = async (req: Request, res: Response) => {
     logger.info(`Added or updated User Preferences for user with ID: ${authUser.pi_uid}`);
     res.status(200).json({ settings: userPreferences });    
   } catch (error: any) {
-    logger.error(`Failed to add or update User Preferences for user with ID ${req.currentUser?.pi_uid}: ${error.message}`);
-    res.status(500).json({ message: error.message });
+    logger.error(`Failed to add or update user preferences for userID ${ req.currentUser?.pi_uid }:`, { 
+      message: error.message,
+      config: error.config,
+      stack: error.stack
+    });
+    return res.status(500).json({ message: 'An error occurred while adding or updating user preferences; please try again later' });
   }
 };
 
@@ -69,7 +80,11 @@ export const deleteUserPreferences = async (req: Request, res: Response) => {
     logger.info(`Deleted user preferences with ID ${user_settings_id}`);
     res.status(200).json({ message: "User Preferences deleted successfully", deletedUserSettings: deletedUserSettings });
   } catch (error: any) {
-    logger.error(`Failed to delete user preferences with ID ${user_settings_id}: ${error.message}`);
-    res.status(500).json({ message: error.message });
+    logger.error(`Failed to delete user preferences for userSettingsID ${ user_settings_id }:`, { 
+      message: error.message,
+      config: error.config,
+      stack: error.stack
+    });
+    return res.status(500).json({ message: 'An error occurred while deleting user preferences; please try again later' });
   }
 };
