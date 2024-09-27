@@ -1,30 +1,49 @@
 import Seller from "../models/Seller";
 import User from "../models/User";
-import { getUserSettingsById } from "./userSettings.service";
-import { ISeller, IUser, IUserSettings, ISellerWithSettings } from "../types";
 import UserSettings from "../models/UserSettings";
 import { SellerType } from '../models/enums/sellerType'
+import { getUserSettingsById } from "./userSettings.service";
+import { ISeller, IUser, IUserSettings, ISellerWithSettings } from "../types";
 
 import logger from "../config/loggingConfig";
+import { TrustMeterScale } from "../models/enums/trustMeterScale";
 
 // Helper function to get settings for all sellers and merge them into seller objects
 const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSettings[]> => {
   const sellersWithSettings = await Promise.all(
     sellers.map(async (seller) => {
-      const sellerObject = seller.toObject();
+      try {
+        const sellerObject = seller.toObject();
 
-      // Fetch the user settings for the seller
-      const userSettings = await getUserSettingsById(seller.seller_id);
-      
-      // Merge seller and settings into a single object
-      return {
-        ...sellerObject,
-        trust_meter_rating: userSettings?.trust_meter_rating,
-        user_name: userSettings?.user_name,
-        findme: userSettings?.findme,
-        email: userSettings?.email,
-        phone_number: userSettings?.phone_number
-      } as ISellerWithSettings;
+        // Fetch the user settings for the seller
+        const userSettings = await getUserSettingsById(seller.seller_id);
+        
+        // Merge seller and settings into a single object
+        return {
+          ...sellerObject,
+          trust_meter_rating: userSettings?.trust_meter_rating,
+          user_name: userSettings?.user_name,
+          findme: userSettings?.findme,
+          email: userSettings?.email,
+          phone_number: userSettings?.phone_number
+        } as ISellerWithSettings;
+      } catch (error: any) {
+        logger.error(`Failed to resolve settings for sellerID ${ seller.seller_id }:`, { 
+          message: error.message,
+          config: error.config,
+          stack: error.stack
+        });
+        
+        // Return a fallback seller object with minimal information
+        return {
+          ...seller.toObject(),
+          trust_meter_rating: TrustMeterScale.ZERO,
+          user_name: seller.name,
+          findme: null,
+          email: null,
+          phone_number: null
+        } as unknown as ISellerWithSettings;
+      }
     })
   );
   return sellersWithSettings;
@@ -76,8 +95,12 @@ export const getAllSellers = async (
     // Return sellers with their settings merged
     return sellersWithSettings;
   } catch (error: any) {
-    logger.error(`Error retrieving sellers: ${error.message}`);
-    throw new Error(error.message);
+    logger.error('Failed to get all sellers:', { 
+      message: error.message,
+      config: error.config,
+      stack: error.stack
+    });
+    throw new Error('Failed to get all sellers; please try again later');
   }
 };
 
@@ -100,8 +123,12 @@ export const getSingleSellerById = async (seller_id: string): Promise<ISeller | 
       sellerInfo: user as IUser,
     } as any;
   } catch (error: any) {
-    logger.error(`Error retrieving seller with sellerID ${seller_id}: ${error.message}`);
-    throw new Error(error.message);
+    logger.error(`Failed to get single seller for sellerID ${ seller_id }:`, { 
+      message: error.message,
+      config: error.config,
+      stack: error.stack
+    });
+    throw new Error('Failed to get single seller; please try again later');
   }
 };
 
@@ -148,9 +175,12 @@ export const registerOrUpdateSeller = async (authUser: IUser, formData: any, ima
       return savedSeller as ISeller;
     }
   } catch (error: any) {
-    const errorMessage = 'An error occurred while registering or updating seller; please try again later';
-    logger.error(`${errorMessage}: ${error}`);
-    throw new Error(errorMessage);
+    logger.error('Failed to register or update seller:', { 
+      message: error.message,
+      config: error.config,
+      stack: error.stack
+    });
+    throw new Error('Failed to register or update seller; please try again later');
   }
 };
 
@@ -160,7 +190,11 @@ export const deleteSeller = async (seller_id: string | undefined): Promise<ISell
     const deletedSeller = await Seller.findOneAndDelete({ seller_id }).exec();
     return deletedSeller ? deletedSeller as ISeller : null;
   } catch (error: any) {
-    logger.error(`Error deleting seller with sellerID ${seller_id}: ${error.message}`);
-    throw new Error(error.message);
+    logger.error(`Failed to delete seller for sellerID ${ seller_id }:`, { 
+      message: error.message,
+      config: error.config,
+      stack: error.stack
+    });
+    throw new Error('Failed to delete seller; please try again later');
   }
 };

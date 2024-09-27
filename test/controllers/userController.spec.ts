@@ -42,7 +42,7 @@ describe('deleteUser function', () => {
   });
 
   it('should return appropriate [500] if delete user fails', async () => {
-    const mockError = new Error('Failed to delete user');
+    const mockError = new Error('An error occurred while deleting user; please try again later');
 
     (userService.deleteUser as jest.Mock).mockRejectedValue(mockError);
 
