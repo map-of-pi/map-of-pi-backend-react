@@ -3,6 +3,7 @@ import User from "../models/User";
 import { IUser, IUserSettings } from "../types";
 
 import logger from "../config/loggingConfig";
+import { getMapCenterById } from "./mapCenter.service";
 
 // Get device location, first trying GPS and then falling back to IP-based geolocation
 export const getDeviceLocation = async (): Promise<{ lat: number; lng: number }> => {
@@ -86,7 +87,7 @@ export const getUserSettingsById = async (user_settings_id: string): Promise<IUs
   }
 };
 
-export const addOrUpdateUserSettings = async (authUser: IUser, formData: any, image: string): Promise<IUserSettings> => {
+export const addOrUpdateUserSettings = async (authUser: IUser, formData: IUserSettings, image: string): Promise<IUserSettings> => {
   try {
     if (formData.user_name.trim() === "") {
       formData.user_name = authUser.pi_username;
@@ -103,24 +104,18 @@ export const addOrUpdateUserSettings = async (authUser: IUser, formData: any, im
     }).exec();
 
     // parse search_map_center from String into JSON object.
-    const searchMapCenter = formData.search_map_center 
-      ? JSON.parse(formData.search_map_center)
-      : { type: 'Point', coordinates: [0, 0] };
-
-    // construct user settings object
-    const userSettingsData: Partial<IUserSettings> = {
-      user_settings_id: authUser.pi_uid,
-      user_name: formData.user_name || '',
-      email: formData.email || existingUserSettings?.email || '',
-      phone_number: formData.phone_number || existingUserSettings?.phone_number || '',
-      image: image || existingUserSettings?.image || '',
-      search_map_center: searchMapCenter || existingUserSettings?.search_map_center || { type: 'Point', coordinates: [0, 0] }
-    };    
+    // let userMapCenter = await getMapCenterById(authUser.pi_uid, 'search'); 
+    const searchMapCenter = formData.search_map_center
+      ? formData.search_map_center
+      : { type: 'Point', coordinates: [0, 0] };  
 
     if (existingUserSettings) {
       const updatedUserSettings = await UserSettings.findOneAndUpdate(
         { user_settings_id: authUser.pi_uid },
-        { $set: userSettingsData }, // Include the potentially updated user_name
+        { 
+          ...formData, 
+          image: image.trim() === '' ? existingUserSettings.image : image, // set image to previous if empty
+         }, // Include the potentially updated user_name
         { new: true }
       ).exec();
 
@@ -129,7 +124,8 @@ export const addOrUpdateUserSettings = async (authUser: IUser, formData: any, im
     } else {
       // If no existing user settings, create new ones
       const newUserSettings = new UserSettings({
-        ...userSettingsData,
+        ...formData,
+        image: image,
         user_settings_id: authUser.pi_uid,
         trust_meter_rating: 100,
       });

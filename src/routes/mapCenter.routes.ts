@@ -45,7 +45,7 @@ const mapCenterRoutes = Router();
  *         description: Internal server error
  */
 mapCenterRoutes.get(
-  '/', 
+  '/:type', 
   verifyToken, 
   mapCenterController.getMapCenter
 );

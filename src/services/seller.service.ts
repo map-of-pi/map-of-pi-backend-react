@@ -55,7 +55,7 @@ export const getAllSellers = async (
   radius?: number,
   search_query?: string
 ): Promise<ISellerWithSettings[]> => {
-  console.log('origin and radius: ', origin)
+
   try {
     let sellers: ISeller[];
     // always apply this condition to exclude 'Inactive sellers'

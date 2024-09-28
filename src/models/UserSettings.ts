@@ -25,11 +25,12 @@ const userSettingsSchema = new Schema<IUserSettings>(
     image: {
       type: String,
       required: false,
+      default: ''
     },
     findme: {
       type: String,
       required: true,
-      default: 'deviceGPS'
+      default: 'auto'
     },
     trust_meter_rating: {
       type: Number,
