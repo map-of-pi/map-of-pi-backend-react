@@ -49,16 +49,9 @@ export interface IReviewFeedback extends Document {
   review_date: Date;
 }
 
-export interface IMapCenter extends Document {
-  map_center_id: string;
-  search_map_center?: {
-    type: 'Point';
-    coordinates: [number, number];
-  };
-  sell_map_center?: {
-    type: 'Point';
-    coordinates: [number, number];
-  };
+export interface IMapCenter {
+  type: 'Point';
+  coordinates: [number, number];
 }
 
 // Select specific fields from IUserSettings
