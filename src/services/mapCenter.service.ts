@@ -1,57 +1,28 @@
-import MapCenter from "../models/MapCenter";
-import { IMapCenter } from "../types";
-
+import UserSettings from "../models/UserSettings";
+import Seller from "../models/Seller";
+import { IUserSettings, ISeller } from "../types";
 import logger from "../config/loggingConfig";
 
-export const getMapCenterById = async (map_center_id: string): Promise<IMapCenter | null> => {
+// Function to fetch map center by user ID
+export const getMapCenterById = async (map_center_id: string): Promise<{ search_map_center: any, sell_map_center: any } | null> => {
   try {
-    const mapCenter = await MapCenter.findOne({ map_center_id }).exec();
-    return mapCenter ? mapCenter as IMapCenter : null;
-  } catch (error: any) {
-    logger.error(`Failed to retrieve Map Center for mapCenterID ${ map_center_id }:`, { 
-      message: error.message,
-      config: error.config,
-      stack: error.stack
-    });
-    throw new Error('Failed to retrieve Map Center; please try again later');
-  }
-};
+    // Fetch search map center from UserSettings
+    const userSettings = await UserSettings.findOne({ user_settings_id: map_center_id }).exec();
+    const searchMapCenter = userSettings?.search_map_center || null;
 
-export const createOrUpdateMapCenter = async (
-  map_center_id: string, 
-  longitude: number,
-  latitude: number, 
-  type: 'search' | 'sell'
-  
-): Promise<IMapCenter> => {
-  try {
-    const updateField = type === 'search' 
-      ? { 
-          search_map_center: {
-            type: 'Point',
-            coordinates: [longitude, latitude],
-          }
-        }
-      : { 
-          sell_map_center: {
-            type: 'Point',
-            coordinates: [longitude, latitude],
-          }
-        };
+    // Fetch sell map center from Seller
+    const seller = await Seller.findOne({ seller_id: map_center_id }).exec();
+    const sellMapCenter = seller?.sell_map_center || null;
 
-    const mapCenter = await MapCenter.findOneAndUpdate(
-      { map_center_id },
-      { $set: updateField }, 
-      { new: true, upsert: true }  // upsert: true ensures that a new record is created if it doesn't exist
-    );
-    
-    return mapCenter as IMapCenter;
+    if (!searchMapCenter && !sellMapCenter) {
+      logger.warn(`No map centers found for user ${map_center_id}`);
+      return null;
+    }
+
+    logger.info(`Map centers retrieved successfully for user ${map_center_id}`);
+    return { search_map_center: searchMapCenter, sell_map_center: sellMapCenter };
   } catch (error: any) {
-    logger.error(`Failed to create or udpate Map Center for ${ type }:`, { 
-      message: error.message,
-      config: error.config,
-      stack: error.stack
-    });
-    throw new Error('Failed to create or update Map Center; please try again later');
+    logger.error(`Error retrieving map center with PI_UID ${map_center_id}: ${error.message}`);
+    throw new Error(error.message);
   }
 };
