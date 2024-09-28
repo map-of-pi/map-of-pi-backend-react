@@ -90,17 +90,17 @@ export const deleteUserPreferences = async (req: Request, res: Response) => {
 };
 
 export const getUserLocation = async (req: Request, res: Response) => {
-  console.log('???????????????????????')
   let origin: { lat: number; lng: number };
   
   // Default map center (example: New York City)
   const defaultMapCenter: { lat: number; lng: number } = { lat: 20, lng: -74.006 };
   try {
     const authUser = req.currentUser;
-    const radius = 2
+    const radius = 13
     if (authUser){
       let location = await userSettingsService.userLocation(authUser?.pi_uid); 
       origin = location? location: defaultMapCenter;
+      logger.info('origin from backend:', origin)
     } else {
       origin = defaultMapCenter;
     }

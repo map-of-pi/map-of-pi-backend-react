@@ -178,7 +178,7 @@ userPreferencesRoutes.delete(
   userPreferencesController.deleteUserPreferences
 );
 
-userPreferencesRoutes.get(
+userPreferencesRoutes.post(
   '/location',
   verifyToken,
   userPreferencesController.getUserLocation
