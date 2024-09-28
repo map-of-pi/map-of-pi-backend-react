@@ -11,7 +11,7 @@ let mongoServer: MongoMemoryServer;
 const mockUserSettings = [
   {
     user_settings_id: '0a0a0a-0a0a-0a0a',
-    user_name: 'Test User', // Add the required user_name field
+    user_name: 'Test User', // Required field added
     search_map_center: { type: 'Point', coordinates: [-74.0060, 40.7128] }
   }
 ] as IUserSettings[];
@@ -19,6 +19,7 @@ const mockUserSettings = [
 const mockSellers = [
   {
     seller_id: '0a0a0a-0a0a-0a0a',
+    name: 'Test Seller', // Add the required name field
     sell_map_center: { type: 'Point', coordinates: [-118.2437, 34.0522] }
   }
 ] as ISeller[];
