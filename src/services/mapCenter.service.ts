@@ -8,8 +8,12 @@ export const getMapCenterById = async (map_center_id: string): Promise<IMapCente
     const mapCenter = await MapCenter.findOne({ map_center_id }).exec();
     return mapCenter ? mapCenter as IMapCenter : null;
   } catch (error: any) {
-    logger.error(`Error retrieving map center with PI_UID ${map_center_id}: ${error.message}`);
-    throw new Error(error.message);
+    logger.error(`Failed to retrieve Map Center for mapCenterID ${ map_center_id }:`, { 
+      message: error.message,
+      config: error.config,
+      stack: error.stack
+    });
+    throw new Error('Failed to retrieve Map Center; please try again later');
   }
 };
 
@@ -43,7 +47,11 @@ export const createOrUpdateMapCenter = async (
     
     return mapCenter as IMapCenter;
   } catch (error: any) {
-    logger.error(`Error creating or updating map center for ${type}: ${error.message}`);
-    throw new Error(error.message);
+    logger.error(`Failed to create or udpate Map Center for ${ type }:`, { 
+      message: error.message,
+      config: error.config,
+      stack: error.stack
+    });
+    throw new Error('Failed to create or update Map Center; please try again later');
   }
 };

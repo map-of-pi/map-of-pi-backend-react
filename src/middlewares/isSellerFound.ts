@@ -31,7 +31,11 @@ export const isSellerFound = async (
       return res.status(404).json({message: "Seller not found"});
     }
   } catch (error: any) {
-    logger.error(`Error in isSellerFound middleware: ${error.message}`);
-    res.status(500).json({ message: error.message });
+    logger.error('Failed to identify seller:', { 
+      message: error.message,
+      config: error.config,
+      stack: error.stack
+    });
+    res.status(500).json({ message: 'Failed to identify | seller not found; please try again later'});
   }
 };

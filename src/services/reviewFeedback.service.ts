@@ -51,8 +51,12 @@ const computeRatings = async (user_settings_id: string) => {
     await UserSettings.findOneAndUpdate({ user_settings_id }, { trust_meter_rating: value });
     return value;
   } catch (error: any) {
-    logger.error(`Error computing ratings for UserID ${user_settings_id}: ${error.message}`);
-    throw new Error(`Error computing ratings for UserID ${user_settings_id}`);
+    logger.error(`Failed to compute ratings for userSettingsID ${ user_settings_id }:`, { 
+      message: error.message,
+      config: error.config,
+      stack: error.stack
+    });
+    throw new Error('Failed to compute ratings; please try again later');
   }
 };
 
@@ -82,8 +86,12 @@ export const getReviewFeedback = async (review_receiver_id: string): Promise<IRe
 
     return updatedReviewFeedbackList as IReviewFeedbackOutput[];
   } catch (error: any) {
-    logger.error(`Error retrieving review feedback collection for userID ${review_receiver_id}: ${error.message}`);
-    throw new Error(error.message);
+    logger.error(`Failed to retrieve reviews for reviewReceiverID ${ review_receiver_id }:`, { 
+      message: error.message,
+      config: error.config,
+      stack: error.stack
+    });
+    throw new Error('Failed to retrieve reviews; please try again later');
   }
 };
 
@@ -98,8 +106,12 @@ export const getReviewFeedbackById = async (review_id: string): Promise<IReviewF
     reviewFeedback.review_giver_id = reviewer ? reviewer.user_name : '';
     return reviewFeedback as IReviewFeedback;
   } catch (error: any) {
-    logger.error(`Error retrieving review feedback with reviewID ${review_id}: ${error.message}`);
-    throw new Error(error.message);
+    logger.error(`Failed to retrieve review for reviewID ${ review_id }:`, { 
+      message: error.message,
+      config: error.config,
+      stack: error.stack
+    });
+    throw new Error('Failed to retrieve review; please try again later');
   }
 };
 
@@ -123,7 +135,11 @@ export const addReviewFeedback = async (authUser: IUser, formData: any, image: s
 
     return savedReviewFeedback as IReviewFeedback;
   } catch (error: any) {
-    logger.error(`Error adding review feedback: ${error.message}`);
-    throw new Error(error.message);
+    logger.error('Failed to add review:', { 
+      message: error.message,
+      config: error.config,
+      stack: error.stack
+    });
+    throw new Error('Failed to add review; please try again later');
   }
 };
