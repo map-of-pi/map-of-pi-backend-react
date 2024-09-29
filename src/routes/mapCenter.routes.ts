@@ -23,11 +23,18 @@ const mapCenterRoutes = Router();
 
 /**
  * @swagger
- * /api/v1/map-center:
+ * /api/v1/map-center/{type}:
  *   get:
  *     tags:
  *       - Map Center
- *     summary: Get the user's map center *
+ *     summary: Get the user's map center by type [search | sell] *
+ *     parameters:
+ *       - name: type
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The type of the map center to retrieve
  *     responses:
  *       200:
  *         description: Successful response

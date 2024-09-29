@@ -107,7 +107,7 @@ userPreferencesRoutes.post(
   isUserSettingsFound,
   userPreferencesController.fetchUserPreferences);
 
-  /**
+/**
  * @swagger
  * /api/v1/user-preferences/add:
  *   put:
@@ -178,6 +178,27 @@ userPreferencesRoutes.delete(
   userPreferencesController.deleteUserPreferences
 );
 
+/**
+ * @swagger
+ * /api/v1/user-preferences/location:
+ *   post:
+ *     tags:
+ *       - User Preferences
+ *     summary: Fetch the user's current location using Bearer Auth token *
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '/api/docs/UserPreferencesSchema.yml#/components/schemas/GetUserLocationRs'
+ *       401:
+ *         description: Unauthorized | Authentication token is required | Authentication token is invalid or expired
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
 userPreferencesRoutes.post(
   '/location',
   verifyToken,

@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 
 import * as userSettingsService from "../services/userSettings.service";
 import { uploadImage } from "../services/misc/image.service";
-import { IUser, IUserSettings } from "../types";
+import { IUserSettings } from "../types";
 
 import logger from "../config/loggingConfig";
 
@@ -96,8 +96,8 @@ export const getUserLocation = async (req: Request, res: Response) => {
   const defaultMapCenter: { lat: number; lng: number } = { lat: 20, lng: -74.006 };
   try {
     const authUser = req.currentUser;
-    const radius = 13
-    if (authUser){
+    const radius = 13;
+    if (authUser) {
       let location = await userSettingsService.userLocation(authUser?.pi_uid); 
       origin = location? location: defaultMapCenter;
       logger.info('origin from backend:', origin)
@@ -106,7 +106,11 @@ export const getUserLocation = async (req: Request, res: Response) => {
     }
     return res.status(200).json({ origin: origin, radius: radius });
   } catch (error: any) {
-    logger.error(`Failed to find user location: ${error.message}`);
-    res.status(500).json({ message: error.message });
+    logger.error(`Failed to get user location for piUID ${ req.currentUser?.pi_uid }:`, {
+      message: error.message,
+      config: error.config,
+      stack: error.stack
+    });
+    return res.status(500).json({ message: 'An error occurred while getting user location; please try again later' });
   }
-}
+};
