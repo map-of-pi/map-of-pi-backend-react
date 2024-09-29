@@ -60,7 +60,10 @@ const computeRatings = async (user_settings_id: string) => {
   }
 };
 
-export const getReviewFeedback = async (review_receiver_id: string): Promise<IReviewFeedbackOutput[]> => {
+export const getReviewFeedback = async (
+  review_receiver_id: string, 
+  searchQuery?: string 
+): Promise<IReviewFeedbackOutput[]> => {
   try {
     const reviewFeedbackList = await ReviewFeedback.find({
       $or: [
@@ -84,9 +87,24 @@ export const getReviewFeedback = async (review_receiver_id: string): Promise<IRe
       })
     );
 
+    // Filter reviews only if searchQuery is provided and not empty
+    if (searchQuery && searchQuery.trim()) {
+      const filteredReviews = updatedReviewFeedbackList.filter(
+        (reviewFeedback) => {
+          const { giver, receiver } = reviewFeedback;
+          return (
+            giver.toLowerCase().includes(searchQuery.toLowerCase()) || 
+            receiver.toLowerCase().includes(searchQuery.toLowerCase())
+          );
+        }
+      );
+      return filteredReviews as IReviewFeedbackOutput[];
+    }
+    
     return updatedReviewFeedbackList as IReviewFeedbackOutput[];
+
   } catch (error: any) {
-    logger.error(`Failed to retrieve reviews for reviewReceiverID ${ review_receiver_id }:`, { 
+    logger.error(`Failed to retrieve reviews for reviewReceiverID ${review_receiver_id}:`, { 
       message: error.message,
       config: error.config,
       stack: error.stack
