@@ -55,9 +55,9 @@ export const getAllSellers = async (
   radius?: number,
   search_query?: string
 ): Promise<ISellerWithSettings[]> => {
+
   try {
     let sellers: ISeller[];
-
     // always apply this condition to exclude 'Inactive sellers'
     const baseCriteria = { seller_type: { $ne: SellerType.Inactive } };
     

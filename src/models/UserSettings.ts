@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 
 import { IUserSettings } from "../types";
+import { DeviceLocationType } from "./enums/deviceLocationType";
 import { TrustMeterScale } from "./enums/trustMeterScale";
 
 const userSettingsSchema = new Schema<IUserSettings>(
@@ -25,11 +26,13 @@ const userSettingsSchema = new Schema<IUserSettings>(
     image: {
       type: String,
       required: false,
+      default: ''
     },
     findme: {
       type: String,
+      enum: Object.values(DeviceLocationType).filter(value => typeof value === 'string'),
       required: true,
-      default: 'deviceGPS'
+      default: DeviceLocationType.Automatic
     },
     trust_meter_rating: {
       type: Number,
