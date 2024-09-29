@@ -39,6 +39,9 @@ components:
           example: 40.7128
         type:
           type: string
+          enum:
+            - search
+            - sell
           example: search
 
     SaveMapCenterRs:

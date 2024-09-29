@@ -131,52 +131,73 @@ components:
         - user_settings_id
 
     DeleteUserPreferencesRs:
-        type: object
-        properties:
-          message:
-            type: string
-            example: User Preferences deleted successfully.
-          deletedUserPreferences:
-            type: object
-            properties:
-              user_settings_id:
-                type: string
-                example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
-              user_name:
-                type: string
-                example: Test User
-              email:
-                type: string
-                example: example@test.com
-              phone_number:
-                type: string
-                example: +1 123 456 7890
-              image:
-                type: string
-                format: binary
-                example: http://example.com/image.jpg
-              findme:
-                $ref: '/api/docs/enum/DeviceLocationType.yml#/components/schemas/DeviceLocationType'
-              trust_meter_rating:
-                $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
-              search_map_center:
-                type: object
-                properties:
-                  type:
-                    type: string
-                    example: Point
-                  coordinates:
-                    type: array
-                    items:
-                      type: number
-                    example: [-73.856077, 40.848447]
-                required:
-                  - type
-                  - coordinates
-              _id:
-                type: string
-                example: 666c84b9d77068c6efeeaa1a
-              __v:
-                type: number
-                example: 0
-  
+      type: object
+      properties:
+        message:
+          type: string
+          example: User Preferences deleted successfully.
+        deletedUserPreferences:
+          type: object
+          properties:
+            user_settings_id:
+              type: string
+              example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
+            user_name:
+              type: string
+              example: Test User
+            email:
+              type: string
+              example: example@test.com
+            phone_number:
+              type: string
+              example: +1 123 456 7890
+            image:
+              type: string
+              format: binary
+              example: http://example.com/image.jpg
+            findme:
+              $ref: '/api/docs/enum/DeviceLocationType.yml#/components/schemas/DeviceLocationType'
+            trust_meter_rating:
+              $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
+            search_map_center:
+              type: object
+              properties:
+                type:
+                  type: string
+                  example: Point
+                coordinates:
+                  type: array
+                  items:
+                    type: number
+                  example: [-73.856077, 40.848447]
+              required:
+                - type
+                - coordinates
+            _id:
+              type: string
+              example: 666c84b9d77068c6efeeaa1a
+            __v:
+              type: number
+              example: 0
+
+    GetUserLocationRs:
+      type: object
+      properties:
+        origin: 
+          type: object
+          properties:
+            lat:
+              type: number
+              example: -73.856077
+            lng:
+              type: number
+              example: 40.848447
+          required:
+            - lat
+            - lng
+        radius:
+          type: number
+          example: 10
+      required:
+        - origin
+        - radius

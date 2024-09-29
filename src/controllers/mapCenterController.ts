@@ -20,27 +20,7 @@ export const saveMapCenter = async (req: Request, res: Response) => {
     const mapCenter = await mapCenterService.createOrUpdateMapCenter(map_center_id, longitude, latitude, type);
     logger.info(`${type === 'search' ? 'Search' : 'Sell'} Center saved successfully for user ${map_center_id} with Longitude: ${longitude}, Latitude: ${latitude} `);
     
-    if (type === 'sell') {
-      const sellMapCenter = {
-        type: 'Point',
-        coordinates: [longitude, latitude],
-      };
-
-      // Update the seller's sell_map_center
-      const updatedSeller = await Seller.findOneAndUpdate(
-        { seller_id: map_center_id },
-        { $set: { sell_map_center: sellMapCenter } },
-        { new: true }
-      ).exec();
-
-      if (updatedSeller) {
-        logger.info(`Seller's sell_map_center updated for seller_id: ${map_center_id}`, { updatedSeller });
-      } else {
-        logger.warn(`Seller not found for seller_id: ${map_center_id}. sell_map_center not updated.`);
-        return res.status(404).json({ message: 'Seller not found: Map Center failed to save' });
-      }
-    }
-    return res.status(200).json(mapCenter);
+    return res.status(200).json({uid: map_center_id, map_center: mapCenter});
 
   } catch (error: any) {
     logger.error('Failed to save Map Center:', { 
@@ -55,8 +35,9 @@ export const saveMapCenter = async (req: Request, res: Response) => {
 export const getMapCenter = async (req: Request, res: Response) => {
   try {
     const map_center_id = req.currentUser?.pi_uid;
+    const {type} = req.params;
     if (map_center_id) {
-      const mapCenter: IMapCenter | null = await mapCenterService.getMapCenterById(map_center_id);
+      const mapCenter: IMapCenter | null = await mapCenterService.getMapCenterById(map_center_id, type);
       if (!mapCenter) {
         logger.warn(`Map Center not found for user ${map_center_id}`);
         return res.status(404).json({ message: "Map Center not found" });

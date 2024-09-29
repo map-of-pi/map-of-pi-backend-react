@@ -1,4 +1,5 @@
 import { Document, Types } from "mongoose";
+import { DeviceLocationType } from "./models/enums/deviceLocationType";
 import { RatingScale } from "./models/enums/ratingScale";
 import { SellerType } from "./models/enums/sellerType";
 import { TrustMeterScale } from "./models/enums/trustMeterScale";
@@ -15,7 +16,7 @@ export interface IUserSettings extends Document {
   email?: string;
   phone_number?: string;
   image?: string; 
-  findme: string;
+  findme: DeviceLocationType;
   trust_meter_rating: TrustMeterScale;
   search_map_center?: {
     type: 'Point';
@@ -49,16 +50,9 @@ export interface IReviewFeedback extends Document {
   review_date: Date;
 }
 
-export interface IMapCenter extends Document {
-  map_center_id: string;
-  search_map_center?: {
-    type: 'Point';
-    coordinates: [number, number];
-  };
-  sell_map_center?: {
-    type: 'Point';
-    coordinates: [number, number];
-  };
+export interface IMapCenter {
+  type: 'Point';
+  coordinates: [number, number];
 }
 
 // Select specific fields from IUserSettings

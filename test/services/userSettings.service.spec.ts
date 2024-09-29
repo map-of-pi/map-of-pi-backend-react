@@ -4,6 +4,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import { addOrUpdateUserSettings } from '../../src/services/userSettings.service';
 import User from '../../src/models/User';
 import UserSettings from '../../src/models/UserSettings';
+import { DeviceLocationType } from '../../src/models/enums/deviceLocationType';
 import { IUser, IUserSettings } from '../../src/types';
 
 let mongoServer: MongoMemoryServer;
@@ -18,9 +19,9 @@ const formData = {
   email: 'example-new@test.com',
   phone_number: '123-456-7890',
   image: 'http://example.com/image_new.jpg',
-  findme: 'deviceGPS',
-  search_map_center: JSON.stringify({ type: 'Point', coordinates: [-73.856077, 40.848447] })
-};
+  findme: DeviceLocationType.GPS,
+  search_map_center: { type: 'Point', coordinates: [-83.856077, 50.848447] }
+} as IUserSettings;
 
 const existingUserSettingsData: Partial<IUserSettings> = {
   user_settings_id: mockUser.pi_uid,
@@ -28,7 +29,7 @@ const existingUserSettingsData: Partial<IUserSettings> = {
   email: 'example-existing@test.com',
   phone_number: '987-654-3210',
   image: 'http://example.com/image-existing.jpg',
-  findme: 'searchCenter',
+  findme: DeviceLocationType.SearchCenter,
   search_map_center: { type: 'Point', coordinates: [-83.856077, 50.848447] }
 };
 
@@ -61,7 +62,7 @@ describe('addOrUpdateUserSettings function', () => {
     })
     jest.spyOn(UserSettings.prototype, 'save').mockImplementation(mockSave);
 
-    const result = await addOrUpdateUserSettings(mockUser, formData, formData.image);
+    const result = await addOrUpdateUserSettings(mockUser, formData, formData.image ?? '');
     
     expect(result).toHaveProperty('user_settings_id', mockUser.pi_uid); 
     expect(result).toHaveProperty('user_name', formData.user_name);
@@ -90,7 +91,10 @@ describe('addOrUpdateUserSettings function', () => {
 
     jest.spyOn(UserSettings.prototype, 'save').mockImplementation(mockSave);
 
-    const result = await addOrUpdateUserSettings(mockUser, { ...formData, user_name: ""}, formData.image);
+    const result = await addOrUpdateUserSettings(
+    mockUser, { 
+      ...formData, user_name: ""
+    } as IUserSettings, formData.image ?? '');
     
     expect(mockFindOneAndUpdate).toHaveBeenCalledWith(
       { pi_uid: mockUser.pi_uid },
@@ -120,13 +124,13 @@ describe('addOrUpdateUserSettings function', () => {
       image: formData.image,
       findme: formData.findme,
       search_map_center: formData.search_map_center
-    };
+    } as IUserSettings;
 
     jest.spyOn(UserSettings, 'findOneAndUpdate').mockReturnValue({
       exec: jest.fn().mockResolvedValue(updatedUserSettingsData)
     } as any);
 
-    const result = await addOrUpdateUserSettings(mockUser, updatedUserSettingsData, updatedUserSettingsData.image);
+    const result = await addOrUpdateUserSettings(mockUser, updatedUserSettingsData, updatedUserSettingsData.image ?? '');
 
     expect(result).toHaveProperty('user_settings_id', mockUser.pi_uid);
     expect(result).toHaveProperty('user_name', updatedUserSettingsData.user_name);
