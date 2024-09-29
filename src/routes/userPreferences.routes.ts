@@ -180,8 +180,8 @@ userPreferencesRoutes.delete(
 
 /**
  * @swagger
- * /api/v1/user-preferences/location:
- *   post:
+ * /api/v1/user-preferences/location/me:
+ *   get:
  *     tags:
  *       - User Preferences
  *     summary: Fetch the user's current location using Bearer Auth token *
@@ -199,8 +199,8 @@ userPreferencesRoutes.delete(
  *       500:
  *         description: Internal server error
  */
-userPreferencesRoutes.post(
-  '/location',
+userPreferencesRoutes.get(
+  '/location/me',
   verifyToken,
   userPreferencesController.getUserLocation
 )

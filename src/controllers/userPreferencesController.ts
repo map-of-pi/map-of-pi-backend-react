@@ -96,7 +96,7 @@ export const getUserLocation = async (req: Request, res: Response) => {
   const defaultMapCenter: { lat: number; lng: number } = { lat: 20, lng: -74.006 };
   try {
     const authUser = req.currentUser;
-    const radius = 13;
+    const radius = 15;
     if (authUser) {
       let location = await userSettingsService.userLocation(authUser?.pi_uid); 
       origin = location? location: defaultMapCenter;
