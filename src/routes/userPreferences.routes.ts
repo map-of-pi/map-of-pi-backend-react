@@ -21,9 +21,11 @@ import upload from "../utils/multer";
  *         email:
  *           type: string
  *           description: Email address of the user
+ *           nullable: true
  *         phone_number:
- *           type: number
+ *           type: string
  *           description: Phone number of the user
+ *           nullable: true
  *         image:
  *           type: string
  *           description: Image of the user
