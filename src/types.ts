@@ -12,8 +12,8 @@ export interface IUser extends Document {
 export interface IUserSettings extends Document {
   user_settings_id: string;
   user_name: string;
-  email?: string;
-  phone_number?: string;
+  email?: string | null;
+  phone_number?: string | null; 
   image?: string; 
   findme: string;
   trust_meter_rating: TrustMeterScale;
