@@ -4,6 +4,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import { addOrUpdateUserSettings } from '../../src/services/userSettings.service';
 import User from '../../src/models/User';
 import UserSettings from '../../src/models/UserSettings';
+import { DeviceLocationType } from '../../src/models/enums/deviceLocationType';
 import { IUser, IUserSettings } from '../../src/types';
 
 let mongoServer: MongoMemoryServer;
@@ -18,7 +19,7 @@ const formData = {
   email: 'example-new@test.com',
   phone_number: '123-456-7890',
   image: 'http://example.com/image_new.jpg',
-  findme: 'deviceGPS',
+  findme: DeviceLocationType.GPS,
   search_map_center: { type: 'Point', coordinates: [-83.856077, 50.848447] }
 } as IUserSettings;
 
@@ -28,7 +29,7 @@ const existingUserSettingsData: Partial<IUserSettings> = {
   email: 'example-existing@test.com',
   phone_number: '987-654-3210',
   image: 'http://example.com/image-existing.jpg',
-  findme: 'searchCenter',
+  findme: DeviceLocationType.SearchCenter,
   search_map_center: { type: 'Point', coordinates: [-83.856077, 50.848447] }
 };
 

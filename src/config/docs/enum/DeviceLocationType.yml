@@ -3,6 +3,7 @@ components:
     DeviceLocationType:
       type: string
       enum:
+        - auto
         - deviceGPS
         - searchCenter
       description: The type of FindMe device location.
