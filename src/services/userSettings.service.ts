@@ -43,11 +43,14 @@ export const addOrUpdateUserSettings = async (authUser: IUser, formData: any, im
     const userSettingsData: Partial<IUserSettings> = {
       user_settings_id: authUser.pi_uid,
       user_name: formData.user_name || '',
-      email: formData.email || existingUserSettings?.email || '',
-      phone_number: formData.phone_number || existingUserSettings?.phone_number || '',
-      image: image || existingUserSettings?.image || '',
-      search_map_center: searchMapCenter || existingUserSettings?.search_map_center || { type: 'Point', coordinates: [0, 0] }
-    };    
+
+        // Set email and phone to null if not provided
+        email: formData.email !== undefined && formData.email !== '' ? formData.email : null,
+        phone_number: formData.phone_number !== undefined && formData.phone_number !=='' ? formData.phone_number : null,
+
+        image: image || existingUserSettings?.image || '',
+        search_map_center: searchMapCenter || existingUserSettings?.search_map_center || { type: 'Point', coordinates: [0, 0] }
+      };    
 
     if (existingUserSettings) {
       const updatedUserSettings = await UserSettings.findOneAndUpdate(
