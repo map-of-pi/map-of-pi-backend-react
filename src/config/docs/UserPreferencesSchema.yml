@@ -10,11 +10,11 @@ components:
           type: string
           example: Test User
         email:
-          type: string
+          type: [string, "null"]
           example: test_user_preferences@example.com
         phone_number:
-          type: number
-          example: 123456789
+          type: [string, "null"]
+          example: null
         image:
           type: string
           format: binary
@@ -56,11 +56,11 @@ components:
           type: string
           example: Test User
         email:
-          type: string
-          example: test_user_preferences@example.com
+          type: [string, "null"]
+          example: null
         phone_number:
-          type: number
-          example: 1234567890
+          type: [string, "null"]
+          example: null
         image:
           type: string
           format: binary
@@ -94,11 +94,11 @@ components:
           type: string
           example: Test User
         email:
-          type: string
-          example: test_user_preferences@example.com
+          type: [string, "null"]
+          example: null
         phone_number:
-          type: number
-          example: 1234567890
+          type: [string, "null"]
+          example: null
         image:
           type: string
           format: binary
@@ -146,11 +146,11 @@ components:
                 type: string
                 example: Test User
               email:
-                type: string
-                example: example@test.com
+                type: [string, "null"]
+                example: null
               phone_number:
-                type: string
-                example: +1 123 456 7890
+                type: [string, "null"]
+                example: null
               image:
                 type: string
                 format: binary
