@@ -24,8 +24,8 @@ const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSet
           trust_meter_rating: userSettings?.trust_meter_rating,
           user_name: userSettings?.user_name,
           findme: userSettings?.findme,
-          email: userSettings?.email,
-          phone_number: userSettings?.phone_number
+          email: userSettings?.email ?? null,
+          phone_number: userSettings?.phone_number ?? null,
         } as ISellerWithSettings;
       } catch (error: any) {
         logger.error(`Failed to resolve settings for sellerID ${ seller.seller_id }:`, { 
