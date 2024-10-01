@@ -16,7 +16,7 @@
       },
       seller_type: {
         type: String,
-        enum: Object.values(SellerType),
+        enum: Object.values(SellerType).filter(value => typeof value === 'string'),
         required: true,
         default: SellerType.Test,
       },

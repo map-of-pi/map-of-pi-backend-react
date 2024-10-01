@@ -9,12 +9,19 @@ import logger from "../config/loggingConfig";
 
 export const getReviews = async (req: Request, res: Response) => {
   const { review_receiver_id } = req.params;
+  const { searchQuery } = req.query;
+
   try {
-    const currentReviews: IReviewFeedback[] | null = await reviewFeedbackService.getReviewFeedback(review_receiver_id);
-    logger.info(`Retrieved reviews for receiver ID ${review_receiver_id}`);
+    // Call the service with the review_receiver_id and searchQuery
+    const currentReviews: IReviewFeedback[] | null = await reviewFeedbackService.getReviewFeedback(
+      review_receiver_id, 
+      searchQuery as string
+    );
+
+    logger.info(`Retrieved reviews for receiver ID ${review_receiver_id} with search query "${searchQuery ?? 'none'}"`);
     return res.status(200).json(currentReviews);
   } catch (error: any) {
-    logger.error(`Failed to get reviews for receiverID ${ review_receiver_id }:`, { 
+    logger.error(`Failed to get reviews for receiverID ${review_receiver_id}:`, { 
       message: error.message,
       config: error.config,
       stack: error.stack

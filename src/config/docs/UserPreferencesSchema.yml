@@ -179,4 +179,26 @@ components:
               __v:
                 type: number
                 example: 0
+                
+  GetUserLocationRs:
+      type: object
+      properties:
+        origin: 
+          type: object
+          properties:
+            lat:
+              type: number
+              example: -73.856077
+            lng:
+              type: number
+              example: 40.848447
+          required:
+            - lat
+            - lng
+        radius:
+          type: number
+          example: 10
+      required:
+        - origin
+        - radius
   

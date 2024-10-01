@@ -1,12 +1,20 @@
-import MapCenter from "../models/MapCenter";
 import { IMapCenter } from "../types";
 
+import Seller from "../models/Seller";
+import UserSettings from "../models/UserSettings";
 import logger from "../config/loggingConfig";
 
-export const getMapCenterById = async (map_center_id: string): Promise<IMapCenter | null> => {
+export const getMapCenterById = async (map_center_id: string, type: string): Promise<IMapCenter | null> => {
   try {
-    const mapCenter = await MapCenter.findOne({ map_center_id }).exec();
-    return mapCenter ? mapCenter as IMapCenter : null;
+    if (type === 'sell') {
+      let seller = await Seller.findOne({ seller_id: map_center_id }).exec();
+      return seller? seller.sell_map_center as IMapCenter : null;
+    } else if (type === 'search') {
+      let userSettings = await UserSettings.findOne({ user_settings_id: map_center_id }).exec();
+      return userSettings? userSettings.search_map_center as IMapCenter : null;
+    } else {
+      return null;
+    }
   } catch (error: any) {
     logger.error(`Failed to retrieve Map Center for mapCenterID ${ map_center_id }:`, { 
       message: error.message,
@@ -22,31 +30,34 @@ export const createOrUpdateMapCenter = async (
   longitude: number,
   latitude: number, 
   type: 'search' | 'sell'
-  
-): Promise<IMapCenter> => {
+): Promise<IMapCenter | null> => {
   try {
-    const updateField = type === 'search' 
-      ? { 
-          search_map_center: {
-            type: 'Point',
-            coordinates: [longitude, latitude],
-          }
-        }
-      : { 
-          sell_map_center: {
-            type: 'Point',
-            coordinates: [longitude, latitude],
-          }
-        };
-
-    const mapCenter = await MapCenter.findOneAndUpdate(
-      { map_center_id },
-      { $set: updateField }, 
-      { new: true, upsert: true }  // upsert: true ensures that a new record is created if it doesn't exist
-    );
+    const setCenter: IMapCenter =  {
+      type: 'Point',
+      coordinates: [longitude, latitude],
+    }
+    if (type === 'search') {
+      await UserSettings.findOneAndUpdate(
+        { user_settings_id: map_center_id }, 
+        { search_map_center: setCenter },
+        { new: true }
+      ).exec();
     
-    return mapCenter as IMapCenter;
-  } catch (error: any) {
+    } else if (type === 'sell') {
+      const existingSeller = await Seller.findOneAndUpdate(
+        { seller_id: map_center_id },
+        { sell_map_center: setCenter },
+        { new: true }
+      ).exec();      
+      if (!existingSeller) {
+        await Seller.create({
+          seller_id: map_center_id,
+          sell_map_center: setCenter,
+        })
+      }
+    }
+    return setCenter;
+    } catch (error: any) {
     logger.error(`Failed to create or udpate Map Center for ${ type }:`, { 
       message: error.message,
       config: error.config,
