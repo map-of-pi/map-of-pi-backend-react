@@ -12,9 +12,9 @@ export interface IUser extends Document {
 
 export interface IUserSettings extends Document {
   user_settings_id: string;
-  user_name: string;
-  email?: string;
-  phone_number?: string;
+  user_name: string | null;
+  email?: string | null;
+  phone_number?: string | null;
   image?: string; 
   findme: DeviceLocationType;
   trust_meter_rating: TrustMeterScale;
