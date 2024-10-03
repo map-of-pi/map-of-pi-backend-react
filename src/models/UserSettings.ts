@@ -18,10 +18,12 @@ const userSettingsSchema = new Schema<IUserSettings>(
     email: {
       type: String,
       required: false,
+      default: null,
     },
     phone_number: {
       type: String,
       required: false,
+      default: null,
     },
     image: {
       type: String,
