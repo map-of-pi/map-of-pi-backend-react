@@ -4,6 +4,7 @@ import { IUser, IUserSettings } from "../types";
 
 import logger from "../config/loggingConfig";
 
+// Fetch user settings by user_settings_id
 export const getUserSettingsById = async (user_settings_id: string): Promise<IUserSettings | null> => {
   try {
     const userSettings = await UserSettings.findOne({ user_settings_id }).exec();
@@ -18,9 +19,10 @@ export const getUserSettingsById = async (user_settings_id: string): Promise<IUs
   }
 };
 
+// Add or update user settings
 export const addOrUpdateUserSettings = async (authUser: IUser, formData: IUserSettings, image: string): Promise<IUserSettings> => {
   try {
-    if (formData.user_name.trim() === "") {
+    if (!formData.user_name || formData.user_name.trim() === "") {
       formData.user_name = authUser.pi_username;
 
       await User.findOneAndUpdate(
@@ -30,11 +32,13 @@ export const addOrUpdateUserSettings = async (authUser: IUser, formData: IUserSe
       ).exec();
     }
 
+    // Fetch existing user settings
     let existingUserSettings = await UserSettings.findOne({
       user_settings_id: authUser.pi_uid
     }).exec();
 
     if (existingUserSettings) {
+      // Update existing user settings
       const updatedUserSettings = await UserSettings.findOneAndUpdate(
         { user_settings_id: authUser.pi_uid },
         { 
@@ -45,12 +49,13 @@ export const addOrUpdateUserSettings = async (authUser: IUser, formData: IUserSe
       ).exec();
 
       return updatedUserSettings as IUserSettings;
-
     } else {
-      // If no existing user settings, create new ones
+      // Create new user settings if none exist
       const newUserSettings = new UserSettings({
         ...formData,
         image: image,
+        email: formData.email && formData.email.trim() !== "" ? formData.email : null,
+        phone_number: formData.phone_number && formData.phone_number.trim() !== "" ? formData.phone_number : null,
         user_settings_id: authUser.pi_uid,
         trust_meter_rating: 100,
       });
