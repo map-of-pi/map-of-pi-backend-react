@@ -100,7 +100,7 @@ export const getUserLocation = async (req: Request, res: Response) => {
     if (authUser) {
       let location = await userSettingsService.userLocation(authUser?.pi_uid); 
       origin = location? location: defaultMapCenter;
-      logger.info('origin from backend:', origin)
+      logger.info('Origin from backend:', origin)
     } else {
       origin = defaultMapCenter;
     }

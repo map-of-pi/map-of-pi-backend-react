@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 
-import Seller from '../models/Seller';
 import * as mapCenterService from '../services/mapCenter.service'; 
 import { IMapCenter } from '../types';
 
