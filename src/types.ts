@@ -13,8 +13,6 @@ export interface IUser extends Document {
 export interface IUserSettings extends Document {
   user_settings_id: string;
   user_name: string | null;
-  email?: string | null;
-  phone_number?: string | null;
   image?: string; 
   findme: DeviceLocationType;
   trust_meter_rating: TrustMeterScale;
@@ -27,6 +25,8 @@ export interface IUserSettings extends Document {
 export interface ISeller extends Document {
   seller_id: string;
   name: string;
+  email?: string | null;
+  phone_number?: string | null;
   seller_type: SellerType;
   description: string;
   image?: string;
@@ -56,7 +56,7 @@ export interface IMapCenter {
 }
 
 // Select specific fields from IUserSettings
-export type PartialUserSettings = Pick<IUserSettings, 'user_name' | 'email' | 'phone_number' | 'findme' | 'trust_meter_rating'>;
+export type PartialUserSettings = Pick<IUserSettings, 'user_name' | 'findme' | 'trust_meter_rating'>;
 
 // Combined interface representing a seller with selected user settings
 export interface ISellerWithSettings extends ISeller, PartialUserSettings {}

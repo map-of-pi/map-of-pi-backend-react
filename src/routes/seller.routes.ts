@@ -18,6 +18,14 @@ import upload from "../utils/multer";
  *         name:
  *           type: string
  *           description: Name of the seller
+ *         email:
+ *           type: string
+ *           description: Email address of the user
+ *           nullable: true
+ *         phone_number:
+ *           type: string
+ *           description: Phone number of the user
+ *           nullable: true
  *         description:
  *           type: string
  *           description: Description of the seller

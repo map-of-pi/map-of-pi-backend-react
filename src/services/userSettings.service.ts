@@ -54,8 +54,6 @@ export const addOrUpdateUserSettings = async (authUser: IUser, formData: IUserSe
       const newUserSettings = new UserSettings({
         ...formData,
         image: image,
-        email: formData.email && formData.email.trim() !== "" ? formData.email : null,
-        phone_number: formData.phone_number && formData.phone_number.trim() !== "" ? formData.phone_number : null,
         user_settings_id: authUser.pi_uid,
         trust_meter_rating: 100,
       });

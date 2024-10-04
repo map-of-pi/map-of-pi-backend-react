@@ -9,12 +9,6 @@ components:
         user_name:
           type: string
           example: Test User
-        email:
-          type: [string, "null"]
-          example: null
-        phone_number:
-          type: [string, "null"]
-          example: null
         image:
           type: string
           format: binary
@@ -55,12 +49,6 @@ components:
         user_name:
           type: string
           example: Test User
-        email:
-          type: [string, "null"]
-          example: null
-        phone_number:
-          type: [string, "null"]
-          example: null
         image:
           type: string
           format: binary
@@ -93,12 +81,6 @@ components:
         user_name:
           type: string
           example: Test User
-        email:
-          type: [string, "null"]
-          example: null
-        phone_number:
-          type: [string, "null"]
-          example: null
         image:
           type: string
           format: binary
@@ -145,12 +127,6 @@ components:
             user_name:
               type: string
               example: Test User
-            email:
-              type: [string, "null"]
-              example: null
-            phone_number:
-              type: [string, "null"]
-              example: null
             image:
               type: string
               format: binary

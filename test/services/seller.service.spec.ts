@@ -14,6 +14,8 @@ const mockSellers = [
   {
     seller_id: '0a0a0a-0a0a-0a0a',
     name: 'Test Seller 1',
+    email: 'test-one@test.com',
+    phone_number: '111-111-1111',
     description: 'Test Seller 1 Description',
     seller_type: SellerType.Test,
     sell_map_center: { type: 'Point', coordinates: [-74.0060, 40.7128] }
@@ -21,6 +23,8 @@ const mockSellers = [
   {
     seller_id: '0b0b0b-0b0b-0b0b',
     name: 'Test Vendor 2',
+    email: 'test-two@test.com',
+    phone_number: '222-222-2222',
     description: 'Test Vendor 2 Description',
     seller_type: SellerType.Inactive,
     sell_map_center: { type: 'Point', coordinates: [-118.2437, 34.0522] }
@@ -28,6 +32,8 @@ const mockSellers = [
   {
     seller_id: '0c0c0c-0c0c-0c0c',
     name: 'Test Vendor 3',
+    email: 'test-three@test.com',
+    phone_number: '333-333-3333',
     description: 'Test Vendor 3 Description',
     seller_type: SellerType.Active,
     sell_map_center: { type: 'Point', coordinates: [-87.6298, 41.8781] }
@@ -35,6 +41,8 @@ const mockSellers = [
   {
     seller_id: '0d0d0d-0d0d-0d0d',
     name: 'Test Seller 4',
+    email: 'test-four@test.com',
+    phone_number: '444-444-4444',
     description: 'Test Seller 4 Description',
     seller_type: SellerType.Inactive,
     sell_map_center: { type: 'Point', coordinates: [-122.4194, 37.7749] }
@@ -42,6 +50,8 @@ const mockSellers = [
   {
     seller_id: '0e0e0e-0e0e-0e0e',
     name: 'Test Vendor 5',
+    email: 'test-five@test.com',
+    phone_number: '555-555-5555',
     description: 'Test Vendor 5 Description',
     seller_type: SellerType.Test,
     sell_map_center: { type: 'Point', coordinates: [-95.3698, 29.7604] }
@@ -52,40 +62,30 @@ const mockUserSettings = [
   {
     user_settings_id: '0a0a0a-0a0a-0a0a',
     user_name: 'Test One',
-    email: 'test-one@test.com',
-    phone_number: '111-111-1111',
     findme: 'deviceGPS',
     trust_meter_rating: TrustMeterScale.HUNDRED
   },
   {
     user_settings_id: '0b0b0b-0b0b-0b0b',
     user_name: 'Test Two',
-    email: 'test-two@test.com',
-    phone_number: '222-222-2222',
     findme: 'deviceGPS',
     trust_meter_rating: TrustMeterScale.EIGHTY
   },
   {
     user_settings_id: '0c0c0c-0c0c-0c0c',
     user_name: 'Test Three',
-    email: 'test-three@test.com',
-    phone_number: '333-333-3333',
     findme: 'deviceGPS',
     trust_meter_rating: TrustMeterScale.FIFTY
   },
   {
     user_settings_id: '0d0d0d-0d0d-0d0d',
     user_name: 'Test Four',
-    email: 'test-four@test.com',
-    phone_number: '444-444-4444',
     findme: 'deviceGPS',
     trust_meter_rating: TrustMeterScale.HUNDRED
   },
   {
     user_settings_id: '0e0e0e-0e0e-0e0e',
     user_name: 'Test Five',
-    email: 'test-five@test.com',
-    phone_number: '555-555-5555',
     findme: 'deviceGPS',
     trust_meter_rating: TrustMeterScale.EIGHTY
   }
@@ -107,8 +107,6 @@ const assertSellersWithSettings = (
         expect.objectContaining({
           ...seller,
           user_name: correspondingUserSettings?.user_name,
-          email: correspondingUserSettings?.email,
-          phone_number: correspondingUserSettings?.phone_number,
           findme: correspondingUserSettings?.findme,
           trust_meter_rating: correspondingUserSettings?.trust_meter_rating
         }),
