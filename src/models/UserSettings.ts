@@ -15,14 +15,6 @@ const userSettingsSchema = new Schema<IUserSettings>(
       type: String,
       required: true,
     },
-    email: {
-      type: String,
-      required: false,
-    },
-    phone_number: {
-      type: String,
-      required: false,
-    },
     image: {
       type: String,
       required: false,
