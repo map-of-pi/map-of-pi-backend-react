@@ -127,7 +127,7 @@ export const getReviewFeedbackById = async (review_id: string): Promise<{
 
     // Fetch replies to the main review
     const replies = await ReviewFeedback.find({ reply_to_review_id: review_id }).exec();
-
+    
     // Fetch giver and receiver names for each reply asynchronously
     const updatedReplyList = await Promise.all(
       replies.map(async (reply) => {
@@ -165,10 +165,9 @@ export const getReviewFeedbackById = async (review_id: string): Promise<{
       message: error.message,
       stack: error.stack,
     });
-    throw new Error('Failed to retrieve review; please try again later.');
+    throw new Error('Failed to retrieve review; please try again later');
   }
 };
-
 
 export const addReviewFeedback = async (authUser: IUser, formData: any, image: string): Promise<IReviewFeedback> => {
   try {
