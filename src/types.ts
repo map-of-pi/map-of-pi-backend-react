@@ -31,6 +31,8 @@ export interface ISeller extends Document {
   description: string;
   image?: string;
   address?: string;
+  email?: string | null,
+  phone_number?: string | null,
   average_rating: Types.Decimal128;
   sell_map_center: {
     type: 'Point';
@@ -56,7 +58,7 @@ export interface IMapCenter {
 }
 
 // Select specific fields from IUserSettings
-export type PartialUserSettings = Pick<IUserSettings, 'user_name' | 'email' | 'phone_number' | 'findme' | 'trust_meter_rating'>;
+export type PartialUserSettings = Pick<IUserSettings, 'user_name' | 'findme' | 'trust_meter_rating'>;
 
 // Combined interface representing a seller with selected user settings
 export interface ISellerWithSettings extends ISeller, PartialUserSettings {}
