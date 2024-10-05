@@ -32,6 +32,16 @@
         type: String,
         required: false,
       },
+      email: {
+        type: String,
+        required: false,
+        default: null,
+      },
+      phone_number: {
+        type: String,
+        required: false,
+        default: null,
+      },
       average_rating: {
         type: Types.Decimal128,
         required: true,
