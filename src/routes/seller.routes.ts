@@ -35,6 +35,12 @@ import upload from "../utils/multer";
  *         address:
  *           type: string
  *           description: Address of the seller
+ *           email:
+ *           type: string
+ *           description: Seller's email address
+ *         phone_number:
+ *           type: string
+ *           description: Seller's phone number
  *         average_rating:
  *           type: object
  *           description: Average rating of the seller
