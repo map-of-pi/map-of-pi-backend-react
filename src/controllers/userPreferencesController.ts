@@ -15,7 +15,11 @@ export const getUserPreferences = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "User Preferences not found" });
     }
     logger.info(`Fetched User Preferences for ID: ${user_settings_id}`);
-    res.status(200).json(userPreferences);
+    
+    // Remove email and phone_number if they exist in the fetched data
+    const { email, phone_number, ...filteredPreferences } = userPreferences;
+
+    res.status(200).json(filteredPreferences); // Do not return email/phone
   } catch (error: any) {
     logger.error(`Failed to fetch user preferences for userSettingsID ${ user_settings_id }:`, { 
       message: error.message,
@@ -33,8 +37,12 @@ export const fetchUserPreferences = async (req: Request, res: Response) => {
       logger.warn(`User Preferences not found for user with ID: ${req.currentUser?.pi_uid || "NULL"}`);
       return res.status(404).json({ message: "User Preferences not found" });
     }
+    
+    // Exclude email and phone_number from the response if they exist
+    const { email, phone_number, ...filteredPreferences } = currentUserPreferences;
+    
     logger.info(`Fetched User Preferences for user with ID: ${req.currentUser.pi_uid}`);
-    res.status(200).json(currentUserPreferences);
+    res.status(200).json(filteredPreferences);
 
   } catch (error: any) {
     logger.error(`Failed to fetch user preferences for userID ${ req.currentUser?.pi_uid }:`, { 
@@ -48,8 +56,8 @@ export const fetchUserPreferences = async (req: Request, res: Response) => {
 
 export const addUserPreferences = async (req: Request, res: Response) => {
   try {
-    const authUser = req.currentUser
-    const formData = req.body;
+    const authUser = req.currentUser;
+    const { email, phone_number, ...formData } = req.body; // Exclude email and phone_number
 
     if (!authUser) {
       logger.warn("No authenticated user found for user preferences.");
