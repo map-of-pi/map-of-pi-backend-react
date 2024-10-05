@@ -24,8 +24,8 @@ const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSet
           trust_meter_rating: userSettings?.trust_meter_rating,
           user_name: userSettings?.user_name,
           findme: userSettings?.findme,
-          email: userSettings?.email,
-          phone_number: userSettings?.phone_number
+          email: seller?.email ?? null,
+          phone_number: seller?.phone_number ?? null,
         } as ISellerWithSettings;
       } catch (error: any) {
         logger.error(`Failed to resolve settings for sellerID ${ seller.seller_id }:`, { 
@@ -148,6 +148,8 @@ export const registerOrUpdateSeller = async (authUser: IUser, formData: any, ima
       description: formData.description || existingSeller?.description || '',
       seller_type: formData.seller_type || existingSeller?.seller_type || '',
       image: image || existingSeller?.image || '',
+      email: formData.email || existingSeller?.email || null,
+      phone_number: formData.phone_number || existingSeller?.phone_number || null,
       address: formData.address || existingSeller?.address || '',
       sell_map_center: sellMapCenter,
       order_online_enabled_pref: formData.order_online_enabled_pref || existingSeller?.order_online_enabled_pref || ''
