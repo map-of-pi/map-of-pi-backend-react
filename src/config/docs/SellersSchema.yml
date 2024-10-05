@@ -35,6 +35,16 @@ components:
             example: This is a sample seller description.
           seller_type:
             $ref: '/api/docs/enum/SellerType.yml#/components/schemas/SellerType'
+          email:
+            oneOf:
+              - type: string
+              - type: "null"
+            example: null
+          phone_number:
+            oneOf:
+              - type: string
+              - type: "null"
+            example: null
           address:
             type: string
             example: 1234 Test St, Test City, SC 12345
@@ -90,6 +100,18 @@ components:
           example: This is a sample seller description.
         seller_type:
           $ref: '/api/docs/enum/SellerType.yml#/components/schemas/SellerType'
+            seller_type:
+            $ref: '/api/docs/enum/SellerType.yml#/components/schemas/SellerType'
+        email:
+          oneOf:
+            - type: string
+            - type: "null"
+          example: null
+        phone_number:
+          oneOf:
+            - type: string
+            - type: "null"
+          example: null
         address:
           type: string
           example: 1234 Test St, Test City, SC 12345
@@ -155,6 +177,16 @@ components:
             name:
               type: string
               example: Test Seller
+            email:
+              oneOf:
+                - type: string
+                - type: "null"
+              example: null
+            phone_number:
+              oneOf:
+                - type: string
+                - type: "null"
+              example: null
             description:
               type: string
               example: This is a sample seller description.
@@ -207,6 +239,16 @@ components:
         name:
           type: string
           example: Test Seller
+        email:
+          oneOf:
+            - type: string
+            - type: "null"
+          example: null
+        phone_number:
+          oneOf:
+            - type: string
+            - type: "null"
+          example: null
         description:
           type: string
           example: This is a sample seller description.
@@ -257,6 +299,16 @@ components:
             name:
               type: string
               example: Test Seller
+            email:
+              oneOf:
+                - type: string
+                - type: "null"
+              example: null
+            phone_number:
+              oneOf:
+                - type: string
+                - type: "null"
+              example: null
             description:
               type: string
               example: This is a sample seller description.
