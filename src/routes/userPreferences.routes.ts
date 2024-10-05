@@ -18,12 +18,6 @@ import upload from "../utils/multer";
  *         user_name: 
  *           type: string
  *           description: Name of the user
- *         email:
- *           type: string
- *           description: Email address of the user
- *         phone_number:
- *           type: number
- *           description: Phone number of the user
  *         image:
  *           type: string
  *           description: Image of the user
