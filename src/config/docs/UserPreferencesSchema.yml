@@ -9,12 +9,6 @@ components:
         user_name:
           type: string
           example: Test User
-        email:
-          type: string
-          example: test_user_preferences@example.com
-        phone_number:
-          type: number
-          example: 123456789
         image:
           type: string
           format: binary
@@ -55,12 +49,6 @@ components:
         user_name:
           type: string
           example: Test User
-        email:
-          type: string
-          example: test_user_preferences@example.com
-        phone_number:
-          type: number
-          example: 1234567890
         image:
           type: string
           format: binary
@@ -93,12 +81,6 @@ components:
         user_name:
           type: string
           example: Test User
-        email:
-          type: string
-          example: test_user_preferences@example.com
-        phone_number:
-          type: number
-          example: 1234567890
         image:
           type: string
           format: binary
@@ -145,12 +127,6 @@ components:
             user_name:
               type: string
               example: Test User
-            email:
-              type: string
-              example: example@test.com
-            phone_number:
-              type: string
-              example: +1 123 456 7890
             image:
               type: string
               format: binary
