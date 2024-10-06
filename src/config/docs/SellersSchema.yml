@@ -100,8 +100,6 @@ components:
           example: This is a sample seller description.
         seller_type:
           $ref: '/api/docs/enum/SellerType.yml#/components/schemas/SellerType'
-            seller_type:
-            $ref: '/api/docs/enum/SellerType.yml#/components/schemas/SellerType'
         email:
           oneOf:
             - type: string
