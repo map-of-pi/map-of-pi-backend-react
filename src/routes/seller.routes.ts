@@ -35,7 +35,7 @@ import upload from "../utils/multer";
  *         address:
  *           type: string
  *           description: Address of the seller
- *           email:
+ *         email:
  *           type: string
  *           description: Seller's email address
  *         phone_number:
