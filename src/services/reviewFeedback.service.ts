@@ -112,21 +112,58 @@ export const getReviewFeedback = async (
   }
 };
 
-export const getReviewFeedbackById = async (review_id: string): Promise<IReviewFeedback | null> => {
+export const getReviewFeedbackById = async (review_id: string): Promise<{
+  review: IReviewFeedbackOutput | null;
+  replies: IReviewFeedbackOutput[];
+} | null> => {
   try {
-    const reviewFeedback = await ReviewFeedback.findById({ _id: review_id }).exec();
+    // Find the main review by ID
+    const reviewFeedback = await ReviewFeedback.findById(review_id).exec();
 
     if (!reviewFeedback) {
+      logger.warn(`No review found with ID: ${review_id}`);
       return null;
     }
-    const reviewer = await getUser(reviewFeedback.review_giver_id);
-    reviewFeedback.review_giver_id = reviewer ? reviewer.user_name : '';
-    return reviewFeedback as IReviewFeedback;
+
+    // Fetch replies to the main review
+    const replies = await ReviewFeedback.find({ reply_to_review_id: review_id }).exec();
+    
+    // Fetch giver and receiver names for each reply asynchronously
+    const updatedReplyList = await Promise.all(
+      replies.map(async (reply) => {
+        const [reviewer, receiver] = await Promise.all([
+          getUser(reply.review_giver_id),
+          getUser(reply.review_receiver_id),
+        ]);
+
+        const giverName = reviewer?.user_name || 'Unknown';
+        const receiverName = receiver?.user_name || 'Unknown';
+
+        // Return updated reply object
+        return { ...reply.toObject(), giver: giverName, receiver: receiverName };
+      })
+    );
+
+    // Fetch giver and receiver names for the main review
+    const [reviewer, receiver] = await Promise.all([
+      getUser(reviewFeedback.review_giver_id),
+      getUser(reviewFeedback.review_receiver_id),
+    ]);
+
+    const giverName = reviewer?.user_name || 'Unknown';
+    const receiverName = receiver?.user_name || 'Unknown';
+
+    // Create the main review object with giver and receiver names
+    const mainReview = { ...reviewFeedback.toObject(), giver: giverName, receiver: receiverName };
+
+    return {
+      review: mainReview as IReviewFeedbackOutput,
+      replies: updatedReplyList as IReviewFeedbackOutput[],
+    };
   } catch (error: any) {
-    logger.error(`Failed to retrieve review for reviewID ${ review_id }:`, { 
+    logger.error(`Failed to retrieve review for reviewID ${review_id}:`, {
       message: error.message,
-      config: error.config,
-      stack: error.stack
+      stack: error.stack,
     });
     throw new Error('Failed to retrieve review; please try again later');
   }

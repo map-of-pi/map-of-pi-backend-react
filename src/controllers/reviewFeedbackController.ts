@@ -2,9 +2,8 @@ import { Request, Response } from "express";
 
 import * as reviewFeedbackService from "../services/reviewFeedback.service";
 import { uploadImage } from "../services/misc/image.service";
-import { IReviewFeedback } from "../types";
+import { IReviewFeedbackOutput } from "../types";
 
-import { env } from "../utils/env";
 import logger from "../config/loggingConfig";
 
 export const getReviews = async (req: Request, res: Response) => {
@@ -13,7 +12,7 @@ export const getReviews = async (req: Request, res: Response) => {
 
   try {
     // Call the service with the review_receiver_id and searchQuery
-    const currentReviews: IReviewFeedback[] | null = await reviewFeedbackService.getReviewFeedback(
+    const currentReviews: IReviewFeedbackOutput[] | null = await reviewFeedbackService.getReviewFeedback(
       review_receiver_id, 
       searchQuery as string
     );
@@ -33,7 +32,7 @@ export const getReviews = async (req: Request, res: Response) => {
 export const getSingleReviewById = async (req: Request, res: Response) => {
   const { review_id } = req.params;
   try {
-    const associatedReview: IReviewFeedback | null = await reviewFeedbackService.getReviewFeedbackById(review_id);
+    const associatedReview = await reviewFeedbackService.getReviewFeedbackById(review_id);
     if (!associatedReview) {
       logger.warn(`Review with ID ${review_id} not found.`);
       return res.status(404).json({ message: "Review not found" });
