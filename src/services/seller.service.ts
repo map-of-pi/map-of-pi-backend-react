@@ -23,6 +23,8 @@ const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSet
           ...sellerObject,
           trust_meter_rating: userSettings?.trust_meter_rating,
           user_name: userSettings?.user_name,
+          email: userSettings?.email ?? null,
+          phone_number: userSettings?.phone_number ?? null,
           findme: userSettings?.findme
         } as ISellerWithSettings;
       } catch (error: any) {
@@ -37,6 +39,8 @@ const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSet
           ...seller.toObject(),
           trust_meter_rating: TrustMeterScale.ZERO,
           user_name: seller.name,
+          email: null,
+          phone_number: null,
           findme: null
         } as unknown as ISellerWithSettings;
       }
@@ -141,8 +145,6 @@ export const registerOrUpdateSeller = async (authUser: IUser, formData: any, ima
     const sellerData: Partial<ISeller> = {
       seller_id: authUser.pi_uid,
       name: formData.name || existingSeller?.name || authUser.user_name,
-      email: formData.email || null,
-      phone_number: formData.phone_number || null,
       description: formData.description || existingSeller?.description || '',
       seller_type: formData.seller_type || existingSeller?.seller_type || '',
       image: image || existingSeller?.image || '',

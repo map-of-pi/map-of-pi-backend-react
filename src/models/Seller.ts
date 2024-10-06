@@ -14,16 +14,6 @@
         type: String,
         required: true,
       },
-      email: {
-        type: String,
-        required: false,
-        default: null,
-      },
-      phone_number: {
-        type: String,
-        required: false,
-        default: null,
-      },
       seller_type: {
         type: String,
         enum: Object.values(SellerType).filter(value => typeof value === 'string'),

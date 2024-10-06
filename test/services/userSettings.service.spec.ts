@@ -16,6 +16,8 @@ const mockUser = {
 
 const formData = {
   user_name: 'Test User',
+  email: 'example-new@test.com',
+  phone_number: '987-654-3210',
   image: 'http://example.com/image_new.jpg',
   findme: DeviceLocationType.GPS,
   search_map_center: { type: 'Point', coordinates: [-83.856077, 50.848447] }
@@ -24,6 +26,8 @@ const formData = {
 const existingUserSettingsData: Partial<IUserSettings> = {
   user_settings_id: mockUser.pi_uid,
   user_name: 'Existing Test User',
+  email: 'example-old@test.com',
+  phone_number: '123-456-7890',
   image: 'http://example.com/image-existing.jpg',
   findme: DeviceLocationType.SearchCenter,
   search_map_center: { type: 'Point', coordinates: [-83.856077, 50.848447] }
@@ -62,6 +66,8 @@ describe('addOrUpdateUserSettings function', () => {
     
     expect(result).toHaveProperty('user_settings_id', mockUser.pi_uid); 
     expect(result).toHaveProperty('user_name', formData.user_name);
+    expect(result).toHaveProperty('email', formData.email);
+    expect(result).toHaveProperty('phone_number', formData.phone_number);
     expect(result).toHaveProperty('image', formData.image);
     expect(result).toHaveProperty('findme', formData.findme);
     expect(result).toHaveProperty('search_map_center', formData.search_map_center);
@@ -98,6 +104,8 @@ describe('addOrUpdateUserSettings function', () => {
 
     expect(result).toHaveProperty('user_settings_id', mockUser.pi_uid); 
     expect(result).toHaveProperty('user_name', mockUser.pi_username);
+    expect(result).toHaveProperty('email', formData.email);
+    expect(result).toHaveProperty('phone_number', formData.phone_number);
     expect(result).toHaveProperty('image', formData.image);
     expect(result).toHaveProperty('findme', formData.findme);
     expect(result).toHaveProperty('search_map_center', formData.search_map_center);
@@ -111,6 +119,8 @@ describe('addOrUpdateUserSettings function', () => {
     const updatedUserSettingsData = {
       ...existingUserSettingsData,
       user_name: formData.user_name,
+      email: formData.email,
+      phone_number: formData.phone_number,
       image: formData.image,
       findme: formData.findme,
       search_map_center: formData.search_map_center
@@ -124,6 +134,8 @@ describe('addOrUpdateUserSettings function', () => {
 
     expect(result).toHaveProperty('user_settings_id', mockUser.pi_uid);
     expect(result).toHaveProperty('user_name', updatedUserSettingsData.user_name);
+    expect(result).toHaveProperty('email', updatedUserSettingsData.email);
+    expect(result).toHaveProperty('phone_number', updatedUserSettingsData.phone_number);
     expect(result).toHaveProperty('image', updatedUserSettingsData.image);
     expect(result).toHaveProperty('findme', updatedUserSettingsData.findme);
     expect(result).toHaveProperty('search_map_center', updatedUserSettingsData.search_map_center);

@@ -30,12 +30,6 @@ components:
           name:
             type: string
             example: Test Seller
-          email:
-            type: string
-            example: test_user@example.com
-          phone_number:
-            type: string
-            example: +1231234567890
           description:
             type: string
             example: This is a sample seller description.
@@ -91,12 +85,6 @@ components:
         name:
           type: string
           example: Test Seller
-        email:
-          type: string
-          example: test_user@example.com
-        phone_number:
-          type: string
-          example: +1231234567890
         description:
           type: string
           example: This is a sample seller description.
@@ -167,12 +155,6 @@ components:
             name:
               type: string
               example: Test Seller
-            email:
-              type: string
-              example: test_user@example.com
-            phone_number:
-              type: string
-              example: +1231234567890
             description:
               type: string
               example: This is a sample seller description.
@@ -225,12 +207,6 @@ components:
         name:
           type: string
           example: Test Seller
-        email:
-          type: string
-          example: test_user@example.com
-        phone_number:
-          type: string
-          example: +1231234567890
         description:
           type: string
           example: This is a sample seller description.
@@ -281,12 +257,6 @@ components:
             name:
               type: string
               example: Test Seller
-            email:
-              type: string
-              example: test_user@example.com
-            phone_number:
-              type: string
-              example: +1231234567890
             description:
               type: string
               example: This is a sample seller description.
@@ -340,12 +310,6 @@ components:
             name:
               type: string
               example: Test Seller
-            email:
-              type: string
-              example: test_user@example.com
-            phone_number:
-              type: string
-              example: +1231234567890
             description:
               type: string
               example: This is a sample seller description.

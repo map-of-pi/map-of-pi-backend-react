@@ -9,6 +9,14 @@ components:
         user_name:
           type: string
           example: Test User
+        email:
+          type: string
+          nullable: true
+          example: test_user@example.com
+        phone_number:
+          type: string
+          nullable: true
+          example: +1231234567890
         image:
           type: string
           format: binary
@@ -49,6 +57,14 @@ components:
         user_name:
           type: string
           example: Test User
+        email:
+          type: string
+          nullable: true
+          example: test_user@example.com
+        phone_number:
+          type: string
+          nullable: true
+          example: +1231234567890
         image:
           type: string
           format: binary
@@ -81,6 +97,14 @@ components:
         user_name:
           type: string
           example: Test User
+        email:
+          type: string
+          nullable: true
+          example: test_user@example.com
+        phone_number:
+          type: string
+          nullable: true
+          example: +1231234567890
         image:
           type: string
           format: binary
@@ -127,6 +151,14 @@ components:
             user_name:
               type: string
               example: Test User
+            email:
+              type: string
+              nullable: true
+              example: test_user@example.com
+            phone_number:
+              type: string
+              nullable: true
+              example: +1231234567890
             image:
               type: string
               format: binary
