@@ -13,7 +13,7 @@ export const fetchSellersByCriteria = async (req: Request, res: Response) => {
 
     if (!sellers || sellers.length === 0) {
       logger.warn(`No sellers found within ${radius ?? 'undefined'} km of ${originString} with "${search_query ?? 'undefined'}"`);
-      return res.status(404).json({ message: "Sellers not found" });
+      return res.status(204).json({ message: "Sellers not found" });
     }
     logger.info(`Fetched ${sellers.length} sellers within ${radius ?? 'undefined'} km of ${originString} with "${search_query ?? 'undefined'}"`);
     res.status(200).json(sellers);

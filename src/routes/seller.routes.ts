@@ -70,7 +70,6 @@ const sellerRoutes = Router();
  *       - Seller
  *     summary: Fetch all sellers within given coordinates, radius, and search criteria, or all sellers if no parameters are not provided
  *     requestBody:
- *       required: false
  *       content:
  *         application/json:
  *           schema:
@@ -84,7 +83,7 @@ const sellerRoutes = Router();
  *               type: array
  *               items:
  *                 $ref: '/api/docs/SellersSchema.yml#/components/schemas/GetAllSellersRs'
- *       404:
+ *       204:
  *         description: Sellers not found
  *       400:
  *         description: Bad request
