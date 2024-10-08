@@ -22,7 +22,7 @@ import upload from "../utils/multer";
  *           type: string
  *           description: Email address of the user
  *         phone_number:
- *           type: number
+ *           type: string
  *           description: Phone number of the user
  *         image:
  *           type: string
