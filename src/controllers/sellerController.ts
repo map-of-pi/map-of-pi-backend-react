@@ -91,11 +91,15 @@ export const registerSeller = async (req: Request, res: Response) => {
     logger.info(`Registered or updated seller for user ${authUser.pi_uid}`);
 
     // Update UserSettings with email and phone_number
-    await userSettingsService.addOrUpdateUserSettings(authUser, formData, '');
+    const userSettings = await userSettingsService.addOrUpdateUserSettings(authUser, formData, '');
     logger.debug('UserSettings updated for user:', { pi_uid: authUser.pi_uid });
 
     // Send response
-    return res.status(200).json({ seller: registeredSeller });
+    return res.status(200).json({ 
+      seller: registeredSeller, 
+      email: userSettings.email, 
+      phone_number: userSettings.phone_number 
+    });
   } catch (error: any) {
     logger.error(`Failed to register seller for userID ${authUser.pi_uid}:`, {
       message: error.message,

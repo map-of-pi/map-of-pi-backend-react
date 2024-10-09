@@ -26,7 +26,7 @@ export const addOrUpdateUserSettings = async (
 
   try {
     // Reinstate user_name update logic
-    if (formData.user_name.trim() === "") {
+    if (formData.user_name?.trim() === "") {
       formData.user_name = authUser.pi_username;
 
       await User.findOneAndUpdate(
@@ -42,18 +42,19 @@ export const addOrUpdateUserSettings = async (
 
     const updateData: any = {};
 
-    // Update fields only if they are provided
-    if (formData.email && formData.email.trim() !== '') {
-      updateData.email = formData.email.trim();
-    }
-
-    if (formData.phone_number && formData.phone_number.trim() !== '') {
-      updateData.phone_number = formData.phone_number.trim();
-    }
+    updateData.user_name = formData.user_name;
 
     // Handle image if provided
     if (image && image.trim() !== '') {
       updateData.image = image.trim();
+    }
+
+    if (formData.email || formData.email?.trim() === '') {
+      updateData.email = formData.email.trim();
+    }
+
+    if (formData.phone_number || formData.phone_number?.trim() === '') {
+      updateData.phone_number = formData.phone_number.trim();
     }
 
     if (existingUserSettings) {
