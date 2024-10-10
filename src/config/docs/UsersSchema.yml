@@ -157,9 +157,10 @@ components:
                   example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
                 email:
                   type: string
+                  nullable: true
                   example: test_user_preferences@example.com
                 phone_number:
-                  type: number
+                  type: string
                   example: 123456789
                 image:
                   type: string

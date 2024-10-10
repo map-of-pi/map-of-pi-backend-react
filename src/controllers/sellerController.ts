@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import * as sellerService from "../services/seller.service";
 import { uploadImage } from "../services/misc/image.service";
+import * as userSettingsService from '../services/userSettings.service';
+
 
 import logger from "../config/loggingConfig";
 import { ISeller } from "../types";
@@ -13,7 +15,7 @@ export const fetchSellersByCriteria = async (req: Request, res: Response) => {
 
     if (!sellers || sellers.length === 0) {
       logger.warn(`No sellers found within ${radius ?? 'undefined'} km of ${originString} with "${search_query ?? 'undefined'}"`);
-      return res.status(404).json({ message: "Sellers not found" });
+      return res.status(204).json({ message: "Sellers not found" });
     }
     logger.info(`Fetched ${sellers.length} sellers within ${radius ?? 'undefined'} km of ${originString} with "${search_query ?? 'undefined'}"`);
     res.status(200).json(sellers);
@@ -67,31 +69,46 @@ export const fetchSellerRegistration = async (req: Request, res: Response) => {
 };
 
 export const registerSeller = async (req: Request, res: Response) => {
+  const authUser = req.currentUser;
+
+  // Check if authUser is defined
+  if (!authUser) {
+    console.warn('No authenticated user found when trying to register seller.');
+    return res.status(401).json({ error: 'User not authenticated' });
+  }
+
+  const formData = req.body;
+  logger.debug('Received formData for registration:', { formData });
+
   try {
-    const authUser = req.currentUser;
-    const formData = req.body as ISeller;
-
-    if (!authUser) {
-      logger.warn("No authenticated user found for registering.");
-      return res.status(401).json({ message: "Unauthorized user" });
-    }
-
-    // image file handling
+    // Image file handling
     const file = req.file;
     const image = file ? await uploadImage(authUser.pi_uid, file, 'seller-registration') : '';
-
     formData.image = image;
-    
+
+    // Register or update seller
     const registeredSeller = await sellerService.registerOrUpdateSeller(authUser, formData, image);
     logger.info(`Registered or updated seller for user ${authUser.pi_uid}`);
-    return res.status(200).json({ seller: registeredSeller });
+
+    // Update UserSettings with email and phone_number
+    const userSettings = await userSettingsService.addOrUpdateUserSettings(authUser, formData, '');
+    logger.debug('UserSettings updated for user:', { pi_uid: authUser.pi_uid });
+
+    // Send response
+    return res.status(200).json({ 
+      seller: registeredSeller, 
+      email: userSettings.email, 
+      phone_number: userSettings.phone_number 
+    });
   } catch (error: any) {
-    logger.error(`Failed to register seller for userID ${ req?.currentUser?.pi_uid }:`, { 
+    logger.error(`Failed to register seller for userID ${authUser.pi_uid}:`, {
       message: error.message,
       config: error.config,
-      stack: error.stack
+      stack: error.stack,
     });
-    return res.status(500).json({ message: 'An error occurred while registering seller; please try again later' });
+    return res.status(500).json({
+      message: 'An error occurred while registering seller; please try again later',
+    });
   }
 };
 

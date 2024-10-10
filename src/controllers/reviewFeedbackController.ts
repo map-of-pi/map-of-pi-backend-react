@@ -2,9 +2,8 @@ import { Request, Response } from "express";
 
 import * as reviewFeedbackService from "../services/reviewFeedback.service";
 import { uploadImage } from "../services/misc/image.service";
-import { IReviewFeedback, IReviewFeedbackOutput } from "../types";
+import { IReviewFeedbackOutput } from "../types";
 
-import { env } from "../utils/env";
 import logger from "../config/loggingConfig";
 
 export const getReviews = async (req: Request, res: Response) => {

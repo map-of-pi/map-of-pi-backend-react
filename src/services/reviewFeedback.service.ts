@@ -165,10 +165,9 @@ export const getReviewFeedbackById = async (review_id: string): Promise<{
       message: error.message,
       stack: error.stack,
     });
-    throw new Error('Failed to retrieve review; please try again later.');
+    throw new Error('Failed to retrieve review; please try again later');
   }
 };
-
 
 export const addReviewFeedback = async (authUser: IUser, formData: any, image: string): Promise<IReviewFeedback> => {
   try {
