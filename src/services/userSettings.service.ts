@@ -18,9 +18,15 @@ export const getUserSettingsById = async (user_settings_id: string): Promise<IUs
   }
 };
 
-export const addOrUpdateUserSettings = async (authUser: IUser, formData: IUserSettings, image: string): Promise<IUserSettings> => {
+export const addOrUpdateUserSettings = async (
+  authUser: IUser,
+  formData: any,
+  image: string
+): Promise<IUserSettings> => {
+
   try {
-    if (formData.user_name.trim() === "") {
+    // Reinstate user_name update logic
+    if (formData.user_name?.trim() === "") {
       formData.user_name = authUser.pi_username;
 
       await User.findOneAndUpdate(
@@ -30,28 +36,42 @@ export const addOrUpdateUserSettings = async (authUser: IUser, formData: IUserSe
       ).exec();
     }
 
-    let existingUserSettings = await UserSettings.findOne({
-      user_settings_id: authUser.pi_uid
+    const existingUserSettings = await UserSettings.findOne({
+      user_settings_id: authUser.pi_uid,
     }).exec();
 
+    const updateData: any = {};
+
+    updateData.user_name = formData.user_name;
+
+    // Handle image if provided
+    if (image && image.trim() !== '') {
+      updateData.image = image.trim();
+    }
+
+    if (formData.email || formData.email?.trim() === '') {
+      updateData.email = formData.email.trim();
+    }
+
+    if (formData.phone_number || formData.phone_number?.trim() === '') {
+      updateData.phone_number = formData.phone_number.trim();
+    }
+
     if (existingUserSettings) {
+      // Update existing settings
       const updatedUserSettings = await UserSettings.findOneAndUpdate(
         { user_settings_id: authUser.pi_uid },
-        { 
-          ...formData, 
-          image: image.trim() === '' ? existingUserSettings.image : image, // set image to previous if empty
-         }, // Include the potentially updated user_name
+        { $set: updateData },
         { new: true }
       ).exec();
 
       return updatedUserSettings as IUserSettings;
-
     } else {
-      // If no existing user settings, create new ones
+      // Create new settings
       const newUserSettings = new UserSettings({
-        ...formData,
-        image: image,
+        ...updateData,
         user_settings_id: authUser.pi_uid,
+        user_name: authUser.user_name || authUser.pi_username,
         trust_meter_rating: 100,
       });
 
@@ -59,10 +79,10 @@ export const addOrUpdateUserSettings = async (authUser: IUser, formData: IUserSe
       return savedUserSettings as IUserSettings;
     }
   } catch (error: any) {
-    logger.error('Failed to add or update user settings:', { 
+    logger.error('Failed to add or update user settings:', {
       message: error.message,
       config: error.config,
-      stack: error.stack
+      stack: error.stack,
     });
     throw new Error('Failed to add or update user settings; please try again later');
   }

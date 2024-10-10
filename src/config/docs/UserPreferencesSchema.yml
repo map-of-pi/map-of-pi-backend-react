@@ -11,10 +11,12 @@ components:
           example: Test User
         email:
           type: string
+          nullable: true
           example: test_user_preferences@example.com
         phone_number:
-          type: number
-          example: 123456789
+          type: string
+          nullable: true
+          example: "123456789"
         image:
           type: string
           format: binary
@@ -57,10 +59,12 @@ components:
           example: Test User
         email:
           type: string
+          nullable: true
           example: test_user_preferences@example.com
         phone_number:
-          type: number
-          example: 1234567890
+          type: string
+          nullable: true
+          example: "123456789"
         image:
           type: string
           format: binary
@@ -95,10 +99,12 @@ components:
           example: Test User
         email:
           type: string
+          nullable: true
           example: test_user_preferences@example.com
         phone_number:
-          type: number
-          example: 1234567890
+          type: string
+          nullable: true
+          example: "123456789"
         image:
           type: string
           format: binary
@@ -147,10 +153,12 @@ components:
               example: Test User
             email:
               type: string
-              example: example@test.com
+              nullable: true
+              example: test_user_preferences@example.com
             phone_number:
               type: string
-              example: +1 123 456 7890
+              nullable: true
+              example: "123456789"
             image:
               type: string
               format: binary
