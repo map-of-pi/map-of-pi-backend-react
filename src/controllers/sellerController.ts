@@ -8,17 +8,18 @@ import logger from "../config/loggingConfig";
 import { ISeller } from "../types";
 
 export const fetchSellersByCriteria = async (req: Request, res: Response) => {
+  
   try {
-    const { origin, radius, search_query } = req.body;
-    const sellers = await sellerService.getAllSellers(origin, radius, search_query);
-    const originString = origin ? `(${origin.lat}, ${origin.lng})` : 'undefined';
+    const { bounds, search_query } = req.body; // bounds: [sw_lat, sw_lng, ne_lat, ne_lng]
+    const sellers = await sellerService.getAllSellers(bounds, search_query)
 
     if (!sellers || sellers.length === 0) {
-      logger.warn(`No sellers found within ${radius ?? 'undefined'} km of ${originString} with "${search_query ?? 'undefined'}"`);
+      logger.warn(`No sellers found within bounds (${bounds?.sw_lat}, ${bounds?.sw_lng}) to (${bounds?.ne_lat}, ${bounds?.ne_lng}) with "${search_query ?? 'undefined'}"`);
       return res.status(204).json({ message: "Sellers not found" });
     }
-    logger.info(`Fetched ${sellers.length} sellers within ${radius ?? 'undefined'} km of ${originString} with "${search_query ?? 'undefined'}"`);
-    res.status(200).json(sellers);
+    logger.info(`Fetched ${sellers.length} sellers within bounds (${bounds?.sw_lat}, ${bounds?.sw_lng}) to (${bounds?.ne_lat}, ${bounds?.ne_lng}) with "${search_query ?? 'undefined'}"`);
+    // Return the sellers in the response
+    return res.status(200).json(sellers);
   } catch (error: any) {
     logger.error('Failed to fetch sellers by criteria:', { 
       message: error.message,
