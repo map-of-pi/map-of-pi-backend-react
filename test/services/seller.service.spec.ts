@@ -10,46 +10,44 @@ import { TrustMeterScale } from '../../src/models/enums/trustMeterScale';
 
 let mongoServer: MongoMemoryServer;
 
-// Updated mockSellers with five sellers
 const mockSellers = [
   {
     seller_id: '0a0a0a-0a0a-0a0a',
     name: 'Test Seller 1',
     description: 'Test Seller 1 Description',
-    seller_type: SellerType.Active,
-    sell_map_center: { type: 'Point', coordinates: [-74.0060, 40.7128] } // In bounds
+    seller_type: SellerType.Test,
+    sell_map_center: { type: 'Point', coordinates: [-74.0060, 40.7128] }
   },
   {
     seller_id: '0b0b0b-0b0b-0b0b',
     name: 'Test Vendor 2',
     description: 'Test Vendor 2 Description',
-    seller_type: SellerType.Active,
-    sell_map_center: { type: 'Point', coordinates: [-73.9000, 40.8000] } // In bounds
+    seller_type: SellerType.Inactive,
+    sell_map_center: { type: 'Point', coordinates: [-73.9000, 40.8000] }
   },
   {
     seller_id: '0c0c0c-0c0c-0c0c',
     name: 'Test Vendor 3',
     description: 'Test Vendor 3 Description',
     seller_type: SellerType.Active,
-    sell_map_center: { type: 'Point', coordinates: [-73.8500, 40.7500] } // In bounds
+    sell_map_center: { type: 'Point', coordinates: [-73.8500, 40.7500] }
   },
   {
     seller_id: '0d0d0d-0d0d-0d0d',
     name: 'Test Seller 4',
     description: 'Test Seller 4 Description',
     seller_type: SellerType.Active,
-    sell_map_center: { type: 'Point', coordinates: [-73.9000, 40.7000] } // In bounds
+    sell_map_center: { type: 'Point', coordinates: [-73.9000, 40.7000] }
   },
   {
     seller_id: '0e0e0e-0e0e-0e0e',
     name: 'Test Vendor 5',
     description: 'Test Vendor 5 Description',
     seller_type: SellerType.Active,
-    sell_map_center: { type: 'Point', coordinates: [-73.8500, 40.7500] } // In bounds
+    sell_map_center: { type: 'Point', coordinates: [-73.8500, 40.7500] }
   }
 ] as ISeller[];
 
-// Mock user settings
 const mockUserSettings = [
   {
     user_settings_id: '0a0a0a-0a0a-0a0a',
@@ -92,6 +90,13 @@ const mockUserSettings = [
     trust_meter_rating: TrustMeterScale.EIGHTY
   }
 ] as IUserSettings[];
+
+const mockBoundingBox = {
+  sw_lat: 40.7000,
+  sw_lng: -74.0060,
+  ne_lat: 40.9000,
+  ne_lng: -73.8000
+};
 
 // Helper function to assert that sellers and their user settings are correctly merged
 const assertSellersWithSettings = (
@@ -148,13 +153,13 @@ describe('getAllSellers function', () => {
 
     const result = await getAllSellers();
 
-    expect(result).toHaveLength(expectedMockSellers.length);
+    expect(result).toHaveLength(4);
 
     // invoke the helper function to assert that sellers are merged with settings
     assertSellersWithSettings(result, expectedMockSellers, mockUserSettings);
   });
 
-  it('should fetch all applicable sellers when search query is provided and origin + radius params are empty', async () => {
+  it('should fetch all applicable sellers when search query is provided and bounding box params are empty', async () => {
     /* filter seller records to include those with description "Vendor" 
        + exclude those with seller_type "Inactive" */
     const expectedMockSellers = mockSellers.filter(
@@ -162,27 +167,27 @@ describe('getAllSellers function', () => {
       seller.seller_type !== SellerType.Inactive
     );
 
-    const result = await getAllSellers(undefined, undefined, 'Vendor');
+    const result = await getAllSellers(undefined, 'Vendor');
 
-    expect(result).toHaveLength(expectedMockSellers.length);
+    expect(result).toHaveLength(2);
 
     // invoke the helper function to assert that sellers are merged with settings
     assertSellersWithSettings(result, expectedMockSellers, mockUserSettings);
   });
 
-  it('should fetch all applicable sellers when origin + radius are provided and search query param is empty', async () => {
+  it('should fetch all applicable sellers when bounding box params are provided and search query param is empty', async () => {
     const expectedMockSellers = mockSellers.filter(
       seller => seller.seller_type !== SellerType.Inactive &&
       seller.sell_map_center.type === 'Point' &&
-      seller.sell_map_center.coordinates[0] >= -74.0060 && // Ensure this logic is correct for your bounds
-      seller.sell_map_center.coordinates[0] <= -73.8000 &&
-      seller.sell_map_center.coordinates[1] >= 40.7128 &&
-      seller.sell_map_center.coordinates[1] <= 40.9000
+      seller.sell_map_center.coordinates[0] >= mockBoundingBox.sw_lng &&
+      seller.sell_map_center.coordinates[0] <= mockBoundingBox.ne_lng &&
+      seller.sell_map_center.coordinates[1] >= mockBoundingBox.sw_lat &&
+      seller.sell_map_center.coordinates[1] <= mockBoundingBox.ne_lat
     );
 
-    const result = await getAllSellers({ lng: -74.0060, lat: 40.7128 }, 10, undefined);
+    const result = await getAllSellers(mockBoundingBox, undefined);
 
-    expect(result).toHaveLength(expectedMockSellers.length);
+    expect(result).toHaveLength(4);
 
     // invoke the helper function to assert that sellers are merged with settings
     assertSellersWithSettings(result, expectedMockSellers, mockUserSettings);
@@ -196,15 +201,15 @@ describe('getAllSellers function', () => {
       seller => seller.seller_type !== SellerType.Inactive &&
       seller.description.includes('Vendor') &&
       seller.sell_map_center.type === 'Point' &&
-      seller.sell_map_center.coordinates[0] >= -74.0060 && // Adjust these bounds as needed
-      seller.sell_map_center.coordinates[0] <= -73.8000 &&
-      seller.sell_map_center.coordinates[1] >= 40.7128 &&
-      seller.sell_map_center.coordinates[1] <= 40.9000
+      seller.sell_map_center.coordinates[0] >= mockBoundingBox.sw_lng &&
+      seller.sell_map_center.coordinates[0] <= mockBoundingBox.ne_lng &&
+      seller.sell_map_center.coordinates[1] >= mockBoundingBox.sw_lat &&
+      seller.sell_map_center.coordinates[1] <= mockBoundingBox.ne_lat
     );
 
-    const result = await getAllSellers({ lng: -74.0060, lat: 40.7128 }, 10, 'Vendor');
+    const result = await getAllSellers(mockBoundingBox, 'Vendor');
 
-    expect(result).toHaveLength(expectedMockSellers.length);
+    expect(result).toHaveLength(2);
 
     // invoke the helper function to assert that sellers are merged with settings
     assertSellersWithSettings(result, expectedMockSellers, mockUserSettings);
