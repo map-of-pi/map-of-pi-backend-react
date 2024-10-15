@@ -83,7 +83,7 @@
       "seller_id": "0a0a0a-0a0a-0a0a",
       "name": "Test Seller 1",
       "description": "Test Seller 1 Description",
-      "seller_type": "Test",
+      "seller_type": "testSeller",
       "sell_map_center": {
           "type": "Point",
           "coordinates": [-74.0060, 40.7128]
@@ -93,7 +93,7 @@
       "seller_id": "0b0b0b-0b0b-0b0b",
       "name": "Test Vendor 2",
       "description": "Test Vendor 2 Description",
-      "seller_type": "Inactive",
+      "seller_type": "inactiveSeller",
       "sell_map_center": {
           "type": "Point",
           "coordinates": [-118.2437, 34.0522]
@@ -103,7 +103,7 @@
       "seller_id": "0c0c0c-0c0c-0c0c",
       "name": "Test Vendor 3",
       "description": "Test Vendor 3 Description",
-      "seller_type": "Active",
+      "seller_type": "activeSeller",
       "sell_map_center": {
           "type": "Point",
           "coordinates": [-87.6298, 41.8781]
@@ -113,7 +113,7 @@
       "seller_id": "0d0d0d-0d0d-0d0d",
       "name": "Test Seller 4",
       "description": "Test Seller 4 Description",
-      "seller_type": "Inactive",
+      "seller_type": "inactiveSeller",
       "sell_map_center": {
           "type": "Point",
           "coordinates": [-122.4194, 37.7749]
@@ -123,7 +123,7 @@
       "seller_id": "0e0e0e-0e0e-0e0e",
       "name": "Test Vendor 5",
       "description": "Test Vendor 5 Description",
-      "seller_type": "Test",
+      "seller_type": "testSeller",
       "sell_map_center": {
           "type": "Point",
           "coordinates": [-95.3698, 29.7604]
