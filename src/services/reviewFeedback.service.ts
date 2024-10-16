@@ -17,16 +17,16 @@ import logger from "../config/loggingConfig";
 const computeRatings = async (user_settings_id: string) => {
   try {
     // Fetch all reviews for the user
-    const reviewFeedbackList = await ReviewFeedback.find({ review_receiver_id: user_settings_id }).exec();
-    if (reviewFeedbackList.length === 0) {
+    const reviewFeedbackCount = await ReviewFeedback.countDocuments({ review_receiver_id: user_settings_id }).exec();
+    if (reviewFeedbackCount === 0) {
       // Default value when there are no reviews
       await UserSettings.findOneAndUpdate({ user_settings_id }, { trust_meter_rating: 100 });
       return 100;
     }
 
     // Calculate the total number of reviews and the number of zero ratings
-    const totalReviews = reviewFeedbackList.length;
-    const zeroRatingsCount = reviewFeedbackList.filter(review => review.rating === 0).length;
+    const totalReviews = reviewFeedbackCount
+    const zeroRatingsCount = await ReviewFeedback.countDocuments({ review_receiver_id: user_settings_id, rating: 0 }).exec();
 
     // Calculate the percentage of zero ratings
     const zeroRatingsPercentage = (zeroRatingsCount / totalReviews) * 100;
