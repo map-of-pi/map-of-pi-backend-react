@@ -1,73 +1,26 @@
-import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
-
 import Seller from '../../src/models/Seller';
 import UserSettings from '../../src/models/UserSettings';
-import { SellerType } from '../../src/models/enums/sellerType';
 import { getMapCenterById, createOrUpdateMapCenter } from '../../src/services/mapCenter.service';
-
-let mongoServer: MongoMemoryServer;
-
-const mockSellers = [
-  {
-    seller_id: '0a0a0a-0a0a-0a0a',
-    name: 'Test Seller A',
-    seller_type: SellerType.Test,
-    sell_map_center: { type: 'Point', coordinates: [-118.2437, 34.0522] }
-  }
-];
-
-const mockUserSettings = [
-  {
-    user_settings_id: '0b0b0b-0b0b-0b0b',
-    user_name: 'Test Seller B',
-    search_map_center: { type: 'Point', coordinates: [-74.0060, 40.7128] }
-  }
-];
-
-beforeAll(async () => {
-  try {
-    mongoServer = await MongoMemoryServer.create();
-    const uri = mongoServer.getUri();
-    await mongoose.connect(uri, { dbName: 'test' });
-
-    // initialize in-memory MongoDB by inserting mock data records
-    await Seller.insertMany(mockSellers);
-    await UserSettings.insertMany(mockUserSettings);
-  } catch (error) {
-    console.error('Failed to start MongoMemoryServer', error);
-    throw error;
-  }
-});
-
-afterAll(async () => {
-  await mongoose.disconnect();
-  await mongoServer.stop();
-});
 
 describe('getMapCenterById function', () => {
   it('should fetch the sell map center for the given seller ID', async () => {
-    const result = await getMapCenterById('0a0a0a-0a0a-0a0a', 'sell');
+    const sellerData = await Seller.findOne({ seller_id: '0a0a0a-0a0a-0a0a' });
 
-    const expectedMockSeller = mockSellers.find(
-      seller => seller.seller_id === '0a0a0a-0a0a-0a0a'
-    );
+    const result = await getMapCenterById('0a0a0a-0a0a-0a0a', 'sell');
 
     expect(result).toBeDefined();
     // assert that the result matches the expected sell map center
-    expect(result).toEqual(expect.objectContaining(expectedMockSeller!.sell_map_center));
+    expect(result).toEqual(expect.objectContaining(sellerData!.sell_map_center));
   });
 
   it('should fetch the search map center for the given user settings ID', async () => {
+    const userSettingsData = await UserSettings.findOne({ user_settings_id: '0b0b0b-0b0b-0b0b' });
+
     const result = await getMapCenterById('0b0b0b-0b0b-0b0b', 'search');
-    
-    const expectedMockUserSettings = mockUserSettings.find(
-      settings => settings.user_settings_id === '0b0b0b-0b0b-0b0b'
-    );
 
     expect(result).toBeDefined();
     // assert that the result matches the expected search map center
-    expect(result).toEqual(expect.objectContaining(expectedMockUserSettings!.search_map_center));
+    expect(result).toEqual(expect.objectContaining(userSettingsData!.search_map_center));
   });
 
   it('should return null for a non-existent map center ID', async () => {

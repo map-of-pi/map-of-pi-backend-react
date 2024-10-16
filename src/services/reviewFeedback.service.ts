@@ -20,10 +20,9 @@ const computeRatings = async (user_settings_id: string) => {
     const reviewFeedbackCount = await ReviewFeedback.countDocuments({ review_receiver_id: user_settings_id }).exec();
     if (reviewFeedbackCount === 0) {
       // Default value when there are no reviews
-      await UserSettings.findOneAndUpdate({ user_settings_id }, { trust_meter_rating: 100 });
+      await UserSettings.findOneAndUpdate({ user_settings_id }, { trust_meter_rating: 100 }).exec();
       return 100;
     }
-
     // Calculate the total number of reviews and the number of zero ratings
     const totalReviews = reviewFeedbackCount
     const zeroRatingsCount = await ReviewFeedback.countDocuments({ review_receiver_id: user_settings_id, rating: 0 }).exec();
@@ -183,9 +182,8 @@ export const addReviewFeedback = async (authUser: IUser, formData: any, image: s
     const newReviewFeedback = new ReviewFeedback(reviewFeedbackData);
     const savedReviewFeedback = await newReviewFeedback.save();
 
-    computeRatings(savedReviewFeedback.review_receiver_id)
-      .then(value => logger.info(`Computed review rating: ${value}`))
-      .catch(error => logger.error(`Error computing review rating: ${error.message}`));
+    const computedValue = await computeRatings(savedReviewFeedback.review_receiver_id);
+    logger.info(`Computed review rating: ${computedValue}`);
 
     return savedReviewFeedback as IReviewFeedback;
   } catch (error: any) {
