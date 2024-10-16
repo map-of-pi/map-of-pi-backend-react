@@ -75,7 +75,7 @@
       "email": "test-five@test.com",
       "phone_number": "555-555-5555",
       "findme": "deviceGPS",
-      "trust_meter_rating": 80
+      "trust_meter_rating": 100
     }
   ],
   "sellers": [
