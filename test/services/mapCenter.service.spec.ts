@@ -4,23 +4,23 @@ import { getMapCenterById, createOrUpdateMapCenter } from '../../src/services/ma
 
 describe('getMapCenterById function', () => {
   it('should fetch the sell map center for the given seller ID', async () => {
-    const mockSeller = await Seller.findOne({ seller_id: '0a0a0a-0a0a-0a0a' });
+    const sellerData = await Seller.findOne({ seller_id: '0a0a0a-0a0a-0a0a' });
 
     const result = await getMapCenterById('0a0a0a-0a0a-0a0a', 'sell');
 
     expect(result).toBeDefined();
     // assert that the result matches the expected sell map center
-    expect(result).toEqual(expect.objectContaining(mockSeller!.sell_map_center));
+    expect(result).toEqual(expect.objectContaining(sellerData!.sell_map_center));
   });
 
   it('should fetch the search map center for the given user settings ID', async () => {
-    const mockUserSettings = await UserSettings.findOne({ user_settings_id: '0b0b0b-0b0b-0b0b' });
+    const userSettingsData = await UserSettings.findOne({ user_settings_id: '0b0b0b-0b0b-0b0b' });
 
     const result = await getMapCenterById('0b0b0b-0b0b-0b0b', 'search');
 
     expect(result).toBeDefined();
     // assert that the result matches the expected search map center
-    expect(result).toEqual(expect.objectContaining(mockUserSettings!.search_map_center));
+    expect(result).toEqual(expect.objectContaining(userSettingsData!.search_map_center));
   });
 
   it('should return null for a non-existent map center ID', async () => {

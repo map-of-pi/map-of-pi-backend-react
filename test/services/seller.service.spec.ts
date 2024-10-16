@@ -4,9 +4,9 @@ import { SellerType } from '../../src/models/enums/sellerType';
 
 describe('getAllSellers function', () => {
   it('should fetch all sellers when all parameters are empty', async () => {
-    const result = await getAllSellers();
+    const sellersData = await getAllSellers();
 
-    expect(result).toHaveLength(await Seller.countDocuments({
+    expect(sellersData).toHaveLength(await Seller.countDocuments({
       seller_type: { $ne: SellerType.Inactive }
     }));
   });
@@ -14,11 +14,11 @@ describe('getAllSellers function', () => {
   it('should fetch all applicable sellers when search query is provided and origin + radius params are empty', async () => {  
     const searchQuery = 'Vendor';
     
-    const result = await getAllSellers(undefined, undefined, searchQuery);
+    const sellersData = await getAllSellers(undefined, undefined, searchQuery);
     
     /* filter seller records to include those with "Vendor" 
        + exclude those with seller_type "Inactive" */
-    expect(result).toHaveLength(
+    expect(sellersData).toHaveLength(
       await Seller.countDocuments({
         $or: [
           { name: { $regex: searchQuery, $options: 'i' } },
@@ -33,11 +33,11 @@ describe('getAllSellers function', () => {
   it('should fetch all applicable sellers when origin + radius are provided and search query param is empty', async () => { 
     const radius = 10000; // 10 km in meters 
 
-    const result = await getAllSellers({ lng: -74.0060, lat: 40.7128 }, 10, undefined);
+    const sellersData = await getAllSellers({ lng: -74.0060, lat: 40.7128 }, 10, undefined);
     
     /* filter seller records to exclude those with seller_type "Inactive"
        + include those with sell_map_center within geospatial radius */
-    expect(result).toHaveLength(
+    expect(sellersData).toHaveLength(
       await Seller.countDocuments({
         seller_type: { $ne: SellerType.Inactive },
         'sell_map_center.coordinates': {
@@ -53,12 +53,12 @@ describe('getAllSellers function', () => {
     const searchQuery = 'Vendor';
     const radius = 10000; // 10 km in meters 
 
-    const result = await getAllSellers({ lng: -74.0060, lat: 40.7128 }, 10, 'Vendor');
+    const sellersData = await getAllSellers({ lng: -74.0060, lat: 40.7128 }, 10, 'Vendor');
 
     /* filter seller records to exclude those with seller_type "Inactive"
        + include those with "Vendor"
        + include those with sell_map_center within geospatial radius */
-    expect(result).toHaveLength(
+    expect(sellersData).toHaveLength(
       await Seller.countDocuments({
         $or: [
           { name: { $regex: searchQuery, $options: 'i' } },

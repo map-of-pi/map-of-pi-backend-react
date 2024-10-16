@@ -14,12 +14,12 @@ const formData = {
 
 describe('addOrUpdateUserSettings function', () => {
   it('should add new user settings when user_name is not empty', async () => {
-    const mockUser = await User.findOne({ pi_username: 'TestUser1' }) as IUser;
+    const userData = await User.findOne({ pi_username: 'TestUser1' }) as IUser;
 
-    const result = await addOrUpdateUserSettings(mockUser, formData, formData.image ?? '');
+    const userSettingsData = await addOrUpdateUserSettings(userData, formData, formData.image ?? '');
     
-    expect(result).toEqual(expect.objectContaining({
-      user_settings_id: mockUser.pi_uid,
+    expect(userSettingsData).toEqual(expect.objectContaining({
+      user_settings_id: userData.pi_uid,
       user_name: formData.user_name,
       email: formData.email,
       phone_number: formData.phone_number,
@@ -30,16 +30,16 @@ describe('addOrUpdateUserSettings function', () => {
   });
 
   it('should add new user settings when user_name is empty', async () => {
-    const mockUser = await User.findOne({ pi_username: 'TestUser1' }) as IUser;
+    const userData = await User.findOne({ pi_username: 'TestUser1' }) as IUser;
 
-    const result = await addOrUpdateUserSettings(
-    mockUser, { 
+    const userSettingsData = await addOrUpdateUserSettings(
+    userData, { 
       ...formData, user_name: ""
     } as IUserSettings, formData.image ?? '');
 
-    expect(result).toEqual(expect.objectContaining({
-      user_settings_id: mockUser.pi_uid,
-      user_name: mockUser.pi_username,
+    expect(userSettingsData).toEqual(expect.objectContaining({
+      user_settings_id: userData.pi_uid,
+      user_name: userData.pi_username,
       email: formData.email,
       phone_number: formData.phone_number,
       image: formData.image,
@@ -49,7 +49,7 @@ describe('addOrUpdateUserSettings function', () => {
   });
 
   it('should update existing user settings', async () => {
-    const mockUser = await User.findOne({ pi_username: 'TestUser1' }) as IUser;
+    const userData = await User.findOne({ pi_username: 'TestUser1' }) as IUser;
 
     const updatedUserSettingsData = {
       user_name: formData.user_name,
@@ -60,10 +60,10 @@ describe('addOrUpdateUserSettings function', () => {
       search_map_center: formData.search_map_center
     } as IUserSettings;
 
-    const result = await addOrUpdateUserSettings(mockUser, updatedUserSettingsData, updatedUserSettingsData.image ?? '');
+    const userSettingsData = await addOrUpdateUserSettings(userData, updatedUserSettingsData, updatedUserSettingsData.image ?? '');
 
-    expect(result).toEqual(expect.objectContaining({
-      user_settings_id: mockUser.pi_uid,
+    expect(userSettingsData).toEqual(expect.objectContaining({
+      user_settings_id: userData.pi_uid,
       user_name: updatedUserSettingsData.user_name,
       email: updatedUserSettingsData.email,
       phone_number: updatedUserSettingsData.phone_number,
