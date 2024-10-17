@@ -49,15 +49,16 @@ const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSet
   return sellersWithSettings;
 };
 
-// Fetch all sellers or within a specific radius from a given origin; optional search query.
+// Fetch all sellers or within a specific bounding box; optional search query.
 export const getAllSellers = async (
-  origin?: { lng: number, lat: number },
-  radius?: number,
+  bounds?: { sw_lat: number, sw_lng: number, ne_lat: number, ne_lng: number },
   search_query?: string
 ): Promise<ISellerWithSettings[]> => {
 
   try {
     let sellers: ISeller[];
+    const maxNumSellers = 36;
+
     // always apply this condition to exclude 'Inactive sellers'
     const baseCriteria = { seller_type: { $ne: SellerType.Inactive } };
     
@@ -71,22 +72,32 @@ export const getAllSellers = async (
         }
       : {};
 
-    // merge criterias
+    // Merge base criteria with search criteria
     const aggregatedCriteria = { ...baseCriteria, ...searchCriteria };
 
-    // conditional to apply geospatial filtering
-    if (origin && radius) {
+    // If bounds are provided, use MongoDB's $geoWithin operator with a bounding box
+    if (bounds) {
       sellers = await Seller.find({
         ...aggregatedCriteria,
         sell_map_center: {
           $geoWithin: {
-            $centerSphere: [[origin.lng, origin.lat], radius / 6378.1] // Radius in radians
+            $box: [
+              [bounds.sw_lng, bounds.sw_lat],
+              [bounds.ne_lng, bounds.ne_lat]
+            ]
           }
         }
-      }).exec();
-    } else {
-      sellers = await Seller.find(aggregatedCriteria).exec();
-    }
+      })
+        .sort({ review_count: -1, updated_at: -1 }) // Sort by review count and last updated
+        .limit(maxNumSellers)
+        .exec();
+      } else {
+        // If no bounds are provided, return all sellers (without geo-filtering)  
+        sellers = await Seller.find(aggregatedCriteria)
+          .sort({ review_count: -1, updated_at: -1 })
+          .limit(maxNumSellers)
+          .exec();
+      }
 
     // Fetch and merge the settings for each seller
     const sellersWithSettings = await resolveSellerSettings(sellers);
