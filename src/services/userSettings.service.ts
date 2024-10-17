@@ -57,6 +57,10 @@ export const addOrUpdateUserSettings = async (
       updateData.phone_number = formData.phone_number.trim();
     }
 
+    if (formData.findme) {
+      updateData.findme = formData.findme;
+    }
+
     if (existingUserSettings) {
       // Update existing settings
       const updatedUserSettings = await UserSettings.findOneAndUpdate(

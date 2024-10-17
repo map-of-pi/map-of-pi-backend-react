@@ -17,16 +17,15 @@ import logger from "../config/loggingConfig";
 const computeRatings = async (user_settings_id: string) => {
   try {
     // Fetch all reviews for the user
-    const reviewFeedbackList = await ReviewFeedback.find({ review_receiver_id: user_settings_id }).exec();
-    if (reviewFeedbackList.length === 0) {
+    const reviewFeedbackCount = await ReviewFeedback.countDocuments({ review_receiver_id: user_settings_id }).exec();
+    if (reviewFeedbackCount === 0) {
       // Default value when there are no reviews
-      await UserSettings.findOneAndUpdate({ user_settings_id }, { trust_meter_rating: 100 });
+      await UserSettings.findOneAndUpdate({ user_settings_id }, { trust_meter_rating: 100 }).exec();
       return 100;
     }
-
     // Calculate the total number of reviews and the number of zero ratings
-    const totalReviews = reviewFeedbackList.length;
-    const zeroRatingsCount = reviewFeedbackList.filter(review => review.rating === 0).length;
+    const totalReviews = reviewFeedbackCount
+    const zeroRatingsCount = await ReviewFeedback.countDocuments({ review_receiver_id: user_settings_id, rating: 0 }).exec();
 
     // Calculate the percentage of zero ratings
     const zeroRatingsPercentage = (zeroRatingsCount / totalReviews) * 100;
@@ -183,9 +182,8 @@ export const addReviewFeedback = async (authUser: IUser, formData: any, image: s
     const newReviewFeedback = new ReviewFeedback(reviewFeedbackData);
     const savedReviewFeedback = await newReviewFeedback.save();
 
-    computeRatings(savedReviewFeedback.review_receiver_id)
-      .then(value => logger.info(`Computed review rating: ${value}`))
-      .catch(error => logger.error(`Error computing review rating: ${error.message}`));
+    const computedValue = await computeRatings(savedReviewFeedback.review_receiver_id);
+    logger.info(`Computed review rating: ${computedValue}`);
 
     return savedReviewFeedback as IReviewFeedback;
   } catch (error: any) {
