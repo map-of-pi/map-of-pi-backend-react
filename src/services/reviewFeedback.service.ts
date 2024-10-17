@@ -117,7 +117,7 @@ export const getReviewFeedbackById = async (review_id: string): Promise<{
 } | null> => {
   try {
     // Find the main review by ID
-    const reviewFeedback = await ReviewFeedback.findById(review_id).sort({ review_date: -1 }).exec();
+    const reviewFeedback = await ReviewFeedback.findById(review_id).exec();
 
     if (!reviewFeedback) {
       logger.warn(`No review found with ID: ${review_id}`);
@@ -125,7 +125,7 @@ export const getReviewFeedbackById = async (review_id: string): Promise<{
     }
 
     // Fetch replies to the main review
-    const replies = await ReviewFeedback.find({ reply_to_review_id: review_id }).sort({ review_date: -1 }).exec();
+    const replies = await ReviewFeedback.find({ reply_to_review_id: review_id }).exec();
 
     // Fetch giver and receiver names for each reply asynchronously
     const updatedReplyList = await Promise.all(
