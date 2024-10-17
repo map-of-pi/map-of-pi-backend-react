@@ -119,9 +119,6 @@ components:
                   address:
                     type: string
                     example: 1234 Test St, Test City, SC 12345
-                  sale_items:
-                    type: string
-                    example: Test Item 1, Test Item 2
                   average_rating:
                     type: object
                     properties:
