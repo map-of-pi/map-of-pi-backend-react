@@ -66,8 +66,7 @@ export const getAllSellers = async (
       ? {
           $or: [
             { name: { $regex: search_query, $options: 'i' } },
-            { description: { $regex: search_query, $options: 'i' } },
-            { sale_items: { $regex: search_query, $options: 'i' } },
+            { description: { $regex: search_query, $options: 'i' } }
           ],
         }
       : {};

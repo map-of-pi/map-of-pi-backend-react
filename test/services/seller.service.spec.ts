@@ -22,8 +22,7 @@ describe('getAllSellers function', () => {
       await Seller.countDocuments({
         $or: [
           { name: { $regex: searchQuery, $options: 'i' } },
-          { description: { $regex: searchQuery, $options: 'i' } },
-          { sale_items: { $regex: searchQuery, $options: 'i' } },
+          { description: { $regex: searchQuery, $options: 'i' } }
         ],
         seller_type: { $ne: SellerType.Inactive }
       })
@@ -62,8 +61,7 @@ describe('getAllSellers function', () => {
       await Seller.countDocuments({
         $or: [
           { name: { $regex: searchQuery, $options: 'i' } },
-          { description: { $regex: searchQuery, $options: 'i' } },
-          { sale_items: { $regex: searchQuery, $options: 'i' } },
+          { description: { $regex: searchQuery, $options: 'i' } }
         ],
         seller_type: { $ne: SellerType.Inactive },
         'sell_map_center.coordinates': {
