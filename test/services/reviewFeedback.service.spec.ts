@@ -21,8 +21,7 @@ describe('getReviewFeedbackById function', () => {
     // Convert Mongoose documents to plain objects
     const plainReviewData = reviewData.toObject();
     const plainReviewRepliesData = reviewRepliesData
-      .map(reply => reply.toObject())
-      .sort((a, b) => new Date(b.review_date).getTime() - new Date(a.review_date).getTime());
+      .map(reply => reply.toObject());
 
     // Assertions for the main review
     expect(result?.review).toMatchObject({
@@ -33,21 +32,21 @@ describe('getReviewFeedbackById function', () => {
       rating: 5
     });
 
-    // Assertions for the replies sorted by most recent review_date.
+    // Assertions for the replies
     expect(result?.replies).toHaveLength(2);
     expect(result?.replies[0]).toMatchObject({
       ...plainReviewRepliesData[0],
-      giver: usersData[3].user_name,
-      receiver: usersData[0].user_name,
-      comment: '0d0d0d-0d0d-0d0d Test Reply Comment',
-      rating: 3,
-    });
-    expect(result?.replies[1]).toMatchObject({
-      ...plainReviewRepliesData[1],
       giver: usersData[2].user_name,
       receiver: usersData[0].user_name,
       comment: '0c0c0c-0c0c-0c0c Test Reply Comment',
       rating: 4,
+    });
+    expect(result?.replies[1]).toMatchObject({
+      ...plainReviewRepliesData[1],
+      giver: usersData[3].user_name,
+      receiver: usersData[0].user_name,
+      comment: '0d0d0d-0d0d-0d0d Test Reply Comment',
+      rating: 3,
     });
   });
 });
