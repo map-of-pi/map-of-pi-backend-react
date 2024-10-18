@@ -7,10 +7,10 @@ import logger from "../config/loggingConfig";
 
 /**
   The value is set depending on the number of zero(0) ratings in the ReviewFeedback table where this user is review-receiver. 
-  IF user has less than 2% zero ratings THEN set it to 100. 
-  IF user has 2%-5% zero ratings THEN set it to 80. 
-  IF user has 5%-10% zero ratings THEN set it to 50. 
-  IF user has more than 10% zero ratings THEN set it to 0.
+  IF user has less than or equal to 5% zero ratings THEN set it to 100. 
+  IF user has 5.01%-10% zero ratings THEN set it to 80. 
+  IF user has 10.01%-20% zero ratings THEN set it to 50. 
+  IF user has more than 20.01% zero ratings THEN set it to 0.
   When the User Registration screen is first used (before the users User record has been created) 
   then the value of “100” is displayed and saved to the DB.
 **/
@@ -33,13 +33,13 @@ const computeRatings = async (user_settings_id: string) => {
     // Determine the value based on the percentage of zero ratings
     let value;
     switch (true) {
-      case (zeroRatingsPercentage < 2):
+      case (zeroRatingsPercentage <= 5):
         value = 100;
         break;
-      case (zeroRatingsPercentage >= 2 && zeroRatingsPercentage < 5):
+      case (zeroRatingsPercentage > 5 && zeroRatingsPercentage <= 10):
         value = 80;
         break;
-      case (zeroRatingsPercentage >= 5 && zeroRatingsPercentage < 10):
+      case (zeroRatingsPercentage > 10 && zeroRatingsPercentage <= 20):
         value = 50;
         break;
       default:
@@ -117,7 +117,7 @@ export const getReviewFeedbackById = async (review_id: string): Promise<{
 } | null> => {
   try {
     // Find the main review by ID
-    const reviewFeedback = await ReviewFeedback.findById(review_id).sort({ review_date: -1 }).exec();
+    const reviewFeedback = await ReviewFeedback.findById(review_id).exec();
 
     if (!reviewFeedback) {
       logger.warn(`No review found with ID: ${review_id}`);
@@ -125,7 +125,7 @@ export const getReviewFeedbackById = async (review_id: string): Promise<{
     }
 
     // Fetch replies to the main review
-    const replies = await ReviewFeedback.find({ reply_to_review_id: review_id }).sort({ review_date: -1 }).exec();
+    const replies = await ReviewFeedback.find({ reply_to_review_id: review_id }).exec();
 
     // Fetch giver and receiver names for each reply asynchronously
     const updatedReplyList = await Promise.all(
