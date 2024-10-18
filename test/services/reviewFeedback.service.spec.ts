@@ -93,12 +93,12 @@ describe('addReviewFeedback function', () => {
     expect(updatedUserSettings?.trust_meter_rating).toBe(expectedRating);
   };
 
-  it('should add new review feedback and compute ratings correctly with less than 2% zero ratings', async () => {
+  it('should add new review feedback and compute ratings correctly with less than or equal to 5% zero ratings', async () => {
     await addReviewAndAssert();
     await assertComputedRating(100);
   });
 
-  it('should add new review feedback and compute ratings correctly with 2%-5% zero ratings', async () => {
+  it('should add new review feedback and compute ratings correctly with 5.01%-10% zero ratings', async () => {
     await ReviewFeedback.insertMany([
       { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0a0a0a-0a0a-0a0a', rating: 0, comment: 'First Zero Rating', review_date: new Date() },
       { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0b0b0b-0b0b-0b0b', rating: 5, comment: 'First Non-Zero Rating', review_date: new Date() },
@@ -108,19 +108,7 @@ describe('addReviewFeedback function', () => {
       { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0f0f0f-0f0f-0f0f', rating: 5, comment: 'Fifth Non-Zero Rating', review_date: new Date() },
       { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0g0g0g-0g0g-0g0g', rating: 4, comment: 'Sixth Non-Zero Rating', review_date: new Date() },
       { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0h0h0h-0h0h-0h0h', rating: 4, comment: 'Seventh Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0i0i0i-0i0i-0i0i', rating: 4, comment: 'Eighth Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0j0j0j-0j0j-0j0j', rating: 4, comment: 'Ninth Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0k0k0k-0k0k-0k0k', rating: 4, comment: 'Tenth Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0l0l0l-0l0l-0l0l', rating: 3, comment: 'Eleventh Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0m0m0m-0m0m-0m0m', rating: 3, comment: 'Twelveth Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0n0n0n-0n0n-0n0n', rating: 3, comment: 'Thirteenth Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0o0o0o-0o0o-0o0o', rating: 3, comment: 'Fourteenth Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0p0p0p-0p0p-0p0p', rating: 3, comment: 'Fifteenth Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0q0q0q-0q0q-0q0q', rating: 2, comment: 'Sixteenth Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0r0r0r-0r0r-0r0r', rating: 2, comment: 'Seventeenth Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0s0s0s-0s0s-0s0s', rating: 2, comment: 'Eighteenth Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0t0t0t-0t0t-0t0t', rating: 2, comment: 'Nineteenth Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0u0u0u-0u0u-0u0u', rating: 2, comment: 'Twentieth Non-Zero Rating', review_date: new Date() }
+      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0i0i0i-0i0i-0i0i', rating: 4, comment: 'Eighth Non-Zero Rating', review_date: new Date() }
     ]);
 
     await addReviewAndAssert();
@@ -132,19 +120,7 @@ describe('addReviewFeedback function', () => {
       { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0a0a0a-0a0a-0a0a', rating: 0, comment: 'First Zero Rating', review_date: new Date() },
       { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0b0b0b-0b0b-0b0b', rating: 5, comment: 'First Non-Zero Rating', review_date: new Date() },
       { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0c0c0c-0c0c-0c0c', rating: 5, comment: 'Second Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0d0d0d-0d0d-0d0d', rating: 5, comment: 'Third Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0e0e0e-0e0e-0e0e', rating: 5, comment: 'Fourth Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0f0f0f-0f0f-0f0f', rating: 5, comment: 'Fifth Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0g0g0g-0g0g-0g0g', rating: 4, comment: 'Sixth Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0h0h0h-0h0h-0h0h', rating: 4, comment: 'Seventh Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0i0i0i-0i0i-0i0i', rating: 4, comment: 'Eighth Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0j0j0j-0j0j-0j0j', rating: 4, comment: 'Ninth Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0k0k0k-0k0k-0k0k', rating: 4, comment: 'Tenth Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0l0l0l-0l0l-0l0l', rating: 3, comment: 'Eleventh Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0m0m0m-0m0m-0m0m', rating: 3, comment: 'Twelveth Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0n0n0n-0n0n-0n0n', rating: 3, comment: 'Thirteenth Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0o0o0o-0o0o-0o0o', rating: 3, comment: 'Fourteenth Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0p0p0p-0p0p-0p0p', rating: 3, comment: 'Fifteenth Non-Zero Rating', review_date: new Date() }
+      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0d0d0d-0d0d-0d0d', rating: 5, comment: 'Third Non-Zero Rating', review_date: new Date() }
     ]);
 
     await addReviewAndAssert();
@@ -155,10 +131,7 @@ describe('addReviewFeedback function', () => {
     await ReviewFeedback.insertMany([
       { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0a0a0a-0a0a-0a0a', rating: 0, comment: 'First Zero Rating', review_date: new Date() },
       { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0b0b0b-0b0b-0b0b', rating: 5, comment: 'First Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0c0c0c-0c0c-0c0c', rating: 5, comment: 'Second Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0d0d0d-0d0d-0d0d', rating: 5, comment: 'Third Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0e0e0e-0e0e-0e0e', rating: 5, comment: 'Fourth Non-Zero Rating', review_date: new Date() },
-      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0f0f0f-0f0f-0f0f', rating: 5, comment: 'Fifth Non-Zero Rating', review_date: new Date() }
+      { review_receiver_id: '0e0e0e-0e0e-0e0e', review_giver_id: '0c0c0c-0c0c-0c0c', rating: 5, comment: 'Second Non-Zero Rating', review_date: new Date() }
     ]);
 
     await addReviewAndAssert();
