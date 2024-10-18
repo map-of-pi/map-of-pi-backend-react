@@ -33,13 +33,13 @@ const computeRatings = async (user_settings_id: string) => {
     // Determine the value based on the percentage of zero ratings
     let value;
     switch (true) {
-      case (zeroRatingsPercentage < 2):
+      case (zeroRatingsPercentage <= 5):
         value = 100;
         break;
-      case (zeroRatingsPercentage >= 2 && zeroRatingsPercentage < 5):
+      case (zeroRatingsPercentage > 5 && zeroRatingsPercentage <= 10):
         value = 80;
         break;
-      case (zeroRatingsPercentage >= 5 && zeroRatingsPercentage < 10):
+      case (zeroRatingsPercentage > 10 && zeroRatingsPercentage <= 20):
         value = 50;
         break;
       default:
