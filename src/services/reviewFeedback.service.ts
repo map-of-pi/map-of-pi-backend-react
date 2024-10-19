@@ -4,6 +4,7 @@ import UserSettings from "../models/UserSettings";
 import { IReviewFeedback, IUser, IReviewFeedbackOutput } from "../types";
 
 import logger from "../config/loggingConfig";
+import User from "../models/User";
 
 /**
   The value is set depending on the number of zero(0) ratings in the ReviewFeedback table where this user is review-receiver. 
@@ -59,21 +60,35 @@ const computeRatings = async (user_settings_id: string) => {
   }
 };
 
+interface CompleteFeedback {
+  givenReviews: IReviewFeedbackOutput[];
+  receivedReviews: IReviewFeedbackOutput[];
+}
+
 export const getReviewFeedback = async (
   review_receiver_id: string, 
   searchQuery?: string 
-): Promise<IReviewFeedbackOutput[]> => {
+): Promise<CompleteFeedback | null> => {
   try {
-    const reviewFeedbackList = await ReviewFeedback.find({
-      $or: [
-        { review_receiver_id: review_receiver_id },
-        { review_giver_id: review_receiver_id }
-      ]
+    //condition to search by username
+    if (searchQuery && searchQuery.trim()) {
+      const user = await User.findOne({pi_username:searchQuery});
+      if(!user){
+        return null;
+      }
+      review_receiver_id = user.pi_uid;
+    }
+
+    const receivedFeedbackList = await ReviewFeedback.find({
+      review_receiver_id: review_receiver_id
     }).sort({ review_date: -1 }).exec();
 
+    const givenFeedbackList = await ReviewFeedback.find({
+      review_giver_id: review_receiver_id
+    }).sort({ review_date: -1 }).exec();
     // Update each reviewFeedback item with the reviewer's and receiver's username
-    const updatedReviewFeedbackList = await Promise.all(
-      reviewFeedbackList.map(async (reviewFeedback) => {
+    const updatedReceivedFeedbackList = await Promise.all(
+      receivedFeedbackList.map(async (reviewFeedback) => {
         // Retrieve user details for both giver and receiver
         const reviewer = await getUser(reviewFeedback.review_giver_id);
         const receiver = await getUser(reviewFeedback.review_receiver_id);
@@ -86,20 +101,23 @@ export const getReviewFeedback = async (
       })
     );
 
-    // Filter reviews only if searchQuery is provided and not empty
-    if (searchQuery && searchQuery.trim()) {
-      const filteredReviews = updatedReviewFeedbackList.filter(
-        (reviewFeedback) => {
-          const { giver, receiver } = reviewFeedback;
-          return (
-            giver.toLowerCase().includes(searchQuery.toLowerCase()) || 
-            receiver.toLowerCase().includes(searchQuery.toLowerCase())
-          );
-        }
-      );
-      return filteredReviews as IReviewFeedbackOutput[];
-    }
-    return updatedReviewFeedbackList as IReviewFeedbackOutput[];
+    const updatedGivenFeedbackList = await Promise.all(
+      givenFeedbackList.map(async (reviewFeedback) => {
+        // Retrieve user details for both giver and receiver
+        const reviewer = await getUser(reviewFeedback.review_giver_id);
+        const receiver = await getUser(reviewFeedback.review_receiver_id);
+
+        const giverName = reviewer ? reviewer.user_name : '';
+        const receiverName = receiver ? receiver.user_name : '';
+
+        // Return the updated review feedback object
+        return { ...reviewFeedback.toObject(), giver: giverName, receiver: receiverName };
+      })
+    );
+    return {
+      givenReviews: updatedGivenFeedbackList,
+      receivedReviews: updatedReceivedFeedbackList
+    } as CompleteFeedback;
 
   } catch (error: any) {
     logger.error(`Failed to retrieve reviews for reviewReceiverID ${review_receiver_id}:`, { 
