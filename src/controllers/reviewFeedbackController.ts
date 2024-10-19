@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 
 import * as reviewFeedbackService from "../services/reviewFeedback.service";
 import { uploadImage } from "../services/misc/image.service";
-import { IReviewFeedbackOutput } from "../types";
 
 import logger from "../config/loggingConfig";
 

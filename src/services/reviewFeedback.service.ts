@@ -67,7 +67,9 @@ export const getReviewFeedback = async (
   try {
     //condition to search by username
     if (searchQuery && searchQuery.trim()) {
-      const user = await User.findOne({pi_username:searchQuery});
+      const user = await User.findOne({
+        pi_username: searchQuery
+      });
       if (!user) {
         return null;
       }
