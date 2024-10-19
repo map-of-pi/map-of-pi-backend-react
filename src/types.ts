@@ -50,6 +50,11 @@
     review_date: Date;
   }
 
+  export interface CompleteFeedback {
+    givenReviews: IReviewFeedbackOutput[];
+    receivedReviews: IReviewFeedbackOutput[];
+  }
+
   export interface IMapCenter {
     type: 'Point';
     coordinates: [number, number];

@@ -1,7 +1,7 @@
 import { getUser } from "./user.service";
 import ReviewFeedback from "../models/ReviewFeedback";
 import UserSettings from "../models/UserSettings";
-import { IReviewFeedback, IUser, IReviewFeedbackOutput } from "../types";
+import { IReviewFeedback, IUser, IReviewFeedbackOutput, CompleteFeedback } from "../types";
 
 import logger from "../config/loggingConfig";
 import User from "../models/User";
@@ -60,11 +60,6 @@ const computeRatings = async (user_settings_id: string) => {
   }
 };
 
-interface CompleteFeedback {
-  givenReviews: IReviewFeedbackOutput[];
-  receivedReviews: IReviewFeedbackOutput[];
-}
-
 export const getReviewFeedback = async (
   review_receiver_id: string, 
   searchQuery?: string 
@@ -73,7 +68,7 @@ export const getReviewFeedback = async (
     //condition to search by username
     if (searchQuery && searchQuery.trim()) {
       const user = await User.findOne({pi_username:searchQuery});
-      if(!user){
+      if (!user) {
         return null;
       }
       review_receiver_id = user.pi_uid;
@@ -86,7 +81,7 @@ export const getReviewFeedback = async (
     const givenFeedbackList = await ReviewFeedback.find({
       review_giver_id: review_receiver_id
     }).sort({ review_date: -1 }).exec();
-    // Update each reviewFeedback item with the reviewer's and receiver's username
+
     const updatedReceivedFeedbackList = await Promise.all(
       receivedFeedbackList.map(async (reviewFeedback) => {
         // Retrieve user details for both giver and receiver
