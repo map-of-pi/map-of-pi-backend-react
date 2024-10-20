@@ -1,4 +1,4 @@
-import { saveMapCenter, getMapCenter } from '../../src/controllers/mapCenterController';
+import { saveMapCenter } from '../../src/controllers/mapCenterController';
 import * as mapCenterService from '../../src/services/mapCenter.service';
 
 jest.mock('../../src/services/mapCenter.service', () => ({
