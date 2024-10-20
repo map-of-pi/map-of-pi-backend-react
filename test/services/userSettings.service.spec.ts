@@ -1,123 +1,57 @@
-import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
-
 import { addOrUpdateUserSettings } from '../../src/services/userSettings.service';
 import User from '../../src/models/User';
-import UserSettings from '../../src/models/UserSettings';
 import { DeviceLocationType } from '../../src/models/enums/deviceLocationType';
 import { IUser, IUserSettings } from '../../src/types';
 
-let mongoServer: MongoMemoryServer;
-
-const mockUser = {
-  pi_uid: '123-456-7890',
-  pi_username: 'TestUser',
-} as IUser;
-
 const formData = {
-  user_name: 'Test User',
+  user_name: 'test-user-1-updated',
   email: 'example-new@test.com',
   phone_number: '123-456-7890',
   image: 'http://example.com/image_new.jpg',
   findme: DeviceLocationType.GPS,
   search_map_center: { type: 'Point', coordinates: [-83.856077, 50.848447] }
-} as IUserSettings;
-
-const existingUserSettingsData: Partial<IUserSettings> = {
-  user_settings_id: mockUser.pi_uid,
-  user_name: 'Existing Test User',
-  email: 'example-existing@test.com',
-  phone_number: '987-654-3210',
-  image: 'http://example.com/image-existing.jpg',
-  findme: DeviceLocationType.SearchCenter,
-  search_map_center: { type: 'Point', coordinates: [-83.856077, 50.848447] }
-};
-
-beforeAll(async () => {
-  try {
-    mongoServer = await MongoMemoryServer.create();
-    const uri = mongoServer.getUri();
-    await mongoose.connect(uri, { dbName: 'test' });
-  } catch (error) {
-    console.error('Failed to start MongoMemoryServer', error);
-    throw error;
-  }
-});
-
-afterAll(async () => {
-  await mongoose.disconnect();
-  await mongoServer.stop();
-});
+}
 
 describe('addOrUpdateUserSettings function', () => {
   it('should add new user settings when user_name is not empty', async () => {
-    jest.spyOn(UserSettings, 'findOne').mockReturnValue({
-      exec: jest.fn().mockResolvedValue(null) // Return null to simulate no existing user settings
-    } as any);
+    const userData = await User.findOne({ pi_username: 'TestUser1' }) as IUser;
 
-    // mock the save function to return the newly created user settings
-    const mockSave = jest.fn().mockResolvedValue({
-      ...formData,
-      user_settings_id: mockUser.pi_uid
-    })
-    jest.spyOn(UserSettings.prototype, 'save').mockImplementation(mockSave);
-
-    const result = await addOrUpdateUserSettings(mockUser, formData, formData.image ?? '');
+    const userSettingsData = await addOrUpdateUserSettings(userData, formData, formData.image ?? '');
     
-    expect(result).toHaveProperty('user_settings_id', mockUser.pi_uid); 
-    expect(result).toHaveProperty('user_name', formData.user_name);
-    expect(result).toHaveProperty('email', formData.email);
-    expect(result).toHaveProperty('phone_number', formData.phone_number);
-    expect(result).toHaveProperty('image', formData.image);
-    expect(result).toHaveProperty('findme', formData.findme);
-    expect(result).toHaveProperty('search_map_center', formData.search_map_center);
+    expect(userSettingsData).toEqual(expect.objectContaining({
+      user_settings_id: userData.pi_uid,
+      user_name: formData.user_name,
+      email: formData.email,
+      phone_number: formData.phone_number,
+      image: formData.image,
+      findme: formData.findme,
+      search_map_center: formData.search_map_center
+    }));
   });
 
   it('should add new user settings when user_name is empty', async () => {
-    jest.spyOn(UserSettings, 'findOne').mockReturnValue({
-      exec: jest.fn().mockResolvedValue(null) // Return null to simulate no existing user settings
-    } as any);
-    
-    const mockFindOneAndUpdate = jest.spyOn(User, 'findOneAndUpdate').mockReturnValue({
-      exec: jest.fn().mockResolvedValue({user_name: mockUser.pi_username}) 
-    } as any);
+    const userData = await User.findOne({ pi_username: 'TestUser1' }) as IUser;
 
-    // mock the save function to return the newly created user settings
-    const mockSave = jest.fn().mockResolvedValue({
-      ...formData,
-      user_settings_id: mockUser.pi_uid,
-      user_name: mockUser.pi_username
-    })
-
-    jest.spyOn(UserSettings.prototype, 'save').mockImplementation(mockSave);
-
-    const result = await addOrUpdateUserSettings(
-    mockUser, { 
+    const userSettingsData = await addOrUpdateUserSettings(
+    userData, { 
       ...formData, user_name: ""
     } as IUserSettings, formData.image ?? '');
-    
-    expect(mockFindOneAndUpdate).toHaveBeenCalledWith(
-      { pi_uid: mockUser.pi_uid },
-      { user_name: mockUser.pi_username },
-      { new: true }
-    );
 
-    expect(result).toHaveProperty('user_settings_id', mockUser.pi_uid); 
-    expect(result).toHaveProperty('user_name', mockUser.pi_username);
-    expect(result).toHaveProperty('email', formData.email);
-    expect(result).toHaveProperty('phone_number', formData.phone_number);
-    expect(result).toHaveProperty('image', formData.image);
-    expect(result).toHaveProperty('findme', formData.findme);
-    expect(result).toHaveProperty('search_map_center', formData.search_map_center);
+    expect(userSettingsData).toEqual(expect.objectContaining({
+      user_settings_id: userData.pi_uid,
+      user_name: userData.pi_username,
+      email: formData.email,
+      phone_number: formData.phone_number,
+      image: formData.image,
+      findme: formData.findme,
+      search_map_center: formData.search_map_center
+    }));
   });
 
   it('should update existing user settings', async () => {
-    jest.spyOn(UserSettings, 'findOne').mockReturnValue({
-      exec: jest.fn().mockResolvedValue(existingUserSettingsData)
-    } as any);
+    const userData = await User.findOne({ pi_username: 'TestUser1' }) as IUser;
 
     const updatedUserSettingsData = {
-      ...existingUserSettingsData,
       user_name: formData.user_name,
       email: formData.email,
       phone_number: formData.phone_number,
@@ -126,18 +60,16 @@ describe('addOrUpdateUserSettings function', () => {
       search_map_center: formData.search_map_center
     } as IUserSettings;
 
-    jest.spyOn(UserSettings, 'findOneAndUpdate').mockReturnValue({
-      exec: jest.fn().mockResolvedValue(updatedUserSettingsData)
-    } as any);
+    const userSettingsData = await addOrUpdateUserSettings(userData, updatedUserSettingsData, updatedUserSettingsData.image ?? '');
 
-    const result = await addOrUpdateUserSettings(mockUser, updatedUserSettingsData, updatedUserSettingsData.image ?? '');
-
-    expect(result).toHaveProperty('user_settings_id', mockUser.pi_uid);
-    expect(result).toHaveProperty('user_name', updatedUserSettingsData.user_name);
-    expect(result).toHaveProperty('email', updatedUserSettingsData.email);
-    expect(result).toHaveProperty('phone_number', updatedUserSettingsData.phone_number);
-    expect(result).toHaveProperty('image', updatedUserSettingsData.image);
-    expect(result).toHaveProperty('findme', updatedUserSettingsData.findme);
-    expect(result).toHaveProperty('search_map_center', updatedUserSettingsData.search_map_center);
+    expect(userSettingsData).toEqual(expect.objectContaining({
+      user_settings_id: userData.pi_uid,
+      user_name: updatedUserSettingsData.user_name,
+      email: updatedUserSettingsData.email,
+      phone_number: updatedUserSettingsData.phone_number,
+      image: updatedUserSettingsData.image,
+      findme: updatedUserSettingsData.findme,
+      search_map_center: updatedUserSettingsData.search_map_center
+    }));
   });
 });

@@ -1,38 +1,80 @@
 components:
   schemas:
     GetReviewsRs:
-      type: array
-      items:
-        type: object
-        properties:
-          _id:
-            type: string
-            example: 6674ecee2ac4de0d31e8c048
-          review_receiver_id:
-            type: string
-            example: test_review_receiver_id
-          review_giver_id:
-            type: string
-            example: test_review_giver_id
-          reply_to_review_id:
-            type: string
-            example: test_reply_to_review_id
-          rating:
-            $ref: '/api/docs/enum/RatingScale.yml#/components/schemas/RatingScale'
-          comment:
-            type: string
-            example: test comment
-          image:
-            type: string
-            format: binary
-            example: http://example.com/image.jpg
-          review_date:
-            type: string
-            format: date-time
-            example: 2024-06-20T00:00:00.000Z
-          __v:
-            type: number
-            example: 0
+      type: object
+      properties:
+        givenReviews:
+          type: array
+          items:
+            type: object
+            properties:
+              _id:
+                type: string
+                example: 6674ecee2ac4de0d31e8c048
+              review_receiver_id:
+                type: string
+                example: 409fdceb-2824-4b62-baad-684efc5d6aaa
+              review_giver_id:
+                type: string
+                example: a59c9e26-a6f0-471c-98f6-d14a1978eabb
+              reply_to_review_id:
+                type: string
+                example: 670ae8c3b26e067dead30750
+              giver:
+                type: string
+                example: test_giver
+              receiver:
+                type: string
+                example: test_receiver
+              rating:
+                $ref: '/api/docs/enum/RatingScale.yml#/components/schemas/RatingScale'
+              comment:
+                type: string
+                example: test comment
+              image:
+                type: string
+                format: binary
+                example: http://example.com/image.jpg
+              review_date:
+                type: string
+                format: date-time
+                example: 2024-06-20T00:00:00.000Z
+        receivedReviews:
+          type: array
+          items:
+            type: object
+            properties:
+              _id:
+                type: string
+                example: 6712038d469fb839b610151f
+              review_receiver_id:
+                type: string
+                example: a59c9e26-a6f0-471c-98f6-d14a1978eabb
+              review_giver_id:
+                type: string
+                example: 409fdceb-2824-4b62-baad-684efc5d6aaa
+              reply_to_review_id:
+                type: string
+                example: 6708212c008b4344d6be5b1a
+              giver:
+                type: string
+                example: test_giver
+              receiver:
+                type: string
+                example: test_receiver
+              rating:
+                $ref: '/api/docs/enum/RatingScale.yml#/components/schemas/RatingScale'
+              comment:
+                type: string
+                example: test comment
+              image:
+                type: string
+                format: binary
+                example: http://example.com/image.jpg
+              review_date:
+                type: string
+                format: date-time
+                example: 2024-07-20T00:00:00.000Z
 
     GetSingleReviewRs:
       type: object
@@ -42,13 +84,13 @@ components:
           example: 6674ecee2ac4de0d31e8c048
         review_receiver_id:
           type: string
-          example: test_review_receiver_id
+          example: a59c9e26-a6f0-471c-98f6-d14a1978eabb
         review_giver_id:
           type: string
-          example: test_review_giver_id
+          example: 409fdceb-2824-4b62-baad-684efc5d6aaa
         reply_to_review_id:
           type: string
-          example: test_reply_to_review_id
+          example: 6708212c008b4344d6be5b1a
         rating:
           $ref: '/api/docs/enum/RatingScale.yml#/components/schemas/RatingScale'
         comment:
@@ -71,13 +113,13 @@ components:
       properties:
         review_receiver_id:
           type: string
-          example: test_review_receiver_id
+          example: a59c9e26-a6f0-471c-98f6-d14a1978eabb
         review_giver_id:
           type: string
-          example: test_review_giver_id
+          example: 409fdceb-2824-4b62-baad-684efc5d6aaa
         reply_to_review_id:
           type: string
-          example: test_reply_to_review_id
+          example: 6708212c008b4344d6be5b1a
         rating:
           $ref: '/api/docs/enum/RatingScale.yml#/components/schemas/RatingScale'
         comment:
@@ -96,13 +138,13 @@ components:
           properties:
             review_receiver_id:
               type: string
-              example: test_review_receiver_id
+              example: a59c9e26-a6f0-471c-98f6-d14a1978eabb
             review_giver_id:
               type: string
-              example: test_review_giver_id
+              example: 409fdceb-2824-4b62-baad-684efc5d6aaa
             reply_to_review_id:
               type: string
-              example: test_reply_to_review_id
+              example: 6708212c008b4344d6be5b1a
             rating:
               $ref: '/api/docs/enum/RatingScale.yml#/components/schemas/RatingScale'
             comment:
