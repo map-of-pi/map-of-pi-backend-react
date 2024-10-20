@@ -49,7 +49,7 @@ const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSet
   return sellersWithSettings;
 };
 
-// Fetch all sellers or within a specific radius from a given origin; optional search query.
+// Fetch all sellers or within a specific bounding box; optional search query.
 export const getAllSellers = async (
   bounds?: { sw_lat: number, sw_lng: number, ne_lat: number, ne_lng: number },
   search_query?: string
@@ -57,7 +57,7 @@ export const getAllSellers = async (
 
   try {
     let sellers: ISeller[];
-    const limit = 36;
+    const maxNumSellers = 36;
 
     // always apply this condition to exclude 'Inactive sellers'
     const baseCriteria = { seller_type: { $ne: SellerType.Inactive } };
@@ -82,20 +82,20 @@ export const getAllSellers = async (
         sell_map_center: {
           $geoWithin: {
             $box: [
-            [bounds.sw_lng, bounds.sw_lat],
-            [bounds.ne_lng, bounds.ne_lat]
+              [bounds.sw_lng, bounds.sw_lat],
+              [bounds.ne_lng, bounds.ne_lat]
             ]
           }
         }
       })
-        .sort({ review_count: -1, updated_at: -1 }) // Sort by review count and last update
-        .limit(limit) // Limit result to 36 sellers
+        .sort({ review_count: -1, updated_at: -1 }) // Sort by review count and last updated
+        .limit(maxNumSellers)
         .exec();
       } else {
         // If no bounds are provided, return all sellers (without geo-filtering)  
         sellers = await Seller.find(aggregatedCriteria)
           .sort({ review_count: -1, updated_at: -1 })
-          .limit(limit)
+          .limit(maxNumSellers)
           .exec();
       }
 
