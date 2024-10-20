@@ -1,8 +1,83 @@
-import { addReviewFeedback, getReviewFeedbackById } from '../../src/services/reviewFeedback.service';
+import { addReviewFeedback, getReviewFeedback, getReviewFeedbackById } from '../../src/services/reviewFeedback.service';
 import ReviewFeedback from '../../src/models/ReviewFeedback';
 import User from '../../src/models/User';
-import { IReviewFeedback, IUser } from '../../src/types';
 import UserSettings from '../../src/models/UserSettings';
+import { IReviewFeedback, IUser } from '../../src/types';
+
+describe('getReviewFeedback function', () => {
+  // Helper function to convert Mongoose documents to plain objects
+  const convertToPlainObjects = async (reviews: IReviewFeedback[]): Promise<any[]> => {
+    return await Promise.all(reviews.map(async (review) => {
+      const reviewer = await User.findOne({ pi_uid: review.review_giver_id });
+      const receiver = await User.findOne({ pi_uid: review.review_receiver_id });
+      
+      return {
+        ...review.toObject(),
+        giver: reviewer ? reviewer.user_name : '',
+        receiver: receiver ? receiver.user_name : '',
+      };
+    }));
+  };
+
+  it('should return associated reviews if search query is not provided', async () => {
+    const reviewsReceivedData = await ReviewFeedback.find({
+      review_receiver_id: '0a0a0a-0a0a-0a0a'
+    }).sort({ review_date: -1 }).exec() as IReviewFeedback[];
+
+    const reviewsGivenData = await ReviewFeedback.find({
+      review_giver_id: '0a0a0a-0a0a-0a0a'
+    }).sort({ review_date: -1 }).exec() as IReviewFeedback[];
+    
+    const result = await getReviewFeedback('0a0a0a-0a0a-0a0a', '');
+
+    // Convert Mongoose documents to plain objects
+    const plainReviewsReceivedData = await convertToPlainObjects(reviewsReceivedData);
+    const plainReviewsGivenData = await convertToPlainObjects(reviewsGivenData);
+
+    expect(result).toEqual({
+      receivedReviews: plainReviewsReceivedData,
+      givenReviews: plainReviewsGivenData
+    });
+  });
+
+  it('should return associated reviews if search query is provided', async () => {
+    const usersData = await User.findOne({
+      pi_username: "TestUser2"
+    });
+    
+    const reviewsReceivedData = await ReviewFeedback.find({
+      review_receiver_id: usersData?.pi_uid
+    }).sort({ review_date: -1 }).exec() as IReviewFeedback[];
+
+    const reviewsGivenData = await ReviewFeedback.find({
+      review_giver_id: usersData?.pi_uid
+    }).sort({ review_date: -1 }).exec() as IReviewFeedback[];
+    
+    const result = await getReviewFeedback('0a0a0a-0a0a-0a0a', 'TestUser2');
+
+    const plainReviewsReceivedData = await convertToPlainObjects(reviewsReceivedData);
+    const plainReviewsGivenData = await convertToPlainObjects(reviewsGivenData);
+
+    expect(result).toEqual({
+      receivedReviews: plainReviewsReceivedData,
+      givenReviews: plainReviewsGivenData
+    });
+  });
+
+  it('should return no reviews if search query is provided but user is not found', async () => {
+    const result = await getReviewFeedback('receiver-id', '0?0?0?-0?0?-0?0?');
+
+    expect(result).toBeNull();
+  });
+
+  it('should throw error if reviews cannot be fetched successfully due to processing failure', async () => {   
+    jest.spyOn(ReviewFeedback, 'find').mockImplementationOnce(() => {
+      throw new Error('Mock database error');
+    });
+
+    await expect(getReviewFeedback('0a0a0a-0a0a-0a0a', '')).rejects.toThrow('Failed to retrieve reviews; please try again later');
+  });
+});
 
 describe('getReviewFeedbackById function', () => {
   it('should return the main review and its associated replies', async () => {

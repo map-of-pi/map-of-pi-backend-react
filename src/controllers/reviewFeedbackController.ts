@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 
 import * as reviewFeedbackService from "../services/reviewFeedback.service";
 import { uploadImage } from "../services/misc/image.service";
-import { IReviewFeedbackOutput } from "../types";
 
 import logger from "../config/loggingConfig";
 
@@ -12,13 +11,13 @@ export const getReviews = async (req: Request, res: Response) => {
 
   try {
     // Call the service with the review_receiver_id and searchQuery
-    const currentReviews: IReviewFeedbackOutput[] | null = await reviewFeedbackService.getReviewFeedback(
+    const completeReviews = await reviewFeedbackService.getReviewFeedback(
       review_receiver_id, 
       searchQuery as string
     );
 
     logger.info(`Retrieved reviews for receiver ID ${review_receiver_id} with search query "${searchQuery ?? 'none'}"`);
-    return res.status(200).json(currentReviews);
+    return res.status(200).json(completeReviews);
   } catch (error: any) {
     logger.error(`Failed to get reviews for receiverID ${review_receiver_id}:`, { 
       message: error.message,

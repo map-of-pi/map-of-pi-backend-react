@@ -166,6 +166,15 @@
       "comment": "0e0e0e-0e0e-0e0e Test Reply Comment",
       "rating": 5,
       "review_date": "2024-10-17T00:00:00.000Z"
+    },
+    {
+      "_id": "64f5a0f2a86d1f9f3b7e4e85",
+      "review_receiver_id": "0b0b0b-0b0b-0b0b",
+      "review_giver_id": "0a0a0a-0a0a-0a0a",
+      "reply_to_review_id": null,
+      "comment": "0a0a0a-0a0a-0a0a Test Reply Comment",
+      "rating": 2,
+      "review_date": "2024-10-18T00:00:00.000Z"
     }
   ]
 }
