@@ -3,18 +3,21 @@ components:
     GetAllSellersRq:
       type: object
       properties:
-        origin:
+        bounds:
           type: object
           properties:
-            lng:
-              type: number
-              example: -74.0060
-            lat:
+            sw_lat:
               type: number
               example: 40.7128
-        radius:
-          type: number
-          example: 15
+            sw_lng:
+              type: number
+              example: -74.0060
+            ne_lat:
+              type: number
+              example: 40.9138
+            ne_lng:
+              type: number
+              example: -73.8055
         search_query:
           type: string
           example: test

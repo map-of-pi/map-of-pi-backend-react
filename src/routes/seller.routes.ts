@@ -23,7 +23,7 @@ import upload from "../utils/multer";
  *           description: Description of the seller
  *         seller_type:
  *           type: string
- *           description: Type of the seller (active, inactive, test, other) // Update description here
+ *           description: Type of the seller
  *           enum:
  *             - active
  *             - inactive
@@ -68,7 +68,7 @@ const sellerRoutes = Router();
  *   post:
  *     tags:
  *       - Seller
- *     summary: Fetch all sellers within given coordinates, radius, and search criteria, or all sellers if no parameters are not provided
+ *     summary: Fetch all sellers within the visible map area (bounding box) | sorted by reviews with a maximum of 36 sellers.
  *     requestBody:
  *       content:
  *         application/json:
