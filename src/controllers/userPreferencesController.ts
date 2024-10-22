@@ -90,21 +90,24 @@ export const deleteUserPreferences = async (req: Request, res: Response) => {
 };
 
 export const getUserLocation = async (req: Request, res: Response) => {
-  let origin: { lat: number; lng: number };
+  let location: { lat: number; lng: number } | null;
   
-  // Default map center (example: New York City)
-  const defaultMapCenter: { lat: number; lng: number } = { lat: 20, lng: -74.006 };
   try {
     const authUser = req.currentUser;
-    const radius = 15;
-    if (authUser) {
-      let location = await userSettingsService.userLocation(authUser?.pi_uid); 
-      origin = location? location: defaultMapCenter;
-      logger.info('Origin from backend:', origin)
-    } else {
-      origin = defaultMapCenter;
+    const zoom = 13;
+    if (!authUser?.pi_uid) {
+      logger.warn(`User not unthenticated`);
+      return res.status(401).json({ message: "User not unthenticated" });      
     }
-    return res.status(200).json({ origin: origin, radius: radius });
+
+    location = await userSettingsService.userLocation(authUser.pi_uid);
+    if (!location) {
+      logger.warn(`Location not found for user ID: ${authUser.pi_uid}`);
+      return res.status(404).json({ message: "Location not found for user ID: " + authUser.pi_uid });      
+    }
+    logger.info('user loaction from backend:', location)
+    return res.status(200).json({ origin: location, zoom: zoom });
+
   } catch (error: any) {
     logger.error(`Failed to get user location for piUID ${ req.currentUser?.pi_uid }:`, {
       message: error.message,

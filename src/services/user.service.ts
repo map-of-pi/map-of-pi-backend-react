@@ -2,7 +2,7 @@ import User from "../models/User";
 import Seller from "../models/Seller";
 import UserSettings from "../models/UserSettings";
 import { ISeller, IUser, IUserSettings } from "../types";
-
+import { getLocationByIP } from "./userSettings.service";
 import logger from "../config/loggingConfig";
 
 export const authenticate = async (currentUser: IUser): Promise<IUser> => {
@@ -21,9 +21,15 @@ export const authenticate = async (currentUser: IUser): Promise<IUser> => {
         pi_username: currentUser.pi_username,
         user_name: currentUser.user_name
       });
-      const uerSettings = await UserSettings.create({
-        user_settings_id: currentUser.pi_uid
-      })
+      const IP_coordinates = await getLocationByIP();
+      const uerSettings = IP_coordinates ? 
+        await UserSettings.create({
+          user_settings_id: currentUser.pi_uid,
+          search_map_center: {point: 'Point', coordinates:IP_coordinates}
+        }) : 
+        await UserSettings.create({
+          user_settings_id: currentUser.pi_uid,
+        })
       
       return newUser;
     }
