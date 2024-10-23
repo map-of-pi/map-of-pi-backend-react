@@ -1,7 +1,7 @@
 import UserSettings from "../models/UserSettings";
 import User from "../models/User";
-import { IUser, IUserSettings } from "../types";
 import { DeviceLocationType } from "../models/enums/deviceLocationType";
+import { IUser, IUserSettings } from "../types";
 
 import logger from "../config/loggingConfig";
 
@@ -124,10 +124,8 @@ export const getDeviceLocation = async (): Promise<{ lat: number; lng: number } 
       logger.warn("GPS location error:", (error as GeolocationPositionError).message);
       // Fall back to IP-based geolocation
     }
-  } else {
-    
   }
-  logger.warn("unable to get device location by GPS");
+  logger.warn("Unable to get device location by GPS");
   return null; 
 };
 
@@ -140,7 +138,7 @@ export const getLocationByIP = async (): Promise<{ lat: number; lng: number } | 
     if (data.latitude && data.longitude) {
       return { lat: data.latitude, lng: data.longitude };
     }
-    logger.warn("new user search center from IP is null")
+    logger.warn("New user search center from IP is null")
     return null
   } catch (error: any) {
     logger.warn('Failed to retrieve location by IP: ' + error.message)

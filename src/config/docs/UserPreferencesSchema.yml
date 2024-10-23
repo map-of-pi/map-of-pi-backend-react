@@ -203,9 +203,9 @@ components:
           required:
             - lat
             - lng
-        radius:
+        zoom:
           type: number
           example: 10
       required:
         - origin
-        - radius
+        - zoom
