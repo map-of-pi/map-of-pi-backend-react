@@ -12,31 +12,31 @@ components:
             search_map_center:
               type: object
               properties:
-                longitude:
-                  type: number
-                  example: -74.0060
                 latitude:
                   type: number
                   example: 40.7128
+                longitude:
+                  type: number
+                  example: -74.0060
             sell_map_center:
               type: object
               properties:
-                longitude:
-                  type: number
-                  example: -118.2437
                 latitude:
                   type: number
                   example: 34.0522
+                longitude:
+                  type: number
+                  example: -118.2437
 
     SaveMapCenterRq:
       type: object
       properties:
-        longitude:
-          type: number
-          example: -74.0060
         latitude:
           type: number
           example: 40.7128
+        longitude:
+          type: number
+          example: -74.0060
         type:
           type: string
           enum:
@@ -53,18 +53,18 @@ components:
         search_map_center:
           type: object
           properties:
-            longitude:
-              type: number
-              example: -74.0060
             latitude:
               type: number
               example: 40.7128
+            longitude:
+              type: number
+              example: -74.0060
         sell_map_center:
           type: object
           properties:
-            longitude:
-              type: number
-              example: -118.2437
             latitude:
               type: number
               example: 34.0522
+            longitude:
+              type: number
+              example: -118.2437
