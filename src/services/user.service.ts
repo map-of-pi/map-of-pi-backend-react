@@ -14,7 +14,6 @@ export const authenticate = async (currentUser: IUser): Promise<IUser> => {
 
     if (user) {
       return user;
-    //  TODO: Revisit and review this implementation; seems contrary to authentication.
     } else {
       const newUser = await User.create({
         pi_uid: currentUser.pi_uid,
@@ -22,13 +21,16 @@ export const authenticate = async (currentUser: IUser): Promise<IUser> => {
         user_name: currentUser.user_name
       });
       const IP_coordinates = await getLocationByIP();
-      const uerSettings = IP_coordinates ? 
+      
+      IP_coordinates ? 
         await UserSettings.create({
           user_settings_id: currentUser.pi_uid,
-          search_map_center: {point: 'Point', coordinates:IP_coordinates}
+          user_name: currentUser.user_name,
+          search_map_center: { point: 'Point', coordinates: [IP_coordinates.lat, IP_coordinates.lng] }
         }) : 
         await UserSettings.create({
           user_settings_id: currentUser.pi_uid,
+          user_name: currentUser.user_name,
         })
       
       return newUser;
