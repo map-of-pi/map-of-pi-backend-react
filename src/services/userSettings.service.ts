@@ -162,7 +162,7 @@ export const userLocation = async (uid: string): Promise<{ lat: number; lng: num
       // set to search center if GPS not available
       if (!location && userSettings.search_map_center?.coordinates){
         const searchCenter = userSettings.search_map_center.coordinates;
-        location = { lat: searchCenter[0], lng: searchCenter[1] };
+        location = { lng: searchCenter[0], lat: searchCenter[1] };
         logger.warn(`[Search-Center] from auto findme ${location}`)
       }
       logger.warn(`[No] from auto findme ${location}`)
@@ -188,7 +188,7 @@ export const userLocation = async (uid: string): Promise<{ lat: number; lng: num
 
   if (userSettings.findme === DeviceLocationType.SearchCenter && userSettings.search_map_center?.coordinates) {
     const searchCenter = userSettings.search_map_center.coordinates;
-    const location = { lat: searchCenter[0], lng: searchCenter[1] };
+    const location = { lng: searchCenter[0], lat: searchCenter[1] };
     logger.info("User location from search center:", location);
     return location as { lat: number; lng: number };
   }

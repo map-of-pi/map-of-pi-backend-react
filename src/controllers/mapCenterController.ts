@@ -15,8 +15,8 @@ export const saveMapCenter = async (req: Request, res: Response) => {
     }
 
     const map_center_id = authUser.pi_uid;
-    const { longitude, latitude, type } = req.body;
-    const mapCenter = await mapCenterService.createOrUpdateMapCenter(map_center_id, longitude, latitude, type);
+    const { latitude, longitude, type } = req.body;
+    const mapCenter = await mapCenterService.createOrUpdateMapCenter(map_center_id, latitude, longitude, type);
     logger.info(`${type === 'search' ? 'Search' : 'Sell'} Center saved successfully for user ${map_center_id} with Longitude: ${longitude}, Latitude: ${latitude} `);
     
     return res.status(200).json({uid: map_center_id, map_center: mapCenter});
