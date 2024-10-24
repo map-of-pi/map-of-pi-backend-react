@@ -2,7 +2,7 @@ import User from "../models/User";
 import Seller from "../models/Seller";
 import UserSettings from "../models/UserSettings";
 import { ISeller, IUser, IUserSettings } from "../types";
-
+import { getLocationByIP } from "./userSettings.service";
 import logger from "../config/loggingConfig";
 
 export const authenticate = async (currentUser: IUser): Promise<IUser> => {
@@ -14,16 +14,24 @@ export const authenticate = async (currentUser: IUser): Promise<IUser> => {
 
     if (user) {
       return user;
-    //  TODO: Revisit and review this implementation; seems contrary to authentication.
     } else {
       const newUser = await User.create({
         pi_uid: currentUser.pi_uid,
         pi_username: currentUser.pi_username,
         user_name: currentUser.user_name
       });
-      const uerSettings = await UserSettings.create({
-        user_settings_id: currentUser.pi_uid
-      })
+      const IP_coordinates = await getLocationByIP();
+      
+      IP_coordinates ? 
+        await UserSettings.create({
+          user_settings_id: currentUser.pi_uid,
+          user_name: currentUser.user_name,
+          search_map_center: { point: 'Point', coordinates: [IP_coordinates.lat, IP_coordinates.lng] }
+        }) : 
+        await UserSettings.create({
+          user_settings_id: currentUser.pi_uid,
+          user_name: currentUser.user_name,
+        })
       
       return newUser;
     }

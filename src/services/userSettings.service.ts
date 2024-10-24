@@ -1,5 +1,6 @@
 import UserSettings from "../models/UserSettings";
 import User from "../models/User";
+import { DeviceLocationType } from "../models/enums/deviceLocationType";
 import { IUser, IUserSettings } from "../types";
 
 import logger from "../config/loggingConfig";
@@ -108,7 +109,7 @@ export const deleteUserSettings = async (user_settings_id: string): Promise<IUse
 };
 
 // Get device location, first trying GPS and then falling back to IP-based geolocation
-export const getDeviceLocation = async (): Promise<{ lat: number; lng: number }> => {
+export const getDeviceLocation = async (): Promise<{ lat: number; lng: number } | null> => {
   if (navigator.geolocation) {
     try {
       const position = await new Promise<GeolocationPosition>((resolve, reject) =>
@@ -124,11 +125,12 @@ export const getDeviceLocation = async (): Promise<{ lat: number; lng: number }>
       // Fall back to IP-based geolocation
     }
   }
-  return getLocationByIP(); // Fallback to IP if GPS fails or is not supported
+  logger.warn("Unable to get device location by GPS");
+  return null; 
 };
 
-// Helper function to get location by IP address
-const getLocationByIP = async (): Promise<{ lat: number; lng: number }> => {
+// function to get location by IP address
+export const getLocationByIP = async (): Promise<{ lat: number; lng: number } | null> => {
   try {
     const response = await fetch('https://ipapi.co/json/');
     const data = await response.json();
@@ -136,9 +138,11 @@ const getLocationByIP = async (): Promise<{ lat: number; lng: number }> => {
     if (data.latitude && data.longitude) {
       return { lat: data.latitude, lng: data.longitude };
     }
-    throw new Error('Unable to retrieve location from IP address.');
+    logger.warn("New user search center from IP is null")
+    return null
   } catch (error: any) {
-    throw new Error('Failed to retrieve location by IP: ' + error.message);
+    logger.warn('Failed to retrieve location by IP: ' + error.message)
+    return null
   }
 };
 
@@ -151,20 +155,40 @@ export const userLocation = async (uid: string): Promise<{ lat: number; lng: num
     return null;
   }
 
-  if (userSettings.findme === 'auto') {
+  if (userSettings.findme === DeviceLocationType.Automatic) {
     try {
-      const location = await getDeviceLocation();
-      logger.info("User location from GPS/IP:", location);
+      let location = await getDeviceLocation();
+      logger.warn(`[GPS] from auto findme ${location}`);
+      // set to search center if GPS not available
+      if (!location && userSettings.search_map_center?.coordinates){
+        const searchCenter = userSettings.search_map_center.coordinates;
+        location = { lng: searchCenter[0], lat: searchCenter[1] };
+        logger.warn(`[Search-Center] from auto findme ${location}`)
+      }
+      logger.warn(`[No] from auto findme ${location}`)
       return location;
+
     } catch (error) {
       logger.error("Failed to retrieve device location:", error);
       return null;
     }
   }
 
-  if (userSettings.findme === 'searchCenter' && userSettings.search_map_center?.coordinates) {
+  if (userSettings.findme === DeviceLocationType.GPS) {
+    try {
+      const location = await getDeviceLocation();
+      logger.info("User location from GPS:", location);
+      return location;
+
+    } catch (error) {
+      logger.error("Failed to retrieve device location from GPS:", error);
+      return null;
+    }
+  }
+
+  if (userSettings.findme === DeviceLocationType.SearchCenter && userSettings.search_map_center?.coordinates) {
     const searchCenter = userSettings.search_map_center.coordinates;
-    const location = { lat: searchCenter[0], lng: searchCenter[1] };
+    const location = { lng: searchCenter[0], lat: searchCenter[1] };
     logger.info("User location from search center:", location);
     return location as { lat: number; lng: number };
   }
