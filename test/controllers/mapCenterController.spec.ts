@@ -33,12 +33,12 @@ describe('MapCenterController', () => {
 
   describe('saveMapCenter', () => {
     it('should save map center successfully', async () => {
-      const mockMapCenter = { map_center_id: '0a0a0a-0a0a-0a0a', longitude: 45.123, latitude: 23.456 };
+      const mockMapCenter = { map_center_id: '0a0a0a-0a0a-0a0a', latitude: 23.456, longitude: 45.123 };
       (mapCenterService.createOrUpdateMapCenter as jest.Mock).mockResolvedValue(mockMapCenter);
 
       await saveMapCenter(req, res);
 
-      expect(mapCenterService.createOrUpdateMapCenter).toHaveBeenCalledWith('0a0a0a-0a0a-0a0a', 45.123, 23.456, 'search');
+      expect(mapCenterService.createOrUpdateMapCenter).toHaveBeenCalledWith('0a0a0a-0a0a-0a0a', 23.456, 45.123, 'search');
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({ uid: '0a0a0a-0a0a-0a0a', map_center: mockMapCenter });
     });
@@ -50,7 +50,7 @@ describe('MapCenterController', () => {
 
       await saveMapCenter(req, res);
 
-      expect(mapCenterService.createOrUpdateMapCenter).toHaveBeenCalledWith('0a0a0a-0a0a-0a0a', 45.123, 23.456, 'search');
+      expect(mapCenterService.createOrUpdateMapCenter).toHaveBeenCalledWith('0a0a0a-0a0a-0a0a', 23.456, 45.123, 'search');
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({ message: mockError.message });
     });

@@ -48,7 +48,7 @@ describe('createOrUpdateMapCenter function', () => {
 
     expect(result).toBeDefined();
     // assert that the search_map_center has been updated with new coordinates
-    expect(result?.coordinates).toEqual([updatedSearchMapCenter.latitude, updatedSearchMapCenter.longitude]);
+    expect(result?.coordinates).toEqual([updatedSearchMapCenter.longitude, updatedSearchMapCenter.latitude]);
   });
 
   it('should update the appropriate sell_map_center instance for the given seller ID', async () => {
@@ -67,6 +67,6 @@ describe('createOrUpdateMapCenter function', () => {
 
     expect(result).toBeDefined();
     // assert that the sell_map_center has been updated with new coordinates
-    expect(result?.coordinates).toEqual([updatedSellMapCenter.latitude, updatedSellMapCenter.longitude]);
+    expect(result?.coordinates).toEqual([updatedSellMapCenter.longitude, updatedSellMapCenter.latitude]);
   });
 });
