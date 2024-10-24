@@ -34,7 +34,7 @@ const userSettingsSchema = new Schema<IUserSettings>(
       type: String,
       enum: Object.values(DeviceLocationType).filter(value => typeof value === 'string'),
       required: true,
-      default: DeviceLocationType.Automatic
+      default: DeviceLocationType.SearchCenter
     },
     trust_meter_rating: {
       type: Number,
