@@ -132,13 +132,13 @@ export const getDeviceLocation = async (): Promise<{ lat: number; lng: number } 
 };
 
 // function to get location by IP address
-export const getLocationByIP = async (): Promise<{ lat: number; lng: number } | null> => {
+export const getLocationByIP = async (): Promise<{ lng: number; lat: number} | null> => {
   try {
     const response = await fetch('https://ipapi.co/json/');
     const data = await response.json();
 
     if (data.latitude && data.longitude) {
-      return { lat: data.latitude, lng: data.longitude };
+      return { lng: data.longitude, lat: data.latitude };
     }
     logger.warn("new user search center from IP is null")
     return null
