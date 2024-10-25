@@ -1,7 +1,7 @@
 import UserSettings from "../models/UserSettings";
 import User from "../models/User";
-import { DeviceLocationType } from "../models/enums/deviceLocationType";
 import { IUser, IUserSettings } from "../types";
+import { DeviceLocationType } from "../models/enums/deviceLocationType";
 
 import logger from "../config/loggingConfig";
 
@@ -124,21 +124,23 @@ export const getDeviceLocation = async (): Promise<{ lat: number; lng: number } 
       logger.warn("GPS location error:", (error as GeolocationPositionError).message);
       // Fall back to IP-based geolocation
     }
+  } else {
+    
   }
-  logger.warn("Unable to get device location by GPS");
+  logger.warn("unable to get device location by GPS");
   return null; 
 };
 
 // function to get location by IP address
-export const getLocationByIP = async (): Promise<{ lng: number; lat: number} | null> => {
+export const getLocationByIP = async (): Promise<{ lat: number; lng: number } | null> => {
   try {
     const response = await fetch('https://ipapi.co/json/');
     const data = await response.json();
 
     if (data.latitude && data.longitude) {
-      return { lng: data.longitude, lat: data.latitude };
+      return { lat: data.latitude, lng: data.longitude };
     }
-    logger.warn("New user search center from IP is null")
+    logger.warn("new user search center from IP is null")
     return null
   } catch (error: any) {
     logger.warn('Failed to retrieve location by IP: ' + error.message)
@@ -162,7 +164,7 @@ export const userLocation = async (uid: string): Promise<{ lat: number; lng: num
       // set to search center if GPS not available
       if (!location && userSettings.search_map_center?.coordinates){
         const searchCenter = userSettings.search_map_center.coordinates;
-        location = { lng: searchCenter[0], lat: searchCenter[1] };
+        location = { lat: searchCenter[0], lng: searchCenter[1] };
         logger.warn(`[Search-Center] from auto findme ${location}`)
       }
       logger.warn(`[No] from auto findme ${location}`)
@@ -188,7 +190,7 @@ export const userLocation = async (uid: string): Promise<{ lat: number; lng: num
 
   if (userSettings.findme === DeviceLocationType.SearchCenter && userSettings.search_map_center?.coordinates) {
     const searchCenter = userSettings.search_map_center.coordinates;
-    const location = { lng: searchCenter[0], lat: searchCenter[1] };
+    const location = { lat: searchCenter[0], lng: searchCenter[1] };
     logger.info("User location from search center:", location);
     return location as { lat: number; lng: number };
   }

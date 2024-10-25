@@ -26,7 +26,7 @@ export const authenticate = async (currentUser: IUser): Promise<IUser> => {
         await UserSettings.create({
           user_settings_id: currentUser.pi_uid,
           user_name: currentUser.user_name,
-          search_map_center: { point: 'Point', coordinates: [IP_coordinates.lat, IP_coordinates.lng] }
+          search_map_center: { point: 'Point', coordinates: [IP_coordinates.lng, IP_coordinates.lat] }
         }) : 
         await UserSettings.create({
           user_settings_id: currentUser.pi_uid,
