@@ -96,16 +96,16 @@ export const getUserLocation = async (req: Request, res: Response) => {
     const authUser = req.currentUser;
     const zoom = 13;
     if (!authUser?.pi_uid) {
-      logger.warn(`User not unthenticated`);
-      return res.status(401).json({ message: "User not unthenticated" });      
+      logger.warn(`User not authenticated`);
+      return res.status(401).json({ message: "User not authenticated" });      
     }
 
     location = await userSettingsService.userLocation(authUser.pi_uid);
     if (!location) {
-      logger.warn(`Location not found for user ID: ${authUser.pi_uid}`);
-      return res.status(404).json({ message: "Location not found for user ID: " + authUser.pi_uid });      
+      logger.warn(`User location not found for piUID: ${authUser.pi_uid}`);
+      return res.status(404).json({ message: "User location not found for piUID: " + authUser.pi_uid });      
     }
-    logger.info('user loaction from backend:', location)
+    logger.info('User location from backend:', location)
     return res.status(200).json({ origin: location, zoom: zoom });
 
   } catch (error: any) {
@@ -117,3 +117,29 @@ export const getUserLocation = async (req: Request, res: Response) => {
     return res.status(500).json({ message: 'An error occurred while getting user location; please try again later' });
   }
 };
+
+// export const getUserLocation = async (req: Request, res: Response) => {
+//   let origin: { lat: number; lng: number };
+  
+//   // Default map center (example: New York City)
+//   const defaultMapCenter: { lat: number; lng: number } = { lat: 20, lng: -74.006 };
+//   try {
+//     const authUser = req.currentUser;
+//     const radius = 15;
+//     if (authUser) {
+//       let location = await userSettingsService.userLocation(authUser?.pi_uid); 
+//       origin = location? location: defaultMapCenter;
+//       logger.info('Origin from backend:', origin)
+//     } else {
+//       origin = defaultMapCenter;
+//     }
+//     return res.status(200).json({ origin: origin, radius: radius });
+//   } catch (error: any) {
+//     logger.error(`Failed to get user location for piUID ${ req.currentUser?.pi_uid }:`, {
+//       message: error.message,
+//       config: error.config,
+//       stack: error.stack
+//     });
+//     return res.status(500).json({ message: 'An error occurred while getting user location; please try again later' });
+//   }
+// };

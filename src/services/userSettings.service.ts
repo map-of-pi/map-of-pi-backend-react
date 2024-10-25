@@ -1,7 +1,7 @@
 import UserSettings from "../models/UserSettings";
 import User from "../models/User";
-import { IUser, IUserSettings } from "../types";
 import { DeviceLocationType } from "../models/enums/deviceLocationType";
+import { IUser, IUserSettings } from "../types";
 
 import logger from "../config/loggingConfig";
 
@@ -124,10 +124,8 @@ export const getDeviceLocation = async (): Promise<{ lat: number; lng: number } 
       logger.warn("GPS location error:", (error as GeolocationPositionError).message);
       // Fall back to IP-based geolocation
     }
-  } else {
-    
   }
-  logger.warn("unable to get device location by GPS");
+  logger.warn("Unable to get device location by GPS");
   return null; 
 };
 
@@ -140,7 +138,7 @@ export const getLocationByIP = async (): Promise<{ lng: number; lat: number} | n
     if (data.latitude && data.longitude) {
       return { lng: data.longitude, lat: data.latitude };
     }
-    logger.warn("new user search center from IP is null")
+    logger.warn("New user search center from IP is null")
     return null
   } catch (error: any) {
     logger.warn('Failed to retrieve location by IP: ' + error.message)
@@ -164,7 +162,7 @@ export const userLocation = async (uid: string): Promise<{ lat: number; lng: num
       // set to search center if GPS not available
       if (!location && userSettings.search_map_center?.coordinates){
         const searchCenter = userSettings.search_map_center.coordinates;
-        location = { lat: searchCenter[0], lng: searchCenter[1] };
+        location = { lng: searchCenter[0], lat: searchCenter[1] };
         logger.warn(`[Search-Center] from auto findme ${location}`)
       }
       logger.warn(`[No] from auto findme ${location}`)
@@ -190,7 +188,7 @@ export const userLocation = async (uid: string): Promise<{ lat: number; lng: num
 
   if (userSettings.findme === DeviceLocationType.SearchCenter && userSettings.search_map_center?.coordinates) {
     const searchCenter = userSettings.search_map_center.coordinates;
-    const location = { lat: searchCenter[0], lng: searchCenter[1] };
+    const location = { lng: searchCenter[0], lat: searchCenter[1] };
     logger.info("User location from search center:", location);
     return location as { lat: number; lng: number };
   }

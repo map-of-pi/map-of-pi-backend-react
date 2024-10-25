@@ -27,8 +27,8 @@ export const getMapCenterById = async (map_center_id: string, type: string): Pro
 
 export const createOrUpdateMapCenter = async (
   map_center_id: string, 
-  longitude: number,
-  latitude: number, 
+  latitude: number,
+  longitude: number, 
   type: 'search' | 'sell'
 ): Promise<IMapCenter | null> => {
   try {
@@ -58,7 +58,7 @@ export const createOrUpdateMapCenter = async (
     }
     return setCenter;
     } catch (error: any) {
-    logger.error(`Failed to create or udpate Map Center for ${ type }:`, { 
+    logger.error(`Failed to create or update Map Center for ${ type }:`, { 
       message: error.message,
       config: error.config,
       stack: error.stack

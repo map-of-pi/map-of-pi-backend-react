@@ -192,6 +192,8 @@ userPreferencesRoutes.delete(
  *           application/json:
  *             schema:
  *               $ref: '/api/docs/UserPreferencesSchema.yml#/components/schemas/GetUserLocationRs'
+ *       404:
+ *         description: User location not found
  *       401:
  *         description: Unauthorized | Authentication token is required | Authentication token is invalid or expired
  *       400:

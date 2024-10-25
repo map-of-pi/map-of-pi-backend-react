@@ -1,6 +1,6 @@
 export enum DeviceLocationType {
-    Automatic = 'Auto',
-    GPS = 'GPS',
+    Automatic = 'auto',
+    GPS = 'deviceGPS',
     SearchCenter = 'searchCenter'
   }
   
