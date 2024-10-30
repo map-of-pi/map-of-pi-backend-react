@@ -21,12 +21,8 @@ export const saveMapCenter = async (req: Request, res: Response) => {
     
     return res.status(200).json({uid: map_center_id, map_center: mapCenter});
 
-  } catch (error: any) {
-    logger.error('Failed to save Map Center:', { 
-      message: error.message,
-      config: error.config,
-      stack: error.stack
-    });
+  } catch (error) {
+    logger.error('Failed to save Map Center:', error);
     return res.status(500).json({ message: 'An error occurred while saving the Map Center; please try again later' });
   }
 };
@@ -47,12 +43,8 @@ export const getMapCenter = async (req: Request, res: Response) => {
       logger.warn('No user found; cannot retrieve Map Center.');
       return res.status(404).json({ message: "User not found" });
     }
-  } catch (error: any) {
-    logger.error('Failed to retrieve Map Center:', { 
-      message: error.message,
-      config: error.config,
-      stack: error.stack
-    });
+  } catch (error) {
+    logger.error('Failed to retrieve Map Center:', error);
     return res.status(500).json({ message: 'An error occurred while getting the Map Center; please try again later' });
   }
 };
