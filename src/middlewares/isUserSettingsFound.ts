@@ -30,12 +30,8 @@ export const isUserSettingsFound = async (
       logger.warn(`User settings not found for user ID: ${userSettingsId}`);
       return res.status(404).json({message: "User Settings not found"});
     }
-  } catch (error: any) {
-    logger.error('Failed to identify user settings:', { 
-      message: error.message,
-      config: error.config,
-      stack: error.stack
-    });
+  } catch (error) {
+    logger.error('Failed to identify user settings:', error);
     res.status(500).json({ message: 'Failed to identify | user settings not found; please try again later'});
   }
 };

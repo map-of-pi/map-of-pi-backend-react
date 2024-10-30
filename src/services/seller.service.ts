@@ -27,12 +27,8 @@ const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSet
           email: userSettings?.email ?? null,
           phone_number: userSettings?.phone_number ?? null, 
         } as ISellerWithSettings;
-      } catch (error: any) {
-        logger.error(`Failed to resolve settings for sellerID ${ seller.seller_id }:`, { 
-          message: error.message,
-          config: error.config,
-          stack: error.stack
-        });
+      } catch (error) {
+        logger.error(`Failed to resolve settings for sellerID ${ seller.seller_id }:`, error);
         
         // Return a fallback seller object with minimal information
         return {
@@ -104,12 +100,8 @@ export const getAllSellers = async (
 
     // Return sellers with their settings merged
     return sellersWithSettings;
-  } catch (error: any) {
-    logger.error('Failed to get all sellers:', { 
-      message: error.message,
-      config: error.config,
-      stack: error.stack
-    });
+  } catch (error) {
+    logger.error('Failed to get all sellers:', error);
     throw new Error('Failed to get all sellers; please try again later');
   }
 };
@@ -132,12 +124,8 @@ export const getSingleSellerById = async (seller_id: string): Promise<ISeller | 
       sellerSettings: userSettings as IUserSettings,
       sellerInfo: user as IUser,
     } as any;
-  } catch (error: any) {
-    logger.error(`Failed to get single seller for sellerID ${ seller_id }:`, { 
-      message: error.message,
-      config: error.config,
-      stack: error.stack
-    });
+  } catch (error) {
+    logger.error(`Failed to get single seller for sellerID ${ seller_id }:`, error);
     throw new Error('Failed to get single seller; please try again later');
   }
 };
@@ -184,12 +172,8 @@ export const registerOrUpdateSeller = async (authUser: IUser, formData: any, ima
       logger.info('New seller created in the database:', savedSeller);
       return savedSeller as ISeller;
     }
-  } catch (error: any) {
-    logger.error('Failed to register or update seller:', { 
-      message: error.message,
-      config: error.config,
-      stack: error.stack
-    });
+  } catch (error) {
+    logger.error('Failed to register or update seller:', error);
     throw new Error('Failed to register or update seller; please try again later');
   }
 };
@@ -199,12 +183,8 @@ export const deleteSeller = async (seller_id: string | undefined): Promise<ISell
   try {
     const deletedSeller = await Seller.findOneAndDelete({ seller_id }).exec();
     return deletedSeller ? deletedSeller as ISeller : null;
-  } catch (error: any) {
-    logger.error(`Failed to delete seller for sellerID ${ seller_id }:`, { 
-      message: error.message,
-      config: error.config,
-      stack: error.stack
-    });
+  } catch (error) {
+    logger.error(`Failed to delete seller for sellerID ${ seller_id }:`, error);
     throw new Error('Failed to delete seller; please try again later');
   }
 };
