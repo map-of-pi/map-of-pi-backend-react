@@ -44,12 +44,8 @@ export const verifyToken = async (
     req.currentUser = currentUser;
     req.token = token;
     next();
-  } catch (error: any) {
-    logger.error('Failed to verify token:', { 
-      message: error.message,
-      config: error.config,
-      stack: error.stack
-    });
+  } catch (error) {
+    logger.error('Failed to verify token:', error);
     return res.status(500).json({ message: 'Failed to verify token; please try again later' });
   }
 };

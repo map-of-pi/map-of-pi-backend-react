@@ -11,11 +11,7 @@ export const connectDB = async () => {
     }
     await mongoose.connect(env.MONGODB_URL);
     logger.info("Successful connection to MongoDB.");
-  } catch (error: any) {
-    logger.error('Failed connection to MongoDB:', { 
-      message: error.message,
-      config: error.config,
-      stack: error.stack
-    });
+  } catch (error) {
+    logger.error('Failed connection to MongoDB:', error);
   }
 };
