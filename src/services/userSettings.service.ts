@@ -9,12 +9,8 @@ export const getUserSettingsById = async (user_settings_id: string): Promise<IUs
   try {
     const userSettings = await UserSettings.findOne({ user_settings_id }).exec();
     return userSettings;
-  } catch (error: any) {
-    logger.error(`Failed to retrieve user settings for userSettingsID ${ user_settings_id }:`, { 
-      message: error.message,
-      config: error.config,
-      stack: error.stack
-    });
+  } catch (error) {
+    logger.error(`Failed to retrieve user settings for userSettingsID ${ user_settings_id }:`, error);
     throw new Error('Failed to get user settings; please try again later');
   }
 };
@@ -83,12 +79,8 @@ export const addOrUpdateUserSettings = async (
       const savedUserSettings = await newUserSettings.save();
       return savedUserSettings as IUserSettings;
     }
-  } catch (error: any) {
-    logger.error('Failed to add or update user settings:', {
-      message: error.message,
-      config: error.config,
-      stack: error.stack,
-    });
+  } catch (error) {
+    logger.error('Failed to add or update user settings:', error);
     throw new Error('Failed to add or update user settings; please try again later');
   }
 };
@@ -98,12 +90,8 @@ export const deleteUserSettings = async (user_settings_id: string): Promise<IUse
   try {
     const deletedUserSettings = await UserSettings.findOneAndDelete({ user_settings_id: user_settings_id }).exec();
     return deletedUserSettings ? deletedUserSettings as IUserSettings : null;
-  } catch (error: any) {
-    logger.error(`Failed to delete user settings for userSettingsID ${ user_settings_id }:`, { 
-      message: error.message,
-      config: error.config,
-      stack: error.stack
-    });
+  } catch (error) {
+    logger.error(`Failed to delete user settings for userSettingsID ${ user_settings_id }:`, error);
     throw new Error('Failed to delete user settings; please try again later');
   }
 };
