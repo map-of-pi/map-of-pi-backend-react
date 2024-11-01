@@ -27,7 +27,7 @@ class SentryTransport extends transports.Stream {
     setImmediate(() => this.emit('logged', info));
 
     if (info.level === 'error') {
-      Sentry.captureMessage(info.message, 'error');
+      Sentry.captureException(new Error(info.message));
     }
     callback();
     return true;
