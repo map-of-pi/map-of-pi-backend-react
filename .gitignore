@@ -16,3 +16,6 @@
 # local misc
 uploads
 /scripts
+
+# Sentry Config File
+.sentryclirc

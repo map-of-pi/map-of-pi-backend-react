@@ -7,12 +7,16 @@
   "main": "index.js",
   "private": true,
   "scripts": {
-    "build": "tsc",
+    "build": "npm run compile && npm run sentry:inject && npm run sentry:upload",
+    "compile": "tsc",
     "dev": "nodemon src/index.ts",
     "start": "node dist/index.js",
-    "test": "jest --detectOpenHandles --coverage"
+    "test": "jest --detectOpenHandles --coverage",
+    "sentry:inject": "sentry-cli sourcemaps inject --org map-of-pi-test --project node-express ./dist",
+    "sentry:upload": "sentry-cli sourcemaps upload --org map-of-pi-test --project node-express ./dist"
   },
   "dependencies": {
+    "@sentry/cli": "^2.38.2",
     "@sentry/integrations": "^7.114.0",
     "@sentry/node": "^8.26.0",
     "@sentry/profiling-node": "^8.26.0",
