@@ -35,9 +35,3 @@ jobs:
 
       - name: Execute Tests for Backend
         run: npm run test -- --passWithNoTests
-
-        # Build and upload source maps to Sentry.io
-      - name: Build + Upload Source Maps to Sentry.io
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-        run: npm run build
