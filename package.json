@@ -18,6 +18,7 @@
     "@sentry/profiling-node": "^8.26.0",
     "axios": "^1.7.4",
     "body-parser": "^1.20.2",
+    "bottleneck": "^2.19.5",
     "cloudinary": "^2.4.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
