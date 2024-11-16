@@ -10,6 +10,8 @@ export const authenticate = async (currentUser: IUser): Promise<IUser> => {
     const user = await User.findOne({
       pi_uid: currentUser.pi_uid,
       pi_username: currentUser.pi_username
+    }).setOptions({
+      readPreference: 'primary'
     }).exec();
 
     if (user) {
