@@ -91,7 +91,7 @@ const reportRoutes = Router();
  */
 reportRoutes.get(
     "/sanctioned-sellers-report",
-    // verifyToken,
+    verifyToken,
     reportController.getSanctionedSellersReport
 );
 
