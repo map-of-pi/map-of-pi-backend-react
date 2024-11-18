@@ -3,7 +3,6 @@ import axios from 'axios';
 import logger from "../config/loggingConfig";
 import {ISeller} from "../types";
 import Bottleneck from "bottleneck";
-import cron from "node-cron";
 import {getAllSellers} from "./seller.service";
 import * as Sentry from "@sentry/node";
 
