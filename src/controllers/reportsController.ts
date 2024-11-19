@@ -9,7 +9,7 @@ export const getSanctionedSellersReport = async (req:Request, res:Response) => {
             await reportSanctionedSellers();
             logger.info("Sanctioned Sellers Report generated successfully")
         }catch(error){
-            logger.error(`An error occurred while generating report: ${error}`);
+            logger.error("An error occurred while generating report:", error);
         }
     })
 };
