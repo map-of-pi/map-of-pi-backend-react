@@ -5,6 +5,24 @@ import { ISeller, IUser, IUserSettings } from "../types";
 import { getLocationByIP } from "./userSettings.service";
 import logger from "../config/loggingConfig";
 
+const getCoordinatesWithRetry = async (
+  retries: number = 3,
+  delay: number = 1000 // Delay in milliseconds
+): Promise<{ lat: number; lng: number } | null> => {
+  let attempt = 0;
+  while (attempt < retries) {
+    const coordinates = await getLocationByIP();
+    if (coordinates) {
+      return coordinates;
+    }
+    attempt++;
+    logger.warn(`Retrying IP location fetch (${attempt}/${retries})...`);
+    await new Promise((resolve) => setTimeout(resolve, delay));
+  }
+  logger.warn('Failed to fetch IP coordinates after maximum retries');
+  return null;
+};
+
 export const authenticate = async (currentUser: IUser): Promise<IUser> => {
   try {
     const user = await User.findOne({
@@ -22,13 +40,13 @@ export const authenticate = async (currentUser: IUser): Promise<IUser> => {
         pi_username: currentUser.pi_username,
         user_name: currentUser.user_name
       });
-      const IP_coordinates = await getLocationByIP();
+      const IP_coordinates = await getCoordinatesWithRetry(3, 1000);
       
       IP_coordinates ? 
         await UserSettings.create({
           user_settings_id: currentUser.pi_uid,
           user_name: currentUser.user_name,
-          search_map_center: { point: 'Point', coordinates: [IP_coordinates.lat, IP_coordinates.lng] }
+          search_map_center: { type: 'Point', coordinates: [IP_coordinates.lng, IP_coordinates.lat] }
         }) : 
         await UserSettings.create({
           user_settings_id: currentUser.pi_uid,
