@@ -50,7 +50,6 @@ export const getAllSellers = async (
   bounds?: { sw_lat: number, sw_lng: number, ne_lat: number, ne_lng: number },
   search_query?: string
 ): Promise<ISellerWithSettings[]> => {
-
   try {
     let sellers: ISeller[];
     const maxNumSellers = 36;
@@ -76,29 +75,32 @@ export const getAllSellers = async (
       sellers = await Seller.find({
         ...aggregatedCriteria,
         sell_map_center: {
-          $geometry: {
-            type: "Polygon",
-            coordinates: [ [
-              [bounds.sw_lng, bounds.sw_lat],
-              [bounds.ne_lng, bounds.sw_lat],
-              [bounds.ne_lng, bounds.ne_lat],
-              [bounds.sw_lng, bounds.ne_lat],
-              [bounds.sw_lng, bounds.sw_lat]
-            ] ]
+          $geoWithin: {
+            $geometry: {
+              type: "Polygon",
+              coordinates: [ [
+                [bounds.sw_lng, bounds.sw_lat],
+                [bounds.ne_lng, bounds.sw_lat],
+                [bounds.ne_lng, bounds.ne_lat],
+                [bounds.sw_lng, bounds.ne_lat],
+                [bounds.sw_lng, bounds.sw_lat]
+              ] ]
+            }
           }
         }
       })
-        .sort({ updatedAt: -1 }) // Sort by last updated
+      .sort({ updatedAt: -1 }) // Sort by last updated
+      .limit(maxNumSellers)
+      .hint({ 'updatedAt': -1, 'sell_map_center.coordinates': '2dsphere' })
+      .exec();
+    } else {
+      // If no bounds are provided, return all sellers (without geo-filtering)  
+      sellers = await Seller.find(aggregatedCriteria)
+        .sort({ updated_at: -1 })
         .limit(maxNumSellers)
         .hint({ 'updatedAt': -1, 'sell_map_center.coordinates': '2dsphere' })
         .exec();
-      } else {
-        // If no bounds are provided, return all sellers (without geo-filtering)  
-        sellers = await Seller.find(aggregatedCriteria)
-          .sort({ review_count: -1, updated_at: -1 })
-          .limit(maxNumSellers)
-          .exec();
-      }
+    }
 
     // Fetch and merge the settings for each seller
     const sellersWithSettings = await resolveSellerSettings(sellers);
@@ -163,7 +165,7 @@ export const registerOrUpdateSeller = async (authUser: IUser, formData: any, ima
         { $set: sellerData },
         { new: true }
       ).exec();
-      // logger.info('Seller updated in the database:', updatedSeller);
+      logger.debug('Seller updated in the database:', updatedSeller);
       return updatedSeller as ISeller;
     } else {
       const shopName = sellerData.name || authUser.user_name;
