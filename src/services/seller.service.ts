@@ -52,7 +52,7 @@ export const getAllSellers = async (
 ): Promise<ISellerWithSettings[]> => {
   try {
     let sellers: ISeller[];
-    const maxNumSellers = 36;
+    const maxNumSellers = 50;
 
     // always apply this condition to exclude 'Inactive sellers'
     const baseCriteria = { seller_type: { $in: Object.values(VisibleSellerType) } };
