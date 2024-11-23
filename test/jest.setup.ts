@@ -26,6 +26,9 @@ beforeAll(async () => {
     const uri = mongoServer.getUri();
     await mongoose.connect(uri, { dbName: 'mapofpi-test-db' });
 
+    // Ensure indexes are created for the Seller model before running tests
+    await Seller.createIndexes();
+
     // Load the mock data into Map of PI DB collections
     await User.insertMany(mockData.users);
     await UserSettings.insertMany(mockData.userSettings);
