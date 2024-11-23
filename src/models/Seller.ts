@@ -1,7 +1,7 @@
   import mongoose, { Schema, Types } from "mongoose";
 
   import { ISeller } from "../types";
-  import { SellerType } from "./enums/sellerType";
+  import { SellerType, VisibleSellerType } from "./enums/sellerType";
 
   const sellerSchema = new Schema<ISeller>(
     {
@@ -60,6 +60,10 @@
 
   // Creating a 2dsphere index for the sell_map_center field
   sellerSchema.index({ 'sell_map_center.coordinates': '2dsphere' });
+  sellerSchema.index(
+    { 'updatedAt': -1, 'sell_map_center.coordinates': '2dsphere' },
+    { partialFilterExpression: { seller_type: { $in: Object.values(VisibleSellerType) } } }
+  );
 
   // Creating the Seller model from the schema
   const Seller = mongoose.model<ISeller>("Seller", sellerSchema);
