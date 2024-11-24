@@ -91,7 +91,6 @@ export const getAllSellers = async (
         // If no bounds are provided, return all sellers (without geo-filtering)  
         sellers = await Seller.find(aggregatedCriteria)
           .sort({ review_count: -1, updated_at: -1 })
-          .limit(maxNumSellers)
           .exec();
       }
 
