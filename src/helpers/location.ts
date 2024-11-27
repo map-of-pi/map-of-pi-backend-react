@@ -11,7 +11,7 @@ export const reverseLocationDetails = async (latitude: number, longitude: number
     params: {
       lat: latitude,
       lon: longitude,
-      zoom: 3,
+      zoom: 6,
       format: "jsonv2",
       "accept-language": "en"
     }
