@@ -3,13 +3,17 @@ import {reportSanctionedSellers} from "../services/report.service";
 import logger from "../config/loggingConfig";
 
 export const getSanctionedSellersReport = async (req: Request, res: Response) => {
-  res.status(200).json({ message: 'Generating Sanctioned Sellers Report..' });
-  setImmediate(async () => {
-    try {
-      await reportSanctionedSellers();
-      logger.info('Sanctioned Sellers Report generated successfully');
-    } catch (error) {
-      logger.error('An error occurred while generating Sanctioned Sellers Report:', error);
-    }
-  })
+  try {
+    const sanctionedSellers = await reportSanctionedSellers();
+    logger.info(`Sanctioned Sellers Report generated successfully with ${sanctionedSellers.length} sellers identified.`);
+    return res.status(200).json({ 
+      message: `${sanctionedSellers.length} Sanctioned seller(s) retrieved successfully`, 
+      sanctionedSellers 
+    });
+  } catch (error) {
+    logger.error('An error occurred while generating Sanctioned Sellers Report:', error);
+    return res.status(500).json({ 
+      message: 'Failed to generate Sanctioned Sellers Report' 
+    });
+  }
 };

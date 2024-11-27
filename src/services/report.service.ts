@@ -1,86 +1,72 @@
-import * as Sentry from "@sentry/node";
 import Bottleneck from "bottleneck";
 
-import {getAllSellers} from "./seller.service";
+import {getSellersWithinSanctionedRegion} from "./seller.service";
 import {reverseLocationDetails, isRestrictedLocation} from "../helpers/location";
-import {ISeller} from "../types";
+import { RestrictedAreas } from "../models/enums/restrictedAreas";
+import {ISeller, SanctionedSeller} from "../types";
 import logger from "../config/loggingConfig";
 
-const requestLimiter = new Bottleneck({minTime: 1000});
-const processedSellersCache = new Set();
-let sanctionedSellers: ISeller[] = [];
-let geocodingErrors: ISeller[] = [];
+const requestLimiter = new Bottleneck({ minTime: 1000 });
 
-export const filterSanctionedSellers = async (seller: ISeller) => {
+export const reportSanctionedSellers = async (): Promise<SanctionedSeller[]> => {
+  const sanctionedSellers: SanctionedSeller[] = [];
+
   try {
-    logger.info(`Checking Pioneer's region.`);
+    // determine potential sanctioned sellers
+    for (const region of Object.values(RestrictedAreas)) {
+      // fetch affected sellers in the current restricted region
+      const sellersInRegion = await getSellersWithinSanctionedRegion(region);
 
-    const { seller_id, name } = seller;
-    const [longitude, latitude] = seller.sell_map_center.coordinates;
-
-    let response = await reverseLocationDetails(latitude, longitude);
-
-    if (response.data.error) {
-      const errorMessage = response.data.error;
-      logger.error(`Geocoding error for seller ${seller_id} with original coordinates: ${errorMessage}`);
-      logger.info(`Retrying geocoding with swapped coordinates for seller ${seller_id}.`);
-      response = await reverseLocationDetails(longitude, latitude);
-      if (response.data.error) {
-        const retryErrorMessage = response.data.error;
-        logger.error(`Geocoding retry error for seller ${seller_id} with swapped coordinates: ${retryErrorMessage}`);
-        geocodingErrors.push(seller);
-        processedSellersCache.add(seller_id);
-        return;
-      }
+      // geocode and validate each affected seller using Nominatim API
+      const results = await Promise.all(
+        sellersInRegion.map((seller) => processSellerGeocoding(seller))
+      );
+      sanctionedSellers.push(...results.filter((result): result is SanctionedSeller => result !== null));
     }
 
-    const locationData = response.data;
-    const locationName = locationData.display_name;
-    logger.info(`Seller location: ${locationName}, from coordinates: latitude: ${latitude}, longitude: ${longitude}`);
-
-    if (isRestrictedLocation(locationName)) {
-      logger.warn(`Pioneer is selling in a restricted area | ${seller_id} | ${name} | ${latitude} | ${longitude} | ${locationName}`);
-      sanctionedSellers.push(seller);
+    if (sanctionedSellers.length > 0) {
+      logger.info(`Total number of sanctioned sellers: ${sanctionedSellers.length}`);
+      logger.error(`Sanctioned Sellers Report | ${sanctionedSellers.length} found: ${JSON.stringify(sanctionedSellers, null, 2)}`);
+    } else {
+      logger.info('No sellers found in any sanctioned regions');
     }
-
-    processedSellersCache.add(seller_id);
   } catch (error) {
-    logger.error("Error checking seller location for seller:", error);
+    // Capture any errors and send to Sentry
+    logger.error('An error occurred while generating the Sanctioned Sellers Report:', error);
+    throw new Error('Failed to generate Sanctioned Sellers Report; please try again later.');
   }
+  return sanctionedSellers;
 };
 
-export const reportSanctionedSellers = async () => {
-  const sellers = await getAllSellers();
-  sanctionedSellers = [];
-  logger.info(`Total number of sellers: ${sellers.length}`);
-  await processSellers(sellers);
-  if (sanctionedSellers.length > 0) {
-    logger.info(`Total number of blacklisted sellers: ${sanctionedSellers.length}`);
-    logger.info("Generating Weekly Report on Sanctioned Sellers");
-    Sentry.captureMessage("Weekly Sanctioned Sellers Report", {
-      level: "info",
-      extra: {sanctionedSellers}
-    });
-    logger.error(`Weekly report data on Sanctioned Sellers: ${sanctionedSellers}`);
-  }
+// Function to handle geocoding for a single seller
+const processSellerGeocoding = async (seller: ISeller): Promise<SanctionedSeller | null> => {
+  const { seller_id, name, address, sell_map_center } = seller;
+  const [longitude, latitude] = sell_map_center.coordinates;
 
-  if (geocodingErrors.length > 0) {
-    logger.info(`Total number of sellers with geocoded error locations: ${geocodingErrors.length}`);
-    Sentry.captureMessage("Failed to geocode Sellers location", {
-      level: "info",
-      extra: {geocodeErrors: geocodingErrors},
-    });
-  }
-}
+  try {
+    const response = await requestLimiter.wrap(reverseLocationDetails)(latitude, longitude);
 
-const processSellers = async (sellers : ISeller[]) => {
-  const sellerPromises = sellers.map(async (seller) => {
-    if (!processedSellersCache.has(seller.id)) {
-      await fetchSellerLocation(seller);
+    if (response.data.error) {
+      logger.error(`Geocoding error for seller ${seller_id}`, {
+        coordinates: [latitude, longitude],
+        error: response.data.error,
+      });
+      return null;
     }
-  });
 
-  await Promise.all(sellerPromises);
-}
+    const locationName = response.data.display_name;
+    if (isRestrictedLocation(locationName)) {
+      logger.info(`Sanctioned Seller found`, { seller_id, name, address, sanctioned_location: locationName });
+      return { 
+        seller_id,
+        name,
+        address, 
+        sanctioned_location: locationName 
+      };
+    }
+  } catch (error) {
+    logger.error(`Geocoding failed for seller ${seller_id}`, { coordinates: [latitude, longitude], error });
+  }
 
-const fetchSellerLocation = requestLimiter.wrap(filterSanctionedSellers);
+  return null;
+};

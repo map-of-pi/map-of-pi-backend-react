@@ -11,8 +11,9 @@ export const reverseLocationDetails = async (latitude: number, longitude: number
     params: {
       lat: latitude,
       lon: longitude,
-      zoom: 6,
-      format: "jsonv2"
+      zoom: 3,
+      format: "jsonv2",
+      "accept-language": "en"
     }
   });
 }

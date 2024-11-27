@@ -2,11 +2,12 @@ import Seller from "../models/Seller";
 import User from "../models/User";
 import UserSettings from "../models/UserSettings";
 import { VisibleSellerType } from '../models/enums/sellerType';
+import { TrustMeterScale } from "../models/enums/trustMeterScale";
+import { RestrictedAreaBoundaries, RestrictedAreas } from "../models/enums/restrictedAreas";
 import { getUserSettingsById } from "./userSettings.service";
 import { ISeller, IUser, IUserSettings, ISellerWithSettings } from "../types";
 
 import logger from "../config/loggingConfig";
-import { TrustMeterScale } from "../models/enums/trustMeterScale";
 
 // Helper function to get settings for all sellers and merge them into seller objects
 const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSettings[]> => {
@@ -110,6 +111,26 @@ export const getAllSellers = async (
   } catch (error) {
     logger.error('Failed to get all sellers:', error);
     throw new Error('Failed to get all sellers; please try again later');
+  }
+};
+
+export const getSellersWithinSanctionedRegion = async (region: RestrictedAreas): Promise<ISeller[]> => {
+  const regionBoundary = RestrictedAreaBoundaries[region];
+  if (!regionBoundary) {
+    throw new Error(`No boundary defined for restricted area: ${ region }`);
+  }
+
+  try {
+    return Seller.find({
+      sell_map_center: {
+        $geoWithin: {
+          $geometry: regionBoundary
+        }
+      }
+    }).exec();
+  } catch (error) {
+    logger.error(`Failed to get sellers within sanctioned region ${ region }:`, error);
+    throw new Error(`Failed to get sellers within sanctioned region ${ region }; please try again later`);  
   }
 };
 

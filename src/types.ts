@@ -72,3 +72,5 @@
   }
 
   export interface IReviewFeedbackOutput extends IReviewFeedback, PartialReview {}
+
+  export type SanctionedSeller = Pick<ISeller, 'seller_id' | 'name' | 'address'> & { sanctioned_location: string };
