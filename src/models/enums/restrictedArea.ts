@@ -1,4 +1,4 @@
-export enum RestrictedAreas {
+export enum RestrictedArea {
   CUBA = "Cuba",
   IRAN = "Iran",
   NORTH_KOREA = "North Korea",
@@ -9,7 +9,7 @@ export enum RestrictedAreas {
 }
 
 export const RestrictedAreaBoundaries = {
-  [RestrictedAreas.CUBA]: {
+  [RestrictedArea.CUBA]: {
     type: "Polygon",
     // (longitude, latitude)
     coordinates: [[
@@ -20,7 +20,7 @@ export const RestrictedAreaBoundaries = {
       [-84.957, 19.825], // close the polygon shape
     ]],
   },
-  [RestrictedAreas.IRAN]: {
+  [RestrictedArea.IRAN]: {
     type: "Polygon",
     coordinates: [[
       [44.0, 24.0],
@@ -30,7 +30,7 @@ export const RestrictedAreaBoundaries = {
       [44.0, 24.0],
     ]],
   },
-  [RestrictedAreas.NORTH_KOREA]: {
+  [RestrictedArea.NORTH_KOREA]: {
     type: "Polygon",
     coordinates: [[
       [124.0, 37.5],
@@ -40,7 +40,7 @@ export const RestrictedAreaBoundaries = {
       [124.0, 37.5],
     ]],
   },
-  [RestrictedAreas.SYRIA]: {
+  [RestrictedArea.SYRIA]: {
     type: "Polygon",
     coordinates: [[
       [35.5, 32.0],
@@ -50,7 +50,7 @@ export const RestrictedAreaBoundaries = {
       [35.5, 32.0],
     ]],
   },
-  [RestrictedAreas.REPUBLIC_OF_CRIMEA]: {
+  [RestrictedArea.REPUBLIC_OF_CRIMEA]: {
     type: "Polygon",
     coordinates: [[
       [33.8, 44.4],
@@ -60,7 +60,7 @@ export const RestrictedAreaBoundaries = {
       [33.8, 44.4],
     ]],
   },
-  [RestrictedAreas.DONETSK_OBLAST]: {
+  [RestrictedArea.DONETSK_OBLAST]: {
     type: "Polygon",
     coordinates: [[
       [36.0, 47.0],
@@ -70,7 +70,7 @@ export const RestrictedAreaBoundaries = {
       [36.0, 47.0],
     ]],
   },
-  [RestrictedAreas.LUHANSK_OBLAST]: {
+  [RestrictedArea.LUHANSK_OBLAST]: {
     type: "Polygon",
     coordinates: [[
       [37.5, 47.0],

@@ -1,7 +1,5 @@
 import axios from 'axios';
 
-import { RestrictedAreas } from '../models/enums/restrictedAreas';
-
 // Geocode using the Nominatim API
 export const reverseLocationDetails = async (latitude: number, longitude: number) =>{
   return await axios.get("https://nominatim.openstreetmap.org/reverse", {
@@ -17,7 +15,3 @@ export const reverseLocationDetails = async (latitude: number, longitude: number
     }
   });
 }
-
-export const isRestrictedLocation = (locationName: string): boolean => {
-  return Object.values(RestrictedAreas).some(area => locationName.includes(area));
-};

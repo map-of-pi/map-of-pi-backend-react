@@ -3,6 +3,7 @@
   import { RatingScale } from "./models/enums/ratingScale";
   import { SellerType } from "./models/enums/sellerType";
   import { TrustMeterScale } from "./models/enums/trustMeterScale";
+  import { RestrictedArea } from "./models/enums/restrictedArea";
 
   export interface IUser extends Document {
     pi_uid: string;
@@ -48,6 +49,14 @@
     comment?: string;
     image?: string;
     review_date: Date;
+  }
+
+  export interface ISanctionedRegion extends Document {
+    location: RestrictedArea;
+    boundary: {
+      type: 'Polygon';
+      coordinates: [[[number, number]]];
+    };
   }
 
   export interface CompleteFeedback {

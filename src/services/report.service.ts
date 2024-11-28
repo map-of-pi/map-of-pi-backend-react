@@ -1,9 +1,9 @@
 import Bottleneck from "bottleneck";
 
+import SanctionedRegion from "../models/misc/SanctionedRegion";
 import {getSellersWithinSanctionedRegion} from "./seller.service";
-import {reverseLocationDetails, isRestrictedLocation} from "../helpers/location";
-import { RestrictedAreas } from "../models/enums/restrictedAreas";
-import {ISeller, SanctionedSeller} from "../types";
+import {reverseLocationDetails} from "../helpers/location";
+import {ISanctionedRegion, ISeller, SanctionedSeller} from "../types";
 import logger from "../config/loggingConfig";
 
 const requestLimiter = new Bottleneck({ minTime: 1000 });
@@ -12,14 +12,20 @@ export const reportSanctionedSellers = async (): Promise<SanctionedSeller[]> => 
   const sanctionedSellers: SanctionedSeller[] = [];
 
   try {
+    // fetch sanctioned regions from Mongo DB collection
+    const sanctionedRegions = await getAllSanctionedRegions();
+    if (!sanctionedRegions.length) {
+      return [];
+    } 
+
     // determine potential sanctioned sellers
-    for (const region of Object.values(RestrictedAreas)) {
-      // fetch affected sellers in the current restricted region
+    for (const region of sanctionedRegions) {
+      // fetch affected sellers within the current sanctioned region
       const sellersInRegion = await getSellersWithinSanctionedRegion(region);
 
       // geocode and validate each affected seller using Nominatim API
       const results = await Promise.all(
-        sellersInRegion.map((seller) => processSellerGeocoding(seller))
+        sellersInRegion.map((seller) => processSellerGeocoding(seller, region.location))
       );
       sanctionedSellers.push(...results.filter((result): result is SanctionedSeller => result !== null));
     }
@@ -38,8 +44,27 @@ export const reportSanctionedSellers = async (): Promise<SanctionedSeller[]> => 
   return sanctionedSellers;
 };
 
+// Fetch all sanctioned regions
+export const getAllSanctionedRegions = async (): Promise<ISanctionedRegion[]> => {
+  try {
+    const regions = await SanctionedRegion.find();
+    if (!regions || regions.length === 0) {
+      logger.warn('No sanctioned regions found');
+      return [];
+    }
+    logger.info(`Fetched ${regions.length} sanctioned regions`);
+    return regions;
+  } catch (error) {
+    logger.error('Failed to fetch sanctioned regions:', error);
+    throw new Error('Failed to get sanctioned regions; please try again later');
+  }
+};
+
 // Function to handle geocoding for a single seller
-const processSellerGeocoding = async (seller: ISeller): Promise<SanctionedSeller | null> => {
+const processSellerGeocoding = async (
+  seller: ISeller, 
+  sanctionedRegion: string
+): Promise<SanctionedSeller | null> => {
   const { seller_id, name, address, sell_map_center } = seller;
   const [longitude, latitude] = sell_map_center.coordinates;
 
@@ -55,7 +80,7 @@ const processSellerGeocoding = async (seller: ISeller): Promise<SanctionedSeller
     }
 
     const locationName = response.data.display_name;
-    if (isRestrictedLocation(locationName)) {
+    if (locationName.includes(sanctionedRegion)) {
       logger.info(`Sanctioned Seller found`, { seller_id, name, address, sanctioned_location: locationName });
       return { 
         seller_id,
