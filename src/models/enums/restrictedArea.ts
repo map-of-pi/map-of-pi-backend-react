@@ -13,39 +13,39 @@ export const RestrictedAreaBoundaries = {
     type: "Polygon",
     // (longitude, latitude)
     coordinates: [[
-      [-84.957, 19.825], // bottom-left corner 
-      [-74.131, 19.825], // bottom-right cornerr
-      [-74.131, 23.317], // top-right corner
-      [-84.957, 23.317], // top-left corner
-      [-84.957, 19.825], // close the polygon shape
+      [-85.3, 19.4], // bottom-left corner 
+      [-73.8, 19.4], // bottom-right corner
+      [-73.8, 23.7], // top-right corner
+      [-85.3, 23.7], // top-left corner
+      [-85.3, 19.4], // close the polygon shape
     ]],
   },
   [RestrictedArea.IRAN]: {
     type: "Polygon",
     coordinates: [[
-      [44.0, 24.0],
+      [43.0, 24.0],
       [63.5, 24.0],
-      [63.5, 39.7],
-      [44.0, 39.7],
-      [44.0, 24.0],
+      [63.5, 40.5],
+      [43.0, 40.5],
+      [43.0, 24.0],
     ]],
   },
   [RestrictedArea.NORTH_KOREA]: {
     type: "Polygon",
     coordinates: [[
-      [124.0, 37.5],
-      [130.7, 37.5],
-      [130.7, 43.0],
-      [124.0, 43.0],
-      [124.0, 37.5],
+      [123.5, 37.5],
+      [131.2, 37.5],
+      [131.2, 43.0],
+      [123.5, 43.0],
+      [123.5, 37.5],
     ]],
   },
   [RestrictedArea.SYRIA]: {
     type: "Polygon",
     coordinates: [[
       [35.5, 32.0],
-      [42.0, 32.0],
-      [42.0, 37.5],
+      [42.5, 32.0],
+      [42.5, 37.5],
       [35.5, 37.5],
       [35.5, 32.0],
     ]],
@@ -53,21 +53,21 @@ export const RestrictedAreaBoundaries = {
   [RestrictedArea.REPUBLIC_OF_CRIMEA]: {
     type: "Polygon",
     coordinates: [[
-      [33.8, 44.4],
-      [38.3, 44.4],
-      [38.3, 45.6],
-      [35.6, 46.4],
-      [33.8, 44.4],
+      [32.1, 43.8],
+      [36.8, 43.8],
+      [36.8, 46.4],
+      [32.1, 46.4],
+      [32.1, 43.8],
     ]],
   },
   [RestrictedArea.DONETSK_OBLAST]: {
     type: "Polygon",
     coordinates: [[
-      [36.0, 47.0],
-      [40.5, 47.0],
-      [40.5, 48.5],
-      [37.0, 49.0],
-      [36.0, 47.0],
+      [36.0, 46.5],
+      [39.5, 46.5],
+      [39.5, 49.5],
+      [36.0, 49.5],
+      [36.0, 46.5],
     ]],
   },
   [RestrictedArea.LUHANSK_OBLAST]: {
@@ -75,8 +75,8 @@ export const RestrictedAreaBoundaries = {
     coordinates: [[
       [37.5, 47.0],
       [40.5, 47.0],
-      [40.5, 49.5],
-      [37.5, 50.5],
+      [40.5, 50.3],
+      [37.5, 50.3],
       [37.5, 47.0],
     ]],
   },
