@@ -1,9 +1,9 @@
 import Bottleneck from "bottleneck";
 
 import SanctionedRegion from "../models/misc/SanctionedRegion";
-import {getSellersWithinSanctionedRegion} from "./seller.service";
-import {reverseLocationDetails} from "../helpers/location";
-import {ISanctionedRegion, ISeller, SanctionedSeller} from "../types";
+import { getSellersWithinSanctionedRegion } from "./seller.service";
+import { reverseLocationDetails } from "../helpers/location";
+import { ISanctionedRegion, ISeller, SanctionedSeller } from "../types";
 import logger from "../config/loggingConfig";
 
 const requestLimiter = new Bottleneck({ minTime: 1000 });
@@ -45,7 +45,7 @@ export const reportSanctionedSellers = async (): Promise<SanctionedSeller[]> => 
 };
 
 // Fetch all sanctioned regions
-export const getAllSanctionedRegions = async (): Promise<ISanctionedRegion[]> => {
+const getAllSanctionedRegions = async (): Promise<ISanctionedRegion[]> => {
   try {
     const regions = await SanctionedRegion.find();
     if (!regions || regions.length === 0) {
@@ -92,6 +92,5 @@ const processSellerGeocoding = async (
   } catch (error) {
     logger.error(`Geocoding failed for seller ${seller_id}`, { coordinates: [latitude, longitude], error });
   }
-
   return null;
 };

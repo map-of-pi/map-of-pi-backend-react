@@ -12,8 +12,6 @@ export const getSanctionedSellersReport = async (req: Request, res: Response) =>
     });
   } catch (error) {
     logger.error('An error occurred while generating Sanctioned Sellers Report:', error);
-    return res.status(500).json({ 
-      message: 'Failed to generate Sanctioned Sellers Report' 
-    });
+    return res.status(500).json({ message: 'An error occurred while generating Sanctioned Sellers Report; please try again later' });
   }
 };
