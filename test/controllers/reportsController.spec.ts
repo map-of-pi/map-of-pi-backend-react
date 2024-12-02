@@ -20,8 +20,8 @@ describe('ReportsController', () => {
   describe('getSanctionedSellersReport function', () => {
     it('should get report for sanctioned sellers and return successful message', async () => {
       const expectedSanctionedSellers = [
-        { seller_id: '0a0a0a-0a0a-0a0a', name: 'Test Seller 1', sanctioned_location: 'Location 1' },
-        { seller_id: '0d0d0d-0d0d-0d0d', name: 'Test Seller 4', sanctioned_location: 'Location 1' },
+        { seller_id: '0f0f0f-0f0f-0f0f', name: 'Test Seller Sanctioned 6', address: 'Sanctioned Region Cuba', sanctioned_location: 'Cuba' },
+        { seller_id: '0g0g0g-0g0g-0g0g', name: 'Test Seller Sanctioned 7', address: 'Sanctioned Region Iran', sanctioned_location: 'Iran' },
       ];
 
       (reportService.reportSanctionedSellers as jest.Mock).mockResolvedValue(expectedSanctionedSellers);
