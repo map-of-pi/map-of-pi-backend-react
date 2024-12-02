@@ -1,6 +1,8 @@
-import { getAllSellers } from '../../src/services/seller.service';
 import Seller from '../../src/models/Seller';
+import { getAllSellers, getSellersWithinSanctionedRegion } from '../../src/services/seller.service';
 import { SellerType } from '../../src/models/enums/sellerType';
+import { RestrictedArea, RestrictedAreaBoundaries } from '../../src/models/enums/restrictedArea';
+import { ISanctionedRegion } from '../../src/types';
 
 describe('getAllSellers function', () => {
   const mockBoundingBox = {
@@ -81,5 +83,84 @@ describe('getAllSellers function', () => {
         },
       })
     ); // Ensure length matches expected sellers
+  });
+});
+
+describe('getSellersWithinSanctionedRegion function', () => {
+  it('should fetch all sellers within a sanctioned region in Cuba', async () => {
+    const sanctionedRegion = {
+      location: RestrictedArea.CUBA,
+      boundary: RestrictedAreaBoundaries[RestrictedArea.CUBA]
+    } as ISanctionedRegion;
+    
+    const sellersData = await getSellersWithinSanctionedRegion(sanctionedRegion);
+
+    expect(sellersData).toHaveLength(1);
+  });
+
+  it('should fetch all sellers within a sanctioned region in Iran', async () => {
+    const sanctionedRegion = {
+      location: RestrictedArea.IRAN,
+      boundary: RestrictedAreaBoundaries[RestrictedArea.IRAN]
+    } as ISanctionedRegion;
+    
+    const sellersData = await getSellersWithinSanctionedRegion(sanctionedRegion);
+
+    expect(sellersData).toHaveLength(1);
+  });
+
+  it('should fetch all sellers within a sanctioned region in North Korea', async () => {
+    const sanctionedRegion = {
+      location: RestrictedArea.NORTH_KOREA,
+      boundary: RestrictedAreaBoundaries[RestrictedArea.NORTH_KOREA]
+    } as ISanctionedRegion;
+    
+    const sellersData = await getSellersWithinSanctionedRegion(sanctionedRegion);
+
+    expect(sellersData).toHaveLength(1);
+  });
+
+  it('should fetch all sellers within a sanctioned region in Syria', async () => {
+    const sanctionedRegion = {
+      location: RestrictedArea.SYRIA,
+      boundary: RestrictedAreaBoundaries[RestrictedArea.SYRIA]
+    } as ISanctionedRegion;
+    
+    const sellersData = await getSellersWithinSanctionedRegion(sanctionedRegion);
+
+    expect(sellersData).toHaveLength(1);
+  });
+
+  it('should fetch all sellers within a sanctioned region in Republic of Crimea', async () => {
+    const sanctionedRegion = {
+      location: RestrictedArea.REPUBLIC_OF_CRIMEA,
+      boundary: RestrictedAreaBoundaries[RestrictedArea.REPUBLIC_OF_CRIMEA]
+    } as ISanctionedRegion;
+    
+    const sellersData = await getSellersWithinSanctionedRegion(sanctionedRegion);
+
+    expect(sellersData).toHaveLength(1);
+  });
+
+  it('should fetch all sellers within a sanctioned region in Donetsk Oblast', async () => {
+    const sanctionedRegion = {
+      location: RestrictedArea.DONETSK_OBLAST,
+      boundary: RestrictedAreaBoundaries[RestrictedArea.DONETSK_OBLAST]
+    } as ISanctionedRegion;
+    
+    const sellersData = await getSellersWithinSanctionedRegion(sanctionedRegion);
+
+    expect(sellersData).toHaveLength(1);
+  });
+
+  it('should fetch all sellers within a sanctioned region in Luhansk Oblast', async () => {
+    const sanctionedRegion = {
+      location: RestrictedArea.LUHANSK_OBLAST,
+      boundary: RestrictedAreaBoundaries[RestrictedArea.LUHANSK_OBLAST]
+    } as ISanctionedRegion;
+    
+    const sellersData = await getSellersWithinSanctionedRegion(sanctionedRegion);
+    // potential seller location overlap with boundaries between Donetsk Oblast and Luhansk Oblast.
+    expect(sellersData).toHaveLength(1);
   });
 });
