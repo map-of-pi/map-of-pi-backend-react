@@ -3,6 +3,7 @@
   import { RatingScale } from "./models/enums/ratingScale";
   import { SellerType } from "./models/enums/sellerType";
   import { TrustMeterScale } from "./models/enums/trustMeterScale";
+  import { RestrictedArea } from "./models/enums/restrictedArea";
 
   export interface IUser extends Document {
     pi_uid: string;
@@ -50,6 +51,14 @@
     review_date: Date;
   }
 
+  export interface ISanctionedRegion extends Document {
+    location: RestrictedArea;
+    boundary: {
+      type: 'Polygon';
+      coordinates: [[[number, number]]];
+    };
+  }
+
   export interface CompleteFeedback {
     givenReviews: IReviewFeedbackOutput[];
     receivedReviews: IReviewFeedbackOutput[];
@@ -72,3 +81,5 @@
   }
 
   export interface IReviewFeedbackOutput extends IReviewFeedback, PartialReview {}
+
+  export type SanctionedSeller = Pick<ISeller, 'seller_id' | 'name' | 'address'> & { sanctioned_location: string };
