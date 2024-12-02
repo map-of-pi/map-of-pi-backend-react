@@ -81,11 +81,12 @@ const processSellerGeocoding = async (
 
     const locationName = response.data.display_name;
     if (locationName.includes(sanctionedRegion)) {
-      logger.info(`Sanctioned Seller found`, { seller_id, name, address, sanctioned_location: locationName });
+      logger.info('Sanctioned Seller found', { seller_id, name, address, coordinates: [latitude, longitude], sanctioned_location: locationName });
       return { 
         seller_id,
         name,
-        address, 
+        address,
+        sell_map_center, 
         sanctioned_location: locationName 
       };
     }
