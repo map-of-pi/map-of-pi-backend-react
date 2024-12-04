@@ -8,6 +8,7 @@
     pi_uid: string;
     pi_username: string;
     user_name: string;
+
   }
 
   export interface IUserSettings extends Document {
@@ -22,6 +23,9 @@
       type: 'Point';
       coordinates: [number, number];
     };
+  membership_class: "Triple Gold" | "Double Gold" | "Gold" | "Green" | "Member" | "Casual";
+    mappi_balance: number;
+    membership_expiration?: Date | null;
   }
 
   export interface ISeller extends Document {
