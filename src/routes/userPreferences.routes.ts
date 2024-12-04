@@ -207,4 +207,131 @@ userPreferencesRoutes.get(
   userPreferencesController.getUserLocation
 )
 
+/**
+ * @swagger
+ * /api/v1/user-preferences/membership-status/{user_settings_id}:
+ *   get:
+ *     tags:
+ *       - User Preferences
+ *     summary: Fetch membership status by user settings ID
+ *     parameters:
+ *       - name: user_settings_id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the user settings record
+ *     responses:
+ *       200:
+ *         description: Membership status fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 membership_class:
+ *                   type: string
+ *                 mappi_balance:
+ *                   type: number
+ *                 membership_expiration:
+ *                   type: string
+ *                   format: date-time
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */
+userPreferencesRoutes.get(
+  "/membership-status/:user_settings_id",
+  verifyToken,
+  userPreferencesController.getMembershipStatus
+);
+
+/**
+ * @swagger
+ * /api/v1/user-preferences/upgrade-membership:
+ *   post:
+ *     tags:
+ *       - User Preferences
+ *     summary: Upgrade the user's membership
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               user_settings_id:
+ *                 type: string
+ *               newMembershipClass:
+ *                 type: string
+ *               mappiAllowance:
+ *                 type: number
+ *               durationWeeks:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: Membership upgraded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 membership_class:
+ *                   type: string
+ *                 mappi_balance:
+ *                   type: number
+ *                 membership_expiration:
+ *                   type: string
+ *                   format: date-time
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */
+userPreferencesRoutes.post(
+  "/upgrade-membership",
+  verifyToken,
+  userPreferencesController.upgradeMembership
+);
+
+/**
+ * @swagger
+ * /api/v1/user-preferences/use-mappi:
+ *   post:
+ *     tags:
+ *       - User Preferences
+ *     summary: Deduct a mappi from the user's balance
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               user_settings_id:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Mappi deducted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 mappi_balance:
+ *                   type: number
+ *       400:
+ *         description: Insufficient mappi balance
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */
+userPreferencesRoutes.post(
+  "/use-mappi",
+  verifyToken,
+  userPreferencesController.useMappi
+);
+
 export default userPreferencesRoutes;
