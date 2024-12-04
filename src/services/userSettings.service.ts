@@ -184,3 +184,91 @@ export const userLocation = async (uid: string): Promise<{ lat: number; lng: num
   logger.warn("Location not found");
   return null;
 };
+
+// Retrieve Membership Status
+export const getMembershipStatus = async (user_settings_id: string): Promise<{
+  membership_class: string;
+  mappi_balance: number;
+  membership_expiration: Date | null;
+} | null> => {
+  try {
+    const userSettings = await UserSettings.findOne({ user_settings_id }).exec();
+
+    if (!userSettings) {
+      logger.warn(`User Settings not found for ID: ${user_settings_id}`);
+      return null;
+    }
+
+    return {
+      membership_class: userSettings.membership_class,
+      mappi_balance: userSettings.mappi_balance,
+      membership_expiration: userSettings.membership_expiration ?? null,
+    };
+  } catch (error) {
+    logger.error(`Failed to retrieve membership status for userSettingsID ${user_settings_id}:`, error);
+    throw new Error("Failed to retrieve membership status; please try again later");
+  }
+};
+
+// Upgrade Membership
+export const upgradeMembership = async (
+  user_settings_id: string,
+  newMembershipClass: string,
+  mappiAllowance: number,
+  durationWeeks: number
+): Promise<IUserSettings | null> => {
+  try {
+    const userSettings = await UserSettings.findOne({ user_settings_id }).exec();
+
+    if (!userSettings) {
+      logger.warn(`User Settings not found for ID: ${user_settings_id}`);
+      return null;
+    }
+
+    const updatedFields = {
+      membership_class: newMembershipClass,
+      mappi_balance: userSettings.mappi_balance + mappiAllowance,
+      membership_expiration: new Date(
+        new Date().getTime() + durationWeeks * 7 * 24 * 60 * 60 * 1000
+      ),
+    };
+
+    const updatedUserSettings = await UserSettings.findOneAndUpdate(
+      { user_settings_id },
+      { $set: updatedFields },
+      { new: true }
+    ).exec();
+
+    logger.info(`Membership upgraded for user_settings_id: ${user_settings_id}`);
+    return updatedUserSettings;
+  } catch (error) {
+    logger.error(`Failed to upgrade membership for userSettingsID ${user_settings_id}:`, error);
+    throw new Error("Failed to upgrade membership; please try again later");
+  }
+};
+
+// Deduct Mappi
+export const deductMappi = async (user_settings_id: string): Promise<number> => {
+  try {
+    const userSettings = await UserSettings.findOne({ user_settings_id }).exec();
+
+    if (!userSettings) {
+      logger.warn(`User Settings not found for ID: ${user_settings_id}`);
+      throw new Error("User not found");
+    }
+
+    if (userSettings.mappi_balance <= 0) {
+      logger.warn(`Insufficient mappi balance for user_settings_id: ${user_settings_id}`);
+      throw new Error("Insufficient mappi balance");
+    }
+
+    userSettings.mappi_balance -= 1;
+    await userSettings.save();
+
+    logger.info(`Mappi deducted for user_settings_id: ${user_settings_id}. Remaining balance: ${userSettings.mappi_balance}`);
+    return userSettings.mappi_balance;
+  } catch (error) {
+    logger.error(`Failed to deduct mappi for userSettingsID ${user_settings_id}:`, error);
+    throw new Error("Failed to deduct mappi; please try again later");
+  }
+};
