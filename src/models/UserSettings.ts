@@ -54,8 +54,26 @@ const userSettingsSchema = new Schema<IUserSettings>(
         required: false,
         default: [0, 0]
       },
+    },
+    // Membership fields
+    membership_class: {
+      type: String,
+      required: true,
+      default: "Casual",
+      enum: ["Triple Gold", "Double Gold", "Gold", "Green", "Member", "Casual"]
+    },
+    mappi_balance: {
+      type: Number,
+      required: true,
+      default: 0
+    },
+    membership_expiration: {
+      type: Date,
+      required: false, // Optional for casual users
+      default: null
     }
-  }
+  },
+  { timestamps: true }
 );
 
 // use GeoJSON format to store geographical data i.e., points using '2dsphere' index.
