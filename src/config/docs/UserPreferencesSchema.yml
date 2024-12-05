@@ -26,7 +26,7 @@ components:
         trust_meter_rating:
           $ref: '/api/docs/enum/TrustMeterScale.yml#/components/schemas/TrustMeterScale'
         search_map_center:
-          type: object                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+          type: object
           properties:
             type:
               type: string
@@ -39,6 +39,16 @@ components:
           required:
             - type
             - coordinates
+        membership_class:
+          type: string
+          example: Gold
+        mappi_balance:
+          type: number
+          example: 100
+        membership_expiration:
+          type: string
+          format: date-time
+          example: 2025-02-12T19:24:20.206+00:00
         _id:
           type: string
           example: 6673a08503852cb0c9b618d9
@@ -85,6 +95,16 @@ components:
           required:
             - type
             - coordinates
+        membership_class:
+          type: string
+          example: Gold
+        mappi_balance:
+          type: number
+          example: 100
+        membership_expiration:
+          type: string
+          format: date-time
+          example: 2025-02-12T19:24:20.206+00:00
       required:
         - user_settings_id
 
@@ -127,6 +147,16 @@ components:
           required:
             - type
             - coordinates
+        membership_class:
+          type: string
+          example: Gold
+        mappi_balance:
+          type: number
+          example: 100
+        membership_expiration:
+          type: string
+          format: date-time
+          example: 2025-02-12T19:24:20.206+00:00
         _id:
           type: string
           example: 66741c62b175e7d059a2639e
@@ -181,6 +211,16 @@ components:
               required:
                 - type
                 - coordinates
+            membership_class:
+              type: string
+              example: Gold
+            mappi_balance:
+              type: number
+              example: 100
+            membership_expiration:
+              type: string
+              format: date-time
+              example: 2025-02-12T19:24:20.206+00:00
             _id:
               type: string
               example: 666c84b9d77068c6efeeaa1a
@@ -188,7 +228,7 @@ components:
               type: number
               example: 0
 
-    GetUserLocationRs:
+ GetUserLocationRs:
       type: object
       properties:
         origin: 
