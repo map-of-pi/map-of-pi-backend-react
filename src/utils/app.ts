@@ -16,7 +16,6 @@ import reviewFeedbackRoutes from "../routes/reviewFeedback.routes";
 import mapCenterRoutes from "../routes/mapCenter.routes";
 import tierRoutes from "../routes/tier.routes";
 
-
 dotenv.config();
 
 const app = express();
