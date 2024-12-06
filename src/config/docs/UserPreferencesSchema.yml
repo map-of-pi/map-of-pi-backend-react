@@ -181,6 +181,16 @@ components:
             user_name:
               type: string
               example: Test User
+            membership_class:
+              type: string
+              example: Gold
+            mappi_balance:
+              type: number
+              example: 100
+            membership_expiration:
+              type: string
+              format: date-time
+              example: 2025-02-12T19:24:20.206+00:00
             email:
               type: string
               nullable: true
@@ -211,16 +221,6 @@ components:
               required:
                 - type
                 - coordinates
-            membership_class:
-              type: string
-              example: Gold
-            mappi_balance:
-              type: number
-              example: 100
-            membership_expiration:
-              type: string
-              format: date-time
-              example: 2025-02-12T19:24:20.206+00:00
             _id:
               type: string
               example: 666c84b9d77068c6efeeaa1a
@@ -228,10 +228,10 @@ components:
               type: number
               example: 0
 
- GetUserLocationRs:
+    GetUserLocationRs:
       type: object
       properties:
-        origin: 
+        origin:
           type: object
           properties:
             lat:
