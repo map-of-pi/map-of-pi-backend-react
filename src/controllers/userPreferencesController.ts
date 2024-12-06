@@ -100,6 +100,7 @@ export const getUserLocation = async (req: Request, res: Response) => {
 
 export const getMembershipStatus = async (req: Request, res: Response) => {
   const { user_settings_id } = req.params;
+
   try {
     const userPreferences = await userSettingsService.getUserSettingsById(user_settings_id);
     if (!userPreferences) {
@@ -120,46 +121,35 @@ export const getMembershipStatus = async (req: Request, res: Response) => {
 };
 
 export const upgradeMembership = async (req: Request, res: Response) => {
-  const { user_settings_id, newMembershipClass, mappiAllowance, durationWeeks } = req.body;
+  // Extract user_settings_id from the authenticated user
+  const user_settings_id = req.currentUser?.pi_uid;
+
+  if (!user_settings_id) {
+    return res.status(401).json({ message: "Unauthorized: No user information found" });
+  }
+
+  logger.info(`Authenticated user ID: ${user_settings_id}`);
 
   try {
-    const userPreferences = await userSettingsService.getUserSettingsById(user_settings_id);
-    if (!userPreferences) {
-      logger.warn(`User not found for ID: ${user_settings_id}`);
+    const updatedUserSettings = await userSettingsService.upgradeMembership(
+      user_settings_id,
+      req.body.newMembershipClass,
+      req.body.mappiAllowance,
+      req.body.durationWeeks
+    );
+
+    if (!updatedUserSettings) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Update membership_class
-    userPreferences.membership_class = newMembershipClass;
-
-    // Add to existing mappi_balance
-    userPreferences.mappi_balance += mappiAllowance;
-
-    // Calculate new membership_expiration
-    const currentTime = new Date().getTime();
-    let newExpirationTime = currentTime + durationWeeks * 7 * 24 * 60 * 60 * 1000;
-
-    if (userPreferences.membership_expiration) {
-      const existingExpirationTime = userPreferences.membership_expiration.getTime();
-      if (existingExpirationTime > currentTime) {
-        // Extend from existing expiration
-        newExpirationTime = existingExpirationTime + durationWeeks * 7 * 24 * 60 * 60 * 1000;
-      }
-    }
-
-    userPreferences.membership_expiration = new Date(newExpirationTime);
-
-    await userPreferences.save();
-
-    logger.info(`Membership upgraded for ID: ${user_settings_id}`);
     res.status(200).json({
-      membership_class: userPreferences.membership_class,
-      mappi_balance: userPreferences.mappi_balance,
-      membership_expiration: userPreferences.membership_expiration,
+      membership_class: updatedUserSettings.membership_class,
+      mappi_balance: updatedUserSettings.mappi_balance,
+      membership_expiration: updatedUserSettings.membership_expiration,
     });
   } catch (error) {
-    logger.error(`Failed to upgrade membership for ID ${user_settings_id}:`, error);
-    return res.status(500).json({ message: "An error occurred while upgrading membership; please try again later" });
+    logger.error("Failed to upgrade membership:", error);
+    res.status(500).json({ message: "Failed to upgrade membership; please try again later" });
   }
 };
 
