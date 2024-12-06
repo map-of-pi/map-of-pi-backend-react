@@ -225,9 +225,20 @@ export const upgradeMembership = async (
       return null;
     }
 
+    // Validate mappi_balance
+    const currentMappiBalance = userSettings.mappi_balance || 0; // Default to 0 if undefined or null
+    if (isNaN(currentMappiBalance)) {
+      throw new Error(`Invalid mappi_balance for user: ${user_settings_id}`);
+    }
+
+    // Validate durationWeeks
+    if (isNaN(durationWeeks) || durationWeeks <= 0) {
+      throw new Error("Invalid durationWeeks value");
+    }
+
     const updatedFields = {
-      membership_class: newMembershipClass,
-      mappi_balance: userSettings.mappi_balance + mappiAllowance,
+      membership_class: newMembershipClass || userSettings.membership_class,
+      mappi_balance: currentMappiBalance + mappiAllowance,
       membership_expiration: new Date(
         new Date().getTime() + durationWeeks * 7 * 24 * 60 * 60 * 1000
       ),
@@ -236,7 +247,7 @@ export const upgradeMembership = async (
     const updatedUserSettings = await UserSettings.findOneAndUpdate(
       { user_settings_id },
       { $set: updatedFields },
-      { new: true }
+      { new: true, runValidators: true } // Validate schema rules during update
     ).exec();
 
     logger.info(`Membership upgraded for user_settings_id: ${user_settings_id}`);
@@ -244,31 +255,5 @@ export const upgradeMembership = async (
   } catch (error) {
     logger.error(`Failed to upgrade membership for userSettingsID ${user_settings_id}:`, error);
     throw new Error("Failed to upgrade membership; please try again later");
-  }
-};
-
-// Deduct Mappi
-export const deductMappi = async (user_settings_id: string): Promise<number> => {
-  try {
-    const userSettings = await UserSettings.findOne({ user_settings_id }).exec();
-
-    if (!userSettings) {
-      logger.warn(`User Settings not found for ID: ${user_settings_id}`);
-      throw new Error("User not found");
-    }
-
-    if (userSettings.mappi_balance <= 0) {
-      logger.warn(`Insufficient mappi balance for user_settings_id: ${user_settings_id}`);
-      throw new Error("Insufficient mappi balance");
-    }
-
-    userSettings.mappi_balance -= 1;
-    await userSettings.save();
-
-    logger.info(`Mappi deducted for user_settings_id: ${user_settings_id}. Remaining balance: ${userSettings.mappi_balance}`);
-    return userSettings.mappi_balance;
-  } catch (error) {
-    logger.error(`Failed to deduct mappi for userSettingsID ${user_settings_id}:`, error);
-    throw new Error("Failed to deduct mappi; please try again later");
   }
 };
