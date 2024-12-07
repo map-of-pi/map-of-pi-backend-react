@@ -1,4 +1,9 @@
 components:
+  securitySchemes:
+    AdminPasswordAuth:
+      type: http
+      scheme: basic
+      
   schemas:
     GetSanctionedSellersReportRs:
       type: array
