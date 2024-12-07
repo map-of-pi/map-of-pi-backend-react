@@ -184,3 +184,76 @@ export const userLocation = async (uid: string): Promise<{ lat: number; lng: num
   logger.warn("Location not found");
   return null;
 };
+
+// Retrieve Membership Status
+export const getMembershipStatus = async (user_settings_id: string): Promise<{
+  membership_class: string;
+  mappi_balance: number;
+  membership_expiration: Date | null;
+} | null> => {
+  try {
+    const userSettings = await UserSettings.findOne({ user_settings_id }).exec();
+
+    if (!userSettings) {
+      logger.warn(`User Settings not found for ID: ${user_settings_id}`);
+      return null;
+    }
+
+    return {
+      membership_class: userSettings.membership_class,
+      mappi_balance: userSettings.mappi_balance,
+      membership_expiration: userSettings.membership_expiration ?? null,
+    };
+  } catch (error) {
+    logger.error(`Failed to retrieve membership status for userSettingsID ${user_settings_id}:`, error);
+    throw new Error("Failed to retrieve membership status; please try again later");
+  }
+};
+
+// Upgrade Membership
+export const upgradeMembership = async (
+  user_settings_id: string,
+  newMembershipClass: string,
+  mappiAllowance: number,
+  durationWeeks: number
+): Promise<IUserSettings | null> => {
+  try {
+    const userSettings = await UserSettings.findOne({ user_settings_id }).exec();
+
+    if (!userSettings) {
+      logger.warn(`User Settings not found for ID: ${user_settings_id}`);
+      return null;
+    }
+
+    // Validate mappi_balance
+    const currentMappiBalance = userSettings.mappi_balance || 0; // Default to 0 if undefined or null
+    if (isNaN(currentMappiBalance)) {
+      throw new Error(`Invalid mappi_balance for user: ${user_settings_id}`);
+    }
+
+    // Validate durationWeeks
+    if (isNaN(durationWeeks) || durationWeeks <= 0) {
+      throw new Error("Invalid durationWeeks value");
+    }
+
+    const updatedFields = {
+      membership_class: newMembershipClass || userSettings.membership_class,
+      mappi_balance: currentMappiBalance + mappiAllowance,
+      membership_expiration: new Date(
+        new Date().getTime() + durationWeeks * 7 * 24 * 60 * 60 * 1000
+      ),
+    };
+
+    const updatedUserSettings = await UserSettings.findOneAndUpdate(
+      { user_settings_id },
+      { $set: updatedFields },
+      { new: true, runValidators: true } // Validate schema rules during update
+    ).exec();
+
+    logger.info(`Membership upgraded for user_settings_id: ${user_settings_id}`);
+    return updatedUserSettings;
+  } catch (error) {
+    logger.error(`Failed to upgrade membership for userSettingsID ${user_settings_id}:`, error);
+    throw new Error("Failed to upgrade membership; please try again later");
+  }
+};

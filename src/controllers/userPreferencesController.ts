@@ -97,3 +97,84 @@ export const getUserLocation = async (req: Request, res: Response) => {
     return res.status(500).json({ message: 'An error occurred while getting user location; please try again later' });
   }
 };
+
+export const getMembershipStatus = async (req: Request, res: Response) => {
+  const { user_settings_id } = req.params;
+
+  try {
+    const userPreferences = await userSettingsService.getUserSettingsById(user_settings_id);
+    if (!userPreferences) {
+      logger.warn(`Membership status not found for ID: ${user_settings_id}`);
+      return res.status(404).json({ message: "Membership status not found" });
+    }
+
+    logger.info(`Fetched membership status for ID: ${user_settings_id}`);
+    res.status(200).json({
+      membership_class: userPreferences.membership_class,
+      mappi_balance: userPreferences.mappi_balance,
+      membership_expiration: userPreferences.membership_expiration,
+    });
+  } catch (error) {
+    logger.error(`Failed to fetch membership status for ID ${user_settings_id}:`, error);
+    return res.status(500).json({ message: "An error occurred while getting membership status; please try again later" });
+  }
+};
+
+export const upgradeMembership = async (req: Request, res: Response) => {
+  // Extract user_settings_id from the authenticated user
+  const user_settings_id = req.currentUser?.pi_uid;
+
+  if (!user_settings_id) {
+    return res.status(401).json({ message: "Unauthorized: No user information found" });
+  }
+
+  logger.info(`Authenticated user ID: ${user_settings_id}`);
+
+  try {
+    const updatedUserSettings = await userSettingsService.upgradeMembership(
+      user_settings_id,
+      req.body.newMembershipClass,
+      req.body.mappiAllowance,
+      req.body.durationWeeks
+    );
+
+    if (!updatedUserSettings) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({
+      membership_class: updatedUserSettings.membership_class,
+      mappi_balance: updatedUserSettings.mappi_balance,
+      membership_expiration: updatedUserSettings.membership_expiration,
+    });
+  } catch (error) {
+    logger.error("Failed to upgrade membership:", error);
+    res.status(500).json({ message: "Failed to upgrade membership; please try again later" });
+  }
+};
+
+export const useMappi = async (req: Request, res: Response) => {
+  const { user_settings_id } = req.body;
+
+  try {
+    const userPreferences = await userSettingsService.getUserSettingsById(user_settings_id);
+    if (!userPreferences) {
+      logger.warn(`User not found for ID: ${user_settings_id}`);
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (userPreferences.mappi_balance <= 0) {
+      logger.warn(`Insufficient mappi balance for user ID: ${user_settings_id}`);
+      return res.status(400).json({ message: "Insufficient mappi balance" });
+    }
+
+    userPreferences.mappi_balance -= 1;
+    await userPreferences.save();
+
+    logger.info(`Mappi deducted for ID: ${user_settings_id}`);
+    res.status(200).json({ mappi_balance: userPreferences.mappi_balance });
+  } catch (error) {
+    logger.error(`Failed to deduct mappi for ID ${user_settings_id}:`, error);
+    return res.status(500).json({ message: "An error occurred while using mappi; please try again later" });
+  }
+};
