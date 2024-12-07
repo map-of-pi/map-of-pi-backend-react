@@ -1,5 +1,6 @@
 import {Router} from "express";
 import * as reportController from "../controllers/reportsController";
+import { verifyAdminToken } from "../middlewares/verifyToken";
 
 const reportRoutes = Router();
 
@@ -9,7 +10,9 @@ const reportRoutes = Router();
  *   post:
  *     tags:
  *       - Report
- *     summary: Build a report for sellers in sanctioned regions.
+ *     summary: Gather and build a report for sellers in sanctioned regions.
+ *     security:
+ *       - AdminPasswordAuth: []
  *     responses:
  *       200:
  *         description: Successful response
@@ -19,11 +22,14 @@ const reportRoutes = Router();
  *               type: array
  *               items:
  *                 $ref: '/api/docs/ReportsSchema.yml#/components/schemas/GetSanctionedSellersReportRs'
+ *       401:
+ *         description: Unauthorized | Admin credentials are required | Admin credentials are invalid
  *       500:
  *         description: Internal server error
  */
 reportRoutes.post(
   "/sanctioned-sellers-report",
+  verifyAdminToken,
   reportController.getSanctionedSellersReport
 );
 
