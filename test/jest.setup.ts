@@ -10,8 +10,9 @@ import SanctionedRegion from '../src/models/misc/SanctionedRegion';
 
 // mock the Winston logger
 jest.mock('../src/config/loggingConfig', () => ({
-  info: jest.fn(),
   debug: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
   error: jest.fn(),
 }));
 

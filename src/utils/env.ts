@@ -9,6 +9,8 @@ export const env = {
   JWT_SECRET: process.env.JWT_SECRET || 'default_secret',
   PI_API_KEY: process.env.PI_API_KEY || '',
   PLATFORM_API_URL: process.env.PLATFORM_API_URL || '',
+  ADMIN_API_USERNAME: process.env.ADMIN_API_USERNAME || '',
+  ADMIN_API_PASSWORD: process.env.ADMIN_API_PASSWORD || '',
   UPLOAD_PATH: process.env.UPLOAD_PATH || '',
   MONGODB_URL: process.env.MONGODB_URL || '',
   SENTRY_DSN: process.env.SENTRY_DSN || '',
