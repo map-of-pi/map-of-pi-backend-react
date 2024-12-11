@@ -95,7 +95,7 @@ userPreferencesRoutes.get("/:user_settings_id", userPreferencesController.getUse
  *       404:
  *         description: User Preferences not found | User Settings not found
  *       401:
- *         description: Unauthorized | Authentication token is required | Authentication token is invalid or expired
+ *         description: Unauthorized
  *       400:
  *         description: Bad request
  *       500:
@@ -128,7 +128,7 @@ userPreferencesRoutes.post(
  *             schema:
  *               $ref: '/api/docs/UserPreferencesSchema.yml#/components/schemas/AddUserPreferencesRs'
  *       401:
- *         description: Unauthorized | Authentication token is required | Authentication token is invalid or expired
+ *         description: Unauthorized
  *       400:
  *         description: Bad request
  *       500:
@@ -165,7 +165,7 @@ userPreferencesRoutes.put(
  *       404:
  *         description: User Preferences not found
  *       401:
- *         description: Unauthorized | Authentication token is required | Authentication token is invalid or expired
+ *         description: Unauthorized
  *       400:
  *         description: Bad request
  *       500:
@@ -195,7 +195,7 @@ userPreferencesRoutes.delete(
  *       404:
  *         description: User location not found
  *       401:
- *         description: Unauthorized | Authentication token is required | Authentication token is invalid or expired
+ *         description: Unauthorized
  *       400:
  *         description: Bad request
  *       500:
