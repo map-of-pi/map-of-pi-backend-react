@@ -173,7 +173,7 @@ sellerRoutes.post(
  *             schema:
  *               $ref: '/api/docs/SellersSchema.yml#/components/schemas/RegisterSellerRs'
  *       401:
- *         description: Unauthorized | Unauthorized user
+ *         description: Unauthorized
  *       400:
  *         description: Bad request
  *       500:
@@ -203,7 +203,7 @@ sellerRoutes.put(
  *       404:
  *         description: Seller not found
  *       401:
- *         description: Unauthorized | Authentication token is required | Authentication token is invalid or expired
+ *         description: Unauthorized
  *       400:
  *         description: Bad request
  *       500:
