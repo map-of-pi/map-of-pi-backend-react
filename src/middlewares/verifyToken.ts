@@ -28,7 +28,7 @@ export const verifyToken = async (
 
   if (!token) {
     logger.warn("Authentication token is missing.");
-    return res.status(401).json({ message: "Authentication token is required" });
+    return res.status(401).json({ message: "Unauthorized" });
   }
 
   try {
@@ -37,7 +37,7 @@ export const verifyToken = async (
 
     if (!currentUser) {
       logger.warn("Authentication token is invalid or expired.");
-      return res.status(401).json({ message: "Authentication token is invalid or expired" });
+      return res.status(401).json({ message: "Unauthorized" });
     }
 
     // Attach currentUser to the request object
@@ -61,7 +61,7 @@ export const verifyAdminToken = (
   const base64Credentials = authHeader && authHeader.split(" ")[1];
   if (!base64Credentials) {
     logger.warn("Admin credentials are missing.");
-    return res.status(401).json({ message: "Admin credentials are required" });
+    return res.status(401).json({ message: "Unauthorized" });
   }
 
   const credentials = Buffer.from(base64Credentials, "base64").toString("ascii");
@@ -69,7 +69,7 @@ export const verifyAdminToken = (
 
   if (username !== ADMIN_API_USERNAME || password !== ADMIN_API_PASSWORD) {
     logger.warn("Admin credentials are invalid.");
-    return res.status(401).json({ message: "Admin credentials are invalid" });
+    return res.status(401).json({ message: "Unauthorized" });
   }
 
   logger.info("Admin credentials verified successfully.");

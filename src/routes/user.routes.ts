@@ -78,7 +78,7 @@ userRoutes.post("/authenticate", isPioneerFound, userController.authenticateUser
  *       404:
  *         description: User not found | Pioneer not found
  *       401:
- *         description: Unauthorized | Authentication token is required | Authentication token is invalid or expired
+ *         description: Unauthorized
  *       400:
  *         description: Bad request
  *       500:
@@ -133,7 +133,7 @@ userRoutes.get("/:pi_uid", userController.getUser);
  *       404:
  *         description: User not found
  *       401:
- *         description: Unauthorized | Authentication token is required | Authentication token is invalid or expired
+ *         description: Unauthorized
  *       400:
  *         description: Bad request
  *       500:

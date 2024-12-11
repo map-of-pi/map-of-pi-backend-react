@@ -23,7 +23,7 @@ const reportRoutes = Router();
  *               items:
  *                 $ref: '/api/docs/ReportsSchema.yml#/components/schemas/GetSanctionedSellersReportRs'
  *       401:
- *         description: Unauthorized | Admin credentials are required | Admin credentials are invalid
+ *         description: Unauthorized
  *       500:
  *         description: Internal server error
  */
