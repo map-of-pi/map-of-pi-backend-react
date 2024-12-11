@@ -26,7 +26,7 @@ describe("verifyAdminToken function", () => {
 
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.json).toHaveBeenCalledWith({
-      message: "Admin credentials are required",
+      message: "Unauthorized",
     });
     expect(mockNext).not.toHaveBeenCalled();
   });
@@ -38,7 +38,7 @@ describe("verifyAdminToken function", () => {
 
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.json).toHaveBeenCalledWith({
-      message: "Admin credentials are invalid",
+      message: "Unauthorized",
     });
     expect(mockNext).not.toHaveBeenCalled();
   });
