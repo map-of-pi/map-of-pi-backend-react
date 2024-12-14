@@ -5,12 +5,14 @@
   import { TrustMeterScale } from "./models/enums/trustMeterScale";
   import { RestrictedArea } from "./models/enums/restrictedArea";
 
+  // User
   export interface IUser extends Document {
     pi_uid: string;
     pi_username: string;
     user_name: string;
   }
 
+  // User Settings
   export interface IUserSettings extends Document {
     user_settings_id: string;
     user_name: string;
@@ -25,6 +27,16 @@
     };
   }
 
+  // Membership
+  export interface IMembership extends Document {
+      user_id: Types.ObjectId;
+      membership_calss: string;
+      mappi_balance: number;
+      membership_expiration: Date | null;
+      mappi_used_to_date: number;
+  }
+
+  // Seller
   export interface ISeller extends Document {
     seller_id: string;
     name: string;
@@ -40,6 +52,7 @@
     order_online_enabled_pref: boolean;
   }
 
+  // Review Feedback
   export interface IReviewFeedback extends Document {
     _id: string;
     review_receiver_id: string;
@@ -51,6 +64,7 @@
     review_date: Date;
   }
 
+  // Sanctioned Regions
   export interface ISanctionedRegion extends Document {
     location: RestrictedArea;
     boundary: {
