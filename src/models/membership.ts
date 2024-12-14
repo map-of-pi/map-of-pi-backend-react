@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { MembershipType } from "./enums/memberShipType";
 
 const membershipSchema = new mongoose.Schema(
 	{
@@ -10,8 +11,8 @@ const membershipSchema = new mongoose.Schema(
 		membership_class: {
 			type: String,
 			required: true,
-			default: 'Casual',
-			enum: ["Triple Gold", "Double Gold", "Gold", "Green", "Member", "Casual"],
+			default: MembershipType.CASUAL,
+    		enum: Object.values(MembershipType),
 		},
 		mappi_balance: {
 			type: Number,
