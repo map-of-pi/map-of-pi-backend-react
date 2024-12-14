@@ -46,6 +46,11 @@ export const upgradeMembership = async (
       return null;
     }
 
+     // Validate the new membership class
+     if (!Object.values(MembershipType).includes(newMembershipClass)) {
+        throw new Error("Invalid membership class provided");
+      }
+
     // Calculate the new expiration date
     const currentDate = new Date();
     const newExpirationDate = membership.membership_expiration
