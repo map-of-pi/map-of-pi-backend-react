@@ -1,5 +1,6 @@
 import Membership from "../models/membership";
 import logger from "../config/loggingConfig";
+import { MembershipType } from "../models/enums/memberShipType";
 
 // Retrieve Membership Status
 export const getMembershipStatus = async (
@@ -32,7 +33,7 @@ export const getMembershipStatus = async (
 // Upgrade Membership
 export const upgradeMembership = async (
   user_id: string,
-  newMembershipClass: string,
+  newMembershipClass: MembershipType,
   mappiAllowance: number,
   durationWeeks: number
 ): Promise<any> => {
@@ -58,7 +59,7 @@ export const upgradeMembership = async (
       : new Date(currentDate.getTime() + durationWeeks * 7 * 24 * 60 * 60 * 1000);
 
     // Update fields
-    membership.membership_class = newMembershipClass as "Casual" | "Triple Gold" | "Double Gold" | "Gold" | "Green" | "Member";
+    membership.membership_class = newMembershipClass as MembershipType;
     membership.mappi_balance += mappiAllowance;
     membership.membership_expiration = newExpirationDate;
 
