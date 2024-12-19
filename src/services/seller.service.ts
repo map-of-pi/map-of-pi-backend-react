@@ -4,9 +4,11 @@ import UserSettings from "../models/UserSettings";
 import { VisibleSellerType } from '../models/enums/sellerType';
 import { TrustMeterScale } from "../models/enums/trustMeterScale";
 import { getUserSettingsById } from "./userSettings.service";
-import { ISeller, IUser, IUserSettings, ISellerWithSettings, ISanctionedRegion } from "../types";
+import { ISeller, IUser, IUserSettings, ISellerWithSettings, ISanctionedRegion, ISellerItem } from "../types";
 
 import logger from "../config/loggingConfig";
+import SellerItem from "../models/SellerItem";
+import { timeStamp } from "console";
 
 // Helper function to get settings for all sellers and merge them into seller objects
 const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSettings[]> => {
@@ -133,10 +135,11 @@ export const getSellersWithinSanctionedRegion = async (region: ISanctionedRegion
 // Fetch a single seller by ID
 export const getSingleSellerById = async (seller_id: string): Promise<ISeller | null> => {
   try {
-    const [seller, userSettings, user] = await Promise.all([
+    const [seller, userSettings, user, items] = await Promise.all([
       Seller.findOne({ seller_id }).exec(),
       UserSettings.findOne({ user_settings_id: seller_id }).exec(),
-      User.findOne({ pi_uid: seller_id }).exec()
+      User.findOne({ pi_uid: seller_id }).exec(),
+      SellerItem.find({seller_id: seller_id}).exec()
     ]);
 
     if (!seller && !userSettings && !user) {
@@ -147,6 +150,7 @@ export const getSingleSellerById = async (seller_id: string): Promise<ISeller | 
       sellerShopInfo: seller as ISeller,
       sellerSettings: userSettings as IUserSettings,
       sellerInfo: user as IUser,
+      sellerItems: items as ISellerItem[] || null
     } as any;
   } catch (error) {
     logger.error(`Failed to get single seller for sellerID ${ seller_id }:`, error);
@@ -209,6 +213,92 @@ export const deleteSeller = async (seller_id: string | undefined): Promise<ISell
     return deletedSeller ? deletedSeller as ISeller : null;
   } catch (error) {
     logger.error(`Failed to delete seller for sellerID ${ seller_id }:`, error);
+    throw new Error('Failed to delete seller; please try again later');
+  }
+};
+
+export const addOrUpdateSellerItem = async (
+  seller: ISeller,
+  item: ISellerItem,
+  image: string
+): Promise<ISellerItem | null> => {
+  try {
+    // Get the current date
+    const today = new Date();
+
+    // Calculate `expired_by` based on `created_date` and `duration` (duration is in weeks)
+    const durationInMs = (parseInt(item.duration.toString()) || 1) * 7 * 24 * 60 * 60 * 1000;
+    const expiredBy = new Date(today.getTime() + durationInMs);
+
+    // Check if the item already exists (use a unique field like `item_id` or another identifier)
+    const existingItem = await SellerItem.findOne({
+      item_id: item._id,
+      seller_id: seller.seller_id,
+    });
+
+    if (existingItem) {
+      // Update the existing item by modifying fields and saving
+      existingItem.set({
+        ...item,
+        updated_at: today,
+        expired_by: expiredBy,
+      });
+      const updatedItem = await existingItem.save();
+
+      logger.info('Item updated successfully');
+      return updatedItem;
+    } else {
+      // Create a new item
+      const newItem = new SellerItem({
+        seller_id: seller.seller_id,
+        name: item.name,
+        description: item.description,
+        price: item.price,
+        stock_level: item.stock_level,
+        duration: item.duration,
+        image: image,
+        created_at: today,
+        updated_at: today,
+        expired_by: expiredBy,
+      });
+      await newItem.save();
+
+      logger.info('Item created successfully');
+      return newItem;
+    }
+  } catch (error:any) {
+    logger.error(`Error adding or updating item: ${error.message}`);
+    return null;
+  }
+};
+
+export const getAllSellerItems = async (
+  seller_id: string,
+): Promise<ISellerItem[] | null> => {
+  try {
+    const existingItems = await SellerItem.find({
+      seller_id: seller_id,
+    });
+
+    if (!existingItems) {
+      logger.warn('Item list is empty.');
+      return null;      
+    } 
+    logger.info('fetched item list successfully');
+    return existingItems as ISellerItem[];
+  } catch (error:any) {
+    logger.error(`Error fetching seller item list: ${error.message}`);
+    return null;
+  }
+};
+
+// Delete existing seller
+export const deleteSellerItem = async (id: string): Promise<ISellerItem | null> => {
+  try {
+    const deletedSeller = await SellerItem.findByIdAndDelete(id).exec();
+    return deletedSeller ? deletedSeller as ISellerItem : null;
+  } catch (error) {
+    logger.error(`Failed to delete seller for sellerID ${ id }:`, error);
     throw new Error('Failed to delete seller; please try again later');
   }
 };
