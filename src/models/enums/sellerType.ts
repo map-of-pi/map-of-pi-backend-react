@@ -9,3 +9,8 @@ enum InvisibleSellerType {
 
 export const SellerType = Object.assign({}, VisibleSellerType, InvisibleSellerType);
 export type SellerType = VisibleSellerType | InvisibleSellerType;
+
+export enum FulfillmentType {
+  CollectionByBuyer = 'Collection by Buyer',
+  DeliverToBuyer = 'Delivered to Buyer'
+}

@@ -103,3 +103,73 @@ export const deleteSeller = async (req: Request, res: Response) => {
     return res.status(500).json({ message: 'An error occurred while deleting seller; please try again later' });
   }
 };
+
+export const addOrUpdateItem = async (req: Request, res: Response) => {
+  const currentSeller = req.currentSeller;
+
+  // Check if authuser is the currentseller
+  if (!currentSeller) {
+    console.warn('No authenticated seller found when trying to modify seller item.');
+    return res.status(401).json({ error: 'Seller not authenticated' });
+  }
+
+  const formData = req.body;
+  logger.debug('Received formData for seller item:', { formData });
+
+  try {
+    // Image file handling
+    const file = req.file;
+    const image = file ? await uploadImage(currentSeller.seller_id, file, 'seller-item') : '';
+    formData.image = image;
+    console.log('Form data being sent:', { formData });
+    // Add or update Item
+    const sellerItem = await sellerService.addOrUpdateSellerItem(currentSeller, formData, image);
+    logger.info(`Added or updated seller Item for seller ${currentSeller.seller_id}`);
+
+    // Send response
+    return res.status(200).json({ 
+      sellerItem: sellerItem, 
+    });
+  } catch (error) {
+    logger.error(`Failed to add or update seller item for userID ${currentSeller.seller_id}:`, error);
+    return res.status(500).json({
+      message: 'An error occurred while updating seller item; please try again later',
+    });
+  }
+};
+
+export const fetchSellerItems = async (req: Request, res: Response) => {  
+  const { seller_id } = req.params
+  try {
+    const items = await sellerService.getAllSellerItems(seller_id);
+
+    if (!items || items.length === 0) {
+      logger.warn(`No items is found for seller: ${seller_id}`);
+      return res.status(204).json({ message: "Seller Items not found" });
+    }
+    logger.info(`Fetched ${items.length} items for seller: ${seller_id}`);
+    return res.status(200).json(items);
+  } catch (error) {
+    logger.error('Failed to fetch seller items:', error);
+    return res.status(500).json({ message: 'An error occurred while fetching seller Items; please try again later' });
+  }
+};
+
+export const deleteItem = async (req: Request, res: Response) => {
+  try {
+    const currentSeller = req.currentSeller;
+
+    // Check if authuser is the currentseller
+  if (!currentSeller) {
+    console.warn('No authenticated seller found when trying to delete seller item.');
+    return res.status(401).json({ error: 'Seller not authenticated' });
+  }
+    const { item_id } = req.params
+    const deletedItem = await sellerService.deleteSellerItem(item_id);
+    logger.info(`Deleted Item with ID ${currentSeller.seller_id}`);
+    res.status(200).json({ message: "Item deleted successfully", deletedItem });
+  } catch (error) {
+    logger.error(`Failed to delete Item for userID ${ req.currentUser?.pi_uid }:`, error);
+    return res.status(500).json({ message: 'An error occurred while deleting item; please try again later' });
+  }
+};

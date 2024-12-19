@@ -216,4 +216,22 @@ sellerRoutes.delete(
   sellerController.deleteSeller
 );
 
+sellerRoutes.put(
+  "/item/add", 
+  verifyToken,
+  isSellerFound,
+  upload.single("image"),
+  sellerController.addOrUpdateItem
+);
+
+sellerRoutes.delete(
+  "/item/delete/:item_id",
+  verifyToken,
+  isSellerFound,
+  sellerController.deleteItem
+);
+
+sellerRoutes.get("/item/:seller_id", sellerController.fetchSellerItems);
+
+
 export default sellerRoutes;
