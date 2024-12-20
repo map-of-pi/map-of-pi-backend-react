@@ -81,7 +81,7 @@ export const getUserLocation = async (req: Request, res: Response) => {
     const zoom = 13;
     if (!authUser?.pi_uid) {
       logger.warn(`User not authenticated`);
-      return res.status(401).json({ message: "User not authenticated" });      
+      return res.status(401).json({ message: "Unauthorized" });      
     }
 
     location = await userSettingsService.userLocation(authUser.pi_uid);
