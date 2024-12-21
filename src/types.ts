@@ -30,7 +30,7 @@
   // Membership
   export interface IMembership extends Document {
       user_id: Types.ObjectId;
-      membership_calss: string;
+      membership_class: string;
       mappi_balance: number;
       membership_expiration: Date | null;
       mappi_used_to_date: number;
