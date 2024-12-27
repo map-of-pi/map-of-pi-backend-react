@@ -221,17 +221,17 @@ sellerRoutes.put(
   verifyToken,
   isSellerFound,
   upload.single("image"),
-  sellerController.addOrUpdateItem
+  sellerController.addOrUpdateSellerItem
 );
 
 sellerRoutes.delete(
   "/item/delete/:item_id",
   verifyToken,
   isSellerFound,
-  sellerController.deleteItem
+  sellerController.deleteSellerItem
 );
 
-sellerRoutes.get("/item/:seller_id", sellerController.fetchSellerItems);
+sellerRoutes.get("/item/:seller_id", sellerController.getSellerItems);
 
 
 export default sellerRoutes;

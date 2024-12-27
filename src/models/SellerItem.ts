@@ -14,39 +14,39 @@ const sellerItemSchema = new Schema<ISellerItem>(
       required: true,
     },
     description: {
-        type: String,
-        default: null
+      type: String,
+      default: null
     },
     price: {
-        type: Number,
-        required: true,
-        default: 0.01
+      type: Types.Decimal128,
+      required: true,
+      default: 0.01
     },
     stock_level: {
-        type: String,
-        enum: Object.values(StockLevelType).filter(value => typeof value === 'string')
+      type: String,
+      enum: Object.values(StockLevelType).filter(value => typeof value === 'string')
     },
     image: {
-        type: String,
-        required: false,
-        default: null
+      type: String,
+      required: false,
+      default: null
     },
     duration: {
-        type: Types.Decimal128,
-        default: 1,
-        min: 1        
+      type: Number,
+      default: 1,
+      min: 1        
     },
     created_at: {
-        type: Date,
-        required: true,
+      type: Date,
+      required: true,
     },
     updated_at: {
-        type: Date,
-        required: true,
+      type: Date,
+      required: true,
     },
     expired_by: {
-        type: Date,
-        required: true,
+      type: Date,
+      required: true,
     }
   }
 );

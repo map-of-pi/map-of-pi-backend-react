@@ -56,11 +56,13 @@
       },
       fulfillment_method: {
         type: String,
+        enum: Object.values(FulfillmentType).filter(value => typeof value === 'string'),
         default: FulfillmentType.CollectionByBuyer
       }, 
       fulfillment_description: {
         type: String,
-        default: null
+        default: null,
+        required: false
       }
     },
     { timestamps: true } // Adds timestamps to track creation and update times

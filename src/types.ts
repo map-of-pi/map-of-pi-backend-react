@@ -48,10 +48,10 @@
     _id: string;
     name: string;
     description: string;
-    price: number;
+    price: Types.Decimal128;
     stock_level: StockLevelType;
     image?: string;
-    duration: Types.Decimal128;
+    duration: number;
     created_at: Date;
     updated_at: Date;
     expired_by: Date;

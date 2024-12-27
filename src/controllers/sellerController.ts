@@ -3,6 +3,7 @@ import * as sellerService from "../services/seller.service";
 import { uploadImage } from "../services/misc/image.service";
 import * as userSettingsService from '../services/userSettings.service';
 import logger from "../config/loggingConfig";
+import { ISeller } from "../types";
 
 export const fetchSellersByCriteria = async (req: Request, res: Response) => {
   try {
@@ -104,14 +105,8 @@ export const deleteSeller = async (req: Request, res: Response) => {
   }
 };
 
-export const addOrUpdateItem = async (req: Request, res: Response) => {
-  const currentSeller = req.currentSeller;
-
-  // Check if authuser is the currentseller
-  if (!currentSeller) {
-    console.warn('No authenticated seller found when trying to modify seller item.');
-    return res.status(401).json({ error: 'Seller not authenticated' });
-  }
+export const addOrUpdateSellerItem = async (req: Request, res: Response) => {
+  const currentSeller = req.currentSeller as ISeller;
 
   const formData = req.body;
   logger.debug('Received formData for seller item:', { formData });
@@ -120,8 +115,7 @@ export const addOrUpdateItem = async (req: Request, res: Response) => {
     // Image file handling
     const file = req.file;
     const image = file ? await uploadImage(currentSeller.seller_id, file, 'seller-item') : '';
-    formData.image = image;
-    console.log('Form data being sent:', { formData });
+    logger.info('Form data being sent:', { formData });
     // Add or update Item
     const sellerItem = await sellerService.addOrUpdateSellerItem(currentSeller, formData, image);
     logger.info(`Added or updated seller Item for seller ${currentSeller.seller_id}`);
@@ -138,7 +132,7 @@ export const addOrUpdateItem = async (req: Request, res: Response) => {
   }
 };
 
-export const fetchSellerItems = async (req: Request, res: Response) => {  
+export const getSellerItems = async (req: Request, res: Response) => {  
   const { seller_id } = req.params
   try {
     const items = await sellerService.getAllSellerItems(seller_id);
@@ -155,7 +149,7 @@ export const fetchSellerItems = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteItem = async (req: Request, res: Response) => {
+export const deleteSellerItem = async (req: Request, res: Response) => {
   try {
     const currentSeller = req.currentSeller;
 
