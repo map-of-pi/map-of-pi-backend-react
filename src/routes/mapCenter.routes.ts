@@ -45,7 +45,7 @@ const mapCenterRoutes = Router();
  *       404:
  *         description: Map Center not found | User not found
  *       401:
- *         description: Unauthorized | Authentication token is required | Authentication token is invalid or expired    
+ *         description: Unauthorized
  *       400:
  *         description: Bad request
  *       500:
@@ -80,7 +80,7 @@ mapCenterRoutes.get(
  *       404:
  *         description: User not found | Seller not found; Map Center failed to save
  *       401:
- *         description: Unauthorized | Authentication token is required | Authentication token is invalid or expired
+ *         description: Unauthorized
  *       400:
  *         description: Bad request
  *       500:

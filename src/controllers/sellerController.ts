@@ -59,7 +59,7 @@ export const registerSeller = async (req: Request, res: Response) => {
   // Check if authUser is defined
   if (!authUser) {
     console.warn('No authenticated user found when trying to register seller.');
-    return res.status(401).json({ error: 'User not authenticated' });
+    return res.status(401).json({ error: 'Unauthorized' });
   }
 
   const formData = req.body;

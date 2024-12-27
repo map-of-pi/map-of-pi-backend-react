@@ -47,7 +47,7 @@ export const addReview = async (req: Request, res: Response) => {
 
     if (!authUser) {
       logger.warn("No authenticated user found for adding review.");
-      return res.status(401).json({ message: "Unauthorized user" });
+      return res.status(401).json({ message: "Unauthorized" });
     } else if (authUser.pi_uid === formData.review_receiver_id) {
       logger.warn(`Attempted self review by user ${authUser.pi_uid}`);
       return res.status(400).json({ message: "Self review is prohibited" });
