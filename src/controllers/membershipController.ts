@@ -1,4 +1,4 @@
-import Membership from "../models/membership";
+import Membership from "../models/Membership";
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import User from "../models/User";

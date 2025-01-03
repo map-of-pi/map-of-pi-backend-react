@@ -1,4 +1,4 @@
-import Membership from "../models/membership";
+import Membership from "../models/Membership";
 import logger from "../config/loggingConfig";
 import { MembershipType } from "../models/enums/memberShipType";
 

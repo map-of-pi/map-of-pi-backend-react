@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import Membership from "../models/membership";
+import Membership from "../models/Membership";
 import User from "../models/User"; // Adjust this path based on your project structure
 
 dotenv.config();
