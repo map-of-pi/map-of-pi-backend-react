@@ -1,6 +1,7 @@
 import Membership from "../models/Membership";
 import logger from "../config/loggingConfig";
 import { MembershipType } from "../models/enums/memberShipType";
+import mongoose from "mongoose";
 
 // Retrieve Membership Status
 export const getMembershipStatus = async (
@@ -12,8 +13,12 @@ export const getMembershipStatus = async (
 } | null> => {
   try {
     // Fetch membership by user_id
-    const membership = await Membership.findOne({ user_id }).exec();
+    if (!mongoose.Types.ObjectId.isValid(user_id)) {
+      logger.warn(`Invalid user_id format: ${user_id}`);
+      throw new Error("Invalid user_id format");
+    }
 
+    const membership = await Membership.findOne({ user_id }).exec();
     if (!membership) {
       logger.warn(`Membership not found for user_id: ${user_id}`);
       return null;
@@ -25,7 +30,7 @@ export const getMembershipStatus = async (
       membership_expiration: membership.membership_expiration ?? null,
     };
   } catch (error) {
-    logger.error(`Failed to retrieve membership status for user_id: ${user_id}`, error);
+    logger.error(`Failed to retrieve membership status for user_id: ${user_id}. Error: ${(error as Error).message}`, error);
     throw new Error("Failed to retrieve membership status; please try again later");
   }
 };
@@ -39,8 +44,16 @@ export const upgradeMembership = async (
 ): Promise<any> => {
   try {
     // Fetch the membership record for the user
-    const membership = await Membership.findOne({ user_id }).exec();
+    if (!mongoose.Types.ObjectId.isValid(user_id)) {
+      logger.warn(`Invalid user_id format: ${user_id}`);
+      throw new Error("Invalid user_id format");
+    }
 
+    if (mappiAllowance <= 0 || durationWeeks <= 0) {
+      throw new Error("Invalid input values");
+    }
+
+    const membership = await Membership.findOne({ user_id }).exec();
     if (!membership) {
       logger.warn(`Membership not found for user_id: ${user_id}`);
       return null;
@@ -74,7 +87,7 @@ export const upgradeMembership = async (
     logger.info(`Membership upgraded for user_id: ${user_id}`);
     return membership;
   } catch (error) {
-    logger.error(`Failed to upgrade membership for user_id: ${user_id}`, error);
+    logger.error(`Failed to upgrade membership for user_id: ${user_id}. Error: ${(error as Error).message}`, error);
     throw new Error("Failed to upgrade membership; please try again later");
   }
 };
@@ -83,29 +96,23 @@ export const upgradeMembership = async (
 export const deductMappi = async (user_id: string): Promise<number> => {
   try {
     // Fetch the membership record for the user
-    const membership = await Membership.findOne({ user_id }).exec();
+    const membership = await Membership.findOneAndUpdate(
+      { user_id, mappi_balance: { $gte: 1 } },
+      { $inc: { mappi_balance: -1, mappi_used_to_date: 1 } },
+      { new: true, projection: { mappi_balance: 1 } }
+    );
 
     if (!membership) {
-      logger.warn(`Membership not found for user_id: ${user_id}`);
-      throw new Error("User not found");
+      logger.warn(`Membership not found or insufficient balance for user_id: ${user_id}`);
+      throw new Error("Membership not found or insufficient balance");
     }
-
-    if (membership.mappi_balance <= 0) {
-      logger.warn(`Insufficient mappi balance for user_id: ${user_id}`);
-      throw new Error("Insufficient mappi balance");
-    }
-
-    // Deduct 1 mappi
-    membership.mappi_balance -= 1;
-    membership.mappi_used_to_date += 1;
-    await membership.save();
 
     logger.info(
       `Mappi deducted for user_id: ${user_id}. Remaining balance: ${membership.mappi_balance}`
     );
     return membership.mappi_balance;
   } catch (error) {
-    logger.error(`Failed to deduct mappi for user_id: ${user_id}`, error);
+    logger.error(`Failed to deduct mappi for user_id: ${user_id}. Error: ${(error as Error).message}`, error);
     throw new Error("Failed to deduct mappi; please try again later");
   }
 };
