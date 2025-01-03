@@ -9,14 +9,7 @@ const membershipRoutes = express.Router();
  * /api/v1/membership/membership-status/{user_id}:
  *   get:
  *     tags:
- *       - Membership
- *     summary: Fetch membership status by user ID
- *     parameters:
- *       - name: user_id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
+ *       - ring
  *         description: The ID of the user record
  *     responses:
  *       200:
@@ -24,15 +17,7 @@ const membershipRoutes = express.Router();
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 membership_class:
- *                   type: string
- *                 mappi_balance:
- *                   type: number
- *                 membership_expiration:
- *                   type: string
- *                   format: date-time
+ *               $ref: './membership.yml#/components/schemas/Membership'
  *       404:
  *         description: Membership not found
  *       500:
@@ -56,31 +41,14 @@ membershipRoutes.get(
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               user_id:
- *                 type: string
- *               newMembershipClass:
- *                 type: string
- *               mappiAllowance:
- *                 type: number
- *               durationWeeks:
- *                 type: number
+ *             $ref: './membership.yml#/components/schemas/UpgradeMembershipRq'
  *     responses:
  *       200:
  *         description: Membership upgraded successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 membership_class:
- *                   type: string
- *                 mappi_balance:
- *                   type: number
- *                 membership_expiration:
- *                   type: string
- *                   format: date-time
+ *               $ref: './membership.yml#/components/schemas/UpgradeMembershipRs'
  *       404:
  *         description: Membership not found
  *       500:
@@ -108,16 +76,15 @@ membershipRoutes.post(
  *             properties:
  *               user_id:
  *                 type: string
+ *                 description: Unique identifier for the user
+ *                 example: 66741c62b175e7d059a2639e
  *     responses:
  *       200:
  *         description: Mappi deducted successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 mappi_balance:
- *                   type: number
+ *               $ref: './membership.yml#/components/schemas/Membership'
  *       400:
  *         description: Insufficient mappi balance
  *       404:
@@ -132,3 +99,4 @@ membershipRoutes.post(
 );
 
 export default membershipRoutes;
+
