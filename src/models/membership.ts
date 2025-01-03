@@ -5,7 +5,7 @@ const membershipSchema = new mongoose.Schema(
 	{
 		user_id: {
 			type: mongoose.Schema.Types.ObjectId,
-			ref: 'user',
+			ref: 'User',
 			required: true,
 		},
 		membership_class: {
@@ -32,5 +32,8 @@ const membershipSchema = new mongoose.Schema(
 	},
 	{ timestamps: true }
 );
+
+// Indexing for faster queries on user_id
+membershipSchema.index({ user_id: 1 });
 
 export default mongoose.model('Membership', membershipSchema);
