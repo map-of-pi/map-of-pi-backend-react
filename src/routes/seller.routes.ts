@@ -262,6 +262,38 @@ sellerRoutes.delete(
 
 /**
  * @swagger
+ * /api/v1/sellers/item/{seller_id}:
+ *   get:
+ *     tags:
+ *       - Seller Item
+ *     summary: Get items associated with the seller ID
+ *     parameters:
+ *       - name: seller_id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The Pi UID of the seller to retrieve
+ *     responses:
+ *       204:
+ *         description : Seller items not found
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '/api/docs/SellersItemSchema.yml#/components/schemas/GetSellerItemRs'
+ *       404:
+ *         description: Seller not found
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
+sellerRoutes.get("/item/:seller_id", sellerController.getSellerItems);
+
+/**
+ * @swagger
  * /api/v1/sellers/item/add:
  *   put:
  *     tags:
@@ -331,38 +363,5 @@ sellerRoutes.delete(
   isSellerFound,
   sellerController.deleteSellerItem
 );
-
-/**
- * @swagger
- * /api/v1/sellers/item/{seller_id}:
- *   get:
- *     tags:
- *       - Seller Item
- *     summary: Get items associated with the seller ID
- *     parameters:
- *       - name: seller_id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *         description: The Pi UID of the seller to retrieve
- *     responses:
- *       204:
- *         description : Seller items not found
- *       200:
- *         description: Successful response
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '/api/docs/SellersItemSchema.yml#/components/schemas/GetSellerItemRs'
- *       404:
- *         description: Seller not found
- *       400:
- *         description: Bad request
- *       500:
- *         description: Internal server error
- */
-sellerRoutes.get("/item/:seller_id", sellerController.getSellerItems);
-
 
 export default sellerRoutes;

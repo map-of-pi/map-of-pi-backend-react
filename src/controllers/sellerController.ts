@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import * as sellerService from "../services/seller.service";
 import { uploadImage } from "../services/misc/image.service";
 import * as userSettingsService from '../services/userSettings.service';
-import logger from "../config/loggingConfig";
 import { ISeller } from "../types";
+import logger from "../config/loggingConfig";
 
 export const fetchSellersByCriteria = async (req: Request, res: Response) => {
   try {
@@ -105,6 +105,23 @@ export const deleteSeller = async (req: Request, res: Response) => {
   }
 };
 
+export const getSellerItems = async (req: Request, res: Response) => {  
+  const { seller_id } = req.params
+  try {
+    const items = await sellerService.getAllSellerItems(seller_id);
+
+    if (!items || items.length === 0) {
+      logger.warn(`No items is found for seller: ${seller_id}`);
+      return res.status(204).json({ message: "Seller items not found" });
+    }
+    logger.info(`Fetched ${items.length} items for seller: ${seller_id}`);
+    return res.status(200).json(items);
+  } catch (error) {
+    logger.error('Failed to fetch seller items:', error);
+    return res.status(500).json({ message: 'An error occurred while fetching seller Items; please try again later' });
+  }
+};
+
 export const addOrUpdateSellerItem = async (req: Request, res: Response) => {
   const currentSeller = req.currentSeller as ISeller;
 
@@ -132,23 +149,6 @@ export const addOrUpdateSellerItem = async (req: Request, res: Response) => {
   }
 };
 
-export const getSellerItems = async (req: Request, res: Response) => {  
-  const { seller_id } = req.params
-  try {
-    const items = await sellerService.getAllSellerItems(seller_id);
-
-    if (!items || items.length === 0) {
-      logger.warn(`No items is found for seller: ${seller_id}`);
-      return res.status(204).json({ message: "Seller Items not found" });
-    }
-    logger.info(`Fetched ${items.length} items for seller: ${seller_id}`);
-    return res.status(200).json(items);
-  } catch (error) {
-    logger.error('Failed to fetch seller items:', error);
-    return res.status(500).json({ message: 'An error occurred while fetching seller Items; please try again later' });
-  }
-};
-
 export const deleteSellerItem = async (req: Request, res: Response) => {
   try {
     const currentSeller = req.currentSeller;
@@ -160,10 +160,10 @@ export const deleteSellerItem = async (req: Request, res: Response) => {
   }
     const { item_id } = req.params
     const deletedItem = await sellerService.deleteSellerItem(item_id);
-    logger.info(`Deleted Item with ID ${currentSeller.seller_id}`);
-    res.status(200).json({ message: "Item deleted successfully", deletedItem });
+    logger.info(`Deleted seller item with ID ${currentSeller.seller_id}`);
+    res.status(200).json({ message: "Seller item deleted successfully", deletedItem });
   } catch (error) {
-    logger.error(`Failed to delete Item for userID ${ req.currentUser?.pi_uid }:`, error);
-    return res.status(500).json({ message: 'An error occurred while deleting item; please try again later' });
+    logger.error(`Failed to delete seller item for userID ${ req.currentUser?.pi_uid }:`, error);
+    return res.status(500).json({ message: 'An error occurred while deleting seller item; please try again later' });
   }
 };
