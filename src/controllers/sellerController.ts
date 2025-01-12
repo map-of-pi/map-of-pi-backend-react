@@ -135,7 +135,7 @@ export const addOrUpdateSellerItem = async (req: Request, res: Response) => {
     logger.info('Form data being sent:', { formData });
     // Add or update Item
     const sellerItem = await sellerService.addOrUpdateSellerItem(currentSeller, formData, image);
-    logger.info(`Added or updated seller Item for seller ${currentSeller.seller_id}`);
+    logger.info(`Added/ updated seller item for seller ${currentSeller.seller_id}`);
 
     // Send response
     return res.status(200).json({ 
@@ -144,24 +144,19 @@ export const addOrUpdateSellerItem = async (req: Request, res: Response) => {
   } catch (error) {
     logger.error(`Failed to add or update seller item for userID ${currentSeller.seller_id}:`, error);
     return res.status(500).json({
-      message: 'An error occurred while updating seller item; please try again later',
+      message: 'An error occurred while adding/ updating seller item; please try again later',
     });
   }
 };
 
 export const deleteSellerItem = async (req: Request, res: Response) => {
   try {
-    const currentSeller = req.currentSeller;
+    const currentSeller = req.currentSeller as ISeller;
 
-    // Check if authuser is the currentseller
-  if (!currentSeller) {
-    console.warn('No authenticated seller found when trying to delete seller item.');
-    return res.status(401).json({ error: 'Seller not authenticated' });
-  }
-    const { item_id } = req.params
-    const deletedItem = await sellerService.deleteSellerItem(item_id);
+    const { item_id } = req.params;
+    const deletedSellerItem = await sellerService.deleteSellerItem(item_id);
     logger.info(`Deleted seller item with ID ${currentSeller.seller_id}`);
-    res.status(200).json({ message: "Seller item deleted successfully", deletedItem });
+    res.status(200).json({ message: "Seller item deleted successfully", deletedSellerItem: deletedSellerItem });
   } catch (error) {
     logger.error(`Failed to delete seller item for userID ${ req.currentUser?.pi_uid }:`, error);
     return res.status(500).json({ message: 'An error occurred while deleting seller item; please try again later' });
