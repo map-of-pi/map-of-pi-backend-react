@@ -3,10 +3,9 @@ import { MembershipType } from "./enums/memberShipType";
 
 const membershipSchema = new mongoose.Schema(
 	{
-		user_id: {
-			type: mongoose.Schema.Types.ObjectId,
-			ref: 'User',
-			required: true,
+		pi_uid: { 
+			type: String, 
+			required: true 
 		},
 		membership_class: {
 			type: String,
@@ -18,7 +17,11 @@ const membershipSchema = new mongoose.Schema(
 			type: Number,
 			default: 0,
 			required: true,
-		},
+			validate: {
+				validator: (value:any) => value >= 0,
+				message: "mappi_balance must be a non-negative number.",
+			},
+		},		
 		membership_expiration: {
 			type: Date,
 			required: false,
@@ -34,6 +37,6 @@ const membershipSchema = new mongoose.Schema(
 );
 
 // Indexing for faster queries on user_id
-membershipSchema.index({ user_id: 1 });
+membershipSchema.index({ pi_uid: 1 });
 
 export default mongoose.model('Membership', membershipSchema);

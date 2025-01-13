@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 import User from "../models/User";
 
 export const getMembershipStatus = async (req: Request, res: Response) => {
-  const piUid = req.params.user_id; // This is the pi_uid being passed in
+  const piUid = req.params.pi_uid; // This is the pi_uid being passed in
 
   try {
     // Validate input
@@ -19,12 +19,10 @@ export const getMembershipStatus = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const userId = user._id; // Extract the user's _id (ObjectId)
-
-    // Step 2: Find Membership by user_id
-    const membership = await Membership.findOne({ user_id: userId });
+    // Step 2: Find Membership by pi_uid
+    const membership = await Membership.findOne({ pi_uid: piUid });
     if (!membership) {
-      console.warn(`Membership not found for user_id: ${userId}`);
+      console.warn(`Membership not found for pi_uid: ${piUid}`);
       return res.status(404).json({ message: "Membership not found" });
     }
 
@@ -41,24 +39,23 @@ export const getMembershipStatus = async (req: Request, res: Response) => {
 };
 
 export const upgradeMembership = async (req: Request, res: Response) => {
-  const { user_id, newMembershipClass, mappiAllowance, durationWeeks } = req.body;
+  const { pi_uid, newMembershipClass, mappiAllowance, durationWeeks } = req.body;
 
   try {
     // Validate input
-    if (!user_id || typeof user_id !== "string") {
+    if (!pi_uid || typeof pi_uid !== "string") {
       return res.status(400).json({ message: "Invalid piUid provided" });
     }
 
-    const user = await User.findOne({ pi_uid: user_id }); // Assume user_id is pi_uid here
+    const user = await User.findOne({ pi_uid: pi_uid }); // Assume pi_uid is pi_uid here
     if (!user) {
-      console.warn(`User not found for pi_uid: ${user_id}`);
+      console.warn(`User not found for pi_uid: ${pi_uid}`);
       return res.status(404).json({ message: "User not found" });
     }
 
-    const userId = user._id; // Extract ObjectId
-    const membership = await Membership.findOne({ user_id: userId });
+    const membership = await Membership.findOne({ pi_uid });
     if (!membership) {
-      console.warn(`Membership not found for user_id: ${userId}`);
+      console.warn(`Membership not found for pi_uid: ${pi_uid}`);
       return res.status(404).json({ message: "Membership not found" });
     }
 
@@ -88,7 +85,7 @@ export const upgradeMembership = async (req: Request, res: Response) => {
 };
 
 export const useMappi = async (req: Request, res: Response) => {
-  const { user_id: piUid } = req.body;
+  const { pi_uid: piUid } = req.body;
 
   try {
     // Validate input
@@ -102,10 +99,9 @@ export const useMappi = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const userId = user._id; // Extract ObjectId
-    const membership = await Membership.findOne({ user_id: userId });
+    const membership = await Membership.findOne({ pi_uid: piUid });
     if (!membership) {
-      console.warn(`Membership not found for user_id: ${userId}`);
+      console.warn(`Membership not found for pi_uid: ${piUid}`);
       return res.status(404).json({ message: "Membership not found" });
     }
 

@@ -4,6 +4,7 @@
   import { SellerType } from "./models/enums/sellerType";
   import { TrustMeterScale } from "./models/enums/trustMeterScale";
   import { RestrictedArea } from "./models/enums/restrictedArea";
+import { MembershipType } from "./models/enums/memberShipType";
 
   // User
   export interface IUser extends Document {
@@ -29,8 +30,8 @@
 
   // Membership
   export interface IMembership extends Document {
-      user_id: Types.ObjectId;
-      membership_class: string;
+      pi_uid: string;
+      membership_class: MembershipType;
       mappi_balance: number;
       membership_expiration: Date | null;
       mappi_used_to_date: number;

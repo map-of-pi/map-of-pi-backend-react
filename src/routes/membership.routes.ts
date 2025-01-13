@@ -6,10 +6,17 @@ const membershipRoutes = express.Router();
 
 /**
  * @swagger
- * /api/v1/membership/membership-status/{user_id}:
+ * /api/v1/membership/membership-status/{pi_uid}:
  *   get:
  *     tags:
- *       - ring
+ *       - Membership
+ *     summary: Get membership status by user ID
+ *     parameters:
+ *       - name: pi_uid
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
  *         description: The ID of the user record
  *     responses:
  *       200:
@@ -24,7 +31,7 @@ const membershipRoutes = express.Router();
  *         description: Internal server error
  */
 membershipRoutes.get(
-  "/membership-status/:user_id",
+  "/membership-status/:pi_uid",
   verifyToken,
   membershipController.getMembershipStatus
 );
@@ -74,7 +81,7 @@ membershipRoutes.post(
  *           schema:
  *             type: object
  *             properties:
- *               user_id:
+ *               pi_uid:
  *                 type: string
  *                 description: Unique identifier for the user
  *                 example: 66741c62b175e7d059a2639e

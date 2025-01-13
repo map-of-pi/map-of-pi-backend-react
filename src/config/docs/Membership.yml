@@ -3,7 +3,7 @@ components:
     Membership:
       type: object
       properties:
-        user_id:
+        pi_uid:
           type: string
           description: Unique identifier for the user
           example: 66741c62b175e7d059a2639e
@@ -27,7 +27,7 @@ components:
           description: Version key for the membership document
           example: 0
       required:
-        - user_id
+        - pi_uid
         - membership_class
         - mappi_balance
         - membership_expiration
@@ -35,7 +35,7 @@ components:
     UpgradeMembershipRq:
       type: object
       properties:
-        user_id:
+        pi_uid:
           type: string
           description: Unique identifier for the user
           example: 66741c62b175e7d059a2639e
@@ -52,7 +52,7 @@ components:
           description: Additional mappi units provided with the new tier
           example: 100
       required:
-        - user_id
+        - pi_uid
         - tier_class
         - durationWeeks
         - mappiAllowance
