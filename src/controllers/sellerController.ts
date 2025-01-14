@@ -72,7 +72,7 @@ export const registerSeller = async (req: Request, res: Response) => {
     formData.image = image;
 
     // Register or update seller
-    const registeredSeller = await sellerService.registerOrUpdateSeller(authUser, formData, image);
+    const registeredSeller = await sellerService.registerOrUpdateSeller(authUser, formData);
     logger.info(`Registered or updated seller for user ${authUser.pi_uid}`);
 
     // Update UserSettings with email and phone_number
@@ -132,9 +132,11 @@ export const addOrUpdateSellerItem = async (req: Request, res: Response) => {
     // Image file handling
     const file = req.file;
     const image = file ? await uploadImage(currentSeller.seller_id, file, 'seller-item') : '';
-    logger.info('Form data being sent:', { formData });
+    formData.image = image;
+
+    logger.debug('Form data being sent:', { formData });
     // Add or update Item
-    const sellerItem = await sellerService.addOrUpdateSellerItem(currentSeller, formData, image);
+    const sellerItem = await sellerService.addOrUpdateSellerItem(currentSeller, formData);
     logger.info(`Added/ updated seller item for seller ${currentSeller.seller_id}`);
 
     // Send response

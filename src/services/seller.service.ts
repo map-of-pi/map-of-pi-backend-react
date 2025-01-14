@@ -114,23 +114,6 @@ export const getAllSellers = async (
   }
 };
 
-export const getSellersWithinSanctionedRegion = async (region: ISanctionedRegion): Promise<ISeller[]> => {
-  try {
-    const sellers = await Seller.find({
-      sell_map_center: {
-        $geoWithin: {
-          $geometry: region.boundary
-        }
-      }
-    }).exec();
-    logger.info(`Found ${sellers.length} seller(s) within the sanctioned region: ${region.location}`);
-    return sellers;
-  } catch (error) {
-    logger.error(`Failed to get sellers within sanctioned region ${ region }:`, error);
-    throw new Error(`Failed to get sellers within sanctioned region ${ region }; please try again later`);  
-  }
-};
-
 // Fetch a single seller by ID
 export const getSingleSellerById = async (seller_id: string): Promise<ISeller | null> => {
   try {
@@ -157,7 +140,7 @@ export const getSingleSellerById = async (seller_id: string): Promise<ISeller | 
   }
 };
 
-export const registerOrUpdateSeller = async (authUser: IUser, formData: any, image: string): Promise<ISeller> => {
+export const registerOrUpdateSeller = async (authUser: IUser, formData: any): Promise<ISeller> => {
   try {
     const existingSeller = await Seller.findOne({ seller_id: authUser.pi_uid }).exec();
 
@@ -172,7 +155,7 @@ export const registerOrUpdateSeller = async (authUser: IUser, formData: any, ima
       name: formData.name || existingSeller?.name || authUser.user_name,
       description: formData.description || existingSeller?.description || '',
       seller_type: formData.seller_type || existingSeller?.seller_type || '',
-      image: image || existingSeller?.image || '',
+      image: formData.image || existingSeller?.image || '',
       address: formData.address || existingSeller?.address || '',
       sell_map_center: sellMapCenter,
       order_online_enabled_pref: formData.order_online_enabled_pref || existingSeller?.order_online_enabled_pref || ''
@@ -224,7 +207,7 @@ export const getAllSellerItems = async (
       seller_id: seller_id,
     });
 
-    if (!existingItems) {
+    if (!existingItems || existingItems.length == 0) {
       logger.warn('Item list is empty.');
       return null;      
     } 
@@ -238,9 +221,9 @@ export const getAllSellerItems = async (
 
 export const addOrUpdateSellerItem = async (
   seller: ISeller,
-  item: ISellerItem,
-  image: string
+  item: ISellerItem
 ): Promise<ISellerItem | null> => {
+
   try {
     // Get the current date
     const today = new Date();
@@ -253,7 +236,7 @@ export const addOrUpdateSellerItem = async (
     const existingItem = await SellerItem.findOne({
       item_id: item._id,
       seller_id: seller.seller_id,
-    });
+    }).exec();
 
     if (existingItem) {
       // Update the existing item by modifying fields and saving
@@ -265,7 +248,7 @@ export const addOrUpdateSellerItem = async (
       const updatedItem = await existingItem.save();
 
       logger.info('Seller item updated successfully');
-      return updatedItem;
+      return updatedItem as ISellerItem;
     } else {
       // Create a new item
       const newItem = new SellerItem({
@@ -275,7 +258,7 @@ export const addOrUpdateSellerItem = async (
         price: item.price,
         stock_level: item.stock_level,
         duration: item.duration,
-        image: image,
+        image: item.image,
         created_at: today,
         updated_at: today,
         expired_by: expiredBy,
@@ -283,7 +266,7 @@ export const addOrUpdateSellerItem = async (
       await newItem.save();
 
       logger.info('Seller item created successfully');
-      return newItem;
+      return newItem as ISellerItem;
     }
   } catch (error:any) {
     logger.error(`Error adding or updating seller item: ${ error.message }`);
@@ -299,5 +282,22 @@ export const deleteSellerItem = async (id: string): Promise<ISellerItem | null> 
   } catch (error) {
     logger.error(`Failed to delete seller item for itemID ${ id }:`, error);
     throw new Error('Failed to delete seller item; please try again later');
+  }
+};
+
+export const getSellersWithinSanctionedRegion = async (region: ISanctionedRegion): Promise<ISeller[]> => {
+  try {
+    const sellers = await Seller.find({
+      sell_map_center: {
+        $geoWithin: {
+          $geometry: region.boundary
+        }
+      }
+    }).exec();
+    logger.info(`Found ${sellers.length} seller(s) within the sanctioned region: ${region.location}`);
+    return sellers;
+  } catch (error) {
+    logger.error(`Failed to get sellers within sanctioned region ${ region }:`, error);
+    throw new Error(`Failed to get sellers within sanctioned region ${ region }; please try again later`);  
   }
 };
