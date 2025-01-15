@@ -109,14 +109,14 @@ describe('getAllSellerItems function', () => {
     expect(sellerItemsData).toBeNull();
   });
 
-  it('should return null when an exception occurs', async () => {
-    // Spy on the `find` function and mock it to reject the promise
-    jest.spyOn(SellerItem, 'find').mockRejectedValue(new Error('Unexpected exception occurred'));
+  it('should throw an error when an exception occurs', async () => {
+    jest.spyOn(SellerItem, 'find').mockImplementationOnce(() => {
+      throw new Error('Mock database error');
+    });
 
-    const sellerItemsData = await getAllSellerItems('0b0b0b-0b0b-0b0b');
-
-    expect(SellerItem.find).toHaveBeenCalledWith({ seller_id: '0b0b0b-0b0b-0b0b' });
-    expect(sellerItemsData).toBeNull();
+    await expect(getAllSellerItems('0b0b0b-0b0b-0b0b')).rejects.toThrow(
+      'Failed to get seller items; please try again later'
+    );
   });
 });
 
@@ -238,7 +238,7 @@ describe('addOrUpdateSellerItem function', () => {
     });
   });
 
-  it('should return null when an exception occurs', async () => {  
+  it('should throw an error when an exception occurs', async () => {  
     const sellerItem = {
       _id: "25f5a0f2a86d1f9f3b7e4e82",
       seller_id: "0b0b0b-0b0b-0b0b",
@@ -252,16 +252,12 @@ describe('addOrUpdateSellerItem function', () => {
 
     // Mock the SellerItem model to throw an error
     jest.spyOn(SellerItem, 'findOne').mockImplementationOnce(() => {
-      throw new Error('Unexpected exception occurred');
+      throw new Error('Mock database error');
     });
 
-    const sellerItemData = (await addOrUpdateSellerItem(
-        { seller_id: "0b0b0b-0b0b-0b0b" } as ISeller, sellerItem)) as ISellerItem;
-
-    expect(SellerItem.findOne).toHaveBeenCalledWith({ 
-      item_id: '25f5a0f2a86d1f9f3b7e4e82', seller_id: '0b0b0b-0b0b-0b0b' });
-
-    expect(sellerItemData).toBeNull();
+    await expect(addOrUpdateSellerItem({ seller_id: "0b0b0b-0b0b-0b0b" } as ISeller, sellerItem)).rejects.toThrow(
+      'Failed to add or update seller item; please try again later'
+    );
   });
 });
 

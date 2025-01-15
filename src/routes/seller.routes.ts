@@ -276,7 +276,7 @@ sellerRoutes.delete(
  *         description: The Pi UID of the seller to retrieve
  *     responses:
  *       204:
- *         description : Seller items not found
+ *         description: Seller items not found
  *       200:
  *         description: Successful response
  *         content:

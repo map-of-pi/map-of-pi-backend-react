@@ -213,9 +213,9 @@ export const getAllSellerItems = async (
     } 
     logger.info('fetched item list successfully');
     return existingItems as ISellerItem[];
-  } catch (error:any) {
-    logger.error(`Error fetching seller item list: ${ error.message }`);
-    return null;
+  } catch (error) {
+    logger.error(`Failed to get seller items for sellerID ${ seller_id }:`, error);
+    throw new Error('Failed to get seller items; please try again later');
   }
 };
 
@@ -268,9 +268,9 @@ export const addOrUpdateSellerItem = async (
       logger.info('Seller item created successfully');
       return newItem as ISellerItem;
     }
-  } catch (error:any) {
-    logger.error(`Error adding or updating seller item: ${ error.message }`);
-    return null;
+  } catch (error) {
+    logger.error(`Failed to add or update seller item for sellerID ${ seller.seller_id }:`, error);
+    throw new Error('Failed to add or update seller item; please try again later');
   }
 };
 

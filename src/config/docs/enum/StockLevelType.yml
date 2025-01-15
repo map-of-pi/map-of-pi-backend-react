@@ -3,11 +3,11 @@ components:
     StockLevelType:
       type: string
       enum:
-        - availableOne
-        - availableTwo
-        - availableThree
-        - availableMany
-        - madeToOrder
-        - ongoingService
-        - sold
+        - 1 available
+        - 2 available
+        - 3 available
+        - Many available
+        - Made to order
+        - Ongoing service
+        - Sold
       description: The type of stock level.

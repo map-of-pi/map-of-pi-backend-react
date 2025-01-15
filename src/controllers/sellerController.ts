@@ -111,8 +111,8 @@ export const getSellerItems = async (req: Request, res: Response) => {
     const items = await sellerService.getAllSellerItems(seller_id);
 
     if (!items || items.length === 0) {
-      logger.warn(`No items is found for seller: ${seller_id}`);
-      return res.status(204).json({ message: "Seller items not found" });
+      logger.warn(`No items are found for seller: ${seller_id}`);
+      return res.status(204).json({ message: 'Seller items not found' });
     }
     logger.info(`Fetched ${items.length} items for seller: ${seller_id}`);
     return res.status(200).json(items);

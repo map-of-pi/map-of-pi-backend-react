@@ -197,7 +197,7 @@ describe('sellerController', () => {
         seller_id: "0b0b0b-0b0b-0b0b",
         name: "Test Seller 2 Item 1",
         description: "Test Seller 2 Item 1 Description",
-        price: 0.015,
+        price: 0.15,
         stock_level: "Sold",
         image: "http://example.com/testSellerTwoItemOne.jpg",
         duration: 1,
