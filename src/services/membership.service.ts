@@ -1,6 +1,6 @@
 import Membership from "../models/Membership";
 import logger from "../config/loggingConfig";
-import { MembershipType } from "../models/enums/memberShipType";
+import { MembershipType } from "../models/enums/membershipType";
 import mongoose from "mongoose";
 
 // Retrieve Membership Status

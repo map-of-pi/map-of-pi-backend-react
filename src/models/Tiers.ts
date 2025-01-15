@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
-import { MembershipType } from "../models/enums/memberShipType";
+import { MembershipType } from "./enums/membershipType";
 
 export interface ITier extends Document {
   class: MembershipType;

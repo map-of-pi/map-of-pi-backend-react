@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { MembershipType } from "./enums/memberShipType";
+import { MembershipType } from "./enums/membershipType";
 
 const membershipSchema = new mongoose.Schema(
 	{

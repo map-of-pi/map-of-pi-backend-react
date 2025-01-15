@@ -17,8 +17,6 @@ const populateMemberships = async () => {
       return;
     }
 
-    console.log(`Found ${users.length} users. Creating memberships...`);
-
     // Iterates over each user and create a Membership entry
     for (const user of users) {
       console.log(`Processing user: ${user._id} - ${user.pi_uid}`);
