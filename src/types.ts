@@ -9,6 +9,8 @@
     pi_uid: string;
     pi_username: string;
     user_name: string;
+    createdAt?: Date;
+    updatedAt?: Date;
   }
 
   export interface IUserSettings extends Document {
@@ -38,6 +40,8 @@
       coordinates: [number, number];
     };
     order_online_enabled_pref: boolean;
+    createdAt?:Date,
+    updatedAt?:Date
   }
 
   export interface IReviewFeedback extends Document {
@@ -49,6 +53,8 @@
     comment?: string;
     image?: string;
     review_date: Date;
+    createdAt?:Date,
+    updatedAt?:Date
   }
 
   export interface ISanctionedRegion extends Document {
@@ -57,6 +63,8 @@
       type: 'Polygon';
       coordinates: [[[number, number]]];
     };
+    createdAt?:Date,
+    updatedAt?:Date
   }
 
   export interface CompleteFeedback {
@@ -82,4 +90,14 @@
 
   export interface IReviewFeedbackOutput extends IReviewFeedback, PartialReview {}
 
-  export type SanctionedSeller = Pick<ISeller, 'seller_id' | 'name' | 'address' | 'sell_map_center'> & { sanctioned_location: string };
+export type SanctionedSeller = Pick<ISeller, 'seller_id' | 'name' | 'address' | 'sell_map_center'> & { sanctioned_location: string };
+  
+export interface IAdmin extends Document {
+  email: string;  
+  username: string;
+  password: string;       
+  role?: string;          
+  createdAt?: Date;      
+  updatedAt?: Date;    
+  isActive?: boolean;   
+}
