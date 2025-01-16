@@ -4,7 +4,7 @@
   import { SellerType } from "./models/enums/sellerType";
   import { TrustMeterScale } from "./models/enums/trustMeterScale";
   import { RestrictedArea } from "./models/enums/restrictedArea";
-import { MembershipType } from "./models/enums/membershipType";
+  import { MembershipType } from "./models/enums/membershipType";
 
   // User
   export interface IUser extends Document {
