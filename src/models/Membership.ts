@@ -1,11 +1,10 @@
-
 import mongoose from "mongoose";
+
 const membershipSchema = new mongoose.Schema(
     {
-        user_id: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'user',
-            required: true,
+        pi_uid: {
+            type: String,
+            required: true, // Ensure every membership has a `pi_uid`
         },
         membership_class: {
             type: String,
@@ -31,4 +30,5 @@ const membershipSchema = new mongoose.Schema(
     },
     { timestamps: true }
 );
+
 export default mongoose.model('Membership', membershipSchema);
