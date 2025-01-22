@@ -8,7 +8,7 @@ import { ISeller, IUser, IUserSettings, ISellerWithSettings, ISanctionedRegion, 
 
 import logger from "../config/loggingConfig";
 import SellerItem from "../models/SellerItem";
-import { timeStamp } from "console";
+import mongoose from 'mongoose';
 
 // Helper function to get settings for all sellers and merge them into seller objects
 const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSettings[]> => {
@@ -223,51 +223,59 @@ export const addOrUpdateSellerItem = async (
   image: string
 ): Promise<ISellerItem | null> => {
   try {
-    // Get the current date
     const today = new Date();
 
-    // Calculate `expired_by` based on `created_date` and `duration` (duration is in weeks)
-    const durationInMs = (parseInt(item.duration.toString()) || 1) * 7 * 24 * 60 * 60 * 1000;
+    // Calculate expiration date based on duration (defaults to 1 week)
+    const durationInMs = (parseInt(item.duration?.toString() || '1') || 1) * 7 * 24 * 60 * 60 * 1000;
     const expiredBy = new Date(today.getTime() + durationInMs);
 
-    // Check if the item already exists (use a unique field like `item_id` or another identifier)
-    const existingItem = await SellerItem.findOne({
-      item_id: item._id,
+    // Ensure unique identifier is used for finding existing items
+    const query = {
+      _id: item._id || undefined,
       seller_id: seller.seller_id,
-    });
+    };
+
+    // Attempt to find the existing item
+    const existingItem = await SellerItem.findOne(query);
 
     if (existingItem) {
-      // Update the existing item by modifying fields and saving
+      // Update the existing item
       existingItem.set({
         ...item,
         updated_at: today,
         expired_by: expiredBy,
+        image: image || existingItem.image, // Use existing image if a new one isn't provided
       });
       const updatedItem = await existingItem.save();
 
-      logger.info('Item updated successfully');
+      logger.info('Item updated successfully:', { updatedItem });
       return updatedItem;
     } else {
+      // Ensure item has a unique identifier for creation
+      const newItemId = item._id || new mongoose.Types.ObjectId().toString();
+
       // Create a new item
       const newItem = new SellerItem({
+        _id: newItemId,
         seller_id: seller.seller_id,
-        name: item.name,
-        description: item.description,
-        price: item.price,
-        stock_level: item.stock_level,
-        duration: item.duration,
+        name: item.name.trim(),
+        description: item.description.trim(),
+        price: parseFloat(item.price?.toString() || '0.01'), // Ensure valid price
+        stock_level: item.stock_level || '1 available',
+        duration: parseInt(item.duration?.toString() || '1'), // Ensure valid duration
         image: image,
         created_at: today,
         updated_at: today,
         expired_by: expiredBy,
       });
+
       await newItem.save();
 
-      logger.info('Item created successfully');
+      logger.info('Item created successfully:', { newItem });
       return newItem;
     }
-  } catch (error:any) {
-    logger.error(`Error adding or updating item: ${error.message}`);
+  } catch (error: any) {
+    logger.error(`Error adding or updating item: ${error.message}`, { error });
     return null;
   }
 };
