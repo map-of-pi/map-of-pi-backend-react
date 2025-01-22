@@ -2,9 +2,9 @@
   import { DeviceLocationType } from "./models/enums/deviceLocationType";
   import { RatingScale } from "./models/enums/ratingScale";
   import { SellerType, FulfillmentType } from "./models/enums/sellerType";
+  import { StockLevelType } from "./models/enums/stockLevelType";
   import { TrustMeterScale } from "./models/enums/trustMeterScale";
   import { RestrictedArea } from "./models/enums/restrictedArea";
-  import { StockLevelType } from "./models/enums/stockLevelType";
 
   export interface IUser extends Document {
     pi_uid: string;
@@ -44,8 +44,8 @@
   }
 
   export interface ISellerItem extends Document {
-    seller_id: string;
     _id: string;
+    seller_id: string;
     name: string;
     description: string;
     price: Types.Decimal128;

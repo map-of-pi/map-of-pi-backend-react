@@ -12,5 +12,5 @@ export type SellerType = VisibleSellerType | InvisibleSellerType;
 
 export enum FulfillmentType {
   CollectionByBuyer = 'Collection by Buyer',
-  DeliverToBuyer = 'Delivered to Buyer'
+  DeliveredToBuyer = 'Delivered to Buyer'
 }
