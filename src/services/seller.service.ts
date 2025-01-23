@@ -26,6 +26,7 @@ const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSet
           findme: userSettings?.findme,
           email: userSettings?.email ?? null,
           phone_number: userSettings?.phone_number ?? null, 
+          search_filters: userSettings?.search_filters ?? null, 
         } as ISellerWithSettings;
       } catch (error) {
         logger.error(`Failed to resolve settings for sellerID ${ seller.seller_id }:`, error);
@@ -48,14 +49,63 @@ const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSet
 // Fetch all sellers or within a specific bounding box; optional search query.
 export const getAllSellers = async (
   bounds?: { sw_lat: number, sw_lng: number, ne_lat: number, ne_lng: number },
-  search_query?: string
+  search_query?: string,
+  userId?: string,
 ): Promise<ISellerWithSettings[]> => {
   try {
     let sellers: ISeller[];
     const maxNumSellers = 50;
-
+    let userSettings :any = {};
     // always apply this condition to exclude 'Inactive sellers'
-    const baseCriteria = { seller_type: { $in: Object.values(VisibleSellerType) } };
+    // const baseCriteria = { 
+    //   // seller_type: { $in: Object.values(VisibleSellerType) },
+    // };
+
+    const baseCriteria : Record<string, any> = {}
+     // Always exclude inactive sellers
+     baseCriteria.seller_type = { $nin: [] };
+
+
+    if(search_query) {
+      if (userId) {
+        userSettings = await getUserSettingsById(userId);
+      } else {
+        throw new Error('User ID is required to fetch user settings');
+      }
+
+    const searchFilters = userSettings.search_filters || {};
+
+    // Apply filters based on userSettings.search_filters
+
+      if(!searchFilters.include_active_sellers) {
+        baseCriteria.seller_type = {$nin: ['activeSeller']};
+      }
+      if(!searchFilters.include_inactive_sellers) {
+        baseCriteria.seller_type = {
+          ...baseCriteria.seller_type,
+         $nin: [...(baseCriteria.seller_type?.$nin || []), 'inactiveSeller']
+        };
+      }
+      if(!searchFilters.include_test_sellers) {
+        baseCriteria.seller_type = {
+          ...baseCriteria.seller_type,
+          $nin: [...(baseCriteria.seller_type?.$nin || []), 'testSeller'],
+        };
+      }
+
+      // Add trust level filters
+      // const trustLevelFilters = [];
+      // if (!searchFilters.include_trust_level_100) trustLevelFilters.push(TrustMeterScale.HUNDRED)
+      // if (!searchFilters.include_trust_level_80) trustLevelFilters.push(TrustMeterScale.EIGHTY)
+      // if (!searchFilters.include_trust_level_50) trustLevelFilters.push(TrustMeterScale.FIFTY)
+      // if (!searchFilters.include_trust_level_0) trustLevelFilters.push(TrustMeterScale.ZERO)
+
+      //   if (trustLevelFilters.length > 0) {
+      //     baseCriteria.trust_meter_rating = { $nin: trustLevelFilters };
+      //   }
+
+    }
+
     
     // if search_query is provided, add search conditions
     const searchCriteria = search_query
@@ -68,7 +118,14 @@ export const getAllSellers = async (
       : {};
 
     // Merge base criteria with search criteria
-    const aggregatedCriteria = { ...baseCriteria, ...searchCriteria };
+    const aggregatedCriteria = { 
+      ...baseCriteria, 
+      ...searchCriteria,
+      // ...(baseCriteria.seller_type?.$nin && searchCriteria.seller_type?.$nin
+      //   ? { seller_type: { $nin: [...baseCriteria.seller_type.$nin, ...searchCriteria.seller_type.$nin] } }
+      //   : {}
+      // )
+     };
 
     // If bounds are provided, use MongoDB's $geometry operator
     if (bounds) {

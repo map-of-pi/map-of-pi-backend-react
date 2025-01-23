@@ -7,7 +7,8 @@ import logger from "../config/loggingConfig";
 export const fetchSellersByCriteria = async (req: Request, res: Response) => {
   try {
     const { bounds, search_query } = req.body; // bounds: [sw_lat, sw_lng, ne_lat, ne_lng]
-    const sellers = await sellerService.getAllSellers(bounds, search_query);
+    const userId = req.currentUser?.pi_uid;
+    const sellers = await sellerService.getAllSellers(bounds, search_query, userId);
 
     if (!sellers || sellers.length === 0) {
       logger.warn(`No sellers found within bounds (${bounds?.sw_lat}, ${bounds?.sw_lng}) to (${bounds?.ne_lat}, ${bounds?.ne_lng}) with "${search_query ?? 'undefined'}"`);

@@ -90,7 +90,7 @@ const sellerRoutes = Router();
  *       500:
  *         description: Internal server error
  */
-sellerRoutes.post("/fetch", sellerController.fetchSellersByCriteria);
+sellerRoutes.post("/fetch",verifyToken, sellerController.fetchSellersByCriteria);
 
 /**
  * @swagger
