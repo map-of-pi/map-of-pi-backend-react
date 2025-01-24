@@ -198,7 +198,7 @@ describe('addOrUpdateSellerItem function', () => {
 
   it('should update existing seller item if it does exist for the seller', async () => {  
     const sellerItem = {
-      _id: "25f5a0f2a86d1f9f3b7e4e82",
+      _id: "25f5a0f2a86d1f9f3b7e4e81",
       seller_id: "0b0b0b-0b0b-0b0b",
       name: 'Test Seller 2 Item 1 Updated',
       description: "Test Seller 2 Item 1 Description Updated",
@@ -240,7 +240,7 @@ describe('addOrUpdateSellerItem function', () => {
 
   it('should throw an error when an exception occurs', async () => {  
     const sellerItem = {
-      _id: "25f5a0f2a86d1f9f3b7e4e82",
+      _id: "25f5a0f2a86d1f9f3b7e4e81",
       seller_id: "0b0b0b-0b0b-0b0b",
       name: 'Test Seller 2 Item 1 Updated',
       description: "Test Seller 2 Item 1 Description Updated",
@@ -293,15 +293,15 @@ describe('deleteSellerItem function', () => {
     const sellerItem = {
       _id: "25f5a0f2a86d1f9f3b7e4e82",
       seller_id: "0b0b0b-0b0b-0b0b",
-      name: 'Test Seller 2 Item 1',
-      description: "Test Seller 2 Item 1 Description",
-      price: 0.15,
-      stock_level: "Sold",
+      name: 'Test Seller 2 Item 2',
+      description: "Test Seller 2 Item 2 Description",
+      price: 0.25,
+      stock_level: "Ongoing service",
       duration: 1,
-      image: 'http://example.com/testSellerTwoItemOne.jpg',
-      created_at: '2025-01-09T00:00:00.000Z',
-      updated_at: '2025-01-09T00:00:00.000Z',
-      expired_by: '2025-01-16T00:00:00.000Z'
+      image: 'http://example.com/testSellerTwoItemTwo.jpg',
+      created_at: '2025-01-10T00:00:00.000Z',
+      updated_at: '2025-01-10T00:00:00.000Z',
+      expired_by: '2025-01-17T00:00:00.000Z'
     } as unknown as ISellerItem;
 
     const sellerItemData = await deleteSellerItem(sellerItem._id) as ISellerItem;
