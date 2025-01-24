@@ -1,7 +1,7 @@
 import Seller from "../models/Seller";
 import User from "../models/User";
 import UserSettings from "../models/UserSettings";
-import { VisibleSellerType } from '../models/enums/sellerType';
+import { FulfillmentType, VisibleSellerType } from '../models/enums/sellerType';
 import { TrustMeterScale } from "../models/enums/trustMeterScale";
 import { getUserSettingsById } from "./userSettings.service";
 import { IUser, IUserSettings, ISeller, ISellerWithSettings, ISellerItem, ISanctionedRegion } from "../types";
@@ -159,7 +159,9 @@ export const registerOrUpdateSeller = async (authUser: IUser, formData: any): Pr
       image: formData.image || existingSeller?.image || '',
       address: formData.address || existingSeller?.address || '',
       sell_map_center: sellMapCenter,
-      order_online_enabled_pref: formData.order_online_enabled_pref || existingSeller?.order_online_enabled_pref || ''
+      order_online_enabled_pref: formData.order_online_enabled_pref || existingSeller?.order_online_enabled_pref || '',
+      fulfillment_method: formData.fulfillment_method || existingSeller?.fulfillment_method || FulfillmentType.CollectionByBuyer,
+      fulfillment_description: formData.fulfillment_description || existingSeller?.fulfillment_description || ''
     };
 
     // Update existing seller or create a new one
