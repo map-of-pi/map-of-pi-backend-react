@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Seller from "../models/Seller";
 import User from "../models/User";
 import UserSettings from "../models/UserSettings";
@@ -8,7 +9,6 @@ import { IUser, IUserSettings, ISeller, ISellerWithSettings, ISellerItem, ISanct
 
 import logger from "../config/loggingConfig";
 import SellerItem from "../models/SellerItem";
-import mongoose from 'mongoose';
 
 // Helper function to get settings for all sellers and merge them into seller objects
 const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSettings[]> => {
@@ -229,7 +229,8 @@ export const addOrUpdateSellerItem = async (
     const today = new Date();
 
     // Calculate expiration date based on duration (defaults to 1 week)
-    const durationInMs = (parseInt(item.duration?.toString() || '1') || 1) * 7 * 24 * 60 * 60 * 1000;
+    const duration = Number(item.duration) || 1;
+    const durationInMs = duration * 7 * 24 * 60 * 60 * 1000;
     const expiredBy = new Date(today.getTime() + durationInMs);
 
     // Ensure unique identifier is used for finding existing items
@@ -261,8 +262,8 @@ export const addOrUpdateSellerItem = async (
       const newItem = new SellerItem({
         _id: newItemId,
         seller_id: seller.seller_id,
-        name: item.name.trim(),
-        description: item.description.trim(),
+        name: item.name ? item.name.trim() : '',
+        description: item.description ? item.description.trim() : '',
         price: parseFloat(item.price?.toString() || '0.01'), // Ensure valid price
         stock_level: item.stock_level || '1 available',
         duration: parseInt(item.duration?.toString() || '1'), // Ensure valid duration
