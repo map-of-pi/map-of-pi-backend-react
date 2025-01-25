@@ -112,7 +112,7 @@ describe('sellerController', () => {
               coordinates: [-87.6298, 41.8781]
           },
           order_online_enabled_pref: false,
-          fulfillment_method: "Collection by Buyer"
+          fulfillment_method: "Collection by buyer"
         }
       };
       res = {

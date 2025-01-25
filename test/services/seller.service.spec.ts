@@ -2,14 +2,16 @@ import Seller from '../../src/models/Seller';
 import SellerItem from '../../src/models/SellerItem';
 import { 
   getAllSellers,
+  registerOrUpdateSeller,
   getAllSellerItems, 
   addOrUpdateSellerItem,
   deleteSellerItem,
   getSellersWithinSanctionedRegion 
 } from '../../src/services/seller.service';
+import User from '../../src/models/User';
 import { SellerType } from '../../src/models/enums/sellerType';
 import { RestrictedArea, RestrictedAreaBoundaries } from '../../src/models/enums/restrictedArea';
-import { ISanctionedRegion, ISeller, ISellerItem } from '../../src/types';
+import { IUser, ISeller, ISellerItem, ISanctionedRegion } from '../../src/types';
 
 describe('getAllSellers function', () => {
   const mockBoundingBox = {
@@ -90,6 +92,114 @@ describe('getAllSellers function', () => {
         },
       })
     ); // Ensure length matches expected sellers
+  });
+});
+
+describe('registerOrUpdateSeller function', () => {
+  // Helper function to convert Mongoose document to a plain object and normalize values accordingly
+  const convertToPlainObject = (seller: ISeller): any => {
+    const plainObject = seller.toObject();
+
+    if (plainObject.sell_map_center) {
+      plainObject.sell_map_center = JSON.stringify(plainObject.sell_map_center);
+    }
+
+    if (plainObject.average_rating) {
+      plainObject.average_rating = plainObject.average_rating.toString();
+    }
+
+    return plainObject;
+  };
+
+  const assertSeller = (actual: any, expected: any) => {
+    const { _id, __v, createdAt, updatedAt, order_online_enabled_pref, ...filteredActual } = actual; // ignore DB values.
+    expect(filteredActual).toEqual(expect.objectContaining(expected));
+  };
+
+  it('should add new seller if the seller does not exist', async () => {
+    const userData = await User.findOne({ pi_username: 'TestUser13' }) as IUser;
+    
+    const formData = {
+      seller_id: "0m0m0m-0m0m-0m0m",
+      name: 'Test Seller 13',
+      description: "Test Seller 13 Description",
+      address: "Test Seller 13 Address",
+      image: "http://example.com/testThirteen.jpg",
+      seller_type: "activeSeller",
+      sell_map_center: JSON.stringify({
+        type: "Point",
+        coordinates: [24.1234, 24.1234]
+      }),
+      average_rating: "5",
+      fulfillment_method: "Delivered to buyer",
+      fulfillment_description: "Test Seller 13 Fulfillment Description"
+    } as unknown as ISeller;
+
+    const sellerData = (await registerOrUpdateSeller(userData, formData)) as ISeller;
+
+    // Convert `sellerData` to a plain object if it's a Mongoose document
+    const plainObject = await convertToPlainObject(sellerData);
+
+    assertSeller(plainObject, {
+      seller_id: formData.seller_id,
+      name: formData.name,
+      description: formData.description,
+      address: formData.address,
+      image: formData.image,
+      seller_type: formData.seller_type,
+      sell_map_center: formData.sell_map_center,
+      average_rating: formData.average_rating,
+      fulfillment_method: formData.fulfillment_method,
+      fulfillment_description: formData.fulfillment_description
+    });
+  });
+
+  it('should update existing seller if the seller does exist', async () => {  
+    const userData = await User.findOne({ pi_username: 'TestUser3' }) as IUser;
+    
+    const formData = {
+      seller_id: "0c0c0c-0c0c-0c0c",
+      name: 'Test Vendor 3 Updated',
+      description: "Test Vendor 3 Description Updated",
+      address: "Test Vendor 3 Address Updated",
+      fulfillment_method: "Delivered to buyer",
+      fulfillment_description: "Test Vendor 3 Fulfillment Description"
+    } as unknown as ISeller;
+
+    const sellerData = (await registerOrUpdateSeller(userData, formData)) as ISeller;
+
+    // Convert `sellerData` to a plain object if it's a Mongoose document
+    const plainObject = await convertToPlainObject(sellerData);
+
+    assertSeller(plainObject, {
+      seller_id: formData.seller_id,
+      name: formData.name,
+      description: formData.description,
+      fulfillment_method: formData.fulfillment_method,
+      fulfillment_description: formData.fulfillment_description
+    });
+  });
+
+  it('should throw an error when an exception occurs', async () => { 
+    const userData = await User.findOne({ pi_username: 'TestUser3' }) as IUser;
+    
+    const formData = {
+      seller_id: "0c0c0c-0c0c-0c0c",
+      name: 'Test Vendor 3 Updated',
+      description: "Test Vendor 3 Description Updated",
+      address: "Test Vendor 3 Address Updated",
+      fulfillment_method: "Delivered to buyer",
+      fulfillment_description: "Test Vendor 3 Fulfillment Description"
+    } as unknown as ISeller;
+
+    // Mock the Seller model to throw an error
+    jest.spyOn(Seller, 'findOne').mockImplementationOnce(() => {
+      throw new Error('Mock database error');
+    });
+
+    await expect(registerOrUpdateSeller(userData, formData)).rejects.toThrow(
+      'Failed to register or update seller; please try again later'
+    );
   });
 });
 

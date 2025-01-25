@@ -24,6 +24,11 @@
       "pi_uid": "0e0e0e-0e0e-0e0e",
       "pi_username": "TestUser5",
       "user_name": "test-user-5"
+    },
+    {
+      "pi_uid": "0m0m0m-0m0m-0m0m",
+      "pi_username": "TestUser13",
+      "user_name": "test-user-13"
     }
   ],
   "userSettings": [
@@ -127,7 +132,9 @@
       "sell_map_center": {
           "type": "Point",
           "coordinates": [-95.3698, 29.7604]
-      }
+      },
+      "fulfillment_method": "Collection by buyer",
+      "fulfillment_description": "Test Vendor 5 Fulfillment Description"
     },
     {
       "seller_id": "0f0f0f-0f0f-0f0f",
