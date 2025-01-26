@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import Tier from "../models/Tiers";
-import { MembershipType } from "../models/enums/membershipType";
+import Tier from "../../src/models/Tiers";
+import { MembershipType } from "../../src/models/enums/membershipType";
 import dotenv from "dotenv";
 
 dotenv.config();
