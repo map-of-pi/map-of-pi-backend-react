@@ -22,13 +22,7 @@ import upload from "../utils/multer";
  *           type: string
  *           description: Description of the seller
  *         seller_type:
- *           type: string
- *           description: Type of the seller
- *           enum:
- *             - active
- *             - inactive
- *             - test
- *             - other
+ *           $ref: '/api/docs/enum/SellerType.yml#/components/schemas/SellerType'
  *         image:
  *           type: string
  *           description: Image of the seller
@@ -56,6 +50,11 @@ import upload from "../utils/multer";
  *           required:
  *             - type
  *             - coordinates
+ *         fulfillment_type:
+ *           $ref: '/api/docs/enum/FulfillmentType.yml#/components/schemas/FulfillmentType'
+ *         fulfillment_description:
+ *           type: string
+ *           description: Description of the fulfillment
  *         order_online_enabled_pref:
  *           type: boolean
  *           description: Preference for online ordering availability
