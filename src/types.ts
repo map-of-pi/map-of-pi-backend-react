@@ -3,8 +3,8 @@
   import { RatingScale } from "./models/enums/ratingScale";
   import { SellerType } from "./models/enums/sellerType";
   import { TrustMeterScale } from "./models/enums/trustMeterScale";
+  import { MembershipClassType } from "./models/enums/membershipClassType";
   import { RestrictedArea } from "./models/enums/restrictedArea";
-  import { MembershipType } from "./models/enums/membershipType";
 
   // User
   export interface IUser extends Document {
@@ -30,11 +30,15 @@
 
   // Membership
   export interface IMembership extends Document {
-      pi_uid: string;
-      membership_class: MembershipType;
-      mappi_balance: number;
-      membership_expiration: Date | null;
-      mappi_used_to_date: number;
+    membership_id: string;
+    membership_class_type: MembershipClassType;
+    membership_expiry_date: Date | null;
+    mappi_balance: number;
+    mappi_allowance_usage?: {
+      date: Date; 
+      purpose: string;
+      amount: number;
+    }[];
   }
 
   // Seller

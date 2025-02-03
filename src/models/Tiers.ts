@@ -1,8 +1,8 @@
 import mongoose, { Schema, Document } from "mongoose";
-import { MembershipType } from "./enums/membershipType";
+import { MembershipClassType } from "./enums/membershipClassType";
 
 export interface ITier extends Document {
-  class: MembershipType;
+  class: MembershipClassType;
   mappiAllowance: number;
   durationWeeks: number;
   cost: number;
@@ -12,7 +12,7 @@ export interface ITier extends Document {
 
 const tierSchema: Schema = new Schema(
   {
-    class: { type: String, enum: Object.values(MembershipType), required: true, unique: true },
+    class: { type: String, enum: Object.values(MembershipClassType), required: true, unique: true },
     mappiAllowance: { type: Number, required: true },
     durationWeeks: { type: Number, required: true },
     cost: { type: Number, required: true },

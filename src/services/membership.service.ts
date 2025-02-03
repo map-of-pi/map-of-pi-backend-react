@@ -1,118 +1,92 @@
 import Membership from "../models/Membership";
+import { MembershipClassType } from "../models/enums/membershipClassType";
+import { IMembership, IUser } from "../types";
+
 import logger from "../config/loggingConfig";
-import { MembershipType } from "../models/enums/membershipType";
-import mongoose from "mongoose";
 
-// Retrieve Membership Status
-export const getMembershipStatus = async (
-  pi_uid: string
-): Promise<{
-  membership_class: string;
-  mappi_balance: number;
-  membership_expiration: Date | null;
-} | null> => {
+// Fetch a single membership by ID
+export const getSingleMembershipById = async (membership_id: string): Promise<IMembership | null> => {
   try {
-    // Fetch membership by pi_uid
-    if (!mongoose.Types.ObjectId.isValid(pi_uid)) {
-      logger.warn(`Invalid pi_uid format: ${pi_uid}`);
-      throw new Error("Invalid pi_uid format");
-    }
-
-    const membership = await Membership.findOne({ pi_uid }).exec();
-    if (!membership) {
-      logger.warn(`Membership not found for pi_uid: ${pi_uid}`);
-      return null;
-    }
-
-    return {
-      membership_class: membership.membership_class,
-      mappi_balance: membership.mappi_balance,
-      membership_expiration: membership.membership_expiration ?? null,
-    };
-  } catch (error) {
-    logger.error(`Failed to retrieve membership status for pi_uid: ${pi_uid}. Error: ${(error as Error).message}`, error);
-    throw new Error("Failed to retrieve membership status; please try again later");
-  }
-};
-
-// Upgrade Membership
-export const upgradeMembership = async (
-  pi_uid: string,
-  newMembershipClass: MembershipType,
-  mappiAllowance: number,
-  durationWeeks: number
-): Promise<any> => {
-  try {
-    // Fetch the membership record for the user
-    if (!mongoose.Types.ObjectId.isValid(pi_uid)) {
-      logger.warn(`Invalid pi_uid format: ${pi_uid}`);
-      throw new Error("Invalid pi_uid format");
-    }
-
-    if (mappiAllowance <= 0 || durationWeeks <= 0) {
-      throw new Error("Invalid input values");
-    }
-
-    const membership = await Membership.findOne({ pi_uid }).exec();
-    if (!membership) {
-      logger.warn(`Membership not found for pi_uid: ${pi_uid}`);
-      return null;
-    }
-
-     // Validate the new membership class
-     if (!Object.values(MembershipType).includes(newMembershipClass)) {
-        throw new Error("Invalid membership class provided");
-      }
-
-    // Calculate the new expiration date
-    const currentDate = new Date();
-    const newExpirationDate = membership.membership_expiration
-      ? new Date(
-          Math.max(
-            membership.membership_expiration.getTime(),
-            currentDate.getTime()
-          ) +
-            durationWeeks * 7 * 24 * 60 * 60 * 1000
-        )
-      : new Date(currentDate.getTime() + durationWeeks * 7 * 24 * 60 * 60 * 1000);
-
-    // Update fields
-    membership.membership_class = newMembershipClass as MembershipType;
-    membership.mappi_balance += mappiAllowance;
-    membership.membership_expiration = newExpirationDate;
-
-    // Save updated membership
-    await membership.save();
-
-    logger.info(`Membership upgraded for pi_uid: ${pi_uid}`);
+    const membership = await Membership.findOne({ membership_id }).exec();
     return membership;
   } catch (error) {
-    logger.error(`Failed to upgrade membership for pi_uid: ${pi_uid}. Error: ${(error as Error).message}`, error);
-    throw new Error("Failed to upgrade membership; please try again later");
+    logger.error(`Failed to retrieve membership for membershipID ${ membership_id }:`, error);
+    throw new Error('Failed to get membership; please try again later');
   }
 };
 
-// Deduct Mappi
-export const deductMappi = async (pi_uid: string): Promise<number> => {
+// Manage Membership
+export const addOrUpdateMembership = async (
+  authUser: IUser,
+  membership_class: MembershipClassType,
+  mappi_allowance: number,
+  duration: number
+): Promise<IMembership> => {
+
+  const today = new Date();
+  const durationInMs = duration * 7 * 24 * 60 * 60 * 1000; // Convert weeks to milliseconds
+
   try {
-    // Fetch the membership record for the user
-    const membership = await Membership.findOneAndUpdate(
-      { pi_uid, mappi_balance: { $gte: 1 } },
-      { $inc: { mappi_balance: -1, mappi_used_to_date: 1 } },
-      { new: true, projection: { mappi_balance: 1 } }
-    );
+    // Check for an existing membership
+    const existingMembership = await Membership.findOne({ membership_id: authUser.pi_uid }).exec();
+    
+    if (existingMembership) {
+      // Use the later of today or the current expiration date
+      const baseDate = existingMembership.membership_expiry_date
+        ? new Date(Math.max(existingMembership.membership_expiry_date.getTime(), today.getTime()))
+        : today;
 
-    if (!membership) {
-      logger.warn(`Membership not found or insufficient balance for pi_uid: ${pi_uid}`);
-      throw new Error("Membership not found or insufficient balance");
+      // Calculate the new expiration date by adding the duration to the base date
+      const newExpirationDate = new Date(baseDate.getTime() + durationInMs);
+      // Calculate the new Mappi balance
+      const newMappiBalance = existingMembership.mappi_balance + mappi_allowance;
+
+      // Update the existing membership
+      const updatedMembership = await Membership.findOneAndUpdate(
+        { membership_id: authUser.pi_uid },
+        { 
+          $set: {
+            membership_class_type: membership_class,
+            membership_expiry_date: newExpirationDate,
+            mappi_balance: newMappiBalance
+          },
+          $push: {
+            mappi_allowance_usage: {
+              date: today,
+              purpose: "Membership purchase",
+              amount: mappi_allowance
+            }
+          }
+        }, 
+        { new: true } // Return the updated document
+      ).exec();
+
+      logger.debug('Membership updated in the database:', updatedMembership);
+      return updatedMembership as IMembership;
+    } else {
+      // Membership does not exist, calculate based on today's date
+      const newExpirationDate = new Date(today.getTime() + durationInMs);
+
+      // Create a new membership
+      const newMembership = new Membership({
+        membership_id: authUser.pi_uid,
+        membership_class_type: membership_class,
+        membership_expiry_date: newExpirationDate,
+        mappi_balance: mappi_allowance,
+        mappi_allowance_usage: [
+          {
+            date: today,
+            purpose: "Initial membership",
+            amount: mappi_allowance
+          }
+        ]
+      });
+      const savedMembership = await newMembership.save();
+      logger.info('New membership created in the database:', savedMembership);
+      return savedMembership as IMembership;
     }
-
-    logger.info(
-      `Mappi deducted for pi_uid: ${pi_uid}. Remaining balance: ${membership.mappi_balance}`
-    );
-    return membership.mappi_balance;
   } catch (error) {
-    logger.error(`Failed to deduct mappi for pi_uid: ${pi_uid}. Error: ${(error as Error).message}`, error);
-    throw new Error("Failed to deduct mappi; please try again later");
+    logger.error(`Failed to add or update membership for pi_uid: ${authUser.pi_uid}`, error);
+    throw new Error("Failed to add or update membership; please try again later");
   }
 };

@@ -29,11 +29,17 @@ const populateMemberships = async () => {
     
       const membership = new Membership({
         user_id: user._id,
-        pi_uid: user.pi_uid,
-        membership_class: "Casual",
-        mappi_balance: 0,
-        membership_expiration: null,
-        mappi_used_to_date: 0,
+        membership_id: user.pi_uid,
+        membership_class_type: "Casual",
+        membership_end_date: null,
+        mappi_allowance: 0,
+        mappi_allowance_usage: [
+          {
+            date: new Date(),
+            purpose: "Test Purpose",
+            amount: 5,
+          }  
+        ]
       });
     
       await membership.save();

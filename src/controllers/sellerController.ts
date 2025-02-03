@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import * as sellerService from "../services/seller.service";
-import { uploadImage } from "../services/misc/image.service";
 import * as userSettingsService from '../services/userSettings.service';
+import { uploadImage } from "../services/misc/image.service";
 import logger from "../config/loggingConfig";
 
 export const fetchSellersByCriteria = async (req: Request, res: Response) => {
