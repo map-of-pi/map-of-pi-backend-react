@@ -1,0 +1,13 @@
+components:
+  schemas:
+    StockLevelType:
+      type: string
+      enum:
+        - 1 available
+        - 2 available
+        - 3 available
+        - Many available
+        - Made to order
+        - Ongoing service
+        - Sold
+      description: The type of stock level.

@@ -67,6 +67,11 @@ components:
             required:
               - type
               - coordinates
+          fulfillment_type:
+            $ref: '/api/docs/enum/FulfillmentType.yml#/components/schemas/FulfillmentType'
+          fulfillment_description:
+            type: string
+            example: This is a sample fulfillment description.
           order_online_enabled_pref:
             type: boolean
             example: true
@@ -122,6 +127,11 @@ components:
           required:
             - type
             - coordinates
+        fulfillment_type:
+          $ref: '/api/docs/enum/FulfillmentType.yml#/components/schemas/FulfillmentType'
+        fulfillment_description:
+          type: string
+          example: This is a sample fulfillment description.
         order_online_enabled_pref:
           type: boolean
           example: true
@@ -192,6 +202,11 @@ components:
               required:
                 - type
                 - coordinates
+            fulfillment_type:
+              $ref: '/api/docs/enum/FulfillmentType.yml#/components/schemas/FulfillmentType'
+            fulfillment_description:
+              type: string
+              example: This is a sample fulfillment description.
             order_online_enabled_pref:
               type: boolean
               example: true
@@ -242,6 +257,11 @@ components:
           required:
             - type
             - coordinates
+        fulfillment_type:
+          $ref: '/api/docs/enum/FulfillmentType.yml#/components/schemas/FulfillmentType'
+        fulfillment_description:
+          type: string
+          example: This is a sample fulfillment description.
         order_online_enabled_pref:
           type: boolean
           example: true
@@ -294,6 +314,11 @@ components:
               required:
                 - type
                 - coordinates
+            fulfillment_type:
+              $ref: '/api/docs/enum/FulfillmentType.yml#/components/schemas/FulfillmentType'
+            fulfillment_description:
+              type: string
+              example: This is a sample fulfillment description.
             order_online_enabled_pref:
               type: boolean
               example: true
@@ -347,6 +372,11 @@ components:
               required:
                 - type
                 - coordinates
+            fulfillment_type:
+              $ref: '/api/docs/enum/FulfillmentType.yml#/components/schemas/FulfillmentType'
+            fulfillment_description:
+              type: string
+              example: This is a sample fulfillment description.
             order_online_enabled_pref:
               type: boolean
               example: true
