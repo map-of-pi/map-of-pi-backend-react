@@ -1,0 +1,8 @@
+components:
+  schemas:
+    FulfillmentType:
+      type: string
+      enum:
+        - Collection by buyer
+        - Delivered to buyer
+      description: The type of fulfillment method.
