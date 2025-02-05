@@ -1,19 +1,18 @@
   import { Document, Types } from "mongoose";
   import { DeviceLocationType } from "./models/enums/deviceLocationType";
   import { RatingScale } from "./models/enums/ratingScale";
-  import { SellerType } from "./models/enums/sellerType";
+  import { SellerType, FulfillmentType } from "./models/enums/sellerType";
+  import { StockLevelType } from "./models/enums/stockLevelType";
   import { TrustMeterScale } from "./models/enums/trustMeterScale";
   import { MembershipClassType } from "./models/enums/membershipClassType";
   import { RestrictedArea } from "./models/enums/restrictedArea";
 
-  // User
   export interface IUser extends Document {
     pi_uid: string;
     pi_username: string;
     user_name: string;
   }
 
-  // User Settings
   export interface IUserSettings extends Document {
     user_settings_id: string;
     user_name: string;
@@ -28,7 +27,6 @@
     };
   }
 
-  // Membership
   export interface IMembership extends Document {
     membership_id: string;
     membership_class_type: MembershipClassType;
@@ -41,7 +39,6 @@
     }[];
   }
 
-  // Seller
   export interface ISeller extends Document {
     seller_id: string;
     name: string;
@@ -55,9 +52,24 @@
       coordinates: [number, number];
     };
     order_online_enabled_pref: boolean;
+    fulfillment_method: FulfillmentType;
+    fulfillment_description?: string;
   }
 
-  // Review Feedback
+  export interface ISellerItem extends Document {
+    _id: string;
+    seller_id: string;
+    name: string;
+    description: string;
+    price: Types.Decimal128;
+    stock_level: StockLevelType;
+    image?: string;
+    duration: number;
+    created_at: Date;
+    updated_at: Date;
+    expired_by: Date;
+  }
+
   export interface IReviewFeedback extends Document {
     _id: string;
     review_receiver_id: string;
@@ -69,7 +81,6 @@
     review_date: Date;
   }
 
-  // Sanctioned Regions
   export interface ISanctionedRegion extends Document {
     location: RestrictedArea;
     boundary: {
