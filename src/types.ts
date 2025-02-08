@@ -67,6 +67,18 @@
     review_date: Date;
   }
 
+  export interface IPayment extends Document {
+    paymentId: string;
+    txId: string;
+    pi_uid: string;
+    amount: number;
+    memo: string;
+    metadata: Record<string, any>;
+    status: "pending" | "approved" | "completed" | "failed";
+    cratedAt: Date;
+    updatedAt: Date;
+  }
+
   export interface ISanctionedRegion extends Document {
     location: RestrictedArea;
     boundary: {
