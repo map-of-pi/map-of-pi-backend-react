@@ -1,0 +1,65 @@
+components:
+  schemas:
+    GetSingleMembershipRs:
+      type: object
+      properties:
+        membership_id:
+          type: string
+          example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
+        membership_class:
+          $ref: './enum/MembershipClassType.yml#/components/schemas/MembershipClassType'
+        membership_end_date:
+          type: string
+          format: date-time
+          example: 2024-12-21T00:00:00.000Z
+        mappi_balance:
+          type: number
+          example: 100
+        _id:
+          type: string
+          example: 66741c62b175e7d059a2639e
+        __v:
+          type: number
+          example: 0
+
+    ManageMembershipRq:
+      type: object
+      properties:
+        membership_id:
+          type: string
+          example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
+        membership_class:
+          $ref: './enum/MembershipClassType.yml#/components/schemas/MembershipClassType'
+        membership_duration:
+          type: number 
+          example: 4
+        mappi_amount:
+          type: number
+          example: 100
+      required:
+        - membership_id
+        - membership_class
+        - membership_duration
+        - mappi_amount
+
+    ManageMembershipRs:
+      type: object
+      properties:
+        membership_id:
+          type: string
+          example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0  
+        membership_class:
+          $ref: './enum/MembershipClassType.yml#/components/schemas/MembershipClassType'
+        membership_end_date:
+          type: string
+          format: date-time
+          example: 2024-12-21T00:00:00.000Z
+        mappi_balance:
+          type: number
+          example: 200
+        _id:
+          type: string
+          example: 66741c62b175e7d059a2639e
+        __v:
+          type: number
+          example: 0

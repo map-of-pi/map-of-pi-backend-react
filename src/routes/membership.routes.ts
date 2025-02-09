@@ -6,104 +6,65 @@ const membershipRoutes = express.Router();
 
 /**
  * @swagger
- * /api/v1/membership/membership-status/{pi_uid}:
+ * /api/v1/memberships/{membership_id}:
  *   get:
  *     tags:
  *       - Membership
- *     summary: Get membership status by user ID
+ *     summary: Get a single membership by membership ID
  *     parameters:
- *       - name: pi_uid
+ *       - name: membership_id
  *         in: path
  *         required: true
  *         schema:
  *           type: string
- *         description: The ID of the user record
+ *         description: The Pi UID of the membership to retrieve
  *     responses:
  *       200:
- *         description: Membership status fetched successfully
+ *         description: Successful response
  *         content:
  *           application/json:
  *             schema:
- *               $ref: './membership.yml#/components/schemas/Membership'
+ *               $ref: '/api/docs/MembershipsSchema.yml#/components/schemas/GetSingleMembershipRs'
  *       404:
  *         description: Membership not found
- *       500:
- *         description: Internal server error
- */
-membershipRoutes.get(
-  "/membership-status/:pi_uid",
-  verifyToken,
-  membershipController.getMembershipStatus
-);
-
-/**
- * @swagger
- * /api/v1/membership/upgrade-membership:
- *   post:
- *     tags:
- *       - Membership
- *     summary: Upgrade the user's membership
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: './membership.yml#/components/schemas/UpgradeMembershipRq'
- *     responses:
- *       200:
- *         description: Membership upgraded successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: './membership.yml#/components/schemas/UpgradeMembershipRs'
- *       404:
- *         description: Membership not found
- *       500:
- *         description: Internal server error
- */
-membershipRoutes.post(
-  "/upgrade-membership",
-  verifyToken,
-  membershipController.upgradeMembership
-);
-
-/**
- * @swagger
- * /api/v1/membership/use-mappi:
- *   post:
- *     tags:
- *       - Membership
- *     summary: Deduct a mappi from the user's balance
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               pi_uid:
- *                 type: string
- *                 description: Unique identifier for the user
- *                 example: 66741c62b175e7d059a2639e
- *     responses:
- *       200:
- *         description: Mappi deducted successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: './membership.yml#/components/schemas/Membership'
  *       400:
- *         description: Insufficient mappi balance
- *       404:
- *         description: Membership not found
+ *         description: Bad request
  *       500:
  *         description: Internal server error
  */
-membershipRoutes.post(
-  "/use-mappi",
+membershipRoutes.get("/:membership_id", membershipController.getSingleMembership);
+
+/**
+ * @swagger
+ * /api/v1/memberships/manage:
+ *   put:
+ *     tags:
+ *       - Membership
+ *     summary: Register a new membership or update existing membership *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '/api/docs/MembershipsSchema.yml#/components/schemas/ManageMembershipRq'
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '/api/docs/MembershipsSchema.yml#/components/schemas/ManageMembershipRs'
+ *       401:
+ *         description: Unauthorized
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
+membershipRoutes.put(
+  "/manage",
   verifyToken,
-  membershipController.useMappi
+  membershipController.manageMembership
 );
 
 export default membershipRoutes;
-

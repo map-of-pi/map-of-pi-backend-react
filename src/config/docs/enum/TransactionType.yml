@@ -1,0 +1,8 @@
+components:
+  schemas:
+    TransactionType:
+      type: string
+      enum:
+        - Mappi
+        - Pi
+      description: The type of Transaction.

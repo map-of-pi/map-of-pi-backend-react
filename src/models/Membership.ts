@@ -25,14 +25,7 @@ const membershipSchema = new Schema<IMembership>(
       type: Number,
       default: 0,
       required: true,
-    },
-    mappi_allowance_usage: [
-      {
-        date: { type: Date, required: true },
-        purpose: { type: String, required: true },
-        amount: { type: Number, required: true },
-      },
-    ]
+    }
   },
   { timestamps: true }
 );

@@ -1,0 +1,42 @@
+components:
+  schemas:
+    SubmitMappiTransactionRq:
+      type: object
+      properties:
+        transaction_id:
+          type: string
+          example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
+        transaction_type:
+          $ref: './enum/TransactionType.yml#/components/schemas/TransactionType'
+        amount:
+          type: number
+          example: 5
+        reason:
+          type: string 
+          example: Sell item 1 week
+      required:
+        - transaction_id
+        - transaction_type
+        - amount
+        - reason
+
+    SubmitMappiTransactionRs:
+      type: object
+      properties:
+        transaction_id:
+          type: string
+          example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0  
+        transaction_type:
+          $ref: './enum/TransactionType.yml#/components/schemas/TransactionType'
+        amount:
+          type: number
+          example: 5
+        reason:
+          type: string 
+          example: Sell item 1 week
+        _id:
+          type: string
+          example: 66741c62b175e7d059a2639e
+        __v:
+          type: number
+          example: 0
