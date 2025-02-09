@@ -6,10 +6,40 @@ const transactionRoutes = express.Router();
 
 /**
  * @swagger
- * /api/v1/transactions/use-mappi:
- *   put:
+ * /api/v1/transactions/{transaction_id}:
+ *   get:
  *     tags:
- *       - Membership
+ *       - Transaction
+ *     summary: Get transaction records associated with the transaction ID
+ *     parameters:
+ *       - name: transaction_id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The Pi UID of the transaction record to retrieve
+ *     responses:
+ *       204:
+ *         description: Transaction records not found
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '/api/docs/TransactionsSchema.yml#/components/schemas/GetTransactionRecordsRs'
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
+transactionRoutes.get("/:transaction_id", transactionController.getTransactionRecords);
+
+/**
+ * @swagger
+ * /api/v1/transactions/submit:
+ *   post:
+ *     tags:
+ *       - Transaction
  *     summary: Add or deduct Mappi points from the user's Mappi balance *
  *     requestBody:
  *       required: true
@@ -31,8 +61,8 @@ const transactionRoutes = express.Router();
  *       500:
  *         description: Internal server error
  */
-transactionRoutes.put(
-  "/use-mappi",
+transactionRoutes.post(
+  "/submit",
   verifyToken,
   transactionController.submitTransaction
 );

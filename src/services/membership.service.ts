@@ -60,7 +60,7 @@ export const addOrUpdateMembership = async (
         { new: true } // Return the updated document
       ).exec();
 
-      logger.debug('Membership updated in the database:', updatedMembership);
+      logger.debug('Existing membership updated in the database:', updatedMembership);
 
       await createTransactionRecord(
         authUser.pi_uid, 
@@ -110,11 +110,9 @@ export const updateMembershipBalance = async (
     if (!membership) {
       throw new Error(`Membership not found for membership ID: ${membership_id}`);
     }
-
+    
     // Calculate the new balance
-    const newBalance = membership.mappi_balance + amount;
-
-    membership.mappi_balance = newBalance;
+    membership.mappi_balance = membership.mappi_balance + amount;
     const updatedMembership = await membership.save();
 
     logger.info(`Membership balance updated for membership ID: ${membership_id}`);

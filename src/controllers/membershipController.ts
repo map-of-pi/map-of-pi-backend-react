@@ -13,7 +13,7 @@ export const getSingleMembership = async (req: Request, res: Response) => {
     logger.info(`Fetched membership with ID ${membership_id}`);
     return res.status(200).json(currentMembership);
   } catch (error) {
-    logger.error(`Failed to get single membership for membershipID ${ membership_id }:`, error);
+    logger.error(`Failed to get single membership for membership ID: ${ membership_id }:`, error);
     return res.status(500).json({ message: 'An error occurred while getting single membership; please try again later' });
   }
 };
@@ -35,9 +35,9 @@ export const manageMembership = async (req: Request, res: Response) => {
       duration
     );
     logger.info(`Successfully managed membership for user ${authUser.pi_uid}`);
-    return res.status(200).json({ membership: updatedMembership });
+    return res.status(200).json(updatedMembership);
   } catch (error) {
-    logger.error(`Failed to manage membership for userID ${authUser?.pi_uid}:`, error);
+    logger.error(`Failed to manage membership for membership ID: ${authUser?.pi_uid}:`, error);
     return res.status(500).json({
       message: 'An error occurred while managing membership; please try again later',
     });
