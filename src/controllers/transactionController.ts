@@ -31,10 +31,10 @@ export const submitTransaction = async (req: Request, res: Response) => {
 
     const newTransactionRecord = await processTransaction(authUser.pi_uid, transaction_type, amount, reason);
 
-    logger.info(`Mappi transaction processed for membershipID: ${authUser.pi_uid}`);
-    return res.status(200).json( { transactionRecord: newTransactionRecord });
+    logger.info(`Transaction processed for transaction ID: ${authUser.pi_uid}`);
+    return res.status(200).json(newTransactionRecord);
   } catch (error) {
-    logger.error('Failed to submit Mappi Transaction:', error);
-    return res.status(500).json({ message: 'An error occurred while submitting the Mappi Transaction; please try again later' });
+    logger.error('Failed to submit transaction:', error);
+    return res.status(500).json({ message: 'An error occurred while submitting transaction; please try again later' });
   }
 };

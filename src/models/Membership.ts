@@ -30,4 +30,7 @@ const membershipSchema = new Schema<IMembership>(
   { timestamps: true }
 );
 
-export default mongoose.model('Membership', membershipSchema);
+// Creating the Membership model from the schema
+const Membership = mongoose.model<IMembership>("Membership", membershipSchema);
+
+export default Membership;

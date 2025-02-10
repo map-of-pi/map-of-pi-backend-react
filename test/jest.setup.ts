@@ -4,6 +4,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import * as mockData from './mockData.json';
 import User from '../src/models/User';
 import UserSettings from '../src/models/UserSettings';
+import Membership from '../src/models/Membership';
 import Seller from '../src/models/Seller';
 import SellerItem from '../src/models/SellerItem';
 import ReviewFeedback from '../src/models/ReviewFeedback';
@@ -32,6 +33,7 @@ beforeAll(async () => {
     // Load the mock data into Map of PI DB collections
     await User.insertMany(mockData.users);
     await UserSettings.insertMany(mockData.userSettings);
+    await Membership.insertMany(mockData.memberships);
     // Ensure indexes are created for the schema models before running tests
     await Seller.createIndexes();
     await Seller.insertMany(mockData.sellers);

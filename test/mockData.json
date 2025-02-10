@@ -83,6 +83,20 @@
       "trust_meter_rating": 100
     }
   ],
+  "memberships": [
+    {
+      "membership_id": "0a0a0a-0a0a-0a0a",
+      "membership_class_type": "Triple Gold",
+      "membership_expiry_date": "2026-01-26T00:00:00.000Z",
+      "mappi_balance": 1000
+    },
+    {
+      "membership_id": "0b0b0b-0b0b-0b0b",
+      "membership_class_type": "Double Gold",
+      "membership_expiry_date": "2025-06-30T00:00:00.000Z",
+      "mappi_balance": 400
+    }
+  ],
   "sellers": [
     {
       "seller_id": "0a0a0a-0a0a-0a0a",

@@ -27,12 +27,12 @@ export const manageMembership = async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const { membership_class, mappi_amount, duration } = req.body;
+    const { membership_class, membership_duration, mappi_allowance } = req.body;
     const updatedMembership = await membershipService.addOrUpdateMembership(
       authUser,
       membership_class,
-      mappi_amount,
-      duration
+      membership_duration,
+      mappi_allowance
     );
     logger.info(`Successfully managed membership for user ${authUser.pi_uid}`);
     return res.status(200).json(updatedMembership);

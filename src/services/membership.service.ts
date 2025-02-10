@@ -11,12 +11,12 @@ export const getSingleMembershipById = async (membership_id: string): Promise<IM
     const membership = await Membership.findOne({ membership_id }).exec();
 
     if (!membership) {
-      throw new Error(`Membership with membershipID: ${membership_id} not found`);
+      throw new Error(`Membership with membership ID: ${membership_id} not found`);
     }
 
     return membership;
   } catch (error) {
-    logger.error(`Failed to retrieve membership for membershipID ${ membership_id }:`, error);
+    logger.error(`Failed to retrieve membership for membership ID: ${ membership_id }:`, error);
     throw new Error('Failed to get membership; please try again later');
   }
 };
@@ -25,12 +25,12 @@ export const getSingleMembershipById = async (membership_id: string): Promise<IM
 export const addOrUpdateMembership = async (
   authUser: IUser,
   membership_class: MembershipClassType,
-  mappi_amount: number,
-  duration: number
+  membership_duration: number,
+  mappi_allowance: number
 ): Promise<IMembership> => {
 
   const today = new Date();
-  const durationInMs = duration * 7 * 24 * 60 * 60 * 1000; // Convert weeks to milliseconds
+  const durationInMs = membership_duration * 7 * 24 * 60 * 60 * 1000; // Convert weeks to milliseconds
 
   try {
     // Check for an existing membership
@@ -45,7 +45,7 @@ export const addOrUpdateMembership = async (
       // Calculate the new expiration date by adding the duration to the base date
       const newExpirationDate = new Date(baseDate.getTime() + durationInMs);
       // Calculate the new Mappi balance
-      const newMappiBalance = existingMembership.mappi_balance + mappi_amount;
+      const newMappiBalance = existingMembership.mappi_balance + mappi_allowance;
 
       // Update the existing membership
       const updatedMembership = await Membership.findOneAndUpdate(
@@ -65,7 +65,7 @@ export const addOrUpdateMembership = async (
       await createTransactionRecord(
         authUser.pi_uid, 
         TransactionType.MAPPI_DEPOSIT, 
-        mappi_amount, 
+        mappi_allowance, 
         `Mappi credited for updated Membership to ${membership_class}`
       );
       
@@ -79,7 +79,7 @@ export const addOrUpdateMembership = async (
         membership_id: authUser.pi_uid,
         membership_class_type: membership_class,
         membership_expiry_date: newExpirationDate,
-        mappi_balance: mappi_amount
+        mappi_balance: mappi_allowance
       });
       const savedMembership = await newMembership.save();
       logger.info('New membership created in the database:', savedMembership);
@@ -87,7 +87,7 @@ export const addOrUpdateMembership = async (
       await createTransactionRecord(
         authUser.pi_uid,
         TransactionType.MAPPI_DEPOSIT,
-        mappi_amount, 
+        mappi_allowance, 
         `Membership initiated to ${membership_class}`
       );
       

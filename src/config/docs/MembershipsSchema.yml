@@ -33,14 +33,14 @@ components:
         membership_duration:
           type: number 
           example: 4
-        mappi_amount:
+        mappi_allowance:
           type: number
           example: 100
       required:
         - membership_id
         - membership_class
         - membership_duration
-        - mappi_amount
+        - mappi_allowance
 
     ManageMembershipRs:
       type: object
