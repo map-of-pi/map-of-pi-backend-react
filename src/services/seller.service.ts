@@ -138,7 +138,7 @@ export const getAllSellers = async (
      };
 
     // If bounds are provided, use MongoDB's $geometry operator
-    if (bounds) {
+    if (bounds && !search_query) {
       sellers = await Seller.find({
         ...aggregatedCriteria,
         sell_map_center: {
