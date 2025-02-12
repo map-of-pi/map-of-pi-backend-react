@@ -222,7 +222,7 @@ export const getAllSellerItems = async (
   }
 };
 
-export const addOrUpdateSellerItem = async (
+export const addOrUpdateSellerItem1 = async (
   seller: ISeller,
   item: ISellerItem
 ): Promise<ISellerItem | null> => {
@@ -233,7 +233,7 @@ export const addOrUpdateSellerItem = async (
     // Calculate expiration date based on duration (defaults to 1 week)
     const duration = Number(item.duration) || 1;
     const durationInMs = duration * 7 * 24 * 60 * 60 * 1000;
-    const expiredBy = new Date(today.getTime() + durationInMs);
+    const expiredBy = new Date(item.created_at.getTime() + durationInMs);
 
     // Ensure unique identifier is used for finding existing items
     const query = {
@@ -245,6 +245,9 @@ export const addOrUpdateSellerItem = async (
     const existingItem = await SellerItem.findOne(query);
 
     if (existingItem) {
+      if (item.expired_by < today){
+        item.created_at = today
+      }
       // Update the existing item
       existingItem.set({
         ...item,
@@ -285,6 +288,83 @@ export const addOrUpdateSellerItem = async (
     throw new Error('Failed to add or update seller item; please try again later');
   }
 };
+
+export const addOrUpdateSellerItem = async (
+  seller: ISeller,
+  item: ISellerItem
+): Promise<ISellerItem | null> => {
+  try {
+    const today = new Date();
+
+    // Ensure duration is valid (default to 1 week)
+    const duration = Number(item.duration) || 1;
+    const durationInMs = duration * 7 * 24 * 60 * 60 * 1000;
+
+    // Define a unique query for finding existing items
+    const query = {
+      _id: item._id || undefined,
+      seller_id: seller.seller_id,
+    };
+
+    // Attempt to find the existing item
+    let existingItem = await SellerItem.findOne(query);
+
+    if (existingItem) {
+      // If the item is expired, reset `created_at`
+      if (existingItem.expired_by < today) {
+        existingItem.created_at = today;
+      }
+
+      // Compute new expiration date based on `created_at` + duration
+      let newExpiredBy = new Date(existingItem.created_at.getTime() + durationInMs);
+
+      // Ensure the expiration date is not reduced below the present date
+      if (newExpiredBy < today) {
+        newExpiredBy = today;
+      }
+
+      // Update fields
+      existingItem.set({
+        ...item,
+        updated_at: today,
+        image: item.image || existingItem.image, // Keep existing image if none provided
+      });
+
+      const updatedItem = await existingItem.save();
+      logger.info('Item updated successfully:', { updatedItem });
+      return updatedItem;
+    } else {
+      // Create a new item with a unique ID
+      const newItemId = item._id || new mongoose.Types.ObjectId().toString();
+
+      // Set creation and expiration dates
+      const createdAt = today;
+      const expiredBy = new Date(createdAt.getTime() + durationInMs);
+
+      const newItem = new SellerItem({
+        _id: newItemId,
+        seller_id: seller.seller_id,
+        name: item.name?.trim() || '',
+        description: item.description?.trim() || '',
+        price: parseFloat(item.price?.toString() || '0.01'),
+        stock_level: item.stock_level || '1 available',
+        duration: duration,
+        image: item.image,
+        created_at: createdAt,
+        updated_at: createdAt,
+        expired_by: expiredBy,
+      });
+
+      await newItem.save();
+      logger.info('Item created successfully:', { newItem });
+      return newItem;
+    }
+  } catch (error) {
+    logger.error(`Failed to add or update seller item for sellerID ${seller.seller_id}:`, error);
+    throw new Error('Failed to add or update seller item; please try again later');
+  }
+};
+
 
 // Delete existing seller item
 export const deleteSellerItem = async (id: string): Promise<ISellerItem | null> => {
