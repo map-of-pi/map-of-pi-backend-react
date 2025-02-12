@@ -69,13 +69,14 @@
 
   export interface IPayment extends Document {
     paymentId: string;
-    txId: string;
+    txId?: string;
     pi_uid: string;
     amount: number;
-    memo: string;
+    memo?: string;
     metadata: Record<string, any>;
+    type: "membership_upgrade" | "mappi_purchase" | "refund";
     status: "pending" | "approved" | "completed" | "failed";
-    cratedAt: Date;
+    createdAt: Date;
     updatedAt: Date;
   }
 
