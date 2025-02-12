@@ -9,15 +9,21 @@ import { ISeller, IUser, IUserSettings, ISellerWithSettings, ISanctionedRegion }
 import logger from "../config/loggingConfig";
 
 // Helper function to get settings for all sellers and merge them into seller objects
-const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSettings[]> => {
+const resolveSellerSettings = async (sellers: ISeller[], trustLevelFilters?: number[]): Promise<ISellerWithSettings[]> => {
   const sellersWithSettings = await Promise.all(
     sellers.map(async (seller) => {
       try {
         const sellerObject = seller.toObject();
 
-        // Fetch the user settings for the seller
+
+        // Fetch the user settings for the selle
         const userSettings = await getUserSettingsById(seller.seller_id);
-        
+
+        // Check if the seller's trust level is allowed
+        if (trustLevelFilters && trustLevelFilters.includes(userSettings?.trust_meter_rating ?? -1)) {
+          return null; // Exclude this seller
+        }
+
         // Merge seller and settings into a single object
         return {
           ...sellerObject,
@@ -30,7 +36,7 @@ const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSet
         } as ISellerWithSettings;
       } catch (error) {
         logger.error(`Failed to resolve settings for sellerID ${ seller.seller_id }:`, error);
-        
+
         // Return a fallback seller object with minimal information
         return {
           ...seller.toObject(),
@@ -42,8 +48,9 @@ const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSet
         } as unknown as ISellerWithSettings;
       }
     })
+
   );
-  return sellersWithSettings;
+  return sellersWithSettings.filter(Boolean) as ISellerWithSettings[];
 };
 
 // Fetch all sellers or within a specific bounding box; optional search query.
@@ -66,7 +73,10 @@ export const getAllSellers = async (
      baseCriteria.seller_type = { $nin: [] };
 
 
-    if(search_query) {
+      // Add trust level filters
+      const trustLevelFilters: number[] = [];
+
+    if(search_query && userId) {
       if (userId) {
         userSettings = await getUserSettingsById(userId);
       } else {
@@ -95,14 +105,14 @@ export const getAllSellers = async (
 
       // Add trust level filters
       // const trustLevelFilters = [];
-      // if (!searchFilters.include_trust_level_100) trustLevelFilters.push(TrustMeterScale.HUNDRED)
-      // if (!searchFilters.include_trust_level_80) trustLevelFilters.push(TrustMeterScale.EIGHTY)
-      // if (!searchFilters.include_trust_level_50) trustLevelFilters.push(TrustMeterScale.FIFTY)
-      // if (!searchFilters.include_trust_level_0) trustLevelFilters.push(TrustMeterScale.ZERO)
+      if (!searchFilters.include_trust_level_100) trustLevelFilters.push(TrustMeterScale.HUNDRED)
+      if (!searchFilters.include_trust_level_80) trustLevelFilters.push(TrustMeterScale.EIGHTY)
+      if (!searchFilters.include_trust_level_50) trustLevelFilters.push(TrustMeterScale.FIFTY)
+      if (!searchFilters.include_trust_level_0) trustLevelFilters.push(TrustMeterScale.ZERO)
 
-      //   if (trustLevelFilters.length > 0) {
-      //     baseCriteria.trust_meter_rating = { $nin: trustLevelFilters };
-      //   }
+        if (trustLevelFilters.length > 0) {
+          baseCriteria.seller_type = { $nin: trustLevelFilters };
+        }
 
     }
 
@@ -160,7 +170,9 @@ export const getAllSellers = async (
     }
 
     // Fetch and merge the settings for each seller
-    const sellersWithSettings = await resolveSellerSettings(sellers);
+    const sellersWithSettings = await resolveSellerSettings(sellers, trustLevelFilters);
+
+    // 
 
     // Return sellers with their settings merged
     return sellersWithSettings;
