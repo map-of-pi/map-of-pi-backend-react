@@ -1,11 +1,12 @@
 import Membership from '../../src/models/Membership';
+import User from '../../src/models/User';
 import { MembershipClassType } from '../../src/models/enums/membershipClassType';
+import { TransactionType } from '../../src/models/enums/transactionType';
 import { 
   getSingleMembershipById,
   addOrUpdateMembership,
-  updateMembershipBalance 
+  updateMappiBalance 
 } from '../../src/services/membership.service';
-import User from '../../src/models/User';
 import { IUser, IMembership } from '../../src/types';
 
 describe('getSingleMembershipById function', () => {
@@ -50,7 +51,7 @@ describe('addOrUpdateMembership function', () => {
   const convertToPlainObject = (membership: IMembership): any => {
     const plainObject = membership.toObject();
 
-    if (plainObject.membership_expiry_date) {
+    if (plainObject.membership_expiry_date instanceof Date) {
       plainObject.membership_expiry_date = new Date(plainObject.membership_expiry_date);
       plainObject.membership_expiry_date.setHours(0, 0, 0, 0);
     }
@@ -63,8 +64,8 @@ describe('addOrUpdateMembership function', () => {
     expect(filteredActual).toEqual(expect.objectContaining(expected));
   };
 
-  it('should build new membership if it does not exist for the Pioneer', async () => {    
-    const userData = await User.findOne({ pi_uid: '0c0c0c-0c0c-0c0c' }) as IUser;
+  it('should build new membership if it does not exist for the Pioneer', async () => {
+    const userData = await User.findOne({ pi_uid: '0d0d0d-0d0d-0d0d' }) as IUser;
 
     const membership = {
       membership_class: MembershipClassType.GREEN,
@@ -83,11 +84,10 @@ describe('addOrUpdateMembership function', () => {
     const plainObject = await convertToPlainObject(membershipData);
 
     const current_date = new Date();
-    current_date.setHours(0, 0, 0, 0);
 
     // Calculate the membership_expiry_date (current_date + duration in weeks)
     const durationInMs = (membership.membership_duration || 1) * 7 * 24 * 60 * 60 * 1000;
-    const expiry_date = new Date(current_date.getTime() + durationInMs)
+    const expiry_date = new Date(current_date.getTime() + durationInMs);
     expiry_date.setHours(0, 0, 0, 0);
 
     // filter and assert membership record associated with the Pioneer
@@ -146,7 +146,7 @@ describe('addOrUpdateMembership function', () => {
       mappi_allowance: 5
     }
 
-    // Mock the SellerItem model to throw an error
+    // Mock the Membership model to throw an error
     jest.spyOn(Membership, 'findOne').mockImplementationOnce(() => {
       throw new Error('Mock database error');
     });
@@ -159,5 +159,50 @@ describe('addOrUpdateMembership function', () => {
         membership.mappi_allowance
       )
     ).rejects.toThrow('Failed to add or update membership; please try again later');
+  });
+});
+
+describe('updateMembershipBalance function', () => {
+  it('should add to membership balance if the membership ID exists for the Pioneer', async () => {      
+    const existingMembership = await Membership.findOne({ membership_id: '0a0a0a-0a0a-0a0a' }) as IMembership;   
+    
+    const membershipData = await updateMappiBalance(
+      existingMembership.membership_id, TransactionType.MAPPI_DEPOSIT, 5) as IMembership;
+
+    expect(membershipData.toObject()).toMatchObject({
+      membership_id: existingMembership.membership_id,
+      membership_class_type: existingMembership.membership_class_type,
+      membership_expiry_date: existingMembership.membership_expiry_date,
+      mappi_balance: existingMembership.mappi_balance + 5 // 1005
+    });
+  });
+
+  it('should deduct from membership balance if the membership ID exists for the Pioneer', async () => {      
+    const existingMembership = await Membership.findOne({ membership_id: '0b0b0b-0b0b-0b0b' }) as IMembership;   
+    
+    const membershipData = await updateMappiBalance(
+      existingMembership.membership_id, TransactionType.MAPPI_WITHDRAWAL, 5) as IMembership;
+
+    expect(membershipData.toObject()).toMatchObject({
+      membership_id: existingMembership.membership_id,
+      membership_class_type: existingMembership.membership_class_type,
+      membership_expiry_date: existingMembership.membership_expiry_date,
+      mappi_balance: existingMembership.mappi_balance - 5 // 395
+    });
+  });
+
+  it('should throw an error when an exception occurs', async () => {  
+    // Mock the Membership model to throw an error
+    jest.spyOn(Membership, 'findOne').mockImplementationOnce(() => {
+      throw new Error('Mock database error');
+    });
+    
+    await expect(
+      updateMappiBalance(
+        '0d0d0d-0d0d-0d0d', 
+        TransactionType.MAPPI_DEPOSIT, 
+        100
+      )
+    ).rejects.toThrow('Failed to update Mappi balance; please try again later');
   });
 });

@@ -95,6 +95,12 @@
       "membership_class_type": "Double Gold",
       "membership_expiry_date": "2025-06-30T00:00:00.000Z",
       "mappi_balance": 400
+    },
+    {
+      "membership_id": "0c0c0c-0c0c-0c0c",
+      "membership_class_type": "Gold",
+      "membership_expiry_date": "2025-04-23T00:00:00.000Z",
+      "mappi_balance": 200
     }
   ],
   "sellers": [
@@ -327,6 +333,25 @@
       "comment": "0a0a0a-0a0a-0a0a Test Reply Comment",
       "rating": 2,
       "review_date": "2024-10-18T00:00:00.000Z"
+    }
+  ],
+  "transactionRecords": [
+    {
+      "transaction_id": "0a0a0a-0a0a-0a0a",
+      "transaction_records": [
+        {
+          "transaction_type": "Mappi Deposit",
+          "amount": 100,
+          "reason": "Mappi credited for updated Membership to Gold",
+          "date": "2025-02-10T00:00:00.000Z"
+        },
+        {
+          "transaction_type": "Mappi Withdrawal",
+          "amount": 1,
+          "reason": "Sell item 1 week",
+          "date": "2025-02-10T00:00:00.000Z"
+        }
+      ]
     }
   ],
   "sanctionedRegion": [

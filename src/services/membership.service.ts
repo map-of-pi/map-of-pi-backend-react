@@ -99,26 +99,33 @@ export const addOrUpdateMembership = async (
   }
 };
 
-export const updateMembershipBalance = async (
+// Update Mappi Balance associated with the membership
+export const updateMappiBalance = async (
   membership_id: string,
+  transaction_type: TransactionType,
   amount: number
 ): Promise<IMembership> => {
   try {
     // Find the membership
     const membership = await Membership.findOne({ membership_id }).exec();
-
     if (!membership) {
       throw new Error(`Membership not found for membership ID: ${membership_id}`);
     }
     
-    // Calculate the new balance
-    membership.mappi_balance = membership.mappi_balance + amount;
+    // Adjust the balance based on transaction type
+    const adjustment = 
+      transaction_type === TransactionType.MAPPI_DEPOSIT ? amount : 
+      transaction_type === TransactionType.MAPPI_WITHDRAWAL ? -amount : 
+      0;
+
+    membership.mappi_balance += adjustment;
+
     const updatedMembership = await membership.save();
 
-    logger.info(`Membership balance updated for membership ID: ${membership_id}`);
+    logger.info(`Mappi balance updated for membership ID: ${membership_id}`);
     return updatedMembership;
   } catch (error) {
-    logger.error(`Failed to update membership balance for membership ID: ${membership_id}`, error);
-    throw new Error("Failed to update membership balance; please try again later");
+    logger.error(`Failed to update Mappi balance for membership ID: ${membership_id}`, error);
+    throw new Error("Failed to update Mappi balance; please try again later");
   }
 };

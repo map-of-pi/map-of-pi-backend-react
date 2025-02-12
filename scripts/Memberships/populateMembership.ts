@@ -19,31 +19,23 @@ const populateMemberships = async () => {
 
     // Iterates over each user and create a Membership entry
     for (const user of users) {
-      console.log(`Processing user: ${user._id} - ${user.pi_uid}`);
+      console.log(`Processing user: ${user.pi_uid}`);
     
-      const existingMembership = await Membership.findOne({ user_id: user._id });
+      const existingMembership = await Membership.findOne({ membership_id: user.pi_uid });
       if (existingMembership) {
-        console.log(`Membership already exists for user ID: ${user._id}. Skipping.`);
+        console.log(`Membership already exists for user ID: ${user.pi_uid}. Skipping.`);
         continue;
       }
     
       const membership = new Membership({
-        user_id: user._id,
         membership_id: user.pi_uid,
         membership_class_type: "Casual",
-        membership_end_date: null,
-        mappi_allowance: 0,
-        mappi_allowance_usage: [
-          {
-            date: new Date(),
-            purpose: "Test Purpose",
-            amount: 5,
-          }  
-        ]
+        membership_expiry_date: null,
+        mappi_balance: 0
       });
     
       await membership.save();
-      console.log(`Created membership for user ID: ${user._id}`);
+      console.log(`Created membership for user ID: ${user.pi_uid}`);
     }    
 
     console.log("Memberships created successfully for all users!");

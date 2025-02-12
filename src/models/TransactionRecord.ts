@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+
 import { ITransactionRecord } from "../types";
 import { TransactionType } from "./enums/transactionType";
 
@@ -9,7 +10,7 @@ const transactionRecordSchema = new Schema<ITransactionRecord>(
       required: true,
       unique: true,
     },
-    transaction_record: [
+    transaction_records: [
       {
         transaction_type: {
           type: String,
@@ -25,4 +26,7 @@ const transactionRecordSchema = new Schema<ITransactionRecord>(
   { timestamps: true }
 );
 
-export default mongoose.model('Transaction-Record', transactionRecordSchema);
+// Creating the TransactionRecord model from the schema
+const TransactionRecord = mongoose.model<ITransactionRecord>("Transaction-Record", transactionRecordSchema);
+
+export default TransactionRecord;

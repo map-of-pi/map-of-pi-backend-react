@@ -68,7 +68,7 @@ export interface ISellerItem extends Document {
 
 export interface ITransactionRecord extends Document {
   transaction_id: string;
-  transaction_record: {
+  transaction_records: {
     transaction_type: TransactionType;
     date: Date; 
     reason: string;

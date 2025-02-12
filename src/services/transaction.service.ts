@@ -1,6 +1,6 @@
 import TransactionRecord from "../models/TransactionRecord";
 import { TransactionType } from "../models/enums/transactionType";
-import { updateMembershipBalance } from "./membership.service";
+import { updateMappiBalance } from "./membership.service";
 import { ITransactionRecord } from "../types";
 import logger from "../config/loggingConfig";
 
@@ -10,13 +10,13 @@ export const getAllTransactionRecords = async (
   try {
     const existingRecords = await TransactionRecord.find({
       transaction_id
-    });
+    }) || [];
 
-    if (!existingRecords || existingRecords.length == 0) {
-      logger.warn('Transaction records list is empty.');
-      return null;      
+    if (existingRecords.length == 0) {
+      logger.warn('Transaction records list is empty.');     
+    } else {
+      logger.info('fetched transaction records list successfully');
     } 
-    logger.info('fetched transaction records list successfully');
     return existingRecords as ITransactionRecord[];
   } catch (error) {
     logger.error(`Failed to get transaction records for transaction ID: ${ transaction_id }`, error);
@@ -42,7 +42,7 @@ export const processTransaction = async (
 
     // Update membership balance for Mappi transactions
     if ([TransactionType.MAPPI_WITHDRAWAL, TransactionType.MAPPI_DEPOSIT].includes(transaction_type)) {
-      await updateMembershipBalance(transaction_id, amount);
+      await updateMappiBalance(transaction_id, transaction_type, amount);
     }
 
     logger.info(`Transaction submitted successfully for transaction ID: ${transaction_id}`);
@@ -71,7 +71,7 @@ export const createTransactionRecord = async(
 
     const transactionRecord = new TransactionRecord({
       transaction_id,
-      transaction_record: [
+      transaction_records: [
         {
           transaction_type,
           date: today,

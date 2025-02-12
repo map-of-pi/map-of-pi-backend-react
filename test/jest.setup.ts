@@ -8,6 +8,7 @@ import Membership from '../src/models/Membership';
 import Seller from '../src/models/Seller';
 import SellerItem from '../src/models/SellerItem';
 import ReviewFeedback from '../src/models/ReviewFeedback';
+import TransactionRecord from '../src/models/TransactionRecord';
 import SanctionedRegion from '../src/models/misc/SanctionedRegion';
 
 // mock the Winston logger
@@ -39,6 +40,7 @@ beforeAll(async () => {
     await Seller.insertMany(mockData.sellers);
     await SellerItem.insertMany(mockData.sellerItems);
     await ReviewFeedback.insertMany(mockData.reviews);
+    await TransactionRecord.insertMany(mockData.transactionRecords);
     await SanctionedRegion.insertMany(mockData.sanctionedRegion);
   } catch (error) {
     console.error('Failed to start MongoMemoryServer', error);
