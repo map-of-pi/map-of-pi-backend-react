@@ -31,6 +31,7 @@ export const updatePaymentStatus = async (
 export const createPayment = async (paymentData: {
   paymentId: string;
   pi_uid: string;
+  txId: string;
   amount: number;
   memo: string;
   metadata: Record<string, any>;
