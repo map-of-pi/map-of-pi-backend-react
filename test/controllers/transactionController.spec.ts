@@ -48,7 +48,7 @@ describe('transactionController', () => {
       expect(res.json).toHaveBeenCalledWith(expectedTransactionRecords);
     });
 
-    it('should return appropriate [204] when transaction records do not exist for associated ID', async () => {
+    it('should return appropriate [404] when transaction records do not exist for associated ID', async () => {
       req.params.transaction_id = '0b0b0b-0b0b-0b0b';
       
       (transactionService.getAllTransactionRecords as jest.Mock).mockResolvedValue([]);
@@ -56,7 +56,7 @@ describe('transactionController', () => {
       await getTransactionRecords(req, res);
 
       expect(transactionService.getAllTransactionRecords).toHaveBeenCalledWith('0b0b0b-0b0b-0b0b');
-      expect(res.status).toHaveBeenCalledWith(204);
+      expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({ message: "Transaction records not found" });
     });
 
