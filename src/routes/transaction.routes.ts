@@ -40,7 +40,7 @@ transactionRoutes.get("/:transaction_id", transactionController.getTransactionRe
  *   post:
  *     tags:
  *       - Transaction
- *     summary: Add or deduct Mappi points from the user's Mappi balance *
+ *     summary: Submit Mappi or Pi transaction to update balance *
  *     requestBody:
  *       required: true
  *       content:

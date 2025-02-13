@@ -11,7 +11,7 @@ export const getSingleMembershipById = async (membership_id: string): Promise<IM
     const membership = await Membership.findOne({ membership_id }).exec();
 
     if (!membership) {
-      throw new Error(`Membership with membership ID: ${membership_id} not found`);
+      logger.warn(`Membership does not exist for membership ID: ${ membership_id }`);
     }
 
     return membership;

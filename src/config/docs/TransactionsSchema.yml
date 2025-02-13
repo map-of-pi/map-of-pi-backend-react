@@ -1,13 +1,37 @@
 components:
   schemas:
-    SubmitMappiTransactionRq:
+    GetTransactionRecordsRs:
+      type: object
+      properties:
+        transaction_id:
+          type: string
+          example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
+        transaction_records: 
+          type: array
+          items:
+            type: object
+            properties:
+              transaction_type:
+                $ref: '/api/docs/enum/TransactionType.yml#/components/schemas/TransactionType' 
+              amount:
+                type: number
+                example: -1
+              reason:
+                type: string
+                example: Sell item 1 week
+              date: 
+                type: string
+                format: date-time
+                example: 2025-02-13T00:00:00.000Z
+
+    SubmitTransactionRq:
       type: object
       properties:
         transaction_id:
           type: string
           example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
         transaction_type:
-          $ref: './enum/TransactionType.yml#/components/schemas/TransactionType'
+          $ref: '/api/docs/enum/TransactionType.yml#/components/schemas/TransactionType'
         amount:
           type: number
           example: 5
@@ -20,14 +44,14 @@ components:
         - amount
         - reason
 
-    SubmitMappiTransactionRs:
+    SubmitTransactionRs:
       type: object
       properties:
         transaction_id:
           type: string
           example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0  
         transaction_type:
-          $ref: './enum/TransactionType.yml#/components/schemas/TransactionType'
+          $ref: '/api/docs/enum/TransactionType.yml#/components/schemas/TransactionType'
         amount:
           type: number
           example: 5
