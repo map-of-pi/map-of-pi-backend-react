@@ -101,6 +101,12 @@
       "membership_class_type": "Gold",
       "membership_expiry_date": "2025-04-23T00:00:00.000Z",
       "mappi_balance": 200
+    },
+    {
+      "membership_id": "0d0d0d-0d0d-0d0d",
+      "membership_class_type": "Green",
+      "membership_expiry_date": "2025-03-12T00:00:00.000Z",
+      "mappi_balance": 100
     }
   ],
   "sellers": [
@@ -347,7 +353,7 @@
         },
         {
           "transaction_type": "Mappi Withdrawal",
-          "amount": 1,
+          "amount": -1,
           "reason": "Sell item 1 week",
           "date": "2025-02-10T00:00:00.000Z"
         }

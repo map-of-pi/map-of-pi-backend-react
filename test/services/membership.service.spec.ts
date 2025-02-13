@@ -65,12 +65,12 @@ describe('addOrUpdateMembership function', () => {
   };
 
   it('should build new membership if it does not exist for the Pioneer', async () => {
-    const userData = await User.findOne({ pi_uid: '0d0d0d-0d0d-0d0d' }) as IUser;
+    const userData = await User.findOne({ pi_uid: '0e0e0e-0e0e-0e0e' }) as IUser;
 
     const membership = {
-      membership_class: MembershipClassType.GREEN,
-      membership_duration: 4,
-      mappi_allowance: 20
+      membership_class: MembershipClassType.MEMBER,
+      membership_duration: 2,
+      mappi_allowance: 5
     }
 
     const membershipData = (await addOrUpdateMembership(
@@ -138,7 +138,7 @@ describe('addOrUpdateMembership function', () => {
   });
 
   it('should throw an error when an exception occurs', async () => {  
-    const userData = await User.findOne({ pi_uid: '0d0d0d-0d0d-0d0d' }) as IUser;
+    const userData = await User.findOne({ pi_uid: '0e0e0e-0e0e-0e0e' }) as IUser;
     
     const membership = {
       membership_class: MembershipClassType.MEMBER,
@@ -199,7 +199,7 @@ describe('updateMembershipBalance function', () => {
     
     await expect(
       updateMappiBalance(
-        '0d0d0d-0d0d-0d0d', 
+        '0e0e0e-0e0e-0e0e', 
         TransactionType.MAPPI_DEPOSIT, 
         100
       )

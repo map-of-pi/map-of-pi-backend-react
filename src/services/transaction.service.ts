@@ -69,23 +69,41 @@ export const createTransactionRecord = async(
         ? -Math.abs(amount)
         : Math.abs(amount);
 
-    const transactionRecord = new TransactionRecord({
-      transaction_id,
-      transaction_records: [
-        {
-          transaction_type,
-          date: today,
-          reason,
-          amount: adjustedAmount,
-        },
-      ],
-    });
+    // Find the existing transaction record by transaction_id
+    const existingRecord = await TransactionRecord.findOne({ transaction_id });
 
-    const newTransactionRecord = await transactionRecord.save();
-    logger.info(`Transaction record created for transaction ID: ${transaction_id}:`, transactionRecord);
-    return newTransactionRecord;
+    if (existingRecord) {
+      // Append new transaction entry to existing array
+      existingRecord.transaction_records.push({
+        transaction_type,
+        date: today,
+        reason,
+        amount: adjustedAmount,
+      });
+
+      const updatedRecord = await existingRecord.save();
+      logger.info(`Transaction records updated for transaction ID: ${transaction_id}`);
+      return updatedRecord;
+    } else {
+      // Create a new transaction record if it does not exist
+      const newTransactionRecord = new TransactionRecord({
+        transaction_id,
+        transaction_records: [
+          {
+            transaction_type,
+            date: today,
+            reason,
+            amount: adjustedAmount,
+          },
+        ],
+      });
+
+      const savedRecord = await newTransactionRecord.save();
+      logger.info(`Transaction records initialized for transaction ID: ${transaction_id}`);
+      return savedRecord;
+    } 
   } catch (error) {
     logger.error(`Failed to create transaction record for transaction ID: ${transaction_id}`, error);
     throw new Error('Failed to create transaction record; please try again later');
   };
-}
+};

@@ -61,7 +61,7 @@ describe('getAllTransactionRecords function', () => {
           },
           {
             transaction_type: TransactionType.MAPPI_WITHDRAWAL,
-            amount: 1,
+            amount: -1,
             reason: 'Sell item 1 week',
             date: '2025-02-10T00:00:00.000Z',
           },
@@ -76,7 +76,7 @@ describe('getAllTransactionRecords function', () => {
   });
 
   it('should return null if there are no existing transaction records associated with the Pioneer', async () => {  
-    const transactionRecordsData = await getAllTransactionRecords('0b0b0b-0b0b-0b0b') as ITransactionRecord[];
+    const transactionRecordsData = await getAllTransactionRecords('0d0d0d-0d0d-0d0d') as ITransactionRecord[];
 
     // Expect no transaction records
     expect(transactionRecordsData).toEqual([]);
@@ -240,5 +240,124 @@ describe('processTransaction function', () => {
     await expect(processTransaction(
       '0b0b0b-0b0b-0b0b', TransactionType.MAPPI_DEPOSIT, 100, "Mappi credited for updated Membership to Gold"
     )).rejects.toThrow('Failed to submit transaction; please try again later');
+  });
+});
+
+describe('createTransactionRecord function', () => {
+  // Helper function to convert Mongoose document to a plain object and normalize values accordingly
+  const convertToTransactionRecordPlainObject = (record: ITransactionRecord): any => {
+    const plainObject = record.toObject();
+  
+    if (Array.isArray(plainObject.transaction_records)) {
+      plainObject.transaction_records = plainObject.transaction_records.map((
+        record: { date: string | number | Date; }, index: number, array: any[]) => {
+        if (record.date instanceof Date) {
+           // Set time to 00:00:00.000 only for the last (newest) transaction record
+           record.date = index === array.length - 1 
+           ? new Date(record.date.setHours(0, 0, 0, 0)).toISOString()
+           : record.date.toISOString();
+        }
+  
+        return {
+          ...record
+        };
+      });
+    }
+  
+    return plainObject;
+  };
+
+  const assertObjects = (actual: any, expected: any) => {
+    const { _id, __v, createdAt, updatedAt, ...filteredActual } = actual;
+  
+    if (Array.isArray(filteredActual.transaction_records)) {
+      filteredActual.transaction_records = filteredActual.transaction_records.map(
+        ({ _id, ...rest }: { _id: string; date?: string; [key: string]: any }) => {
+          return {
+            ...rest,
+          };
+        }
+      );
+    }
+  
+    expect(filteredActual).toEqual(expect.objectContaining(expected));
+  };
+
+  it('should add a new transaction record to existing transaction records for the Pioneer', async () => {    
+    const existingTransactionRecords = await TransactionRecord.findOne({ transaction_id: '0a0a0a-0a0a-0a0a' });
+    // Count the number of previous transaction entries (if any)
+    const existingTransactionRecordsCount = existingTransactionRecords ? existingTransactionRecords.transaction_records.length : 0;
+
+    const transactionRecords = await createTransactionRecord(
+      '0a0a0a-0a0a-0a0a', TransactionType.MAPPI_DEPOSIT, 20, "Mappi credited for updated Membership to Green"
+    ) as ITransactionRecord;
+
+    // Convert Mongoose document to plain object
+    const plainObjectTransactionRecords = convertToTransactionRecordPlainObject(transactionRecords);
+
+    // The new transaction should be appended to the existing array
+    expect(plainObjectTransactionRecords.transaction_records.length).toBe(existingTransactionRecordsCount + 1);
+
+    const expectedTransactionRecords = {
+      transaction_id: '0a0a0a-0a0a-0a0a',
+      transaction_records: [
+        {
+          transaction_type: TransactionType.MAPPI_DEPOSIT,
+          amount: 100,
+          reason: 'Mappi credited for updated Membership to Gold',
+          date: "2025-02-10T00:00:00.000Z"
+        },
+        {
+          transaction_type: TransactionType.MAPPI_WITHDRAWAL,
+          amount: -1,
+          reason: 'Sell item 1 week',
+          date: "2025-02-10T00:00:00.000Z"
+        },
+        {
+          transaction_type: TransactionType.MAPPI_DEPOSIT,
+          amount: 20,
+          reason: 'Mappi credited for updated Membership to Green',
+          date: new Date(new Date().setHours(0, 0, 0, 0)).toISOString(),
+        }
+      ]
+    };
+
+    // Assert that the transaction record was appended correctly
+    expect(plainObjectTransactionRecords.transaction_records.length).toBe(3);
+    assertObjects(plainObjectTransactionRecords, expectedTransactionRecords);
+  });
+
+  it('should create a new transaction record for the Pioneer', async () => {    
+    const transactionRecords = await createTransactionRecord(
+      '0d0d0d-0d0d-0d0d', TransactionType.MAPPI_DEPOSIT, 1, "Membership initiated to Casual"
+    ) as ITransactionRecord;
+
+    // Convert Mongoose document to plain object
+    const plainObjectTransactionRecords = convertToTransactionRecordPlainObject(transactionRecords);
+
+    const expectedTransactionRecords = {
+      transaction_id: '0d0d0d-0d0d-0d0d',
+      transaction_records: [
+        {
+          transaction_type: TransactionType.MAPPI_DEPOSIT,
+          amount: 1,
+          reason: 'Membership initiated to Casual',
+          date: new Date(new Date().setHours(0, 0, 0, 0)).toISOString()
+        }
+      ]
+    };
+    assertObjects(plainObjectTransactionRecords, expectedTransactionRecords);
+  });
+
+  it('should throw an error when an exception occurs', async () => {  
+    // Mock the TransactionRecord model to throw an error
+    jest.spyOn(TransactionRecord.prototype, 'save').mockImplementationOnce(() => {
+      throw new Error('Unexpected exception occurred');
+    });
+
+    // Call the createTransactionRecord function and assert it throws the expected error
+    await expect(createTransactionRecord(
+      '0d0d0d-0d0d-0d0d', TransactionType.MAPPI_DEPOSIT, 100, "Mappi credited for updated Membership to Gold"
+    )).rejects.toThrow('Failed to create transaction record; please try again later');
   });
 });
