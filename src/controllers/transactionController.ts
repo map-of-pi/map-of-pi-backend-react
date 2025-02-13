@@ -9,7 +9,7 @@ export const getTransactionRecords = async (req: Request, res: Response) => {
 
     if (!records || records.length === 0) {
       logger.warn(`No records are found for Pioneer: ${transaction_id}`);
-      return res.status(204).json({ message: 'Transaction records not found' });
+      return res.status(404).json({ message: 'Transaction records not found' });
     }
     logger.info(`Fetched ${records.length} transaction records for Pioneer: ${transaction_id}`);
     return res.status(200).json(records);

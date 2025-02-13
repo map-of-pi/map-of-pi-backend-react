@@ -19,14 +19,14 @@ const transactionRoutes = express.Router();
  *           type: string
  *         description: The Pi UID of the transaction record to retrieve
  *     responses:
- *       204:
- *         description: Transaction records not found
  *       200:
  *         description: Successful response
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '/api/docs/TransactionsSchema.yml#/components/schemas/GetTransactionRecordsRs'
+ *       404:
+ *         description: Transaction records not found
  *       400:
  *         description: Bad request
  *       500:
@@ -46,14 +46,14 @@ transactionRoutes.get("/:transaction_id", transactionController.getTransactionRe
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '/api/docs/TransactionsSchema.yml#/components/schemas/SubmitMappiTransactionRq'
+ *             $ref: '/api/docs/TransactionsSchema.yml#/components/schemas/SubmitTransactionRq'
  *     responses:
  *       200:
  *         description: Successful response
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '/api/docs/TransactionsSchema.yml#/components/schemas/SubmitMappiTransactionRs'
+ *               $ref: '/api/docs/TransactionsSchema.yml#/components/schemas/SubmitTransactionRs'
  *       401:
  *         description: Unauthorized
  *       400:
