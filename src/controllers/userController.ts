@@ -5,6 +5,7 @@ import * as userService from "../services/user.service";
 import { IUser } from "../types";
 
 import logger from '../config/loggingConfig';
+import { platformAPIClient } from "../config/platformAPIclient";
 
 export const authenticateUser = async (req: Request, res: Response) => {
   const auth = req.body;
@@ -64,3 +65,38 @@ export const deleteUser = async (req: Request, res: Response) => {
     return res.status(500).json({ message: 'An error occurred while deleting user; please try again later' });
   }
 };
+
+export const makePayment = async (req: Request, res: Response) => {
+  const currentUser = req.currentUser;
+  const paymentCallbacks = {
+    onReadyForServerApproval: function(paymentId:string) { 
+      console.log("payment id: ", paymentId)
+     },
+    onReadyForServerCompletion: function(paymentId:string, txid:string) { 
+      console.log("transaction id: ", txid)
+     },
+    onCancel: function(paymentId:string) { 
+      console.log("payment cancelled: ", paymentId)
+     },
+    onError: function(error:any, payment:any) { 
+      console.log("payment error: ", error)
+     }
+  };
+  const paymentData = {
+    amount: 1,
+    memo: 'This is a Test Payment',
+    metadata: { order_id: 1234 },
+    uid: currentUser?.pi_uid,
+    wallet_address: 'GAPWFM7SMMNXSHG7QVK7CNKFC7AVBK3EOGVKU3LM2NDP2YTB6ENI73AN'
+  };
+  const scope = [
+    'username', 'payments'
+  ]
+  const body = {
+    payment: paymentData,
+    paymentCallbacks: paymentCallbacks
+  }
+
+  const me = await platformAPIClient.post(`/v2/payments`, body);
+  console.log("returned payment: ", me.data)
+}

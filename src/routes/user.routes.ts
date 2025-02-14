@@ -3,6 +3,7 @@ import { Router } from "express";
 import * as userController from "../controllers/userController";
 import { isPioneerFound } from "../middlewares/isPioneerFound";
 import { verifyToken } from "../middlewares/verifyToken";
+import { makePayment } from "../services/payment";
 
 /**
  * @swagger
@@ -144,5 +145,7 @@ userRoutes.delete(
   verifyToken,
   userController.deleteUser
 );
+
+userRoutes.post("/payment", verifyToken, makePayment); 
 
 export default userRoutes;
