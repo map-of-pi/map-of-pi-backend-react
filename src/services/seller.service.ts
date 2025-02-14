@@ -327,6 +327,7 @@ export const addOrUpdateSellerItem = async (
       existingItem.set({
         ...item,
         updated_at: today,
+        expired_by: newExpiredBy,
         image: item.image || existingItem.image, // Keep existing image if none provided
       });
 
