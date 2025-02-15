@@ -4,6 +4,7 @@ import { RatingScale } from "./models/enums/ratingScale";
 import { SellerType } from "./models/enums/sellerType";
 import { TrustMeterScale } from "./models/enums/trustMeterScale";
 import { RestrictedArea } from "./models/enums/restrictedArea";
+import { StockLevelType } from "./models/enums/stockLevelType";
 
 export interface IUser extends Document {
   pi_uid: string;
@@ -47,6 +48,21 @@ export interface ISeller extends Document {
     coordinates: [number, number];
   };
   order_online_enabled_pref: boolean;
+}
+
+
+export interface ISellerItem extends Document {
+  _id: string;
+  seller_id: string;
+  name: string;
+  description: string;
+  price: Types.Decimal128;
+  stock_level: StockLevelType;
+  image?: string;
+  duration: number;
+  created_at: Date;
+  updated_at: Date;
+  expired_by: Date;
 }
 
 export interface IReviewFeedback extends Document {

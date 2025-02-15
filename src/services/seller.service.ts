@@ -7,6 +7,7 @@ import { getUserSettingsById } from "./userSettings.service";
 import { ISeller, IUser, IUserSettings, ISellerWithSettings, ISanctionedRegion } from "../types";
 
 import logger from "../config/loggingConfig";
+import SellerItem from "../models/SellerItem";
 
 // Helper function to get settings for all sellers and merge them into seller objects
 const resolveSellerSettings = async (sellers: ISeller[], trustLevelFilters?: number[]): Promise<ISellerWithSettings[]> => {
@@ -122,7 +123,8 @@ export const getAllSellers = async (
       ? {
           $or: [
             { name: { $regex: search_query, $options: 'i' } },
-            { description: { $regex: search_query, $options: 'i' } }
+            { description: { $regex: search_query, $options: 'i' } },
+            { _id: { $in: (await SellerItem.find({ name: { $regex: search_query, $options: 'i'}})).map(item => item.seller_id)}}
           ],
         }
       : {};
