@@ -5,6 +5,7 @@
   import { StockLevelType } from "./models/enums/stockLevelType";
   import { TrustMeterScale } from "./models/enums/trustMeterScale";
   import { RestrictedArea } from "./models/enums/restrictedArea";
+import { OrderStatusType } from "./models/enums/OrderStatusType";
 
   export interface IUser extends Document {
     pi_uid: string;
@@ -99,3 +100,18 @@
   export interface IReviewFeedbackOutput extends IReviewFeedback, PartialReview {}
 
   export type SanctionedSeller = Pick<ISeller, 'seller_id' | 'name' | 'address' | 'sell_map_center'> & { sanctioned_location: string };
+
+  export interface IOrder extends Document {
+    items: Types.ObjectId[];
+    buyer: Types.ObjectId;
+    seller: Types.ObjectId;
+    total_amount: number;
+    status: OrderStatusType;
+    paid: boolean;
+    filled: boolean;
+    fulfillment_method: FulfillmentType;
+    seller_filfullment_instruction: string
+    buyer_filfullment_details: string;
+    created_at: Date;
+    updated_at: Date;
+  }
