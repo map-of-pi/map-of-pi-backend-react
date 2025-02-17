@@ -103,15 +103,27 @@ import { OrderStatusType } from "./models/enums/OrderStatusType";
 
   export interface IOrder extends Document {
     items: Types.ObjectId[];
-    buyer: Types.ObjectId;
-    seller: Types.ObjectId;
+    buyer: string;
+    seller: string;
     total_amount: number;
     status: OrderStatusType;
     paid: boolean;
     filled: boolean;
     fulfillment_method: FulfillmentType;
-    seller_filfullment_instruction: string
+    seller_filfullment_instruction: string;
     buyer_filfullment_details: string;
     created_at: Date;
     updated_at: Date;
+  }
+
+  export interface ITransaction extends Document {
+    order: Types.ObjectId;
+    user: Types.ObjectId;
+    amount: number;
+    paid: boolean;
+    memo: string;
+    payment_id: string;
+    txid: string | null;
+    cancelled: boolean;
+    created_at: Date;
   }

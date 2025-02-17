@@ -11,11 +11,11 @@ import { OrderStatusType } from "./enums/OrderStatusType";
         required: true,
       },
       buyer: {
-        type: SchemaTypes.ObjectId,
+        type: String,
         required: true,
       },
       seller: {
-        type: SchemaTypes.ObjectId,
+        type: String,
         required: true,
       },
       total_amount: {
@@ -69,6 +69,6 @@ import { OrderStatusType } from "./enums/OrderStatusType";
     { timestamps: true } // Adds timestamps to track creation and update times
   );
   // Creating the Seller model from the schema
-  const Order = mongoose.model<IOrder>("Seller", orderSchema);
+  const Order = mongoose.model<IOrder>("Order", orderSchema);
 
   export default Order;
