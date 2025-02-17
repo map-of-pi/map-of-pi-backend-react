@@ -124,7 +124,7 @@ export const getAllSellers = async (
           $or: [
             { name: { $regex: search_query, $options: 'i' } },
             { description: { $regex: search_query, $options: 'i' } },
-            { _id: { $in: (await SellerItem.find({ name: { $regex: search_query, $options: 'i'}})).map(item => item.seller_id)}}
+            { seller_id: { $in: (await SellerItem.find({ name: RegExp(search_query, 'i')})).map(item => item.seller_id)}}
           ],
         }
       : {};
