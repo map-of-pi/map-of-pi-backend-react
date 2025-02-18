@@ -1,5 +1,4 @@
-declare module 'express-session' {
-}
+
 import axios from "axios";
 import { Router } from "express";
 import { platformAPIClient } from "../config/platformAPIclient";
@@ -8,14 +7,24 @@ import Order from "../models/Order";
 import Transaction from "../models/Transaction";
 import User from "../models/User";
 
+interface Payment {
+  identifier: string;
+  transaction?: {
+    txid: string;
+    _link: string;
+  };
+}
+
 export default function mountPaymentsEndpoints(router: Router) {
   // handle the incomplete payment
   router.post('/incomplete', async (req, res) => {
-    const payment = req.body.payment;
+    const payment: Payment = req.body.payment;
     const paymentId = payment.identifier;
-    const txid = payment.transaction && payment.transaction.txid;
-    const txURL = payment.transaction && payment.transaction._link;
-    console.log('transacton URL: ', txURL)
+    const txid = payment.transaction?.txid;
+    const txURL = payment.transaction?._link;
+    const currentPayment = await platformAPIClient.get(
+      `/v2/payments/${paymentId}`
+    );
 
     /* 
       implement your logic here
@@ -33,6 +42,7 @@ export default function mountPaymentsEndpoints(router: Router) {
     }
 
     // check the transaction on the Pi blockchain
+    //@ts-ignore
     const horizonResponse = await axios.create({ timeout: 20000 }).get(txURL);
     const paymentIdOnBlock = horizonResponse.data.memo;
 
@@ -156,3 +166,5 @@ export default function mountPaymentsEndpoints(router: Router) {
     return res.status(200).json({ message: `Cancelled the payment ${paymentId}` });
   })
 }
+
+
