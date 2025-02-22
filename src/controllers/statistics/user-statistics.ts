@@ -4,7 +4,6 @@ import ReviewFeedback from "../../models/ReviewFeedback";
 import { RatingScale } from "../../models/enums/ratingScale";
 import { startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
 
-
 export const getTotalUser = async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
@@ -85,7 +84,6 @@ export const getTotalUser = async (req: Request, res: Response) => {
     });
   }
 };
-
 
 export const getUserStatistics = async (req: Request, res: Response) => {
   try {
@@ -183,4 +181,3 @@ export const getUserStatistics = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Failed to fetch user statistics", error });
   }
 };
-

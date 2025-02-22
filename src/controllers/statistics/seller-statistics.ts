@@ -1,8 +1,5 @@
-
-
 import { Request, Response } from "express";
 import Seller from "../../models/Seller";
-// import logger from "../../config/loggingConfig";
 
 export const getSellerStatistics = async (req: Request, res: Response) => {
   try {
@@ -20,7 +17,6 @@ export const getSellerStatistics = async (req: Request, res: Response) => {
     const hasNextPage = page < totalPages;
     const hasPrevPage = page > 1;
 
-    
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
@@ -51,9 +47,9 @@ export const getSellerStatistics = async (req: Request, res: Response) => {
     const newSellersThisMonth = sellerGrowthThisMonth.reduce((sum, item) => sum + item.count, 0);
 
     const percentageGrowthThisMonth =
-        totalSellers > 0 ? (newSellersThisMonth / totalSellers) * 100 : 0;
-      
-          const months = [
+      totalSellers > 0 ? (newSellersThisMonth / totalSellers) * 100 : 0;
+    
+    const months = [
       "January",
       "February",
       "March",
@@ -95,7 +91,6 @@ export const getSellerStatistics = async (req: Request, res: Response) => {
       coordinates: seller.sell_map_center.coordinates,
     }));
 
-
     const statistics = {
       totalSellers,
       sellers:shopDetails,
@@ -108,7 +103,7 @@ export const getSellerStatistics = async (req: Request, res: Response) => {
         activeSeller: sellerGrowthByTypeThisMonth["activeSeller"] || 0,
         inactiveSeller: sellerGrowthByTypeThisMonth["inactiveSeller"] || 0,
         testSeller: sellerGrowthByTypeThisMonth["testSeller"] || 0,
-        },
+      },
       sellerGrowth: data,
       pagination: {
         currentPage: page,
@@ -118,11 +113,8 @@ export const getSellerStatistics = async (req: Request, res: Response) => {
       },
     };
 
-    // logger.info("Fetched seller statistics for the current month successfully", statistics);
-
     return res.status(200).json(statistics);
   } catch (error) {
-    // logger.error("Failed to fetch seller statistics:", error);
     return res
       .status(500)
       .json({ message: "An error occurred while fetching seller statistics; please try again later." });

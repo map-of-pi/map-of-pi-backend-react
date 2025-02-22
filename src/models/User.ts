@@ -17,9 +17,8 @@ const userSchema = new Schema<IUser>(
       type: String,
       required: true,
     }
-  }, {
-    timestamps: true
-  }
+  }, 
+  { timestamps: true } // Adds timestamps to track creation and update times
 );
 
 const User = mongoose.model<IUser>("User", userSchema);

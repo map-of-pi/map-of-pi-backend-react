@@ -1,9 +1,6 @@
 import { Router } from "express";
 import { activateAdmin, deactivateAdmin, getAdminInfo, loginAdmin, registerAdmin } from "../controllers/admin";
 
-
-
-
 const adminRoutes = Router();
 
 adminRoutes.get("/me", getAdminInfo);

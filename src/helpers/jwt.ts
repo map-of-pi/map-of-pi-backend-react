@@ -1,11 +1,11 @@
 import jwt from "jsonwebtoken";
 
 import { IAdmin, IUser } from "../types";
+import Admin from "../models/Admin";
 import User from "../models/User";
 import { env } from "../utils/env";
 
 import logger from '../config/loggingConfig';
-import Admin from "../models/Admin";
 
 export const generateUserToken = (user: IUser) => {
   try {
@@ -20,6 +20,7 @@ export const generateUserToken = (user: IUser) => {
     throw new Error('Failed to generate user token; please try again');
   }
 };
+
 export const generateAdminToken = (admin: IAdmin) => {
   try {
     const token = jwt.sign({ userId: admin.id }, env.JWT_SECRET, {
@@ -52,6 +53,7 @@ export const decodeUserToken = async (token: string) => {
     throw new Error('Failed to decode user token; please try again');
   }
 };
+
 export const decodeAdminToken = async (token: string) => {
   try {
     logger.info(`Decoding token.`);

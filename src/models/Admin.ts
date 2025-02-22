@@ -1,7 +1,6 @@
 import { Schema, model } from "mongoose";
 import { IAdmin } from "../types";
 
-
 const AdminSchema = new Schema<IAdmin>(
   {
     email: {
@@ -29,9 +28,7 @@ const AdminSchema = new Schema<IAdmin>(
       default: true,
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true } // Adds timestamps to track creation and update times
 );
 
 const Admin = model<IAdmin>("Admin", AdminSchema);

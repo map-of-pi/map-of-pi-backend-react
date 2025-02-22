@@ -34,7 +34,6 @@ export const getReviewStatistics = async (req: Request, res: Response) => {
       })
     );
 
-
     const mostReviewedUser = await ReviewFeedback.aggregate([
       { $group: { _id: "$review_receiver_id", count: { $sum: 1 } } },
       { $sort: { count: -1 } },
@@ -44,7 +43,6 @@ export const getReviewStatistics = async (req: Request, res: Response) => {
     const user = await User.findOne({
       pi_uid: mostReviewedUser[0]?._id,
     });
-
 
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -80,4 +78,3 @@ export const getReviewStatistics = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Failed to fetch review statistics", error });
   }
 };
-

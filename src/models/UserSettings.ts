@@ -56,9 +56,7 @@ const userSettingsSchema = new Schema<IUserSettings>(
       },
     }
   },
-  {
-    timestamps:true
-  }
+  { timestamps: true } // Adds timestamps to track creation and update times
 );
 
 // use GeoJSON format to store geographical data i.e., points using '2dsphere' index.
