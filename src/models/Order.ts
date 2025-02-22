@@ -6,17 +6,18 @@ import { OrderStatusType } from "./enums/OrderStatusType";
 
   const orderSchema = new Schema<IOrder>(
     {
-      items: {
-        type: [SchemaTypes.ObjectId],
-        required: true,
-      },
-      buyer: {
+      buyer_id: {
         type: String,
         required: true,
       },
-      seller: {
+      seller_id: {
         type: String,
         required: true,
+      },
+      transaction: {
+        type: SchemaTypes.ObjectId,
+        required: true,
+        default: null,
       },
       total_amount: {
         type: Number,
@@ -53,17 +54,6 @@ import { OrderStatusType } from "./enums/OrderStatusType";
         type: String,
         enum: Object.values(FulfillmentType).filter(value => typeof value === 'string'),
         default: FulfillmentType.CollectionByBuyer
-      },
-      created_at: {
-        type: Date,
-        required: true,
-        immutable: true,
-        default: () => Date.now(),
-      },
-      updated_at: {
-        type: Date,
-        required: true,
-        default: () => Date.now(),
       },
     },
     { timestamps: true } // Adds timestamps to track creation and update times

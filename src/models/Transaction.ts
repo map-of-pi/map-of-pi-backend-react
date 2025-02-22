@@ -4,10 +4,6 @@
 
   const transactionSchema = new Schema<ITransaction>(
     {
-      order: {
-        type: SchemaTypes.ObjectId,
-        required: true,
-      },
       user: {
         type: SchemaTypes.ObjectId,
         required: true,
@@ -41,12 +37,6 @@
         type: String,
         required: false,
         default: null
-      },
-      created_at: {
-        type: Date,
-        required: true,
-        immutable: true,
-        default: () => Date.now(),
       },
     }, { timestamps: true } // Adds timestamps to track creation and update times
   );

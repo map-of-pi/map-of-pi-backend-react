@@ -6,6 +6,7 @@
   import { TrustMeterScale } from "./models/enums/trustMeterScale";
   import { RestrictedArea } from "./models/enums/restrictedArea";
 import { OrderStatusType } from "./models/enums/OrderStatusType";
+import { OrderItemStatus } from "./models/enums/SellerItemStatus";
 
   export interface IUser extends Document {
     pi_uid: string;
@@ -102,9 +103,9 @@ import { OrderStatusType } from "./models/enums/OrderStatusType";
   export type SanctionedSeller = Pick<ISeller, 'seller_id' | 'name' | 'address' | 'sell_map_center'> & { sanctioned_location: string };
 
   export interface IOrder extends Document {
-    items: Types.ObjectId[];
-    buyer: string;
-    seller: string;
+    buyer_id: string;
+    seller_id: string;
+    transaction: Types.ObjectId;
     total_amount: number;
     status: OrderStatusType;
     paid: boolean;
@@ -112,12 +113,22 @@ import { OrderStatusType } from "./models/enums/OrderStatusType";
     fulfillment_method: FulfillmentType;
     seller_filfullment_instruction: string;
     buyer_filfullment_details: string;
-    created_at: Date;
-    updated_at: Date;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+  
+  export interface IOrderItem extends Document {
+    order: Types.ObjectId;
+    seller_item: Types.ObjectId;
+    quantity: number;
+    sub_total_amount: number;
+    status: OrderItemStatus;
+    createdAt: Date;
+    updatedAt: Date;
   }
 
   export interface ITransaction extends Document {
-    order: Types.ObjectId;
     user: Types.ObjectId;
     amount: number;
     paid: boolean;
@@ -125,5 +136,5 @@ import { OrderStatusType } from "./models/enums/OrderStatusType";
     payment_id: string;
     txid: string | null;
     cancelled: boolean;
-    created_at: Date;
+    createdAt: Date;
   }
