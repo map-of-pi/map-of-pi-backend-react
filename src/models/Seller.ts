@@ -1,7 +1,7 @@
   import mongoose, { Schema, Types } from "mongoose";
 
   import { ISeller } from "../types";
-  import { SellerType, VisibleSellerType } from "./enums/sellerType";
+  import { SellerType, VisibleSellerType, FulfillmentType } from "./enums/sellerType";
 
   const sellerSchema = new Schema<ISeller>(
     {
@@ -53,6 +53,16 @@
       order_online_enabled_pref: {
         type: Boolean,
         required: false,
+      },
+      fulfillment_method: {
+        type: String,
+        enum: Object.values(FulfillmentType).filter(value => typeof value === 'string'),
+        default: FulfillmentType.CollectionByBuyer
+      }, 
+      fulfillment_description: {
+        type: String,
+        default: null,
+        required: false
       }
     },
     { timestamps: true } // Adds timestamps to track creation and update times
