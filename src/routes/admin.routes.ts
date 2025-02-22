@@ -1,12 +1,13 @@
 import { Router } from "express";
-import { activateAdmin, deactivateAdmin, getAdminInfo, loginAdmin, registerAdmin } from "../controllers/admin";
+import { loginAdmin, registerAdmin, getAdminInfo, activateAdmin, deactivateAdmin } from "../controllers/admin/adminController";
 
 const adminRoutes = Router();
 
-adminRoutes.get("/me", getAdminInfo);
-adminRoutes.post("/register", registerAdmin);
 adminRoutes.post("/login", loginAdmin);
+adminRoutes.post("/register", registerAdmin);
 adminRoutes.put("/deactivate/:id", deactivateAdmin);
 adminRoutes.put("/activate/:id", activateAdmin);
+
+adminRoutes.get("/me", getAdminInfo);
 
 export default adminRoutes;
