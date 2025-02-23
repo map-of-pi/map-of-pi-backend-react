@@ -9,6 +9,8 @@ import requestLogger from "../middlewares/logger";
 
 import appRouter from "../routes";
 import homeRoutes from "../routes/home.routes";
+import adminRoutes from "../routes/admin.routes";
+import metricRoutes from "../routes/metric.routes";
 import userRoutes from "../routes/user.routes";
 import userPreferencesRoutes from "../routes/userPreferences.routes";
 import sellerRoutes from "../routes/seller.routes";
@@ -25,7 +27,7 @@ app.use(express.json());
 app.use(requestLogger);
 
 app.use(cors({
-    origin: process.env.CORS_ORIGIN_URL,
+    origin: [`${process.env.CORS_ORIGIN_URL}`,`${process.env.ADMIN_URL}`],
     credentials: true
 }));
 app.use(cookieParser());
@@ -40,6 +42,8 @@ app.use('/api/docs/swagger-ui', express.static(path.join(__dirname, '../node_mod
 app.use("/api/docs", docRouter);
 
 app.use("/api/v1", appRouter);
+app.use("/api/v1/admin", adminRoutes)
+app.use("/api/v1/metrics", metricRoutes)
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/user-preferences", userPreferencesRoutes);
 app.use("/api/v1/sellers", sellerRoutes);
