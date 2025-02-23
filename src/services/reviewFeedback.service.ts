@@ -110,7 +110,7 @@ export const getReviewFeedback = async (
     return {
       givenReviews: updatedGivenFeedbackList,
       receivedReviews: updatedReceivedFeedbackList
-    } as CompleteFeedback;
+    } as unknown as CompleteFeedback;
 
   } catch (error) {
     logger.error(`Failed to retrieve reviews for reviewReceiverID ${review_receiver_id}:`, error);
@@ -163,8 +163,8 @@ export const getReviewFeedbackById = async (review_id: string): Promise<{
     const mainReview = { ...reviewFeedback.toObject(), giver: giverName, receiver: receiverName };
 
     return {
-      review: mainReview as IReviewFeedbackOutput,
-      replies: updatedReplyList as IReviewFeedbackOutput[],
+      review: mainReview as unknown as IReviewFeedbackOutput,
+      replies: updatedReplyList as unknown as IReviewFeedbackOutput[],
     };
   } catch (error) {
     logger.error(`Failed to retrieve review for reviewID ${review_id}:`, error);
