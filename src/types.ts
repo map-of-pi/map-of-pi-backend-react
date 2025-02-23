@@ -1,10 +1,10 @@
-import { Document, Types } from "mongoose";
-import { DeviceLocationType } from "./models/enums/deviceLocationType";
-import { RatingScale } from "./models/enums/ratingScale";
-import { SellerType } from "./models/enums/sellerType";
-import { TrustMeterScale } from "./models/enums/trustMeterScale";
-import { RestrictedArea } from "./models/enums/restrictedArea";
-import { StockLevelType } from "./models/enums/stockLevelType";
+  import { Document, Types } from "mongoose";
+  import { DeviceLocationType } from "./models/enums/deviceLocationType";
+  import { RatingScale } from "./models/enums/ratingScale";
+  import { SellerType, FulfillmentType } from "./models/enums/sellerType";
+  import { StockLevelType } from "./models/enums/stockLevelType";
+  import { TrustMeterScale } from "./models/enums/trustMeterScale";
+  import { RestrictedArea } from "./models/enums/restrictedArea";
 
 export interface IUser extends Document {
   pi_uid: string;
@@ -35,46 +35,46 @@ export interface IUserSettings extends Document {
   };
 }
 
-export interface ISeller extends Document {
-  seller_id: string;
-  name: string;
-  seller_type: SellerType;
-  description: string;
-  image?: string;
-  address?: string;
-  average_rating: Types.Decimal128;
-  sell_map_center: {
-    type: "Point";
-    coordinates: [number, number];
-  };
-  order_online_enabled_pref: boolean;
-}
+  export interface ISeller extends Document {
+    seller_id: string;
+    name: string;
+    seller_type: SellerType;
+    description: string;
+    image?: string;
+    address?: string;
+    average_rating: Types.Decimal128;
+    sell_map_center: {
+      type: 'Point';
+      coordinates: [number, number];
+    };
+    order_online_enabled_pref: boolean;
+    fulfillment_method: FulfillmentType;
+    fulfillment_description?: string;
+  }
 
-
-export interface ISellerItem extends Document {
-  _id: string;
-  seller_id: string;
-  name: string;
-  description: string;
-  price: Types.Decimal128;
-  stock_level: StockLevelType;
-  image?: string;
-  duration: number;
-  created_at: Date;
-  updated_at: Date;
-  expired_by: Date;
-}
-
-export interface IReviewFeedback extends Document {
-  _id: string;
-  review_receiver_id: string;
-  review_giver_id: string;
-  reply_to_review_id: string | null;
-  rating: RatingScale;
-  comment?: string;
-  image?: string;
-  review_date: Date;
-}
+  export interface ISellerItem extends Document {
+    _id: string;
+    seller_id: string;
+    name: string;
+    description: string;
+    price: Types.Decimal128;
+    stock_level: StockLevelType;
+    image?: string;
+    duration: number;
+    created_at: Date;
+    updated_at: Date;
+    expired_by: Date;
+  }
+  export interface IReviewFeedback extends Document {
+    _id: string;
+    review_receiver_id: string;
+    review_giver_id: string;
+    reply_to_review_id: string | null;
+    rating: RatingScale;
+    comment?: string;
+    image?: string;
+    review_date: Date;
+  }
 
 export interface ISanctionedRegion extends Document {
   location: RestrictedArea;

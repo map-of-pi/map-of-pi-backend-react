@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import * as sellerService from "../services/seller.service";
 import { uploadImage } from "../services/misc/image.service";
 import * as userSettingsService from '../services/userSettings.service';
+import { ISeller } from "../types";
 import logger from "../config/loggingConfig";
 
 export const fetchSellersByCriteria = async (req: Request, res: Response) => {
@@ -72,7 +73,7 @@ export const registerSeller = async (req: Request, res: Response) => {
     formData.image = image;
 
     // Register or update seller
-    const registeredSeller = await sellerService.registerOrUpdateSeller(authUser, formData, image);
+    const registeredSeller = await sellerService.registerOrUpdateSeller(authUser, formData);
     logger.info(`Registered or updated seller for user ${authUser.pi_uid}`);
 
     // Update UserSettings with email and phone_number
@@ -102,5 +103,65 @@ export const deleteSeller = async (req: Request, res: Response) => {
   } catch (error) {
     logger.error(`Failed to delete seller for userID ${ req.currentUser?.pi_uid }:`, error);
     return res.status(500).json({ message: 'An error occurred while deleting seller; please try again later' });
+  }
+};
+
+export const getSellerItems = async (req: Request, res: Response) => {  
+  const { seller_id } = req.params
+  try {
+    const items = await sellerService.getAllSellerItems(seller_id);
+
+    if (!items || items.length === 0) {
+      logger.warn(`No items are found for seller: ${seller_id}`);
+      return res.status(204).json({ message: 'Seller items not found' });
+    }
+    logger.info(`Fetched ${items.length} items for seller: ${seller_id}`);
+    return res.status(200).json(items);
+  } catch (error) {
+    logger.error('Failed to fetch seller items:', error);
+    return res.status(500).json({ message: 'An error occurred while fetching seller Items; please try again later' });
+  }
+};
+
+export const addOrUpdateSellerItem = async (req: Request, res: Response) => {
+  const currentSeller = req.currentSeller as ISeller;
+
+  const formData = req.body;
+  logger.debug('Received formData for seller item:', { formData });
+
+  try {
+    // Image file handling
+    const file = req.file;
+    const image = file ? await uploadImage(currentSeller.seller_id, file, 'seller-item') : '';
+    formData.image = image;
+
+    logger.debug('Form data being sent:', { formData });
+    // Add or update Item
+    const sellerItem = await sellerService.addOrUpdateSellerItem(currentSeller, formData);
+    logger.info(`Added/ updated seller item for seller ${currentSeller.seller_id}`);
+
+    // Send response
+    return res.status(200).json({ 
+      sellerItem: sellerItem, 
+    });
+  } catch (error) {
+    logger.error(`Failed to add or update seller item for userID ${currentSeller.seller_id}:`, error);
+    return res.status(500).json({
+      message: 'An error occurred while adding/ updating seller item; please try again later',
+    });
+  }
+};
+
+export const deleteSellerItem = async (req: Request, res: Response) => {
+  try {
+    const currentSeller = req.currentSeller as ISeller;
+
+    const { item_id } = req.params;
+    const deletedSellerItem = await sellerService.deleteSellerItem(item_id);
+    logger.info(`Deleted seller item with ID ${currentSeller.seller_id}`);
+    res.status(200).json({ message: "Seller item deleted successfully", deletedSellerItem: deletedSellerItem });
+  } catch (error) {
+    logger.error(`Failed to delete seller item for userID ${ req.currentUser?.pi_uid }:`, error);
+    return res.status(500).json({ message: 'An error occurred while deleting seller item; please try again later' });
   }
 };
