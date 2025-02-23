@@ -111,9 +111,9 @@ export const getAllSellers = async (
       if (!searchFilters.include_trust_level_50) trustLevelFilters.push(TrustMeterScale.FIFTY)
       if (!searchFilters.include_trust_level_0) trustLevelFilters.push(TrustMeterScale.ZERO)
 
-        if (trustLevelFilters.length > 0) {
-          baseCriteria.seller_type = { $nin: trustLevelFilters };
-        }
+        // if (trustLevelFilters.length > 0) {
+        //   ...baseCriteria.seller_type = { $nin: trustLevelFilters };
+        // }
 
     }
 
