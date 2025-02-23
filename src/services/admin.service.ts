@@ -20,7 +20,10 @@ export const loginAdmin = async (
   return { admin, token };
 };
 
-export const registerAdmin = async (email: string, password: string): Promise<IAdmin> => {
+export const registerAdmin = async (
+  email: string, 
+  password: string
+): Promise<IAdmin> => {
   const existingAdmin = await Admin.findOne({ email });
   if (existingAdmin) {
     throw new Error("Admin already exists.");

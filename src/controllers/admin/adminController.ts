@@ -7,12 +7,12 @@ export const loginAdmin = async (req: Request, res: Response) => {
 
   try {
     const { admin, token } = await adminService.loginAdmin(email, password);
-    return res.status(200).json({ message: "Admin logged in successfully.", token, admin });
+    return res.status(200).json({ message: "Admin logged in successfully", token, admin });
   } catch (error: any) {
-    if (error.message === "Admin not found.") {
+    if (error.message === "Admin not found") {
       return res.status(404).json({ message: error.message });
     }
-    if (error.message === "Invalid credentials.") {
+    if (error.message === "Invalid credentials") {
       return res.status(401).json({ message: error.message });
     }
 
@@ -28,9 +28,9 @@ export const registerAdmin = async (req: Request, res: Response) => {
 
   try {
     const admin = await adminService.registerAdmin(email, password);
-    return res.status(201).json({ message: "Admin registered successfully.", admin });
+    return res.status(201).json({ message: "Admin registered successfully", admin });
   } catch (error: any) {
-    if (error.message === "Admin already exists.") {
+    if (error.message === "Admin already exists") {
       return res.status(400).json({ message: error.message });
     }
 
@@ -45,14 +45,14 @@ export const getAdminInfo = async (req: Request, res: Response) => {
   const token = req.headers.authorization?.split(" ")[1]; 
 
   if (!token) {
-    return res.status(401).json({ message: "Authorization token missing." });
+    return res.status(401).json({ message: "Authorization token missing" });
   }
 
   try {
     const admin = await adminService.getAdminInfoByToken(token);
     return res.status(200).json(admin);
   } catch (error: any) {
-    if (error.message === "Admin not found.") {
+    if (error.message === "Admin not found") {
       return res.status(404).json({ message: error.message });
     }
 
@@ -68,9 +68,9 @@ export const activateAdmin = async (req: Request, res: Response) => {
 
   try {
     const admin = await adminService.activateAdminById(id);
-    return res.status(200).json({ message: "Admin activated successfully.", admin });
+    return res.status(200).json({ message: "Admin activated successfully", admin });
   } catch (error: any) {
-    if (error.message === "Admin not found.") {
+    if (error.message === "Admin not found") {
       return res.status(404).json({ message: error.message });
     }
     
@@ -85,9 +85,9 @@ export const deactivateAdmin = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
     const admin = await adminService.deactivateAdminById(id);
-    return res.status(200).json({ message: "Admin deactivated successfully.", admin });
+    return res.status(200).json({ message: "Admin deactivated successfully", admin });
   } catch (error: any) {
-    if (error.message === "Admin not found.") {
+    if (error.message === "Admin not found") {
       return res.status(404).json({ message: error.message });
     }
     
