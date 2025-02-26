@@ -134,7 +134,6 @@ export const getSellerOrders = async (sellerId: string) => {
   }
 };
 
-
 export const deleteOrderById = async (orderId: string) => {
   try {
     return await Order.findByIdAndDelete(orderId);

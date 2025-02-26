@@ -2,7 +2,6 @@
 
 import { Request, Response } from "express";
 import axios from "axios";
-import { env } from "../utils/env";
 import { platformAPIClient } from "../config/platformAPIclient";
 import Transaction from "../models/Transaction";
 import Order from "../models/Order";
@@ -12,8 +11,6 @@ import { addOrUpdateOrder } from "../services/order.service";
 import { IOrder } from "../types";
 import { OrderStatusType } from "../models/enums/OrderStatusType";
 import { Types } from "mongoose";
-import { makePayment } from "../services/payment.service";
-
 
 interface Payment {
   identifier: string;
@@ -154,7 +151,6 @@ export const onPaymentApproval = async (req: Request, res: Response) => {
   }
 };
 
-
 export const onPaymentCompletion = async (
   req: Request,
   res: Response
@@ -164,7 +160,7 @@ export const onPaymentCompletion = async (
     const paymentId: string = req.body.paymentId;
     const txid: string = req.body.txid;
 
-    const currentPayment = await platformAPIClient.get(
+    await platformAPIClient.get(
       `/v2/payments/${paymentId}`
     );
 
@@ -221,25 +217,6 @@ export const onPaymentCancellation = async (
     return res
       .status(200)
       .json({ message: `Cancelled the payment ${paymentId}` });
-  } catch (error: any) {
-    console.error("Error while canceling transaction: ", error.message);
-
-    return res.status(500).json({ message: "Internal Server Error" });
-  }
-};
-
-
-export const onSubmitPayment = async (
-  req: Request,
-  res: Response
-) => {
-  try {
-    const {paymentId} = req.body
-    console.log("paymentData from controller: ", paymentId)
-    const paymentDetails = makePayment(paymentId)
-    return res
-      .status(200)
-      .json({ message: `payment completed sucessfully ${paymentDetails}` });
   } catch (error: any) {
     console.error("Error while canceling transaction: ", error.message);
 
