@@ -16,6 +16,7 @@ import reviewFeedbackRoutes from "../routes/reviewFeedback.routes";
 import mapCenterRoutes from "../routes/mapCenter.routes";
 import reportRoutes from "../routes/report.routes";
 import paymentsRouter from "../routes/payment.routes";
+import orderRoutes from "../routes/order.routes";
 
 dotenv.config();
 
@@ -47,6 +48,7 @@ app.use("/api/v1/sellers", sellerRoutes);
 app.use("/api/v1/review-feedback", reviewFeedbackRoutes);
 app.use("/api/v1/map-center", mapCenterRoutes);
 app.use("/api/v1/reports", reportRoutes);
+app.use("/api/v1/orders", orderRoutes);
 
 app.use("/", homeRoutes);
 

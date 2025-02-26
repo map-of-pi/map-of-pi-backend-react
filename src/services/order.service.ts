@@ -5,6 +5,7 @@ import { IOrder, IOrderItem } from "../types";
 import logger from "../config/loggingConfig";
 import SellerItem from "../models/SellerItem";
 import { OrderItemStatus } from "../models/enums/SellerItemStatus";
+import User from "../models/User";
 
 /**
  * Adds a new order or updates an existing one.
@@ -100,15 +101,39 @@ export const getAllOrders = async (filters: Record<string, any>) => {
   }
 };
 
-
-export const getOrderById = async (orderId: string) => {
+export const getSellerOrders = async (sellerId: string) => {
   try {
-    return await Order.findById(orderId);
+    // Fetch orders matching the seller_id and sorted in descending order
+    const orders = await Order.find({ seller_id: sellerId }).sort({ updatedAt: -1 }).lean();
+
+    // Extract all unique buyer `pi_uid`s from the orders
+    const buyerPiUids = [...new Set(orders.map((order) => order.buyer_id))];
+
+    // Fetch user details using `pi_uid`
+    const users = await User.find({ pi_uid: { $in: buyerPiUids } })
+      .select("pi_uid pi_username")
+      .lean();
+
+    // Create a lookup object for quick access
+    const userLookup = users.reduce((acc, user) => {
+      acc[user.pi_uid] = user.pi_username;
+      return acc;
+    }, {} as Record<string, string>);
+
+    // Attach `pi_username` to each order
+    const ordersWithUsernames = orders.map((order) => ({
+      ...order,
+      pi_username: userLookup[order.buyer_id] || null, // Attach username if found
+    }));
+
+    console.log("Fetched orders: ", ordersWithUsernames);
+    return ordersWithUsernames;
   } catch (error) {
-    logger.error("Error fetching order: ", error);
-    throw new Error("Error fetching order");
+    logger.error("Error fetching seller orders: ", error);
+    throw new Error("Error fetching orders");
   }
 };
+
 
 export const deleteOrderById = async (orderId: string) => {
   try {
@@ -122,20 +147,41 @@ export const deleteOrderById = async (orderId: string) => {
 export const getOrderItems = async (orderId: string) => {
   try {
     // Fetch the base order
-    const order = await Order.findById(orderId);
+    let order = await Order.findById(orderId);
     if (!order) {
       return null; // Order not found
     }
 
+    // Fetch the user's pi_username based on buyer_id matching pi_uid
+    const user = await User.findOne({ pi_uid: order.buyer_id }, "pi_username");
+
     // Fetch the items linked to the order
     const orderItems = await OrderItem.find({ order: orderId })
-      .populate("seller_item") // Populate seller item details
+    .populate({ path: "seller_item", model: "Seller-Item" }) // Populate seller item details
       .exec();
-
-    return { order, items: orderItems };
+    // logger.info('fetched order items: ', orderItems);
+    return { 
+      order, 
+      orderItems: orderItems, 
+      pi_username: user ? user.pi_username : ''  
+    };
   } catch (error) {
     logger.error(`Error fetching order and items for order ${orderId}: `, error);
     throw new Error("Error fetching order and items");
   }
 };
+
+export const updateOrderItemStatus = async (itemId: string, itemStatus: string) => {
+  try {
+    const updatedItem = await OrderItem.findByIdAndUpdate(itemId, {
+      status: itemStatus,
+      updatedAt: new Date()
+    }, {new: true}).exec()
+    return updatedItem
+  }catch (error:any){
+    logger.error(`Error updating order item for order ${itemId}: `, error);
+    throw new Error("Error updating order item");
+  }
+  
+}
 

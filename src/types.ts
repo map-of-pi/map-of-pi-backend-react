@@ -111,8 +111,8 @@ import { OrderItemStatus } from "./models/enums/SellerItemStatus";
     paid: boolean;
     filled: boolean;
     fulfillment_method: FulfillmentType;
-    seller_filfullment_instruction: string;
-    buyer_filfullment_details: string;
+    seller_fulfillment_description: string;
+    buyer_fulfillment_description: string;
     createdAt: Date;
     updatedAt: Date;
 }

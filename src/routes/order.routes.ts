@@ -1,19 +1,16 @@
 import express from "express";
-import {
-  getAllOrdersController,
-  getSingleOrder,
-  createOrUpdateOrderController,
-  deleteOrder,
-  getOrderItemsController,
-} from "../controllers/orderController";
+import * as orderController from "../controllers/orderController";
 import { verifyToken } from "../middlewares/verifyToken";
+import { isSellerFound } from "../middlewares/isSellerFound";
 
-const router = express.Router();
+const orderRoutes = express.Router();
 
-router.get("/", getAllOrdersController);
-router.get("/:id", getSingleOrder);
-router.post("/", verifyToken, createOrUpdateOrderController);
-router.delete("/:id", verifyToken, deleteOrder);
-router.get("/:id/items", getOrderItemsController); // Route for fetching order items
+orderRoutes.get("/", orderController.getAllOrders);
+orderRoutes.get("/seller-order", verifyToken, isSellerFound, orderController.getSellerOrders)
+orderRoutes.get("/:id", orderController.getSingleOrder);
+orderRoutes.post("/", verifyToken, orderController.createOrUpdateOrder);
+orderRoutes.delete("/:id", verifyToken, orderController.deleteOrder);
+orderRoutes.get("/:id/items", orderController.getOrderItems);
+orderRoutes.put("/:id", verifyToken, isSellerFound, orderController.updateOrderItemStatus);
 
-export default router;
+export default orderRoutes;

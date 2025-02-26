@@ -40,12 +40,12 @@ import { OrderStatusType } from "./enums/OrderStatusType";
         required: true,
         default: OrderStatusType.Pending,
       },
-      seller_filfullment_instruction: {
+      seller_fulfillment_description: {
         type: String,
         required: false,
         default: ""
       },
-      buyer_filfullment_details: {
+      buyer_fulfillment_description: {
         type: String,
         required: false,
         default: ""

@@ -1,8 +1,8 @@
 export enum OrderItemStatus { 
-  Refunded = 'dispatched', 
+  Refunded = 'refunded', 
   Collected = 'collected',
   Returned = 'returned',
   Dispatched = 'dispatched',
-  Filled = "filled",
+  Fulfilled = "fufilled",
   Pending = 'pending',
 }

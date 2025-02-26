@@ -12,6 +12,7 @@ import { addOrUpdateOrder } from "../services/order.service";
 import { IOrder } from "../types";
 import { OrderStatusType } from "../models/enums/OrderStatusType";
 import { Types } from "mongoose";
+import { makePayment } from "../services/payment.service";
 
 
 interface Payment {
@@ -81,54 +82,58 @@ export const onPaymentApproval = async (req: Request, res: Response) => {
     const currentPayment = await platformAPIClient.get(`/v2/payments/${paymentId}`);
 
     let metadata = currentPayment.data.metadata;
+    const oldTransaction = await Transaction.findOne({payment_id: paymentId})
+
+    // create new transaction only not exist
+    if (!oldTransaction) {
+      const seller = await Seller.findOne({ seller_id: metadata.seller });
+      const buyer = await User.findOne({ pi_uid: currentUser?.pi_uid });
+
+      if (!buyer || !seller) {
+        return res.status(404).json({ message: "Seller or buyer not found" });
+      }
+
+      const newTransaction = await Transaction.create({
+        payment_id: paymentId,
+        user: buyer._id,  // Ensure this is an ObjectId
+        txid: null,
+        memo: currentPayment.data.memo,
+        amount: currentPayment.data.amount,
+        paid: false,
+        cancelled: false,
+        created_at: new Date(),
+      });
+
+      if (!newTransaction) {
+        return res.status(404).json({ message: "Transaction cannot be created" });
+      }
+
+      // console.log("new Transaction: ", newTransaction)
+
+      const orderData: Partial<IOrder> = {    
+        buyer_id: metadata.buyer,
+        seller_id: metadata.seller,        
+        transaction: newTransaction._id as Types.ObjectId,
+        total_amount: currentPayment.data.amount,
+        status: OrderStatusType.New,
+        paid: false,
+        filled: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        fulfillment_method: metadata.fulfillment_method,
+        seller_fulfillment_description: metadata.seller_instruction,
+        buyer_fulfillment_description: metadata.buyer_fulfillment_description,
+      };
+
+      console.log('ITEMS DATA: ', metadata.items)
+
+      const orderItemsData = metadata.items;
+
+      // create order and order items
+      const newOrder = await addOrUpdateOrder(null, orderData as IOrder, orderItemsData);
+
+    }
     
-    // Await for async DB queries
-    const seller = await Seller.findOne({ seller_id: metadata.seller });
-    const buyer = await User.findOne({ pi_uid: currentUser?.pi_uid });
-
-    if (!buyer || !seller) {
-      return res.status(404).json({ message: "Seller or buyer not found" });
-    }
-
-    const newTransaction = await Transaction.create({
-      payment_id: paymentId,
-      user: buyer._id,  // Ensure this is an ObjectId
-      txid: null,
-      memo: currentPayment.data.memo,
-      amount: currentPayment.data.amount,
-      paid: false,
-      cancelled: false,
-      created_at: new Date(),
-    });
-
-    if (!newTransaction) {
-      return res.status(404).json({ message: "Transaction cannot be created" });
-    }
-
-    // console.log("new Transaction: ", newTransaction)
-
-    const orderData: Partial<IOrder> = {    
-      buyer_id: metadata.buyer,
-      seller_id: metadata.seller,        
-      transaction: newTransaction._id as Types.ObjectId,
-      total_amount: currentPayment.data.amount,
-      status: OrderStatusType.New,
-      paid: false,
-      filled: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      fulfillment_method: metadata.fulfillment_method,
-      seller_filfullment_instruction: metadata.seller_instruction,
-      buyer_filfullment_details: metadata.buyer_filfullment_details,
-    };
-
-    console.log('ITEMS DATA: ', metadata.items)
-
-    const orderItemsData = metadata.items;
-
-    // ✅ Await the async function
-    const newOrder = await addOrUpdateOrder(null, orderData as IOrder, orderItemsData);
-
     // Approve payment request
     const response = await platformAPIClient.post(`/v2/payments/${paymentId}/approve`);
 
@@ -137,7 +142,7 @@ export const onPaymentApproval = async (req: Request, res: Response) => {
     return res.status(200).json({
       status: "ok",
       message: `Approved payment with id ${paymentId}`,
-      order: newOrder, // Optional: Return the created/updated order
+      // order: newOrder, // Optional: Return the created/updated order
     });
 
   } catch (error: any) {
@@ -163,25 +168,26 @@ export const onPaymentCompletion = async (
       `/v2/payments/${paymentId}`
     );
 
-    //  const transaction = await Transaction.findOneAndUpdate({ payment_id: paymentId }, { $set: { txid: txid, paid: true } }).exec();
+    // update transaction status to paid on sucessfull payment
+    const transaction = await Transaction.findOneAndUpdate({ payment_id: paymentId }, { $set: { txid: txid, paid: true } }).exec();
 
-    // await Order.findByIdAndUpdate(transaction?.order, 
-    //   { $set: {
-    //     updated_at: new Date(),
-    //     paid: true
-    //   }
-    // }).exec()
+    // update Order status to paid on sucessfull payment
+    await Order.findOneAndUpdate({transaction: transaction?._id}, 
+      { $set: {
+        updated_at: new Date(),
+        paid: true,
+        status: OrderStatusType.Pending
+      }
+    }).exec()
     const response = await platformAPIClient.post(
       `/v2/payments/${paymentId}/complete`,
       { txid }
     );
-
-   
-
-    // console.log(
-    //   "response from Pi server while completing payment: ",
-    //   response.data
-    // );
+    
+    console.log(
+      "response from Pi server while completing payment: ",
+      response
+    );
 
     return res
       .status(200)
@@ -215,6 +221,25 @@ export const onPaymentCancellation = async (
     return res
       .status(200)
       .json({ message: `Cancelled the payment ${paymentId}` });
+  } catch (error: any) {
+    console.error("Error while canceling transaction: ", error.message);
+
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
+export const onSubmitPayment = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const {paymentId} = req.body
+    console.log("paymentData from controller: ", paymentId)
+    const paymentDetails = makePayment(paymentId)
+    return res
+      .status(200)
+      .json({ message: `payment completed sucessfully ${paymentDetails}` });
   } catch (error: any) {
     console.error("Error while canceling transaction: ", error.message);
 
