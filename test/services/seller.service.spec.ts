@@ -274,7 +274,8 @@ describe('addOrUpdateSellerItem function', () => {
       price: 0.50,
       stock_level: "Many available",
       duration: 2,
-      image: 'http://example.com/testSellerThreeItemOne.jpg'
+      image: 'http://example.com/testSellerThreeItemOne.jpg',
+      created_at: new Date()
     } as unknown as ISellerItem;
 
     const sellerItemData = (await addOrUpdateSellerItem(
@@ -315,7 +316,8 @@ describe('addOrUpdateSellerItem function', () => {
       price: 0.50,
       stock_level: "Sold",
       duration: 2,
-      image: 'http://example.com/testSellerThreeItemOneUpdated.jpg'
+      image: 'http://example.com/testSellerThreeItemOneUpdated.jpg',
+      created_at: new Date()
     } as unknown as ISellerItem;
 
     const sellerItemData = (
