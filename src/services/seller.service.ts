@@ -226,16 +226,15 @@ export const addOrUpdateSellerItem = async (
   seller: ISeller,
   item: ISellerItem
 ): Promise<ISellerItem | null> => {
-
   try {
     const today = new Date();
 
-    // Calculate expiration date based on duration (defaults to 1 week)
+    // Ensure duration is valid (default to 1 week)
     const duration = Number(item.duration) || 1;
     const durationInMs = duration * 7 * 24 * 60 * 60 * 1000;
-    const expiredBy = new Date(today.getTime() + durationInMs);
+    const expiredBy = new Date(item.created_at.getTime() + durationInMs);
 
-    // Ensure unique identifier is used for finding existing items
+    // Define a unique query for finding existing items
     const query = {
       _id: item._id || undefined,
       seller_id: seller.seller_id,
@@ -245,6 +244,11 @@ export const addOrUpdateSellerItem = async (
     const existingItem = await SellerItem.findOne(query);
 
     if (existingItem) {
+      // If the item is expired, reset `created_at`
+      if (item.expired_by < today) {
+        item.created_at = today;
+      }
+
       // Update the existing item
       existingItem.set({
         ...item,
@@ -257,7 +261,7 @@ export const addOrUpdateSellerItem = async (
       logger.info('Item updated successfully:', { updatedItem });
       return updatedItem;
     } else {
-      // Ensure item has a unique identifier for creation
+      // Create a new item with a unique ID
       const newItemId = item._id || new mongoose.Types.ObjectId().toString();
 
       // Create a new item
@@ -281,7 +285,7 @@ export const addOrUpdateSellerItem = async (
       return newItem;
     }
   } catch (error) {
-    logger.error(`Failed to add or update seller item for sellerID ${ seller.seller_id }:`, error);
+    logger.error(`Failed to add or update seller item for sellerID ${seller.seller_id}:`, error);
     throw new Error('Failed to add or update seller item; please try again later');
   }
 };
