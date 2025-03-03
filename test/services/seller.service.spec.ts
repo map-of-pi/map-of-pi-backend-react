@@ -239,14 +239,14 @@ describe('addOrUpdateSellerItem function', () => {
       plainObject.price = Number(plainObject.price);
     }
     
-    if (plainObject.created_at) {
-      plainObject.created_at = new Date(plainObject.created_at);
-      plainObject.created_at.setHours(0, 0, 0, 0);
+    if (plainObject.createdAt) {
+      plainObject.createdAt = new Date(plainObject.createdAt);
+      plainObject.createdAt.setHours(0, 0, 0, 0);
     }
 
-    if (plainObject.updated_at) {
-      plainObject.updated_at = new Date(plainObject.updated_at);
-      plainObject.updated_at.setHours(0, 0, 0, 0);
+    if (plainObject.updatedAt) {
+      plainObject.updatedAt = new Date(plainObject.updatedAt);
+      plainObject.updatedAt.setHours(0, 0, 0, 0);
     }
 
     if (plainObject.expired_by) {
@@ -262,7 +262,7 @@ describe('addOrUpdateSellerItem function', () => {
   };
 
   const assertUpdatedSellerItem = (actual: any, expected: any) => {
-    const { __v, created_at, ...filteredActual } = actual; // ignore DB values.
+    const { __v, createdAt, ...filteredActual } = actual; // ignore DB values.
     expect(filteredActual).toEqual(expect.objectContaining({ ...expected, _id: actual._id }));
   };
 
@@ -275,7 +275,7 @@ describe('addOrUpdateSellerItem function', () => {
       stock_level: "Many available",
       duration: 2,
       image: 'http://example.com/testSellerThreeItemOne.jpg',
-      created_at: new Date()
+      createdAt: '2025-02-20T00:00:00.000Z'
     } as unknown as ISellerItem;
 
     const sellerItemData = (await addOrUpdateSellerItem(
@@ -301,9 +301,9 @@ describe('addOrUpdateSellerItem function', () => {
       stock_level: sellerItem.stock_level,
       duration: sellerItem.duration,
       image: sellerItem.image,
-      created_at: current_date,
-      updated_at: current_date,
-      expired_by: expired_date
+      expired_by: expired_date,
+      createdAt: current_date,
+      updatedAt: current_date
     });
   });
 
@@ -316,8 +316,7 @@ describe('addOrUpdateSellerItem function', () => {
       price: 0.50,
       stock_level: "Sold",
       duration: 2,
-      image: 'http://example.com/testSellerThreeItemOneUpdated.jpg',
-      created_at: new Date()
+      image: 'http://example.com/testSellerThreeItemOneUpdated.jpg'
     } as unknown as ISellerItem;
 
     const sellerItemData = (
@@ -345,8 +344,8 @@ describe('addOrUpdateSellerItem function', () => {
       stock_level: sellerItem.stock_level,
       duration: sellerItem.duration,
       image: sellerItem.image,
-      updated_at: current_date,
-      expired_by: expired_date
+      expired_by: expired_date,
+      updatedAt: current_date
     });
   });
 
@@ -383,11 +382,11 @@ describe('deleteSellerItem function', () => {
     }
 
     // Normalize timestamps
-    if (plainObject.created_at instanceof Date) {
-      plainObject.created_at = plainObject.created_at.toISOString();
+    if (plainObject.createdAt instanceof Date) {
+      plainObject.createdAt = plainObject.createdAt.toISOString();
     }
-    if (plainObject.updated_at instanceof Date) {
-      plainObject.updated_at = plainObject.updated_at.toISOString();
+    if (plainObject.updatedAt instanceof Date) {
+      plainObject.updatedAt = plainObject.updatedAt.toISOString();
     }
     if (plainObject.expired_by instanceof Date) {
       plainObject.expired_by = plainObject.expired_by.toISOString();
@@ -411,8 +410,8 @@ describe('deleteSellerItem function', () => {
       stock_level: "Ongoing service",
       duration: 1,
       image: 'http://example.com/testSellerTwoItemTwo.jpg',
-      created_at: '2025-01-10T00:00:00.000Z',
-      updated_at: '2025-01-10T00:00:00.000Z',
+      createdAt: '2025-01-10T00:00:00.000Z',
+      updatedAt: '2025-01-10T00:00:00.000Z',
       expired_by: '2025-01-17T00:00:00.000Z'
     } as unknown as ISellerItem;
 
@@ -431,8 +430,8 @@ describe('deleteSellerItem function', () => {
       stock_level: sellerItem.stock_level,
       duration: sellerItem.duration,
       image: sellerItem.image,
-      created_at: sellerItem.created_at,
-      updated_at: sellerItem.updated_at,
+      createdAt: sellerItem.createdAt,
+      updatedAt: sellerItem.updatedAt,
       expired_by: sellerItem.expired_by
     });
   });
