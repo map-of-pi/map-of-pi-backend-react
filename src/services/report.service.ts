@@ -5,6 +5,8 @@ import { getSellersWithinSanctionedRegion } from "./seller.service";
 import { reverseLocationDetails } from "../helpers/location";
 import { ISanctionedRegion, ISeller, SanctionedSeller } from "../types";
 import logger from "../config/loggingConfig";
+import {SellerType} from "../models/enums/sellerType";
+import Seller from "../models/Seller";
 
 const requestLimiter = new Bottleneck({ minTime: 1000 });
 
@@ -82,6 +84,7 @@ const processSellerGeocoding = async (
     const locationName = response.data.display_name;
     if (locationName.includes(sanctionedRegion)) {
       logger.info('Sanctioned Seller found', { seller_id, name, address, coordinates: [latitude, longitude], sanctioned_location: locationName });
+      await restrictSellerType(seller_id);
       return { 
         seller_id,
         name,
@@ -94,4 +97,16 @@ const processSellerGeocoding = async (
     logger.error(`Geocoding failed for seller ${seller_id}`, { coordinates: [latitude, longitude], error });
   }
   return null;
+};
+
+const restrictSellerType = async (seller_id: string): Promise<void> => {
+  try {
+    await Seller.updateOne(
+      { seller_id },
+      { $set: { seller_type: SellerType.Restricted } }
+    );
+    logger.info(`Seller ${seller_id} updated to Restricted`);
+  } catch (error) {
+    logger.error(`Failed to update seller type for ${seller_id}`, error);
+  }
 };
