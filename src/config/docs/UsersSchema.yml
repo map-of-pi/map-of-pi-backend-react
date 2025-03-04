@@ -1,4 +1,9 @@
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+
   schemas:
     AuthenticateUserRq:
       type: object
