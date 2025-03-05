@@ -31,7 +31,7 @@ const userRoutes = Router();
  *       - User
  *     summary: Authenticate the user's access token *
  *     security:
- *       - BearerAuth: []
+ *       - BearerAuth: []    
  *     responses:
  *       200:
  *         description: Successful response
