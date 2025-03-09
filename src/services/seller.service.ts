@@ -2,13 +2,14 @@ import mongoose from 'mongoose';
 import Seller from "../models/Seller";
 import User from "../models/User";
 import UserSettings from "../models/UserSettings";
+import SellerItem from "../models/SellerItem";
 import { FulfillmentType, VisibleSellerType } from '../models/enums/sellerType';
+import { StockLevelType } from '../models/enums/stockLevelType';
 import { TrustMeterScale } from "../models/enums/trustMeterScale";
 import { getUserSettingsById } from "./userSettings.service";
 import { IUser, IUserSettings, ISeller, ISellerWithSettings, ISellerItem, ISanctionedRegion } from "../types";
 
 import logger from "../config/loggingConfig";
-import SellerItem from "../models/SellerItem";
 
 // Helper function to get settings for all sellers and merge them into seller objects
 const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSettings[]> => {
@@ -226,16 +227,15 @@ export const addOrUpdateSellerItem = async (
   seller: ISeller,
   item: ISellerItem
 ): Promise<ISellerItem | null> => {
-
   try {
     const today = new Date();
 
-    // Calculate expiration date based on duration (defaults to 1 week)
+    // Ensure duration is valid (default to 1 week)
     const duration = Number(item.duration) || 1;
     const durationInMs = duration * 7 * 24 * 60 * 60 * 1000;
     const expiredBy = new Date(today.getTime() + durationInMs);
 
-    // Ensure unique identifier is used for finding existing items
+    // Define a unique query for finding existing items
     const query = {
       _id: item._id || undefined,
       seller_id: seller.seller_id,
@@ -248,7 +248,6 @@ export const addOrUpdateSellerItem = async (
       // Update the existing item
       existingItem.set({
         ...item,
-        updated_at: today,
         expired_by: expiredBy,
         image: item.image || existingItem.image, // Use existing image if a new one isn't provided
       });
@@ -257,7 +256,7 @@ export const addOrUpdateSellerItem = async (
       logger.info('Item updated successfully:', { updatedItem });
       return updatedItem;
     } else {
-      // Ensure item has a unique identifier for creation
+      // Create a new item with a unique ID
       const newItemId = item._id || new mongoose.Types.ObjectId().toString();
 
       // Create a new item
@@ -267,11 +266,9 @@ export const addOrUpdateSellerItem = async (
         name: item.name ? item.name.trim() : '',
         description: item.description ? item.description.trim() : '',
         price: parseFloat(item.price?.toString() || '0.01'), // Ensure valid price
-        stock_level: item.stock_level || '1 available',
+        stock_level: item.stock_level || StockLevelType.AVAILABLE_1,
         duration: parseInt(item.duration?.toString() || '1'), // Ensure valid duration
         image: item.image,
-        created_at: today,
-        updated_at: today,
         expired_by: expiredBy,
       });
 
@@ -281,7 +278,7 @@ export const addOrUpdateSellerItem = async (
       return newItem;
     }
   } catch (error) {
-    logger.error(`Failed to add or update seller item for sellerID ${ seller.seller_id }:`, error);
+    logger.error(`Failed to add or update seller item for sellerID ${seller.seller_id}:`, error);
     throw new Error('Failed to add or update seller item; please try again later');
   }
 };

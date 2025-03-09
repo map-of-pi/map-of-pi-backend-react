@@ -1,9 +1,9 @@
 export enum StockLevelType {
-    available_1 = '1 available', 
-    available_2 = '2 available', 
-    available_3 = '3 available',
-    many = 'Many available', 
-    made_to_order = 'Made to order', 
-    ongoing_service = 'Ongoing service', 
-    sold = 'Sold'
+    AVAILABLE_1 = '1 available', 
+    AVAILABLE_2 = '2 available', 
+    AVAILABLE_3 = '3 available',
+    MANY_AVAILABLE = 'Many available', 
+    MADE_TO_ORDER = 'Made to order', 
+    ONGOING_SERVICE = 'Ongoing service', 
+    SOLD = 'Sold'
 }
