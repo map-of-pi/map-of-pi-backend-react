@@ -36,18 +36,13 @@ const sellerItemSchema = new Schema<ISellerItem>(
       default: 1,
       min: 1        
     },
-    created_at: {
-      type: Date,
-      required: true,
-    },
-    updated_at: {
-      type: Date,
-      required: true,
-    },
     expired_by: {
       type: Date,
       required: true,
     }
+  },
+  {
+    timestamps: true, // Enables createdAt and updatedAt
   }
 );
 
