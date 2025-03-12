@@ -2,25 +2,30 @@ import mongoose from 'mongoose';
 import Seller from "../models/Seller";
 import User from "../models/User";
 import UserSettings from "../models/UserSettings";
-import SellerItem from "../models/SellerItem";
 import { FulfillmentType, VisibleSellerType } from '../models/enums/sellerType';
-import { StockLevelType } from '../models/enums/stockLevelType';
 import { TrustMeterScale } from "../models/enums/trustMeterScale";
 import { getUserSettingsById } from "./userSettings.service";
 import { IUser, IUserSettings, ISeller, ISellerWithSettings, ISellerItem, ISanctionedRegion } from "../types";
 
 import logger from "../config/loggingConfig";
+import SellerItem from "../models/SellerItem";
 
 // Helper function to get settings for all sellers and merge them into seller objects
-const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSettings[]> => {
+const resolveSellerSettings = async (sellers: ISeller[], trustLevelFilters?: number[]): Promise<ISellerWithSettings[]> => {
   const sellersWithSettings = await Promise.all(
     sellers.map(async (seller) => {
       try {
         const sellerObject = seller.toObject();
 
-        // Fetch the user settings for the seller
+
+        // Fetch the user settings for the selle
         const userSettings = await getUserSettingsById(seller.seller_id);
-        
+
+        // Check if the seller's trust level is allowed
+        if (trustLevelFilters && trustLevelFilters.includes(userSettings?.trust_meter_rating ?? -1)) {
+          return null; // Exclude this seller
+        }
+
         // Merge seller and settings into a single object
         return {
           ...sellerObject,
@@ -29,10 +34,11 @@ const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSet
           findme: userSettings?.findme,
           email: userSettings?.email ?? null,
           phone_number: userSettings?.phone_number ?? null, 
+          search_filters: userSettings?.search_filters ?? null, 
         } as ISellerWithSettings;
       } catch (error) {
         logger.error(`Failed to resolve settings for sellerID ${ seller.seller_id }:`, error);
-        
+
         // Return a fallback seller object with minimal information
         return {
           ...seller.toObject(),
@@ -44,37 +50,98 @@ const resolveSellerSettings = async (sellers: ISeller[]): Promise<ISellerWithSet
         } as unknown as ISellerWithSettings;
       }
     })
+
   );
-  return sellersWithSettings;
+  return sellersWithSettings.filter(Boolean) as ISellerWithSettings[];
 };
 
 // Fetch all sellers or within a specific bounding box; optional search query.
 export const getAllSellers = async (
   bounds?: { sw_lat: number, sw_lng: number, ne_lat: number, ne_lng: number },
-  search_query?: string
+  search_query?: string,
+  userId?: string,
 ): Promise<ISellerWithSettings[]> => {
   try {
     let sellers: ISeller[];
     const maxNumSellers = 50;
-
+    let userSettings :any = {};
     // always apply this condition to exclude 'Inactive sellers'
-    const baseCriteria = { seller_type: { $in: Object.values(VisibleSellerType) } };
+    // const baseCriteria = { 
+    //   // seller_type: { $in: Object.values(VisibleSellerType) },
+    // };
+
+    const baseCriteria : Record<string, any> = {}
+     // Always exclude inactive sellers
+     baseCriteria.seller_type = { $nin: [] };
+
+
+      // Add trust level filters
+      const trustLevelFilters: number[] = [];
+
+    if(search_query && userId) {
+      if (userId) {
+        userSettings = await getUserSettingsById(userId);
+      } else {
+        throw new Error('User ID is required to fetch user settings');
+      }
+
+    const searchFilters = userSettings.search_filters || {};
+
+    // Apply filters based on userSettings.search_filters
+
+      if(!searchFilters.include_active_sellers) {
+        baseCriteria.seller_type = {$nin: ['activeSeller']};
+      }
+      if(!searchFilters.include_inactive_sellers) { 
+        baseCriteria.seller_type = {
+          ...baseCriteria.seller_type,
+         $nin: [...(baseCriteria.seller_type?.$nin || []), 'inactiveSeller']
+        };
+      }
+      if(!searchFilters.include_test_sellers) {
+        baseCriteria.seller_type = {
+          ...baseCriteria.seller_type,
+          $nin: [...(baseCriteria.seller_type?.$nin || []), 'testSeller'],
+        };
+      }
+
+      // Add trust level filters
+      // const trustLevelFilters = [];
+      if (!searchFilters.include_trust_level_100) trustLevelFilters.push(TrustMeterScale.HUNDRED)
+      if (!searchFilters.include_trust_level_80) trustLevelFilters.push(TrustMeterScale.EIGHTY)
+      if (!searchFilters.include_trust_level_50) trustLevelFilters.push(TrustMeterScale.FIFTY)
+      if (!searchFilters.include_trust_level_0) trustLevelFilters.push(TrustMeterScale.ZERO)
+
+        // if (trustLevelFilters.length > 0) {
+        //   ...baseCriteria.seller_type = { $nin: trustLevelFilters };
+        // }
+
+    }
+
     
     // if search_query is provided, add search conditions
     const searchCriteria = search_query
       ? {
           $or: [
             { name: { $regex: search_query, $options: 'i' } },
-            { description: { $regex: search_query, $options: 'i' } }
+            { description: { $regex: search_query, $options: 'i' } },
+            { seller_id: { $in: (await SellerItem.find({ name: RegExp(search_query, 'i')})).map(item => item.seller_id)}}
           ],
         }
       : {};
 
     // Merge base criteria with search criteria
-    const aggregatedCriteria = { ...baseCriteria, ...searchCriteria };
+    const aggregatedCriteria = { 
+      ...baseCriteria, 
+      ...searchCriteria,
+      // ...(baseCriteria.seller_type?.$nin && searchCriteria.seller_type?.$nin
+      //   ? { seller_type: { $nin: [...baseCriteria.seller_type.$nin, ...searchCriteria.seller_type.$nin] } }
+      //   : {}
+      // )
+     };
 
     // If bounds are provided, use MongoDB's $geometry operator
-    if (bounds) {
+    if (bounds && !search_query) {
       sellers = await Seller.find({
         ...aggregatedCriteria,
         sell_map_center: {
@@ -106,7 +173,9 @@ export const getAllSellers = async (
     }
 
     // Fetch and merge the settings for each seller
-    const sellersWithSettings = await resolveSellerSettings(sellers);
+    const sellersWithSettings = await resolveSellerSettings(sellers, trustLevelFilters);
+
+    // 
 
     // Return sellers with their settings merged
     return sellersWithSettings;
@@ -227,15 +296,16 @@ export const addOrUpdateSellerItem = async (
   seller: ISeller,
   item: ISellerItem
 ): Promise<ISellerItem | null> => {
+
   try {
     const today = new Date();
 
-    // Ensure duration is valid (default to 1 week)
+    // Calculate expiration date based on duration (defaults to 1 week)
     const duration = Number(item.duration) || 1;
     const durationInMs = duration * 7 * 24 * 60 * 60 * 1000;
     const expiredBy = new Date(today.getTime() + durationInMs);
 
-    // Define a unique query for finding existing items
+    // Ensure unique identifier is used for finding existing items
     const query = {
       _id: item._id || undefined,
       seller_id: seller.seller_id,
@@ -248,6 +318,7 @@ export const addOrUpdateSellerItem = async (
       // Update the existing item
       existingItem.set({
         ...item,
+        updated_at: today,
         expired_by: expiredBy,
         image: item.image || existingItem.image, // Use existing image if a new one isn't provided
       });
@@ -256,7 +327,7 @@ export const addOrUpdateSellerItem = async (
       logger.info('Item updated successfully:', { updatedItem });
       return updatedItem;
     } else {
-      // Create a new item with a unique ID
+      // Ensure item has a unique identifier for creation
       const newItemId = item._id || new mongoose.Types.ObjectId().toString();
 
       // Create a new item
@@ -266,9 +337,11 @@ export const addOrUpdateSellerItem = async (
         name: item.name ? item.name.trim() : '',
         description: item.description ? item.description.trim() : '',
         price: parseFloat(item.price?.toString() || '0.01'), // Ensure valid price
-        stock_level: item.stock_level || StockLevelType.AVAILABLE_1,
+        stock_level: item.stock_level || '1 available',
         duration: parseInt(item.duration?.toString() || '1'), // Ensure valid duration
         image: item.image,
+        created_at: today,
+        updated_at: today,
         expired_by: expiredBy,
       });
 
@@ -278,7 +351,7 @@ export const addOrUpdateSellerItem = async (
       return newItem;
     }
   } catch (error) {
-    logger.error(`Failed to add or update seller item for sellerID ${seller.seller_id}:`, error);
+    logger.error(`Failed to add or update seller item for sellerID ${ seller.seller_id }:`, error);
     throw new Error('Failed to add or update seller item; please try again later');
   }
 };

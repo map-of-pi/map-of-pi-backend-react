@@ -58,6 +58,10 @@ export const addOrUpdateUserSettings = async (
       updateData.findme = formData.findme;
     }
 
+    if(formData.search_filters) {
+      updateData.search_filters = JSON.parse(formData.search_filters);
+    }
+
     if (existingUserSettings) {
       // Update existing settings
       const updatedUserSettings = await UserSettings.findOneAndUpdate(
