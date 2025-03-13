@@ -1,8 +1,6 @@
 export enum OrderStatusType {
-  Completed = 'completed', 
-  Dispatched = 'dispatched', 
-  Collected = 'collected',
-  Cancelled = 'cancelled',
+  Initialized = 'initialized',
   Pending = 'pending',
-  New = 'new'
+  Completed = 'completed', 
+  Cancelled = 'cancelled'
 }

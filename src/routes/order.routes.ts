@@ -1,16 +1,15 @@
-import express from "express";
+import { Router } from "express";
+
 import * as orderController from "../controllers/orderController";
-import { verifyToken } from "../middlewares/verifyToken";
 import { isSellerFound } from "../middlewares/isSellerFound";
+import { verifyToken } from "../middlewares/verifyToken";
 
-const orderRoutes = express.Router();
+const orderRoutes = Router();
 
-orderRoutes.get("/", orderController.getAllOrders);
 orderRoutes.get("/seller-order", verifyToken, isSellerFound, orderController.getSellerOrders)
-orderRoutes.get("/:id", orderController.getSingleOrder);
-orderRoutes.post("/", verifyToken, orderController.createOrUpdateOrder);
-orderRoutes.delete("/:id", verifyToken, orderController.deleteOrder);
-orderRoutes.get("/:id/items", orderController.getOrderItems);
-orderRoutes.put("/:id", verifyToken, isSellerFound, orderController.updateOrderItemStatus);
+orderRoutes.get("/:order_id", orderController.getSingleOrder);
+orderRoutes.post("/", verifyToken, orderController.addOrUpdateOrder);
+orderRoutes.put("/:order_item_id", verifyToken, isSellerFound, orderController.updateOrderItemStatus);
+orderRoutes.delete("/:order_id", verifyToken, orderController.deleteOrder);
 
 export default orderRoutes;
