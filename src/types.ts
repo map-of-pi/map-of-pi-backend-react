@@ -41,6 +41,8 @@
     order_online_enabled_pref: boolean;
     fulfillment_method: FulfillmentType;
     fulfillment_description?: string;
+    pre_restriction_seller_type?: string | null;
+    isPreRestricted: boolean;
   }
 
   export interface ISellerItem extends Document {

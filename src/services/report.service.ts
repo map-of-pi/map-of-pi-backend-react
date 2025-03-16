@@ -45,7 +45,7 @@ export const reportSanctionedSellers = async (): Promise<SanctionedSeller[]> => 
 };
 
 // Fetch all sanctioned regions
-const getAllSanctionedRegions = async (): Promise<ISanctionedRegion[]> => {
+export const getAllSanctionedRegions = async (): Promise<ISanctionedRegion[]> => {
   try {
     const regions = await SanctionedRegion.find();
     if (!regions || regions.length === 0) {
@@ -61,7 +61,7 @@ const getAllSanctionedRegions = async (): Promise<ISanctionedRegion[]> => {
 };
 
 // Function to handle geocoding for a single seller
-const processSellerGeocoding = async (
+export const processSellerGeocoding = async (
   seller: ISeller, 
   sanctionedRegion: string
 ): Promise<SanctionedSeller | null> => {
