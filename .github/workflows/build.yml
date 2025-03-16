@@ -31,7 +31,7 @@ jobs:
 
         # Backend CI/CD Process
       - name: Install Dependencies for Backend
-        run: npm ci
+        run: npm install
 
       - name: Execute Tests for Backend
         run: npm run test -- --passWithNoTests
