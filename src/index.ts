@@ -5,6 +5,8 @@ import logger from "./config/loggingConfig";
 import { connectDB } from "./config/dbConnection";
 import app from "./utils/app";
 import { env } from "./utils/env";
+import {runSanctionBot} from "./services/sanctionBotJob.service";
+const schedule = require("node-schedule");
 
 dotenv.config();
 
@@ -33,5 +35,20 @@ const startServer = async () => {
 
 // Start the server setup process
 startServer();
+
+// Schedule the job to run daily at 22:00 UTC using node-schedule.
+/*
+schedule.scheduleJob('0 22 * * *', () => {
+  logger.info('Scheduled job triggered at 22:00 UTC.');
+  runSanctionBot().then(() => logger.info(""));
+  logger.info('Scheduled job finished running');
+});
+*/
+
+schedule.scheduleJob('0 * * * * *', async () => {
+  logger.info('Scheduled job triggered at the start of the hour.');
+  await runSanctionBot().then(() => logger.info("Sanction Bot finished execution!"));
+  logger.info('Scheduled job finished running');
+});
 
 export default app;
