@@ -79,7 +79,6 @@ export const registerSeller = async (req: Request, res: Response) => {
     const userSettings = await userSettingsService.addOrUpdateUserSettings(authUser, formData, '');
     logger.debug('UserSettings updated for user:', { pi_uid: authUser.pi_uid });
 
-    // Send response
     return res.status(200).json({ 
       seller: registeredSeller, 
       email: userSettings.email, 
