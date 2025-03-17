@@ -3,7 +3,8 @@ import Seller from "../models/Seller";
 import User from "../models/User";
 import UserSettings from "../models/UserSettings";
 import SellerItem from "../models/SellerItem";
-import { FulfillmentType, VisibleSellerType } from '../models/enums/sellerType';
+import { SellerType } from '../models/enums/sellerType';
+import { FulfillmentType } from "../models/enums/fulfillmentType";
 import { StockLevelType } from '../models/enums/stockLevelType';
 import { TrustMeterScale } from "../models/enums/trustMeterScale";
 import { getUserSettingsById } from "./userSettings.service";
@@ -19,7 +20,7 @@ const resolveSellerSettings = async (sellers: ISeller[], trustLevelFilters?: num
         const sellerObject = seller.toObject();
 
         // Fetch the user settings for the seller
-        const userSettings = await getUserSettingsById(seller.seller_id);
+        const userSettings = await UserSettings.findOne({ user_settings_id: seller.seller_id }).exec();
 
         // Check if the seller's trust level is allowed
         if (trustLevelFilters && trustLevelFilters.includes(userSettings?.trust_meter_rating ?? -1)) {
@@ -66,46 +67,40 @@ export const getAllSellers = async (
 
     let userSettings: any = {};
 
-    // always apply this condition to exclude 'Inactive sellers'
     const baseCriteria : Record<string, any> = {}
-    // Always exclude inactive sellers
     baseCriteria.seller_type = { $nin: [] };
-    // Add trust level filters
     const trustLevelFilters: number[] = [];
 
-    if (search_query && userId) {
-      if (userId) {
-        userSettings = await getUserSettingsById(userId);
-      } else {
-        throw new Error('User ID is required to fetch user settings');
-      }
-
-      const searchFilters = userSettings.search_filters || {};
-
-      // Apply filters based on userSettings.search_filters
-
-      if (!searchFilters.include_active_sellers) {
-        baseCriteria.seller_type = {$nin: ['activeSeller']};
-      }
-      if (!searchFilters.include_inactive_sellers) { 
-        baseCriteria.seller_type = {
-          ...baseCriteria.seller_type,
-          $nin: [...(baseCriteria.seller_type?.$nin || []), 'inactiveSeller']
-        };
-      }
-      if (!searchFilters.include_test_sellers) {
-        baseCriteria.seller_type = {
-          ...baseCriteria.seller_type,
-          $nin: [...(baseCriteria.seller_type?.$nin || []), 'testSeller']
-        };
-      }
-
-      // Add trust level filters
-      if (!searchFilters.include_trust_level_100) trustLevelFilters.push(TrustMeterScale.HUNDRED);
-      if (!searchFilters.include_trust_level_80) trustLevelFilters.push(TrustMeterScale.EIGHTY);
-      if (!searchFilters.include_trust_level_50) trustLevelFilters.push(TrustMeterScale.FIFTY);
-      if (!searchFilters.include_trust_level_0) trustLevelFilters.push(TrustMeterScale.ZERO);
+    if (userId) {
+      userSettings = await getUserSettingsById(userId);
+    } else {
+      throw new Error('User ID is required to fetch user settings');
     }
+
+    const searchFilters = userSettings.search_filters || {};
+
+    // Apply filters based on userSettings.search_filters
+    if (!searchFilters.include_active_sellers) {
+      baseCriteria.seller_type = {$nin: [SellerType.Active]};
+    }
+    if (!searchFilters.include_inactive_sellers) { 
+      baseCriteria.seller_type = {
+        ...baseCriteria.seller_type,
+        $nin: [...(baseCriteria.seller_type?.$nin || []), SellerType.Inactive]
+      };
+    }
+    if (!searchFilters.include_test_sellers) {
+      baseCriteria.seller_type = {
+        ...baseCriteria.seller_type,
+        $nin: [...(baseCriteria.seller_type?.$nin || []), SellerType.Test]
+      };
+    }
+
+    // Add trust level filters
+    if (!searchFilters.include_trust_level_100) trustLevelFilters.push(TrustMeterScale.HUNDRED);
+    if (!searchFilters.include_trust_level_80) trustLevelFilters.push(TrustMeterScale.EIGHTY);
+    if (!searchFilters.include_trust_level_50) trustLevelFilters.push(TrustMeterScale.FIFTY);
+    if (!searchFilters.include_trust_level_0) trustLevelFilters.push(TrustMeterScale.ZERO);
     
     // if search_query is provided, add search conditions
     const searchCriteria = search_query
@@ -295,7 +290,6 @@ export const addOrUpdateSellerItem = async (
       // Update the existing item
       existingItem.set({
         ...item,
-        updated_at: today,
         expired_by: expiredBy,
         image: item.image || existingItem.image, // Use existing image if a new one isn't provided
       });
@@ -317,8 +311,6 @@ export const addOrUpdateSellerItem = async (
         stock_level: item.stock_level || StockLevelType.AVAILABLE_1,
         duration: parseInt(item.duration?.toString() || '1'), // Ensure valid duration
         image: item.image,
-        created_at: today,
-        updated_at: today,
         expired_by: expiredBy,
       });
 

@@ -111,7 +111,7 @@ const sellerRoutes = Router();
  *   post:
  *     tags:
  *       - Seller
- *     summary: Fetch all sellers within the visible map area (bounding box) | sorted by reviews with a maximum of 36 sellers.
+ *     summary: Fetch all filtered sellers within the visible map area (bounding box) | sorted by reviews with a maximum of 50 sellers *
  *     requestBody:
  *       content:
  *         application/json:
