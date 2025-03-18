@@ -62,59 +62,42 @@ export const getAllSellers = async (
   userId?: string,
 ): Promise<ISellerWithSettings[]> => {
   try {
-    let sellers: ISeller[];
     const maxNumSellers = 50;
-
-    let userSettings: any = {};
-
-    const baseCriteria : Record<string, any> = {}
-    baseCriteria.seller_type = { $nin: [] };
-    const trustLevelFilters: number[] = [];
-
-    if (userId) {
-      userSettings = await getUserSettingsById(userId);
-    } else {
-      throw new Error('User ID is required to fetch user settings');
-    }
-
+    let userSettings: any = userId ? await getUserSettingsById(userId) : {};
     const searchFilters = userSettings.search_filters || {};
 
-    // Apply filters based on userSettings.search_filters
-    if (!searchFilters.include_active_sellers) {
-      baseCriteria.seller_type = {$nin: [SellerType.Active]};
-    }
-    if (!searchFilters.include_inactive_sellers) { 
-      baseCriteria.seller_type = {
-        ...baseCriteria.seller_type,
-        $nin: [...(baseCriteria.seller_type?.$nin || []), SellerType.Inactive]
-      };
-    }
-    if (!searchFilters.include_test_sellers) {
-      baseCriteria.seller_type = {
-        ...baseCriteria.seller_type,
-        $nin: [...(baseCriteria.seller_type?.$nin || []), SellerType.Test]
-      };
-    }
+    // Construct base filter criteria
+    const baseCriteria: Record<string, any> = {};
+    const sellerTypeFilters: SellerType[] = [];
 
-    // Add trust level filters
-    if (!searchFilters.include_trust_level_100) trustLevelFilters.push(TrustMeterScale.HUNDRED);
-    if (!searchFilters.include_trust_level_80) trustLevelFilters.push(TrustMeterScale.EIGHTY);
-    if (!searchFilters.include_trust_level_50) trustLevelFilters.push(TrustMeterScale.FIFTY);
-    if (!searchFilters.include_trust_level_0) trustLevelFilters.push(TrustMeterScale.ZERO);
+    if (!searchFilters.include_active_sellers) sellerTypeFilters.push(SellerType.Active);
+    if (!searchFilters.include_inactive_sellers) sellerTypeFilters.push(SellerType.Inactive);
+    if (!searchFilters.include_test_sellers) sellerTypeFilters.push(SellerType.Test);
+    // exclude filtered seller types
+    if (sellerTypeFilters.length) baseCriteria.seller_type = { $nin: sellerTypeFilters };
+
+    // Trust Level Filters
+    const trustLevels = [
+      { key: "include_trust_level_100", value: TrustMeterScale.HUNDRED },
+      { key: "include_trust_level_80", value: TrustMeterScale.EIGHTY },
+      { key: "include_trust_level_50", value: TrustMeterScale.FIFTY },
+      { key: "include_trust_level_0", value: TrustMeterScale.ZERO },
+    ];
+    const trustLevelFilters = trustLevels
+      .filter(({ key }) => !searchFilters[key]) // exclude unchecked trust levels
+      .map(({ value }) => value);
+
     
-    // if search_query is provided, add search conditions
+    // Search Query Filter
+    const searchFields = ["name", "description"];
     const searchCriteria = search_query
-      ? {
-          $or: [
-            { name: { $regex: search_query, $options: 'i' } },
-            { description: { $regex: search_query, $options: 'i' } }
-          ],
-        }
-      : {};
+      ? { $or: searchFields.map(field => ({ [field]: { $regex: search_query, $options: "i" } })) }
+      : {}; // default to empty object if search_query not provided
 
-    // Merge base criteria with search criteria
+    // Merge filters
     const aggregatedCriteria = { ...baseCriteria, ...searchCriteria };
 
+    let sellers: ISeller[];
     // If bounds are provided, use MongoDB's $geometry operator
     if (bounds && !search_query) {
       sellers = await Seller.find({
