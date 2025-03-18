@@ -87,11 +87,14 @@ export const getAllSellers = async (
       .filter(({ key }) => !searchFilters[key]) // exclude unchecked trust levels
       .map(({ value }) => value);
 
-    
     // Search Query Filter
-    const searchFields = ["name", "description"];
     const searchCriteria = search_query
-      ? { $or: searchFields.map(field => ({ [field]: { $regex: search_query, $options: "i" } })) }
+      ? {
+          $text: {
+            $search: search_query,
+            $caseSensitive: false,
+          },
+        }
       : {}; // default to empty object if search_query not provided
 
     // Merge filters
@@ -126,7 +129,6 @@ export const getAllSellers = async (
       sellers = await Seller.find(aggregatedCriteria)
         .sort({ updated_at: -1 })
         .limit(maxNumSellers)
-        .hint({ 'updatedAt': -1, 'sell_map_center.coordinates': '2dsphere' })
         .exec();
     }
 

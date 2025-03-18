@@ -44,12 +44,9 @@ describe('getAllSellers function', () => {
     
     // filter seller records to include those with "Vendor"
     expect(sellersData).toHaveLength(
-      await Seller.countDocuments({
-        $or: [
-          { name: { $regex: searchQuery, $options: 'i' } },
-          { description: { $regex: searchQuery, $options: 'i' } }
-        ]
-      })
+      await Seller.find({
+        $text: { $search: searchQuery, $caseSensitive: false },
+      }).countDocuments()
     ); // Ensure length matches expected sellers
   });
 
@@ -74,7 +71,6 @@ describe('getAllSellers function', () => {
   });
 
   it('should fetch all applicable sellers when all parameters are provided', async () => {
-    const searchQuery = 'Vendor';
     const userData = await User.findOne({ pi_username: 'TestUser1' }) as IUser;
 
     const sellersData = await getAllSellers(mockBoundingBox, 'Vendor', userData.pi_uid);

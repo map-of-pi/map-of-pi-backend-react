@@ -69,6 +69,9 @@ const sellerSchema = new Schema<ISeller>(
   { timestamps: true } // Adds timestamps to track creation and update times
 );
 
+// Creating a text index on the 'name' and 'description' fields
+sellerSchema.index({ name: "text", description: "text" });
+
 // Creating a 2dsphere index for the sell_map_center field
 sellerSchema.index({ 'sell_map_center.coordinates': '2dsphere' });
 sellerSchema.index(
