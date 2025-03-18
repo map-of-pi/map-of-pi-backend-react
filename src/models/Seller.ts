@@ -63,6 +63,16 @@
         type: String,
         default: null,
         required: false
+      },
+      pre_restriction_seller_type:{
+        type: String,
+        default: '',
+        required: false,
+      },
+      isPreRestricted: {
+        type: Boolean,
+        default: false,
+        required: false
       }
     },
     { timestamps: true } // Adds timestamps to track creation and update times

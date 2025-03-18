@@ -4,7 +4,8 @@ export enum VisibleSellerType {
 }
 
 enum InvisibleSellerType {
-  Inactive = 'inactiveSeller'
+  Inactive = 'inactiveSeller',
+  Restricted = 'restrictedSeller',
 }
 
 export const SellerType = Object.assign({}, VisibleSellerType, InvisibleSellerType);
