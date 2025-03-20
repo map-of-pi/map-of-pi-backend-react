@@ -22,36 +22,39 @@ describe('getAllSellers function', () => {
   };
 
   it('should fetch all sellers when all parameters are empty', async () => {
-    const sellersData = await getAllSellers();
+    const userData = await User.findOne({ pi_username: 'TestUser1' }) as IUser;
+    const sellersData = await getAllSellers(undefined, undefined, userData.pi_uid);
 
-    expect(sellersData).toHaveLength(await Seller.countDocuments({
-      seller_type: { $ne: SellerType.Inactive }
-    }));
+    expect(sellersData).toHaveLength(await Seller.countDocuments());
+  });
+
+  it('should fetch all applicable filtered sellers when all parameters are empty', async () => {
+    const userData = await User.findOne({ pi_username: 'TestUser2' }) as IUser;
+    const sellersData = await getAllSellers(undefined, undefined, userData.pi_uid);
+
+    // filter out inactive sellers and sellers with trust level <= 50. 
+    expect(sellersData).toHaveLength(9);
   });
 
   it('should fetch all applicable sellers when search query is provided and bounding box params are empty', async () => {
     const searchQuery = 'Vendor';
+    const userData = await User.findOne({ pi_username: 'TestUser1' }) as IUser;
     
-    const sellersData = await getAllSellers(undefined, searchQuery);
+    const sellersData = await getAllSellers(undefined, searchQuery, userData.pi_uid);
     
-    /* filter seller records to include those with "Vendor" 
-       + exclude those with seller_type "Inactive" */
+    // filter seller records to include those with "Vendor"
     expect(sellersData).toHaveLength(
-      await Seller.countDocuments({
-        $or: [
-          { name: { $regex: searchQuery, $options: 'i' } },
-          { description: { $regex: searchQuery, $options: 'i' } }
-        ],
-        seller_type: { $ne: SellerType.Inactive }
-      })
+      await Seller.find({
+        $text: { $search: searchQuery, $caseSensitive: false },
+      }).countDocuments()
     ); // Ensure length matches expected sellers
   });
 
   it('should fetch all applicable sellers when bounding box params are provided and search query param is empty', async () => {
-    const sellersData = await getAllSellers(mockBoundingBox, undefined);
+    const userData = await User.findOne({ pi_username: 'TestUser1' }) as IUser;
+    const sellersData = await getAllSellers(mockBoundingBox, undefined, userData.pi_uid);
     
-    /* filter seller records to exclude those with seller_type "Inactive"
-       + include those with sell_map_center within geospatial bounding box */
+    // filter seller records to include those with sell_map_center within geospatial bounding box
     expect(sellersData).toHaveLength(
       await Seller.countDocuments({
         seller_type: { $ne: SellerType.Inactive },
@@ -68,30 +71,13 @@ describe('getAllSellers function', () => {
   });
 
   it('should fetch all applicable sellers when all parameters are provided', async () => {
-    const searchQuery = 'Vendor';
+    const userData = await User.findOne({ pi_username: 'TestUser1' }) as IUser;
 
-    const sellersData = await getAllSellers(mockBoundingBox, 'Vendor');
+    const sellersData = await getAllSellers(mockBoundingBox, 'Vendor', userData.pi_uid);
 
-    /* filter seller records to exclude those with seller_type "Inactive"
-       + include those with "Vendor"
+    /* filter seller records to include those with "Vendor"
        + include those with sell_map_center within geospatial bounding box */
-    expect(sellersData).toHaveLength(
-      await Seller.countDocuments({
-        $or: [
-          { name: { $regex: searchQuery, $options: 'i' } },
-          { description: { $regex: searchQuery, $options: 'i' } }
-        ],
-        seller_type: { $ne: SellerType.Inactive },
-        'sell_map_center.coordinates': {
-          $geoWithin: {
-            $box: [
-              [mockBoundingBox.sw_lng, mockBoundingBox.sw_lat],
-              [mockBoundingBox.ne_lng, mockBoundingBox.ne_lat]
-            ]
-          },
-        },
-      })
-    ); // Ensure length matches expected sellers
+    expect(sellersData).toHaveLength(3);
   });
 });
 
