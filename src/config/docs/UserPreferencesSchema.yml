@@ -39,6 +39,38 @@ components:
           required:
             - type
             - coordinates
+        search_filters:
+          type: object
+          properties:
+            include_active_sellers:
+              type: boolean
+              example: true
+            include_inactive_sellers:
+              type: boolean
+              example: false
+            include_test_sellers:
+              type: boolean
+              example: false
+            include_trust_level_100:
+              type: boolean
+              example: true
+            include_trust_level_80:
+              type: boolean
+              example: true
+            include_trust_level_50:
+              type: boolean
+              example: true
+            include_trust_level_0:
+              type: boolean
+              example: false
+          required:
+            - include_active_sellers
+            - include_inactive_sellers
+            - include_test_sellers
+            - include_trust_level_100
+            - include_trust_level_80
+            - include_trust_level_50
+            - include_trust_level_0
         _id:
           type: string
           example: 6673a08503852cb0c9b618d9
@@ -85,6 +117,38 @@ components:
           required:
             - type
             - coordinates
+        search_filters:
+          type: object
+          properties:
+            include_active_sellers:
+              type: boolean
+              example: true
+            include_inactive_sellers:
+              type: boolean
+              example: false
+            include_test_sellers:
+              type: boolean
+              example: false
+            include_trust_level_100:
+              type: boolean
+              example: true
+            include_trust_level_80:
+              type: boolean
+              example: true
+            include_trust_level_50:
+              type: boolean
+              example: true
+            include_trust_level_0:
+              type: boolean
+              example: false
+          required:
+            - include_active_sellers
+            - include_inactive_sellers
+            - include_test_sellers
+            - include_trust_level_100
+            - include_trust_level_80
+            - include_trust_level_50
+            - include_trust_level_0
       required:
         - user_settings_id
 
@@ -127,6 +191,38 @@ components:
           required:
             - type
             - coordinates
+        search_filters:
+          type: object
+          properties:
+            include_active_sellers:
+              type: boolean
+              example: true
+            include_inactive_sellers:
+              type: boolean
+              example: false
+            include_test_sellers:
+              type: boolean
+              example: false
+            include_trust_level_100:
+              type: boolean
+              example: true
+            include_trust_level_80:
+              type: boolean
+              example: true
+            include_trust_level_50:
+              type: boolean
+              example: true
+            include_trust_level_0:
+              type: boolean
+              example: false
+          required:
+            - include_active_sellers
+            - include_inactive_sellers
+            - include_test_sellers
+            - include_trust_level_100
+            - include_trust_level_80
+            - include_trust_level_50
+            - include_trust_level_0
         _id:
           type: string
           example: 66741c62b175e7d059a2639e
@@ -181,6 +277,38 @@ components:
               required:
                 - type
                 - coordinates
+            search_filters:
+              type: object
+              properties:
+                include_active_sellers:
+                  type: boolean
+                  example: true
+                include_inactive_sellers:
+                  type: boolean
+                  example: false
+                include_test_sellers:
+                  type: boolean
+                  example: false
+                include_trust_level_100:
+                  type: boolean
+                  example: true
+                include_trust_level_80:
+                  type: boolean
+                  example: true
+                include_trust_level_50:
+                  type: boolean
+                  example: true
+                include_trust_level_0:
+                  type: boolean
+                  example: false
+              required:
+                - include_active_sellers
+                - include_inactive_sellers
+                - include_test_sellers
+                - include_trust_level_100
+                - include_trust_level_80
+                - include_trust_level_50
+                - include_trust_level_0
             _id:
               type: string
               example: 666c84b9d77068c6efeeaa1a

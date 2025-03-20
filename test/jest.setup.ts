@@ -18,7 +18,7 @@ jest.mock('../src/config/loggingConfig', () => ({
 }));
 
 // allow ample time to start running tests
-jest.setTimeout(60000);
+jest.setTimeout(100000);
 
 // MongoDB memory server setup
 let mongoServer: MongoMemoryServer;
