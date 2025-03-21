@@ -3,6 +3,17 @@ import { IToggle } from "../../types";
 
 import logger from "../../config/loggingConfig";
 
+export const getToggles = async (): Promise<IToggle[]> => {
+  try {
+    const toggles = await Toggle.find().sort({ createdAt: -1 }).exec();
+    logger.info(`Successfully retrieved ${toggles.length} toggles`);    
+    return toggles;
+  } catch (error) {
+    logger.error('Failed to retrieve toggles:', error);
+    throw new Error('Failed to get toggles; please try again later');
+  }
+};
+
 export const getToggleByName = async (name: string): Promise<IToggle | null> => {
   try {
     const toggle = await Toggle.findOne({ name }).exec();    

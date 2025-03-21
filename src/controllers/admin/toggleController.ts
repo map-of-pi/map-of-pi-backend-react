@@ -4,6 +4,17 @@ import { IToggle } from "../../types";
 
 import logger from "../../config/loggingConfig";
 
+export const getToggles = async (req: Request, res: Response) => {
+  try {
+    const existingToggles = await toggleService.getToggles();
+    logger.info(`Successfully fetched ${ existingToggles.length } toggles`);
+    return res.status(200).json(existingToggles);
+  } catch (error) {
+    logger.error('Failed to get toggles', error);
+    return res.status(500).json({ message: 'An error occurred while fetching toggles; please try again later' });
+  }
+};
+
 export const getToggle = async (req: Request, res: Response) => {
   const { name } = req.params;
   try {

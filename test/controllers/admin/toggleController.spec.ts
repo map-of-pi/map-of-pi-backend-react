@@ -1,7 +1,8 @@
-import { getToggle, addToggle, updateToggle } from '../../../src/controllers/admin/toggleController';
+import { getToggles, getToggle, addToggle, updateToggle } from '../../../src/controllers/admin/toggleController';
 import * as toggleService from '../../../src/services/admin/toggle.service';
 
 jest.mock('../../../src/services/admin/toggle.service', () => ({
+  getToggles: jest.fn(),
   getToggleByName: jest.fn(),
   addToggle: jest.fn(),
   updateToggle: jest.fn()
@@ -10,6 +11,42 @@ jest.mock('../../../src/services/admin/toggle.service', () => ({
 describe('toggleController', () => {
   let req: any;
   let res: any;
+
+  describe('getToggles function', () => {
+    beforeEach(() => {
+      req = {};
+      res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      };
+      jest.clearAllMocks();
+    });
+
+    it('should return appropriate [200] when toggles are successfully fetched', async () => {
+      const expectedToggles = [
+      { name: 'testToggle', enabled: false, description: 'Toggle for testing' },
+      { name: 'testToggle_1', enabled: true, description: 'Toggle for testing_1' },
+    ];
+      
+      (toggleService.getToggles as jest.Mock).mockResolvedValue(expectedToggles);
+
+      await getToggles(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(expectedToggles);
+    });
+
+    it('should return appropriate [500] when getting toggles fail', async () => {
+      const mockError = new Error('An error occurred while fetching toggles; please try again later');
+
+      (toggleService.getToggles as jest.Mock).mockRejectedValue(mockError);
+
+      await getToggles(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({ message: mockError.message });
+    });
+  });
 
   describe('getToggle function', () => {
     beforeEach(() => {

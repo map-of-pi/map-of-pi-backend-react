@@ -1,10 +1,29 @@
 import Toggle from '../../../src/models/misc/Toggle';
-import { 
+import {
+  getToggles, 
   getToggleByName,
   addToggle,
   updateToggle 
 } from '../../../src/services/admin/toggle.service';
 import { IToggle } from '../../../src/types';
+
+describe('getToggles function', () => {
+  it('should fetch all existing toggles', async () => {
+    const toggleData = await getToggles();
+    expect(toggleData).toHaveLength(2);
+  });
+
+  it('should throw an error when an exception occurs', async () => {
+    // Mock the Toggle model to throw an error
+    jest.spyOn(Toggle, 'find').mockImplementationOnce(() => {
+      throw new Error('Mock database error');
+    });
+    
+    await expect(getToggles()).rejects.toThrow(
+      'Failed to get toggles; please try again later'
+    );
+  });
+});
 
 describe('getToggleByName function', () => {
   const expectedToggle = {

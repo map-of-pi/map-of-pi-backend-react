@@ -1,0 +1,86 @@
+components:
+  schemas:
+    AddToggleRq:
+      type: object
+      properties:
+        name:
+          type: string
+          example: testToggle
+        enabled:
+          type: boolean
+          example: false
+        description:
+          type: string
+          example: This is a toggle description.
+      required:
+      - name
+      - enabled
+      - description
+
+    UpdateToggleRq:
+      type: object
+      properties:
+        name:
+          type: string
+          example: testToggle
+        enabled:
+          type: boolean
+          example: false
+        description:
+          type: string
+          example: This is a toggle description.
+
+    GetAllTogglesRs:
+      type: array
+      items:
+        type: object
+        properties:
+          name:
+            type: string
+            example: testToggle
+          enabled:
+            type: boolean
+            example: false
+          description:
+            type: string
+            example: This is a toggle description.
+
+    GetSingleToggleRs:
+      type: object
+      properties:
+        name:
+          type: string
+          example: testToggle
+        enabled:
+          type: boolean
+          example: false
+        description:
+          type: string
+          example: This is a toggle description.
+
+    AddToggleRs:
+      type: object
+      properties:
+        name:
+          type: string
+          example: testToggle
+        enabled:
+          type: boolean
+          example: false
+        description:
+          type: string
+          example: This is a toggle description.
+
+    UpdateToggleRs:
+      type: object
+      properties:
+        name:
+          type: string
+          example: testToggle
+        enabled:
+          type: boolean
+          example: false
+        description:
+          type: string
+          example: This is a toggle description.
+ 
