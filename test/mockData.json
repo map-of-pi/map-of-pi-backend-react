@@ -425,5 +425,12 @@
         ]]
       }
     }
+  ],
+  "toggle": [
+    {
+      "name": "testToggle",
+      "enabled": false,
+      "description": "Toggle for testing"
+    }
   ]
 }
