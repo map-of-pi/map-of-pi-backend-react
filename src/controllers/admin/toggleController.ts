@@ -16,17 +16,17 @@ export const getToggles = async (req: Request, res: Response) => {
 };
 
 export const getToggle = async (req: Request, res: Response) => {
-  const { name } = req.params;
+  const { toggle_name } = req.params;
   try {
-    const currentToggle = await toggleService.getToggleByName(name);
+    const currentToggle = await toggleService.getToggleByName(toggle_name);
     if (!currentToggle) {
-      logger.warn(`Toggle with identifier ${name} not found.`);
+      logger.warn(`Toggle with identifier ${toggle_name} not found.`);
       return res.status(404).json({ message: "Toggle not found" });
     }
-    logger.info(`Fetched toggle with identifier ${name}`);
+    logger.info(`Fetched toggle with identifier ${toggle_name}`);
     return res.status(200).json(currentToggle);
   } catch (error) {
-    logger.error(`Failed to get toggle for identifier ${ name }:`, error);
+    logger.error(`Failed to get toggle for identifier ${ toggle_name }:`, error);
     return res.status(500).json({ message: 'An error occurred while fetching toggle; please try again later' });
   }
 };

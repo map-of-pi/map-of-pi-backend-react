@@ -32,14 +32,9 @@ describe('getToggleByName function', () => {
     description: "Toggle for testing"
   }
 
-  const assertToggle = (actual: any, expected: any) => {
-    const { _id, __v, createdAt, updatedAt, ...filteredActual } = actual; // ignore DB values.
-    expect(filteredActual).toEqual(expect.objectContaining(expected));
-  };
-
   it('should fetch the corresponding toggle', async () => {
     const toggleData = await getToggleByName("testToggle");
-    assertToggle(toggleData?.toObject(), expectedToggle);
+    expect(toggleData).toEqual(expect.objectContaining(expectedToggle));
   });
 
   it('should return null if the corresponding toggle does not exist', async () => {
@@ -72,14 +67,9 @@ describe('addToggle function', () => {
     description: "Toggle for testing_2"
   } as IToggle;
 
-  const assertToggle = (actual: any, expected: any) => {
-    const { _id, __v, createdAt, updatedAt, ...filteredActual } = actual; // ignore DB values.
-    expect(filteredActual).toEqual(expect.objectContaining(expected));
-  };
-
   it('should successfully add the new toggle', async () => {
     const toggleData = await addToggle(newToggle);
-    assertToggle(toggleData?.toObject(), newToggle);
+    expect(toggleData).toEqual(expect.objectContaining(newToggle));
   });
 
   it('should throw an error if a toggle with the same name already exists', async () => {
@@ -109,14 +99,9 @@ describe('updateToggle function', () => {
     description: "Toggle for testing updated"
   } as IToggle;
 
-  const assertToggle = (actual: any, expected: any) => {
-    const { _id, __v, createdAt, updatedAt, ...filteredActual } = actual; // ignore DB values.
-    expect(filteredActual).toEqual(expect.objectContaining(expected));
-  };
-
   it('should successfully update the toggle when it exists', async () => {
     const toggleData = await updateToggle("testToggle", true, "Toggle for testing updated");
-    assertToggle(toggleData?.toObject(), updatedToggle);
+    expect(toggleData).toEqual(expect.objectContaining(updatedToggle));
   });
 
   it('should successfully update the existing toggle when description is not provided', async () => {
@@ -126,7 +111,7 @@ describe('updateToggle function', () => {
     } as IToggle;
 
     const toggleData = await updateToggle("testToggle", false);
-    assertToggle(toggleData?.toObject(), expectedToggle);
+    expect(toggleData).toEqual(expect.objectContaining(expectedToggle));
   });
 
   it('should throw an error if the corresponding toggle does not exist', async () => {

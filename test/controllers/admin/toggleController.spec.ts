@@ -59,7 +59,7 @@ describe('toggleController', () => {
     });
 
     it('should return appropriate [200] when the toggle is successfully fetched', async () => {
-      req.params.name = 'testToggle';
+      req.params.toggle_name = 'testToggle';
       
       const expectedToggle = { 
         name: 'testToggle', 
@@ -77,7 +77,7 @@ describe('toggleController', () => {
     });
 
     it('should return appropriate [404] when the toggle is not found', async () => {
-      req.params.name = 'testToggle_2';
+      req.params.toggle_name = 'testToggle_2';
       
       (toggleService.getToggleByName as jest.Mock).mockResolvedValue(null);
 
@@ -89,7 +89,7 @@ describe('toggleController', () => {
     });
 
     it('should return appropriate [500] when getting toggle fails', async () => {
-      req.params.name = 'testToggle';
+      req.params.toggle_name = 'testToggle';
 
       const mockError = new Error('An error occurred while fetching toggle; please try again later');
 

@@ -6,7 +6,7 @@ import logger from "../../config/loggingConfig";
 export const getToggles = async (): Promise<IToggle[]> => {
   try {
     const toggles = await Toggle.find().sort({ createdAt: -1 }).exec();
-    logger.info(`Successfully retrieved ${toggles.length} toggles`);    
+    logger.info(`Successfully retrieved ${toggles.length} toggle(s)`);    
     return toggles;
   } catch (error) {
     logger.error('Failed to retrieve toggles:', error);
