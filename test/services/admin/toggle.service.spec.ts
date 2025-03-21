@@ -87,7 +87,7 @@ describe('updateToggle function', () => {
   const updatedToggle = {
     name: "testToggle",
     enabled: true,
-    description: "Toggle for testing"
+    description: "Toggle for testing updated"
   } as IToggle;
 
   const assertToggle = (actual: any, expected: any) => {
@@ -96,12 +96,22 @@ describe('updateToggle function', () => {
   };
 
   it('should successfully update the toggle when it exists', async () => {
-    const toggleData = await updateToggle("testToggle", true);
+    const toggleData = await updateToggle("testToggle", true, "Toggle for testing updated");
     assertToggle(toggleData?.toObject(), updatedToggle);
   });
 
+  it('should successfully update the existing toggle when description is not provided', async () => {
+    const expectedToggle = {
+      name: "testToggle",
+      enabled: false
+    } as IToggle;
+
+    const toggleData = await updateToggle("testToggle", false);
+    assertToggle(toggleData?.toObject(), expectedToggle);
+  });
+
   it('should throw an error if the corresponding toggle does not exist', async () => {
-    await expect(updateToggle("testUnknownToggle", false)).rejects.toThrow(
+    await expect(updateToggle("testUnknownToggle", false, "")).rejects.toThrow(
       `A toggle with the identifier testUnknownToggle does not exist.`
     );
   });
@@ -112,6 +122,6 @@ describe('updateToggle function', () => {
       throw new Error('Mock database error');
     });
     
-    await expect(updateToggle("testToggle", false)).rejects.toThrow('Failed to update toggle; please try again later');
+    await expect(updateToggle("testToggle", false, "")).rejects.toThrow('Failed to update toggle; please try again later');
   });
 });

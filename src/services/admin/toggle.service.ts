@@ -36,12 +36,23 @@ export const addToggle = async (toggleData: IToggle): Promise<IToggle> => {
   }
 };
 
-export const updateToggle = async (name: string, enabled: boolean): Promise<IToggle> => {
+export const updateToggle = async (
+  name: string, 
+  enabled: boolean, 
+  description?: string
+): Promise<IToggle> => {
   try {
+    const updateData: any = { enabled };
+
+    // Only update the description if it's provided and not an empty string
+    if (description !== undefined && description !== '') {
+      updateData.description = description;
+    }
+
     // Find and update the toggle by name
     const updatedToggle = await Toggle.findOneAndUpdate(
       { name },
-      { $set: { enabled } },
+      { $set: updateData },
       { new: true }
     ).exec();
 
