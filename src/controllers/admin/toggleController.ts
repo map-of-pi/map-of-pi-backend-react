@@ -54,3 +54,19 @@ export const updateToggle = async (req: Request, res: Response) => {
     return res.status(500).json({ message: 'An error occurred while updating toggle; please try again later' });
   }
 };
+
+export const deleteToggle = async (req: Request, res: Response) => {
+  const { toggle_name } = req.params;
+  try {
+    const deletedToggle = await toggleService.deleteToggleByName(toggle_name);
+    if (!deletedToggle) {
+      logger.warn(`Toggle with identifier ${toggle_name} not found.`);
+      return res.status(404).json({ message: "Toggle not found" });
+    }
+    logger.info(`Successfully deleted toggle with identifier ${toggle_name}`);
+    return res.status(200).json({ message: "Toggle successfully deleted" });
+  } catch (error) {
+    logger.error(`Failed to delete toggle for identifier ${ toggle_name }:`, error);
+    return res.status(500).json({ message: 'An error occurred while deleting toggle; please try again later' });
+  }
+};

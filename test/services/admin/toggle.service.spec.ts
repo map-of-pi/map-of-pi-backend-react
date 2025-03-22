@@ -3,7 +3,8 @@ import {
   getToggles, 
   getToggleByName,
   addToggle,
-  updateToggle 
+  updateToggle,
+  deleteToggleByName 
 } from '../../../src/services/admin/toggle.service';
 import { IToggle } from '../../../src/types';
 
@@ -127,5 +128,34 @@ describe('updateToggle function', () => {
     });
     
     await expect(updateToggle("testToggle", false, "")).rejects.toThrow('Failed to update toggle; please try again later');
+  });
+});
+
+describe('deleteToggleByName function', () => {
+  const deletedToggle = {
+    name: "testToggle_1",
+    enabled: true,
+    description: "Toggle for testing_1"
+  }
+
+  it('should delete the corresponding toggle', async () => {
+    const toggleData = await deleteToggleByName("testToggle_1");
+    expect(toggleData).toEqual(expect.objectContaining(deletedToggle));
+  });
+
+  it('should return null if the corresponding toggle does not exist', async () => {
+    const toggleData = await deleteToggleByName("testUnknownToggle");
+    expect(toggleData).toBeNull();
+  });
+
+  it('should throw an error when an exception occurs', async () => {
+    // Mock the Toggle model to throw an error
+    jest.spyOn(Toggle, 'findOneAndDelete').mockImplementationOnce(() => {
+      throw new Error('Mock database error');
+    });
+    
+    await expect(deleteToggleByName("testToggle_1")).rejects.toThrow(
+      'Failed to delete toggle; please try again later'
+    );
   });
 });

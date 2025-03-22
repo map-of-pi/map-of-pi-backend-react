@@ -1,11 +1,18 @@
-import { getToggles, getToggle, addToggle, updateToggle } from '../../../src/controllers/admin/toggleController';
+import { 
+  getToggles, 
+  getToggle, 
+  addToggle, 
+  updateToggle, 
+  deleteToggle 
+} from '../../../src/controllers/admin/toggleController';
 import * as toggleService from '../../../src/services/admin/toggle.service';
 
 jest.mock('../../../src/services/admin/toggle.service', () => ({
   getToggles: jest.fn(),
   getToggleByName: jest.fn(),
   addToggle: jest.fn(),
-  updateToggle: jest.fn()
+  updateToggle: jest.fn(),
+  deleteToggleByName: jest.fn()
 }));
 
 describe('toggleController', () => {
@@ -188,6 +195,61 @@ describe('toggleController', () => {
       await updateToggle(req, res);
 
       expect(toggleService.updateToggle).toHaveBeenCalledWith('testToggle', false, 'Test toggle');
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({ message: mockError.message });
+    });
+  });
+
+  describe('deleteToggle function', () => {
+    beforeEach(() => {
+      req = { params: {} };
+      res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      };
+      jest.clearAllMocks();
+    });
+
+    it('should return appropriate [200] when the toggle is successfully deleted', async () => {
+      req.params.toggle_name = 'testToggle';
+      
+      const deletedToggle = { 
+        name: 'testToggle', 
+        enabled: true, 
+        description: 'Test toggle'
+      };
+      
+      (toggleService.deleteToggleByName as jest.Mock).mockResolvedValue(deletedToggle);
+
+      await deleteToggle(req, res);
+
+      expect(toggleService.deleteToggleByName).toHaveBeenCalledWith('testToggle');
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({ message: 'Toggle successfully deleted' });
+    });
+
+    it('should return appropriate [404] when the toggle is not found', async () => {
+      req.params.toggle_name = 'testToggle_2';
+      
+      (toggleService.deleteToggleByName as jest.Mock).mockResolvedValue(null);
+
+      await deleteToggle(req, res);
+
+      expect(toggleService.deleteToggleByName).toHaveBeenCalledWith('testToggle_2');
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({ message: "Toggle not found" });
+    });
+
+    it('should return appropriate [500] when deleting toggle fails', async () => {
+      req.params.toggle_name = 'testToggle';
+
+      const mockError = new Error('An error occurred while deleting toggle; please try again later');
+
+      (toggleService.deleteToggleByName as jest.Mock).mockRejectedValue(mockError);
+
+      await deleteToggle(req, res);
+
+      expect(toggleService.deleteToggleByName).toHaveBeenCalledWith('testToggle');
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({ message: mockError.message });
     });

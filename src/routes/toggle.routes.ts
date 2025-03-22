@@ -56,7 +56,7 @@ toggleRoutes.get("/", toggleController.getToggles);
  *         required: true
  *         schema:
  *           type: string
- *         description: The Pi UID of the seller to retrieve
+ *         description: The name of the toggle to retrieve
  *     responses:
  *       200:
  *         description: Successful response
@@ -130,5 +130,33 @@ toggleRoutes.post("/add", verifyAdminToken, toggleController.addToggle);
  *         description: Internal server error
  */
 toggleRoutes.put("/update", verifyAdminToken, toggleController.updateToggle);
+
+/**
+ * @swagger
+ * /api/v1/toggles/delete/{toggle_name}:
+ *   delete:
+ *     tags:
+ *       - Toggle
+ *     summary: Delete the corresponding toggle by toggle name *
+ *     security:
+ *       - AdminPasswordAuth: []
+ *     parameters:
+ *       - name: toggle_name
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The name of the toggle to delete
+ *     responses:
+ *       200:
+ *         description: Successful response | Toggle successfully deleted
+ *       404:
+ *         description: Toggle not found
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+toggleRoutes.delete("/delete/:toggle_name", verifyAdminToken, toggleController.deleteToggle);
 
 export default toggleRoutes;

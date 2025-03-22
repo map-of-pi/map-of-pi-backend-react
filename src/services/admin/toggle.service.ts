@@ -71,7 +71,7 @@ export const updateToggle = async (
       throw new Error(`A toggle with the identifier ${name} does not exist.`);
     }
 
-    logger.info('Toggle updated in the database:', updatedToggle);
+    logger.info('Toggle successfully updated in the database:', updatedToggle);
     return updatedToggle as IToggle;
   } catch (error: any) {
     if (error.message.includes('does not exist')) {
@@ -82,3 +82,18 @@ export const updateToggle = async (
   }
 };
 
+export const deleteToggleByName = async (name: string): Promise<IToggle | null> => {
+  try {
+    const deletedToggle = await Toggle.findOneAndDelete({ name }).exec();
+    
+    if (!deletedToggle) {
+      logger.warn(`A toggle with the identifier ${name} does not exist.`);
+      return null;
+    }
+    logger.info('Toggle successfully deleted in the database:', deletedToggle);
+    return deletedToggle as IToggle;
+  } catch (error) {
+    logger.error(`Failed to delete toggle with identifier ${ name }:`, error);
+    throw new Error('Failed to delete toggle; please try again later');
+  }
+};
