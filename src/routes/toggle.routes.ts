@@ -1,6 +1,7 @@
 import { Router } from "express";
 
 import * as toggleController from "../controllers/admin/toggleController";
+import { verifyAdminToken } from "../middlewares/verifyToken";
 
 /**
  * @swagger
@@ -78,7 +79,9 @@ toggleRoutes.get("/:toggle_name", toggleController.getToggle);
  *   post:
  *     tags:
  *       - Toggle
- *     summary: Add a new toggle
+ *     summary: Add a new toggle *
+ *     security:
+ *       - AdminPasswordAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -92,10 +95,12 @@ toggleRoutes.get("/:toggle_name", toggleController.getToggle);
  *           application/json:
  *             schema:
  *                $ref: '/api/docs/TogglesSchema.yml#/components/schemas/AddToggleRs'
+ *       401:
+ *         description: Unauthorized
  *       500:
  *         description: Internal server error
  */
-toggleRoutes.post("/add", toggleController.addToggle);
+toggleRoutes.post("/add", verifyAdminToken, toggleController.addToggle);
 
 /**
  * @swagger
@@ -103,7 +108,9 @@ toggleRoutes.post("/add", toggleController.addToggle);
  *   put:
  *     tags:
  *       - Toggle
- *     summary: Update an existing toggle
+ *     summary: Update an existing toggle *
+ *     security:
+ *       - AdminPasswordAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -117,9 +124,11 @@ toggleRoutes.post("/add", toggleController.addToggle);
  *           application/json:
  *             schema:
  *                $ref: '/api/docs/TogglesSchema.yml#/components/schemas/UpdateToggleRs'
+ *       401:
+ *         description: Unauthorized
  *       500:
  *         description: Internal server error
  */
-toggleRoutes.put("/update", toggleController.updateToggle);
+toggleRoutes.put("/update", verifyAdminToken, toggleController.updateToggle);
 
 export default toggleRoutes;
