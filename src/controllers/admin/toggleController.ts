@@ -36,7 +36,7 @@ export const addToggle = async (req: Request, res: Response) => {
   try {
     const newToggle = await toggleService.addToggle({ name, enabled, description } as IToggle);
     logger.info(`Successfully added toggle with identifier ${name}`);
-    return res.status(201).json(newToggle);
+    return res.status(201).json({ message: "Toggle successfully added", newToggle });
   } catch (error) {
     logger.error(`Failed to add toggle for identifier ${ name }:`, error);
     return res.status(500).json({ message: 'An error occurred while adding toggle; please try again later' });
@@ -48,7 +48,7 @@ export const updateToggle = async (req: Request, res: Response) => {
   try {
     const updatedToggle = await toggleService.updateToggle(name, enabled, description);
     logger.info(`Successfully updated toggle with identifier ${name}`);
-    return res.status(200).json(updatedToggle);
+    return res.status(200).json({ message: "Toggle successfully updated", updatedToggle });
   } catch (error) {
     logger.error(`Failed to update toggle for identifier ${ name }:`, error);
     return res.status(500).json({ message: 'An error occurred while updating toggle; please try again later' });
@@ -64,7 +64,7 @@ export const deleteToggle = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Toggle not found" });
     }
     logger.info(`Successfully deleted toggle with identifier ${toggle_name}`);
-    return res.status(200).json({ message: "Toggle successfully deleted" });
+    return res.status(200).json({ message: "Toggle successfully deleted", deletedToggle });
   } catch (error) {
     logger.error(`Failed to delete toggle for identifier ${ toggle_name }:`, error);
     return res.status(500).json({ message: 'An error occurred while deleting toggle; please try again later' });

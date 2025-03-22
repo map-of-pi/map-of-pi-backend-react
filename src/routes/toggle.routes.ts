@@ -94,7 +94,13 @@ toggleRoutes.get("/:toggle_name", toggleController.getToggle);
  *         content:
  *           application/json:
  *             schema:
- *                $ref: '/api/docs/TogglesSchema.yml#/components/schemas/AddToggleRs'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Toggle successfully added"
+ *                 addedToggle:
+ *                   $ref: '/api/docs/TogglesSchema.yml#/components/schemas/AddToggleRs'
  *       401:
  *         description: Unauthorized
  *       500:
@@ -123,7 +129,13 @@ toggleRoutes.post("/add", verifyAdminToken, toggleController.addToggle);
  *         content:
  *           application/json:
  *             schema:
- *                $ref: '/api/docs/TogglesSchema.yml#/components/schemas/UpdateToggleRs'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Toggle successfully updated"
+ *                 updatedToggle:
+ *                   $ref: '/api/docs/TogglesSchema.yml#/components/schemas/UpdateToggleRs'
  *       401:
  *         description: Unauthorized
  *       500:
@@ -149,7 +161,17 @@ toggleRoutes.put("/update", verifyAdminToken, toggleController.updateToggle);
  *         description: The name of the toggle to delete
  *     responses:
  *       200:
- *         description: Successful response | Toggle successfully deleted
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Toggle successfully deleted"
+ *                 deletedToggle:
+ *                   $ref: '/api/docs/TogglesSchema.yml#/components/schemas/DeleteToggleRs'
  *       404:
  *         description: Toggle not found
  *       401:

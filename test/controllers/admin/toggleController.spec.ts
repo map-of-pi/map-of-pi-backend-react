@@ -139,7 +139,10 @@ describe('toggleController', () => {
 
       expect(toggleService.addToggle).toHaveBeenCalledWith(req.body);
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith(newToggle);
+      expect(res.json).toHaveBeenCalledWith({ 
+        message: 'Toggle successfully added',
+        newToggle: newToggle
+      });
     });
 
     it('should return appropriate [500] when adding toggle fails', async () => {
@@ -184,7 +187,10 @@ describe('toggleController', () => {
 
       expect(toggleService.updateToggle).toHaveBeenCalledWith('testToggle', false, 'Test toggle');
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith(updatedToggle);
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'Toggle successfully updated',
+        updatedToggle: updatedToggle 
+      });
     });
 
     it('should return appropriate [500] when updating toggle fails', async () => {
@@ -225,7 +231,10 @@ describe('toggleController', () => {
 
       expect(toggleService.deleteToggleByName).toHaveBeenCalledWith('testToggle');
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Toggle successfully deleted' });
+      expect(res.json).toHaveBeenCalledWith({ 
+        message: 'Toggle successfully deleted', 
+        deletedToggle 
+      });
     });
 
     it('should return appropriate [404] when the toggle is not found', async () => {
