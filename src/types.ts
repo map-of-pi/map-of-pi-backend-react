@@ -109,3 +109,11 @@ export type PartialReview = {
 export interface IReviewFeedbackOutput extends IReviewFeedback, PartialReview {}
 
 export type SanctionedSeller = Pick<ISeller, 'seller_id' | 'name' | 'address' | 'sell_map_center'> & { sanctioned_location: string };
+
+export interface IToggle extends Document {
+  name: string;
+  enabled: boolean;
+  description?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
