@@ -8,16 +8,17 @@ export const isPioneerFound = async (
     res: Response,
     next: NextFunction
   ) => {
-    const auth = req.body.pioneerAuth;
+    const authHeader = req.headers.authorization;
+    const tokenFromHeader = authHeader && authHeader.split(" ")[1];
 
     try {
       logger.info("Verifying user's access token with the /me endpoint.");
       // Verify the user's access token with the /me endpoint:
-      const me = await platformAPIClient.get(`/me`, { 
-        headers: { 'Authorization': `Bearer ${auth.accessToken}` } 
+      const me = await platformAPIClient.get(`/v2/me`, { 
+        headers: { 'Authorization': `Bearer ${ tokenFromHeader }` }  
       });
       
-      if (me) {
+      if (me && me.data) {
         const user = {
           pi_uid: me.data.uid,
           pi_username: me.data.username,

@@ -29,22 +29,9 @@ const userRoutes = Router();
  *   post:
  *     tags:
  *       - User
- *     summary: Authenticate the user's access token
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties: 
- *               pioneerAuth:
- *                 type: object
- *                 properties:
- *                   accessToken:  
- *                     type: string
- *                     example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjZiYmFlNGEwNWJjYzNkOGRmYWI1NjMiLCJpYXQiOjE3MTgzMzk0MDksImV4cCI6MTcyMDkzMTQwOX0.gFz-EdHoOqz3-AuFX5R4uGtruFaTMH8sTOXEX-3c7yw
- *                 required:
- *                   - pioneerAuth    
+ *     summary: Authenticate the user's access token *
+ *     security:
+ *       - BearerAuth: []    
  *     responses:
  *       200:
  *         description: Successful response

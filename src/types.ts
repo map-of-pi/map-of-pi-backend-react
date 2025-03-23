@@ -54,9 +54,9 @@ import { OrderItemStatus } from "./models/enums/SellerItemStatus";
     stock_level: StockLevelType;
     image?: string;
     duration: number;
-    created_at: Date;
-    updated_at: Date;
     expired_by: Date;
+    createdAt: Date;
+    updatedAt: Date;
   }
   export interface IReviewFeedback extends Document {
     _id: string;
