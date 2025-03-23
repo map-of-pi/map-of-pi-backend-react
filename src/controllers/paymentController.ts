@@ -11,6 +11,7 @@ import { addOrUpdateOrder } from "../services/order.service";
 import { IOrder } from "../types";
 import { OrderStatusType } from "../models/enums/OrderStatusType";
 import { Types } from "mongoose";
+import logger from "../config/loggingConfig";
 
 interface Payment {
   identifier: string;
@@ -31,6 +32,7 @@ export const onIncompletePaymentFound = async (
     const paymentId = payment.identifier;
     const txid = payment.transaction?.txid;
     const txURL = payment.transaction?._link;
+    logger.info("incomplete payment data: ", payment);
 
     // const transaction = await Transaction.findOne({ payment_id: paymentId });
 
@@ -55,7 +57,7 @@ export const onIncompletePaymentFound = async (
 
     // console.log("current payment : ", currentDeposit);
 
-    await platformAPIClient.post(`/v2/payments/${paymentId}/complete`, {
+    await platformAPIClient.post(`/payments/${paymentId}/complete`, {
       txid,
     });
 
@@ -76,63 +78,63 @@ export const onPaymentApproval = async (req: Request, res: Response) => {
 
   try {
     const { paymentId } = req.body;
-    const currentPayment = await platformAPIClient.get(`/v2/payments/${paymentId}`);
+    const currentPayment = await platformAPIClient.get(`/payments/${paymentId}`);
 
-    let metadata = currentPayment.data.metadata;
-    const oldTransaction = await Transaction.findOne({payment_id: paymentId})
+    // let metadata = currentPayment.data.metadata;
+    // const oldTransaction = await Transaction.findOne({payment_id: paymentId})
 
     // create new transaction only not exist
-    if (!oldTransaction) {
-      const seller = await Seller.findOne({ seller_id: metadata.seller });
-      const buyer = await User.findOne({ pi_uid: currentUser?.pi_uid });
+    // if (!oldTransaction) {
+    //   const seller = await Seller.findOne({ seller_id: metadata.seller });
+    //   const buyer = await User.findOne({ pi_uid: currentUser?.pi_uid });
 
-      if (!buyer || !seller) {
-        return res.status(404).json({ message: "Seller or buyer not found" });
-      }
+    //   if (!buyer || !seller) {
+    //     return res.status(404).json({ message: "Seller or buyer not found" });
+    //   }
 
-      const newTransaction = await Transaction.create({
-        payment_id: paymentId,
-        user: buyer._id,  // Ensure this is an ObjectId
-        txid: null,
-        memo: currentPayment.data.memo,
-        amount: currentPayment.data.amount,
-        paid: false,
-        cancelled: false,
-        created_at: new Date(),
-      });
+    //   const newTransaction = await Transaction.create({
+    //     payment_id: paymentId,
+    //     user: buyer._id,  // Ensure this is an ObjectId
+    //     txid: null,
+    //     memo: currentPayment.data.memo,
+    //     amount: currentPayment.data.amount,
+    //     paid: false,
+    //     cancelled: false,
+    //     created_at: new Date(),
+    //   });
 
-      if (!newTransaction) {
-        return res.status(404).json({ message: "Transaction cannot be created" });
-      }
+      // if (!newTransaction) {
+      //   return res.status(404).json({ message: "Transaction cannot be created" });
+      // }
 
       // console.log("new Transaction: ", newTransaction)
 
-      const orderData: Partial<IOrder> = {    
-        buyer_id: metadata.buyer,
-        seller_id: metadata.seller,        
-        transaction: newTransaction._id as Types.ObjectId,
-        total_amount: currentPayment.data.amount,
-        status: OrderStatusType.New,
-        paid: false,
-        filled: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        fulfillment_method: metadata.fulfillment_method,
-        seller_fulfillment_description: metadata.seller_instruction,
-        buyer_fulfillment_description: metadata.buyer_fulfillment_description,
-      };
+      // const orderData: Partial<IOrder> = {    
+      //   buyer_id: metadata.buyer,
+      //   seller_id: metadata.seller,        
+      //   transaction: newTransaction._id as Types.ObjectId,
+      //   total_amount: currentPayment.data.amount,
+      //   status: OrderStatusType.New,
+      //   paid: false,
+      //   filled: false,
+      //   createdAt: new Date(),
+      //   updatedAt: new Date(),
+      //   fulfillment_method: metadata.fulfillment_method,
+      //   seller_fulfillment_description: metadata.seller_instruction,
+      //   buyer_fulfillment_description: metadata.buyer_fulfillment_description,
+      // };
 
-      console.log('ITEMS DATA: ', metadata.items)
+      // console.log('ITEMS DATA: ', metadata.items)
 
-      const orderItemsData = metadata.items;
+      // const orderItemsData = metadata.items;
 
       // create order and order items
-      const newOrder = await addOrUpdateOrder(null, orderData as IOrder, orderItemsData);
+      // const newOrder = await addOrUpdateOrder(null, orderData as IOrder, orderItemsData);
 
-    }
+    // }
     
     // Approve payment request
-    const response = await platformAPIClient.post(`/v2/payments/${paymentId}/approve`);
+    const response = await platformAPIClient.post(`/payments/${paymentId}/approve`);
 
     // console.log("Response from Pi server while approving payment: ", response.data);
 
@@ -161,7 +163,7 @@ export const onPaymentCompletion = async (
     const txid: string = req.body.txid;
 
     await platformAPIClient.get(
-      `/v2/payments/${paymentId}`
+      `/payments/${paymentId}`
     );
 
     // update transaction status to paid on sucessfull payment
@@ -176,7 +178,7 @@ export const onPaymentCompletion = async (
       }
     }).exec()
     const response = await platformAPIClient.post(
-      `/v2/payments/${paymentId}/complete`,
+      `/payments/${paymentId}/complete`,
       { txid }
     );
     
@@ -206,7 +208,7 @@ export const onPaymentCancellation = async (
   try {
     const { paymentId } = req.body;
     const response = await platformAPIClient.post(
-      `/v2/payments/${paymentId}/cancel`
+      `/payments/${paymentId}/cancel`
     );
 
     // console.log(

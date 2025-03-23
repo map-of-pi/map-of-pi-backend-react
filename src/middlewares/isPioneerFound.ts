@@ -13,7 +13,7 @@ export const isPioneerFound = async (
     try {
       logger.info("Verifying user's access token with the /me endpoint.");
       // Verify the user's access token with the /me endpoint:
-      const me = await platformAPIClient.get(`/v2/me`, { 
+      const me = await platformAPIClient.get(`/me`, { 
         headers: { 'Authorization': `Bearer ${auth.accessToken}` } 
       });
       
