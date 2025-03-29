@@ -9,7 +9,7 @@ import Seller from "../models/Seller";
 import User from "../models/User";
 import { addOrUpdateOrder } from "../services/order.service";
 import { IOrder } from "../types";
-import { OrderStatusType } from "../models/enums/OrderStatusType";
+import { OrderStatusType } from "../models/enums/orderStatusType";
 import { Types } from "mongoose";
 import logger from "../config/loggingConfig";
 

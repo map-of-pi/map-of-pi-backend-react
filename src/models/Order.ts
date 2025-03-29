@@ -2,7 +2,7 @@
 
   import { IOrder } from "../types";
   import { FulfillmentType } from "./enums/sellerType";
-import { OrderStatusType } from "./enums/OrderStatusType";
+import { OrderStatusType } from "./enums/orderStatusType";
 
   const orderSchema = new Schema<IOrder>(
     {

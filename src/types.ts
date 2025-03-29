@@ -5,8 +5,8 @@
   import { StockLevelType } from "./models/enums/stockLevelType";
   import { TrustMeterScale } from "./models/enums/trustMeterScale";
   import { RestrictedArea } from "./models/enums/restrictedArea";
-import { OrderStatusType } from "./models/enums/OrderStatusType";
-import { OrderItemStatus } from "./models/enums/SellerItemStatus";
+import { OrderStatusType } from "./models/enums/orderStatusType";
+import { OrderItemStatus } from "./models/enums/orderItemStatus";
 
   export interface IUser extends Document {
     pi_uid: string;

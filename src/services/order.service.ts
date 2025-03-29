@@ -4,7 +4,7 @@ import OrderItem from "../models/orderItem";
 import { IOrder, IOrderItem } from "../types";
 import logger from "../config/loggingConfig";
 import SellerItem from "../models/SellerItem";
-import { OrderItemStatus } from "../models/enums/SellerItemStatus";
+import { OrderItemStatus } from "../models/enums/orderItemStatus";
 import User from "../models/User";
 
 /**
@@ -175,7 +175,8 @@ export const updateOrderItemStatus = async (itemId: string, itemStatus: string) 
     const updatedItem = await OrderItem.findByIdAndUpdate(itemId, {
       status: itemStatus,
       updatedAt: new Date()
-    }, {new: true}).exec()
+    }, {new: true}).exec();
+    if (!updatedItem) return null 
     return updatedItem
   }catch (error:any){
     logger.error(`Error updating order item for order ${itemId}: `, error);

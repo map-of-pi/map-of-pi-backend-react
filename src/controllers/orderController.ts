@@ -80,14 +80,28 @@ export const getOrderItems = async (req: Request, res: Response) => {
 };
 
 export const updateOrderItemStatus = async (req: Request, res: Response) => {
-  try{
-    const itemId = req.params.id;
-    const itemStatus = req.body.itemStatus;
-    logger.info('new order item status: ', itemStatus)
-    const orderItem = await orderService.updateOrderItemStatus(itemId, itemStatus);
-    logger.info('updated order item: ', orderItem)
+  try {
+    const { id } = req.params;
+    const { itemStatus } = req.body;
+
+    if (!id || !itemStatus) {
+      return res.status(400).json({ message: "Order item ID and status are required" });
+    }
+
+    logger.info(`Order item ID: ${id}`);
+    logger.info(`New order item status: ${itemStatus}`);
+
+    const orderItem = await orderService.updateOrderItemStatus(id, itemStatus);
+
+    if (!orderItem) {
+      return res.status(404).json({ message: "Order item not found" });
+    }
+
+    logger.info(`Updated order item: ${JSON.stringify(orderItem)}`);
+
     return res.status(200).json(orderItem);
   } catch (error) {
-    res.status(500).json({ message: "Failed to update order items" });
+    console.error("Error updating order item:", error);
+    return res.status(500).json({ message: "Failed to update order item" });
   }
-}
+};
