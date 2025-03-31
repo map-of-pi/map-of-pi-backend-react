@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 import Order from "../models/Order";
-import OrderItem from "../models/OrderItem";
 import { IOrder } from "../types";
 import logger from "../config/loggingConfig";
 import SellerItem from "../models/SellerItem";
+import OrderItem from "../models/OrderItem";
 import { OrderItemStatusType } from "../models/enums/orderItemStatusType";
 import User from "../models/User";
 
