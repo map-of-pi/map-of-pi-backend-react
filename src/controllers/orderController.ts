@@ -2,17 +2,6 @@ import { Request, Response } from "express";
 import *  as orderService from "../services/order.service";
 import logger from "../config/loggingConfig";
 
-export const getAllOrders = async (req: Request, res: Response) => {
-  try {
-    const filters = req.query; // Extract filters from query params
-    const orders = await orderService.getAllOrders(filters);
-
-    res.status(200).json(orders);
-  } catch (error) {
-    res.status(500).json({ message: "Failed to fetch orders" });
-  }
-};
-
 export const getSellerOrders= async (req: Request, res: Response) => {
   try {
     const seller = req.currentSeller; 

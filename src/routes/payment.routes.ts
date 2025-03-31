@@ -1,15 +1,17 @@
-// Payments endpoint under /payments:
 import { Router } from "express";
-import { onIncompletePaymentFound, onPaymentApproval, onPaymentCancellation, onPaymentCompletion } from "../controllers/paymentController";
+import { 
+  onIncompletePaymentFound, 
+  onPaymentApproval, 
+  onPaymentCancellation, 
+  onPaymentCompletion 
+} from "../controllers/paymentController";
 import { verifyToken } from "../middlewares/verifyToken";
 
 const paymentsRouter = Router();
 
-paymentsRouter.post("/incomplete",onIncompletePaymentFound);
-paymentsRouter.post("/approve", verifyToken,  onPaymentApproval);
-paymentsRouter.post("/complete", verifyToken, onPaymentCompletion);
-paymentsRouter.post("/cancelled_payment", onPaymentCancellation);
+paymentsRouter.post("/incomplete", onIncompletePaymentFound);
+paymentsRouter.post("/complete", onPaymentCompletion);
+paymentsRouter.post("/approve",verifyToken, onPaymentApproval);
+paymentsRouter.post("/cancelled-payment", onPaymentCancellation);
 
-export default paymentsRouter
-
-
+export default paymentsRouter;

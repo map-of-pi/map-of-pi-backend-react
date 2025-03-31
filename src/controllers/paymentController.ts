@@ -1,5 +1,3 @@
-
-
 import { Request, Response } from "express";
 import axios from "axios";
 import { platformAPIClient } from "../config/platformAPIclient";
@@ -13,7 +11,7 @@ import { OrderStatusType } from "../models/enums/orderStatusType";
 import { Types } from "mongoose";
 import logger from "../config/loggingConfig";
 
-interface Payment {
+interface PaymentInfo {
   identifier: string;
   transaction?: {
     txid: string;
@@ -28,7 +26,7 @@ export const onIncompletePaymentFound = async (
   const currentUser = req.currentUser;
 
   try {
-    const payment: Payment = req.body.payment;
+    const payment: PaymentInfo = req.body.payment;
     const paymentId = payment.identifier;
     const txid = payment.transaction?.txid;
     const txURL = payment.transaction?._link;

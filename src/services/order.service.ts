@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 import Order from "../models/Order";
-import OrderItem from "../models/orderItem";
-import { IOrder, IOrderItem } from "../types";
+import { IOrder } from "../types";
 import logger from "../config/loggingConfig";
 import SellerItem from "../models/SellerItem";
-import { OrderItemStatus } from "../models/enums/orderItemStatus";
+import OrderItem from "../models/OrderItem";
+import { OrderItemStatusType } from "../models/enums/orderItemStatusType";
 import User from "../models/User";
 
 /**
@@ -51,7 +51,7 @@ export const createOrder = async (
           seller_item: sellerItem._id, // Store only the ObjectId
           quantity: item.quantity,
           sub_total_amount: item.quantity * parseFloat(sellerItem?.price.toString()), // Corrected field
-          status: OrderItemStatus.Pending,
+          status: OrderItemStatusType.Pending,
         });
         sellerItem = await newItem.save({ session });
       }
@@ -74,36 +74,7 @@ export const createOrder = async (
   }
 };
 
-export const getAllOrders = async (filters: Record<string, any>) => {
-  try {
-    // Construct query object based on provided filters
-    const query: Record<string, any> = {};
-
-    if (filters.status) {
-      query.status = filters.status; // Filter by order status
-    }
-    if (filters.buyer) {
-      query.buyer = filters.buyer; // Filter by buyer ID
-    }
-    if (filters.seller) {
-      query.seller = filters.seller; // Filter by seller ID
-    }
-    if (filters.startDate && filters.endDate) {
-      query.createdAt = {
-        $gte: new Date(filters.startDate),
-        $lte: new Date(filters.endDate),
-      }; // Filter by date range
-    }
-
-    const orders = await Order.find(query);
-    return orders;
-  } catch (error) {
-    logger.error("Error fetching orders with filters: ", error);
-    throw new Error("Error fetching orders");
-  }
-};
-
-export const getSellerOrders = async (sellerId: string) => {
+export const getSellerOrdersById = async (sellerId: string) => {
   try {
     // Fetch orders matching the seller_id and sorted in descending order
     const orders = await Order.find({ seller_id: sellerId }).sort({ updatedAt: -1 }).lean();
@@ -157,7 +128,7 @@ export const getOrderItems = async (orderId: string) => {
     const user = await User.findOne({ pi_uid: order.buyer_id }, "pi_username");
 
     // Fetch the items linked to the order
-    const orderItems = await OrderItem.find({ order: orderId })
+    const orderItems = await OrderItem.find({ order_id: orderId })
     .populate({ path: "seller_item", model: "Seller-Item" }) // Populate seller item details
       .exec();
     // logger.info('fetched order items: ', orderItems);

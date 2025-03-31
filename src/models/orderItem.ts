@@ -1,38 +1,39 @@
 import mongoose, { Schema, SchemaTypes, Types } from "mongoose";
 
+import { OrderItemStatusType } from "./enums/orderItemStatusType";
 import { IOrderItem } from "../types";
-import { OrderItemStatus } from "./enums/orderItemStatus";
 
-  const orderItemSchema = new Schema<IOrderItem>(
-    {
-      seller_item_id: {
-        type: SchemaTypes.ObjectId,
-        required: true,
-      },
-      order_id: {
-        type: SchemaTypes.ObjectId,
-        required: true,
-      },
-      quantity: {
-        type: Number,
-        required: true,
-        default: 0
-      },
-      subtotal: {
-        type: Number,
-        required: true,
-        default: 0.00
-      },
-      status: {
-        type: String,
-        enum: Object.values(OrderItemStatus).filter(value => typeof value === 'string'),
-        required: true,
-        default: OrderItemStatus.Pending,
-      },
+const orderItemSchema = new Schema<IOrderItem>(
+  {
+    order_id: {
+      type: SchemaTypes.ObjectId,
+      required: true,
     },
-    { timestamps: true } // Adds timestamps to track creation and update times
-  );
-  // Creating the Seller model from the schema
-  const OrderItem = mongoose.model<IOrderItem>("OrderItem", orderItemSchema);
+    seller_item_id: {
+      type: SchemaTypes.ObjectId,
+      required: true,
+    },
+    quantity: {
+      type: Number,
+      required: true,
+      default: 0
+    },
+    subtotal: {
+      type: Types.Decimal128,
+      required: true,
+      default: 0.00
+    },
+    status: {
+      type: String,
+      enum: Object.values(OrderItemStatusType).filter(value => typeof value === 'string'),
+      required: true,
+      default: OrderItemStatusType.Pending,
+    },
+  },
+  { timestamps: true } // Adds timestamps to track creation and update times
+);
 
-  export default OrderItem;
+// Creating the OrderItem model from the schema
+const OrderItem = mongoose.model<IOrderItem>("OrderItem", orderItemSchema);
+
+export default OrderItem;
