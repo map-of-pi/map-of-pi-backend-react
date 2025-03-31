@@ -40,11 +40,11 @@ export const getSingleOrder = async (req: Request, res: Response) => {
   }
 };
 
-export const createOrUpdateOrder = async (req: Request, res: Response) => {
+export const createOrder = async (req: Request, res: Response) => {
   try {
     const { orderId, orderData, orderItems } = req.body;
     
-    const updatedOrder = await orderService.addOrUpdateOrder(orderId, orderData, orderItems);
+    const updatedOrder = await orderService.createOrder(orderId, orderData, orderItems);
     res.status(200).json(updatedOrder);
   } catch (error:any) {
     res.status(500).json({ message: error.message });

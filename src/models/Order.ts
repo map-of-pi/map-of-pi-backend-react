@@ -14,7 +14,7 @@ import { OrderStatusType } from "./enums/orderStatusType";
         type: String,
         required: true,
       },
-      transaction: {
+      payment_id: {
         type: SchemaTypes.ObjectId,
         required: true,
         default: null,
@@ -24,12 +24,12 @@ import { OrderStatusType } from "./enums/orderStatusType";
         required: true,
         default: 0.00
       },
-      paid: {
+      is_paid: {
         type: Boolean,
         default: false,
         required: true
       },
-      filled: {
+      is_fulfilled: {
         type: Boolean,
         default: false,
         required: true

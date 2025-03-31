@@ -1,8 +1,9 @@
   import mongoose, { Schema, SchemaTypes, Types } from "mongoose";
 
-  import { ITransaction } from "../types";
+  import { IPayment } from "../types";
+import { PaymentType } from "./enums/paymentType";
 
-  const transactionSchema = new Schema<ITransaction>(
+  const paymentSchema = new Schema<IPayment>(
     {
       user: {
         type: SchemaTypes.ObjectId,
@@ -28,7 +29,7 @@
         required: false,
         default: ""
       },
-      payment_id: {
+      pi_payment_id: {
         type: String,
         required: true,
         default: null
@@ -38,9 +39,15 @@
         required: false,
         default: null
       },
+      payment_type: {
+        type: String,
+        required: true,
+        enum: Object.values(PaymentType).filter(value => typeof value === 'string'),
+        default: PaymentType.BuyerCheckout
+      }
     }, { timestamps: true } // Adds timestamps to track creation and update times
   );
   // Creating the Seller model from the schema
-  const Transaction = mongoose.model<ITransaction>("Transaction", transactionSchema);
+  const Payment = mongoose.model<IPayment>("Payment", paymentSchema);
 
-  export default Transaction;
+  export default Payment;

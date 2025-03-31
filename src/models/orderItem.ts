@@ -5,11 +5,11 @@ import { OrderItemStatus } from "./enums/orderItemStatus";
 
   const orderItemSchema = new Schema<IOrderItem>(
     {
-      seller_item: {
+      seller_item_id: {
         type: SchemaTypes.ObjectId,
         required: true,
       },
-      order: {
+      order_id: {
         type: SchemaTypes.ObjectId,
         required: true,
       },
@@ -18,7 +18,7 @@ import { OrderItemStatus } from "./enums/orderItemStatus";
         required: true,
         default: 0
       },
-      sub_total_amount: {
+      subtotal: {
         type: Number,
         required: true,
         default: 0.00

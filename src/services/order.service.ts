@@ -14,7 +14,7 @@ import User from "../models/User";
  * @param {IOrderItem[]} orderItems - List of order items.
  * @returns {Promise<IOrder>} - The newly created or updated order.
  */
-export const addOrUpdateOrder = async (
+export const createOrder = async (
   orderId: string | null,
   orderData: IOrder,
   orderItems: {itemId: string, quantity: number}[]
@@ -37,7 +37,7 @@ export const addOrUpdateOrder = async (
       await order.save({ session });
     }
 
-    // Handle order items (add/update)
+    // Handle order items
     for (const item of orderItems) {
       if (item.itemId) {
         sellerItem = await SellerItem.findById(item.itemId);
@@ -56,6 +56,8 @@ export const addOrUpdateOrder = async (
         sellerItem = await newItem.save({ session });
       }
     }
+
+    // use bulk item creation/update instead of
 
     await session.commitTransaction();
     session.endSession();

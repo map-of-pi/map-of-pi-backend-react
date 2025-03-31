@@ -5,8 +5,10 @@
   import { StockLevelType } from "./models/enums/stockLevelType";
   import { TrustMeterScale } from "./models/enums/trustMeterScale";
   import { RestrictedArea } from "./models/enums/restrictedArea";
-import { OrderStatusType } from "./models/enums/orderStatusType";
-import { OrderItemStatus } from "./models/enums/orderItemStatus";
+  import { OrderStatusType } from "./models/enums/orderStatusType";
+  import { OrderItemStatus } from "./models/enums/orderItemStatus";
+import { U2UPaymentStatus } from "./models/enums/u2uPaymentStatus";
+import { PaymentType } from "./models/enums/paymentType";
 
   export interface IUser extends Document {
     pi_uid: string;
@@ -105,11 +107,11 @@ import { OrderItemStatus } from "./models/enums/orderItemStatus";
   export interface IOrder extends Document {
     buyer_id: string;
     seller_id: string;
-    transaction: Types.ObjectId;
+    payment_id: Types.ObjectId;
     total_amount: number;
     status: OrderStatusType;
-    paid: boolean;
-    filled: boolean;
+    is_paid: boolean;
+    is_fulfilled: boolean;
     fulfillment_method: FulfillmentType;
     seller_fulfillment_description: string;
     buyer_fulfillment_description: string;
@@ -119,22 +121,35 @@ import { OrderItemStatus } from "./models/enums/orderItemStatus";
 
   
   export interface IOrderItem extends Document {
-    order: Types.ObjectId;
-    seller_item: Types.ObjectId;
+    order_id: Types.ObjectId;
+    seller_item_id: Types.ObjectId;
     quantity: number;
-    sub_total_amount: number;
+    subtotal: number;
     status: OrderItemStatus;
     createdAt: Date;
     updatedAt: Date;
   }
 
-  export interface ITransaction extends Document {
+  export interface IPayment extends Document {
     user: Types.ObjectId;
     amount: number;
     paid: boolean;
     memo: string;
-    payment_id: string;
+    pi_payment_id: string;
     txid: string | null;
+    payment_type: PaymentType;
     cancelled: boolean;
     createdAt: Date;
+  }
+
+  export interface PaymentCrossReferenceType {
+    _id: Types.ObjectId;
+    u2a_payment_id: Types.ObjectId;
+    a2u_payment_id: Types.ObjectId;
+    u2u_status: U2UPaymentStatus;
+    error_message: string;
+    u2a_completed_at: Date;
+    a2u_completed_at: Date;
+    createdAt: Date;
+    updatedAt: Date;
   }

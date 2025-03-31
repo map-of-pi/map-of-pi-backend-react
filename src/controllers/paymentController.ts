@@ -3,11 +3,11 @@
 import { Request, Response } from "express";
 import axios from "axios";
 import { platformAPIClient } from "../config/platformAPIclient";
-import Transaction from "../models/Transaction";
+import Payment from "../models/Payment";
 import Order from "../models/Order";
 import Seller from "../models/Seller";
 import User from "../models/User";
-import { addOrUpdateOrder } from "../services/order.service";
+import { createOrder } from "../services/order.service";
 import { IOrder } from "../types";
 import { OrderStatusType } from "../models/enums/orderStatusType";
 import { Types } from "mongoose";
@@ -167,10 +167,10 @@ export const onPaymentCompletion = async (
     );
 
     // update transaction status to paid on sucessfull payment
-    const transaction = await Transaction.findOneAndUpdate({ payment_id: paymentId }, { $set: { txid: txid, paid: true } }).exec();
+    const payment = await Payment.findOneAndUpdate({ payment_id: paymentId }, { $set: { txid: txid, paid: true } }).exec();
 
     // update Order status to paid on sucessfull payment
-    await Order.findOneAndUpdate({transaction: transaction?._id}, 
+    await Order.findOneAndUpdate({payment_id: payment?._id}, 
       { $set: {
         updated_at: new Date(),
         paid: true,
