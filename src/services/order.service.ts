@@ -1,19 +1,12 @@
 import mongoose from "mongoose";
 import Order from "../models/Order";
 import OrderItem from "../models/OrderItem";
-import { IOrder, IOrderItem } from "../types";
+import { IOrder } from "../types";
 import logger from "../config/loggingConfig";
 import SellerItem from "../models/SellerItem";
 import { OrderItemStatusType } from "../models/enums/orderItemStatusType";
 import User from "../models/User";
 
-/**
- * Adds a new order or updates an existing one.
- * @param {string | null} orderId - Existing order ID (if updating).
- * @param {IOrder} orderData - Order details.
- * @param {IOrderItem[]} orderItems - List of order items.
- * @returns {Promise<IOrder>} - The newly created or updated order.
- */
 export const addOrUpdateOrder = async (
   orderId: string | null,
   orderData: IOrder,
