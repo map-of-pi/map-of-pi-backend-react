@@ -5,6 +5,9 @@ import { SellerType } from "./models/enums/sellerType";
 import { FulfillmentType } from "./models/enums/fulfillmentType";
 import { StockLevelType } from "./models/enums/stockLevelType";
 import { TrustMeterScale } from "./models/enums/trustMeterScale";
+import { OrderStatusType } from "./models/enums/orderStatusType";
+import { OrderItemStatusType } from "./models/enums/orderItemStatusType";
+import { PaymentType } from "./models/enums/paymentType";
 import { RestrictedArea } from "./models/enums/restrictedArea";
 
 export interface IUser extends Document {
@@ -66,6 +69,48 @@ export interface ISellerItem extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface IOrder extends Document {
+  _id: string;
+  payment_id: Types.ObjectId;
+  buyer_id: string;
+  seller_id: string;
+  total_amount: Types.Decimal128;
+  is_paid: boolean;
+  is_fulfilled: boolean;
+  status: OrderStatusType;
+  fulfillment_method: FulfillmentType;
+  buyer_fulfillment_description: string;
+  seller_fulfillment_description: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IOrderItem extends Document {
+  _id: string;
+  order_id: Types.ObjectId;
+  seller_item_id: Types.ObjectId;
+  quantity: number;
+  subtotal: Types.Decimal128;
+  status: OrderItemStatusType;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IPayment extends Document {
+  _id: string;
+  user_id: Types.ObjectId;
+  payment_id: string;
+  txid: string | null;
+  amount: Types.Decimal128;
+  paid: boolean;
+  cancelled: boolean;
+  memo: string;
+  payment_type: PaymentType;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface IReviewFeedback extends Document {
   _id: string;
   review_receiver_id: string;
