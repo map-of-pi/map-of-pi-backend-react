@@ -146,7 +146,8 @@ export const updateOrderItemStatus = async (itemId: string, itemStatus: string) 
     const updatedItem = await OrderItem.findByIdAndUpdate(itemId, {
       status: itemStatus,
       updatedAt: new Date()
-    }, {new: true}).exec()
+    }, {new: true}).exec();
+    if (!updatedItem) return null 
     return updatedItem
   }catch (error:any){
     logger.error(`Error updating order item for order ${itemId}: `, error);
