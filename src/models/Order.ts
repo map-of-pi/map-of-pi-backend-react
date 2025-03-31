@@ -1,6 +1,6 @@
 import mongoose, { Schema, SchemaTypes, Types } from "mongoose";
 
-import { FulfillmentType } from "./enums/sellerType";
+import { FulfillmentType } from "./enums/fulfillmentType";
 import { OrderStatusType } from "./enums/orderStatusType";
 import { IOrder } from "../types";
 
