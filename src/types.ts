@@ -1,7 +1,8 @@
 import { Document, Types } from "mongoose";
 import { DeviceLocationType } from "./models/enums/deviceLocationType";
 import { RatingScale } from "./models/enums/ratingScale";
-import { SellerType, FulfillmentType } from "./models/enums/sellerType";
+import { SellerType } from "./models/enums/sellerType";
+import { FulfillmentType } from "./models/enums/fulfillmentType";
 import { StockLevelType } from "./models/enums/stockLevelType";
 import { TrustMeterScale } from "./models/enums/trustMeterScale";
 import { OrderStatusType } from "./models/enums/orderStatusType";
@@ -26,6 +27,15 @@ export interface IUserSettings extends Document {
   search_map_center?: {
     type: 'Point';
     coordinates: [number, number];
+  };
+  search_filters?: {
+    include_active_sellers: Boolean;
+    include_inactive_sellers: Boolean;
+    include_test_sellers: Boolean;
+    include_trust_level_100: Boolean;
+    include_trust_level_80: Boolean;
+    include_trust_level_50: Boolean;
+    include_trust_level_0: Boolean;
   };
 }
 
@@ -144,3 +154,11 @@ export type PartialReview = {
 export interface IReviewFeedbackOutput extends IReviewFeedback, PartialReview {}
 
 export type SanctionedSeller = Pick<ISeller, 'seller_id' | 'name' | 'address' | 'sell_map_center'> & { sanctioned_location: string };
+
+export interface IToggle extends Document {
+  name: string;
+  enabled: boolean;
+  description?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
