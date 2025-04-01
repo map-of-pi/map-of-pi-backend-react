@@ -9,6 +9,7 @@ import {
 } from '../../src/services/transaction.service';
 import * as membershipService from '../../src/services/membership.service';
 import { IMembership, ITransactionRecord } from '../../src/types';
+import * as transactionService from '../../src/services/transaction.service';
 
 describe('getAllTransactionRecords function', () => {
   // Helper function to convert Mongoose documents to plain objects
@@ -31,6 +32,18 @@ describe('getAllTransactionRecords function', () => {
     );
   };
 
+  jest.spyOn(transactionService, 'createTransactionRecord').mockResolvedValue({
+    transaction_id: 'mock-id',
+    transaction_records: [
+      {
+        transaction_type: TransactionType.MAPPI_DEPOSIT,
+        amount: 10,
+        reason: 'Mocked transaction',
+        date: new Date(),
+      }
+    ]
+  } as unknown as ITransactionRecord);
+  
   const assertTransactionRecords = (actual: any, expected: any) => {
     const { _id, __v, createdAt, updatedAt, ...filteredActual } = actual; // ignore DB values.
     
