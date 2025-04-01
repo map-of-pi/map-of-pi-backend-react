@@ -67,8 +67,9 @@ const sellerSchema = new Schema<ISeller>(
     },
     pre_restriction_seller_type: {
       type: String,
-      default: '',
+      enum: Object.values(SellerType).filter(value => typeof value === 'string'),
       required: false,
+      default: null
     },
     isPreRestricted: {
       type: Boolean,

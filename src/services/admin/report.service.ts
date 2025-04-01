@@ -1,10 +1,10 @@
 import Bottleneck from "bottleneck";
 
-import SanctionedRegion from "../models/misc/SanctionedRegion";
-import { getSellersWithinSanctionedRegion } from "./seller.service";
-import { reverseLocationDetails } from "../helpers/location";
-import { ISanctionedRegion, ISeller, SanctionedSeller } from "../types";
-import logger from "../config/loggingConfig";
+import SanctionedRegion from "../../models/misc/SanctionedRegion";
+import { getSellersWithinSanctionedRegion } from "../seller.service";
+import { reverseLocationDetails } from "../../helpers/location";
+import { ISanctionedRegion, ISeller, SanctionedSeller } from "../../types";
+import logger from "../../config/loggingConfig";
 
 const requestLimiter = new Bottleneck({ minTime: 1000 });
 
