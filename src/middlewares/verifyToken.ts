@@ -18,11 +18,10 @@ export const verifyToken = async (
 ) => {
   // First, checking if the token exists in the cookies
   const tokenFromCookie = req.cookies.token;
-
   // Fallback to the authorization header if token is not in the cookie
   const authHeader = req.headers.authorization;
   const tokenFromHeader = authHeader && authHeader.split(" ")[1];
-
+  
   // Prioritize token from cookies, then from header
   const token = tokenFromCookie || tokenFromHeader;
 
@@ -32,21 +31,18 @@ export const verifyToken = async (
   }
 
   try {
-    // Decode the token to get the user information
-    const currentUser = await decodeUserToken(token);
-
+        // Decode the token to get the user information
+    const currentUser = await decodeUserToken(token); // ✅ KEEP THIS
     if (!currentUser) {
       logger.warn("Authentication token is invalid or expired.");
       return res.status(401).json({ message: "Unauthorized" });
     }
-
     // Attach currentUser to the request object
     req.currentUser = currentUser;
-    req.token = token;
     next();
   } catch (error) {
-    logger.error('Failed to verify token:', error);
-    return res.status(500).json({ message: 'Failed to verify token; please try again later' });
+    logger.error("Token verification failed:", error);
+    return res.status(401).json({ message: "Unauthorized" });
   }
 };
 
