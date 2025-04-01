@@ -28,73 +28,68 @@ export const addOrUpdateMembership = async (
   membership_duration: number,
   mappi_allowance: number
 ): Promise<IMembership> => {
-
   const today = new Date();
-  const durationInMs = membership_duration * 7 * 24 * 60 * 60 * 1000; // Convert weeks to milliseconds
+  const durationInMs = membership_duration * 7 * 24 * 60 * 60 * 1000;
 
   try {
-    // Check for an existing membership
-    const existingMembership = await Membership.findOne({ membership_id: authUser.pi_uid }).exec();
-    
+    const session = await Membership.startSession();
+    session.startTransaction();
+
+    const existingMembership = await Membership.findOne({ membership_id: authUser.pi_uid }).session(session).exec();
+
     if (existingMembership) {
-      // Use the later of today or the current expiration date
       const baseDate = existingMembership.membership_expiry_date
         ? new Date(Math.max(existingMembership.membership_expiry_date.getTime(), today.getTime()))
         : today;
 
-      // Calculate the new expiration date by adding the duration to the base date
       const newExpirationDate = new Date(baseDate.getTime() + durationInMs);
-      // Calculate the new Mappi balance
       const newMappiBalance = existingMembership.mappi_balance + mappi_allowance;
 
-      // Update the existing membership
-      const updatedMembership = await Membership.findOneAndUpdate(
-        { membership_id: authUser.pi_uid },
-        { 
-          $set: {
-            membership_class_type: membership_class,
-            membership_expiry_date: newExpirationDate,
-            mappi_balance: newMappiBalance
-          }
-        }, 
-        { new: true } // Return the updated document
-      ).exec();
+      existingMembership.membership_class = membership_class;
+      existingMembership.membership_expiry_date = newExpirationDate;
+      existingMembership.mappi_balance = newMappiBalance;
 
-      logger.debug('Existing membership updated in the database:', updatedMembership);
+      const updatedMembership = await existingMembership.save({ session });
 
-      await createTransactionRecord(
-        authUser.pi_uid, 
-        TransactionType.MAPPI_DEPOSIT, 
-        mappi_allowance, 
-        `Mappi credited for updated Membership to ${membership_class}`
-      );
-      
-      return updatedMembership as IMembership;
-    } else {
-      // Membership does not exist, calculate based on today's date
-      const newExpirationDate = new Date(today.getTime() + durationInMs);
-
-      // Create a new membership
-      const newMembership = new Membership({
-        membership_id: authUser.pi_uid,
-        membership_class_type: membership_class,
-        membership_expiry_date: newExpirationDate,
-        mappi_balance: mappi_allowance
-      });
-      const savedMembership = await newMembership.save();
-      logger.info('New membership created in the database:', savedMembership);
-      
       await createTransactionRecord(
         authUser.pi_uid,
         TransactionType.MAPPI_DEPOSIT,
-        mappi_allowance, 
+        mappi_allowance,
+        `Mappi credited for updated Membership to ${membership_class}`
+      );
+
+      await session.commitTransaction();
+      session.endSession();
+
+      logger.info('Membership updated:', updatedMembership);
+      return updatedMembership;
+    } else {
+      const newExpirationDate = new Date(today.getTime() + durationInMs);
+
+      const newMembership = new Membership({
+        membership_id: authUser.pi_uid,
+        membership_class,
+        membership_expiry_date: newExpirationDate,
+        mappi_balance: mappi_allowance
+      });
+
+      const savedMembership = await newMembership.save({ session });
+
+      await createTransactionRecord(
+        authUser.pi_uid,
+        TransactionType.MAPPI_DEPOSIT,
+        mappi_allowance,
         `Membership initiated to ${membership_class}`
       );
-      
-      return savedMembership as IMembership;
+
+      await session.commitTransaction();
+      session.endSession();
+
+      logger.info('New membership created:', savedMembership);
+      return savedMembership;
     }
   } catch (error) {
-    logger.error(`Failed to add or update membership for membership ID: ${authUser.pi_uid}`, error);
+    logger.error(`Failed to add/update membership for ${authUser.pi_uid}:`, error);
     throw new Error("Failed to add or update membership; please try again later");
   }
 };
