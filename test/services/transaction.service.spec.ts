@@ -151,7 +151,7 @@ describe('processTransaction function', () => {
       
       const expectedMembership = {
         membership_id: '0b0b0b-0b0b-0b0b',
-        membership_class_type: MembershipClassType.DOUBLE_GOLD,
+        membership_class: MembershipClassType.DOUBLE_GOLD,
         membership_expiry_date: '2025-06-30T00:00:00.000Z',
         mappi_balance: 500
       }
@@ -194,7 +194,7 @@ describe('processTransaction function', () => {
       
       const expectedMembership = {
         membership_id: '0c0c0c-0c0c-0c0c',
-        membership_class_type: MembershipClassType.GOLD,
+        membership_class: MembershipClassType.GOLD,
         membership_expiry_date: '2025-04-23T00:00:00.000Z',
         mappi_balance: 200 // Unchanged Mappi balance
       }

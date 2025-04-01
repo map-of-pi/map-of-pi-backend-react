@@ -86,25 +86,25 @@
   "memberships": [
     {
       "membership_id": "0a0a0a-0a0a-0a0a",
-      "membership_class_type": "Triple Gold",
+      "membership_class": "Triple Gold",
       "membership_expiry_date": "2026-01-26T00:00:00.000Z",
       "mappi_balance": 1000
     },
     {
       "membership_id": "0b0b0b-0b0b-0b0b",
-      "membership_class_type": "Double Gold",
+      "membership_class": "Double Gold",
       "membership_expiry_date": "2025-06-30T00:00:00.000Z",
       "mappi_balance": 400
     },
     {
       "membership_id": "0c0c0c-0c0c-0c0c",
-      "membership_class_type": "Gold",
+      "membership_class": "Gold",
       "membership_expiry_date": "2025-04-23T00:00:00.000Z",
       "mappi_balance": 200
     },
     {
       "membership_id": "0d0d0d-0d0d-0d0d",
-      "membership_class_type": "Green",
+      "membership_class": "Green",
       "membership_expiry_date": "2025-03-12T00:00:00.000Z",
       "mappi_balance": 100
     }

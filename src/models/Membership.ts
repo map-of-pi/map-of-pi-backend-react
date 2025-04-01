@@ -10,7 +10,7 @@ const membershipSchema = new Schema<IMembership>(
       required: true,
       unique: true,
     },
-    membership_class_type: {
+    membership_class: {
       type: String,
       enum: Object.values(MembershipClassType).filter(value => typeof value === 'string'),
       required: true,

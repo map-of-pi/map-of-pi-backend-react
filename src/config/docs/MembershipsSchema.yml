@@ -6,7 +6,7 @@ components:
         membership_id:
           type: string
           example: 0d367ba3-a2e8-4380-86c3-ab7c0b7890c0
-        membership_class_type:
+        membership_class:
           $ref: '/api/docs/enum/MembershipClassType.yml#/components/schemas/MembershipClassType'
         membership_expiry_date:
           type: string

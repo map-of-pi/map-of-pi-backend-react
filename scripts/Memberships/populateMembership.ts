@@ -29,7 +29,7 @@ const populateMemberships = async () => {
     
       const membership = new Membership({
         membership_id: user.pi_uid,
-        membership_class_type: "Casual",
+        membership_class: "Casual",
         membership_expiry_date: null,
         mappi_balance: 0
       });

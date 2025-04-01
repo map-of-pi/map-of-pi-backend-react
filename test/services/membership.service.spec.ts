@@ -28,7 +28,7 @@ describe('getSingleMembershipById function', () => {
 
     expect(plainObject).toMatchObject({
       membership_id: '0a0a0a-0a0a-0a0a',
-      membership_class_type: "Triple Gold",
+      membership_class: "Triple Gold",
       membership_expiry_date: "2026-01-26T00:00:00.000Z",
       mappi_balance: 1000
     });
@@ -93,7 +93,7 @@ describe('addOrUpdateMembership function', () => {
     // filter and assert membership record associated with the Pioneer
     assertMembership(plainObject, {
       membership_id: userData.pi_uid,
-      membership_class_type: membership.membership_class,
+      membership_class: membership.membership_class,
       membership_expiry_date: expiry_date,
       mappi_balance: membership.mappi_allowance
     });
@@ -131,7 +131,7 @@ describe('addOrUpdateMembership function', () => {
     // filter and assert membership record associated with the Pioneer
     assertMembership(plainObject, {
       membership_id: userData.pi_uid,
-      membership_class_type: membership.membership_class,
+      membership_class: membership.membership_class,
       membership_expiry_date: expiry_date,
       mappi_balance: (existingMembershipData?.mappi_balance || 0) + membership.mappi_allowance
     });
@@ -171,7 +171,7 @@ describe('updateMembershipBalance function', () => {
 
     expect(membershipData.toObject()).toMatchObject({
       membership_id: existingMembership.membership_id,
-      membership_class_type: existingMembership.membership_class_type,
+      membership_class: existingMembership.membership_class,
       membership_expiry_date: existingMembership.membership_expiry_date,
       mappi_balance: existingMembership.mappi_balance + 5 // 1005
     });
@@ -185,7 +185,7 @@ describe('updateMembershipBalance function', () => {
 
     expect(membershipData.toObject()).toMatchObject({
       membership_id: existingMembership.membership_id,
-      membership_class_type: existingMembership.membership_class_type,
+      membership_class: existingMembership.membership_class,
       membership_expiry_date: existingMembership.membership_expiry_date,
       mappi_balance: existingMembership.mappi_balance - 5 // 395
     });

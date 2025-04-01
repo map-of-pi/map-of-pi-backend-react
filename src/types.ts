@@ -30,7 +30,7 @@ export interface IUserSettings extends Document {
 
 export interface IMembership extends Document {
   membership_id: string;
-  membership_class_type: MembershipClassType;
+  membership_class: MembershipClassType;
   membership_expiry_date: Date | null;
   mappi_balance: number;
 }
