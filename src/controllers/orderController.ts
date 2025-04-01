@@ -6,7 +6,7 @@ export const getSellerOrders= async (req: Request, res: Response) => {
   try {
     const seller = req.currentSeller; 
 
-    const orders = await orderService.getSellerOrders(seller.seller_id);
+    const orders = await orderService.getSellerOrdersById(seller.seller_id);
 
     res.status(200).json(orders);
   } catch (error) {

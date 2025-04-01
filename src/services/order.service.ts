@@ -3,7 +3,7 @@ import Order from "../models/Order";
 import { IOrder } from "../types";
 import logger from "../config/loggingConfig";
 import SellerItem from "../models/SellerItem";
-import OrderItem from "../models/OrderItem";
+import OrderItem from "../models/orderItem";
 import { OrderItemStatusType } from "../models/enums/orderItemStatusType";
 import User from "../models/User";
 
@@ -99,7 +99,7 @@ export const getSellerOrdersById = async (sellerId: string) => {
       pi_username: userLookup[order.buyer_id] || null, // Attach username if found
     }));
 
-    console.log("Fetched orders: ", ordersWithUsernames);
+    console.log("Fetched orders: ", ordersWithUsernames.length);
     return ordersWithUsernames;
   } catch (error) {
     logger.error("Error fetching seller orders: ", error);
@@ -129,9 +129,9 @@ export const getOrderItems = async (orderId: string) => {
 
     // Fetch the items linked to the order
     const orderItems = await OrderItem.find({ order_id: orderId })
-    .populate({ path: "seller_item", model: "Seller-Item" }) // Populate seller item details
+    .populate({ path: "seller_item_id", model: "Seller-Item" }) // Populate seller item details
       .exec();
-    // logger.info('fetched order items: ', orderItems);
+    logger.info('fetched order items: ', orderItems);
     return { 
       order, 
       orderItems: orderItems, 

@@ -1,7 +1,7 @@
 import mongoose, { Schema, Types } from "mongoose";
 
 import { ISeller } from "../types";
-import { SellerType, VisibleSellerType } from "./enums/sellerType";
+import { SellerType } from "./enums/sellerType";
 import { FulfillmentType } from "./enums/fulfillmentType";
 
 const sellerSchema = new Schema<ISeller>(
@@ -69,11 +69,13 @@ const sellerSchema = new Schema<ISeller>(
   { timestamps: true } // Adds timestamps to track creation and update times
 );
 
+// Creating a text index on the 'name' and 'description' fields
+sellerSchema.index({ name: "text", description: "text" });
+
 // Creating a 2dsphere index for the sell_map_center field
 sellerSchema.index({ 'sell_map_center.coordinates': '2dsphere' });
 sellerSchema.index(
-    { 'updatedAt': -1, 'sell_map_center.coordinates': '2dsphere' },
-    { partialFilterExpression: { seller_type: { $in: Object.values(VisibleSellerType) } } }
+  { 'updatedAt': -1, 'sell_map_center.coordinates': '2dsphere' }
 );
 
 // Creating the Seller model from the schema

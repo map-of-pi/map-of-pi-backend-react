@@ -9,7 +9,7 @@ const paymentSchema = new Schema<IPayment>(
       type: SchemaTypes.ObjectId,
       required: true,
     },
-    payment_id: {
+    pi_payment_id: {
       type: String,
       required: true,
       default: null

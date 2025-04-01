@@ -8,8 +8,8 @@ import { TrustMeterScale } from "./models/enums/trustMeterScale";
 import { RestrictedArea } from "./models/enums/restrictedArea";
 import { OrderStatusType } from "./models/enums/orderStatusType";
 import { OrderItemStatusType } from "./models/enums/orderItemStatusType";
-import { U2UPaymentStatus } from "./models/enums/u2uPaymentStatus";
 import { PaymentType } from "./models/enums/paymentType";
+import { U2UPaymentStatus } from "./models/enums/u2uPaymentStatus";
 
 export interface IUser extends Document {
   pi_uid: string;
@@ -114,6 +114,15 @@ export interface IReviewFeedbackOutput extends IReviewFeedback, PartialReview {}
 
 export type SanctionedSeller = Pick<ISeller, 'seller_id' | 'name' | 'address' | 'sell_map_center'> & { sanctioned_location: string };
 
+
+export interface IToggle extends Document {
+  name: string;
+  enabled: boolean;
+  description?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
   export interface IOrder extends Document {
     buyer_id: string;
     seller_id: string;
@@ -141,8 +150,8 @@ export type SanctionedSeller = Pick<ISeller, 'seller_id' | 'name' | 'address' | 
   }
 
   export interface IPayment extends Document {
-    user: Types.ObjectId;
-    amount: number;
+    user_id: Types.ObjectId;
+    amount: Types.Decimal128;
     paid: boolean;
     memo: string;
     pi_payment_id: string;

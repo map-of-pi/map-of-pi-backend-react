@@ -1,17 +1,5 @@
-export enum VisibleSellerType {
+export enum SellerType {
   Active = 'activeSeller',
+  Inactive = 'inactiveSeller',
   Test = 'testSeller'
-}
-
-enum InvisibleSellerType {
-  Inactive = 'inactiveSeller'
-}
-
-export const SellerType = Object.assign({}, VisibleSellerType, InvisibleSellerType);
-export type SellerType = VisibleSellerType | InvisibleSellerType;
-
-export enum FulfillmentType {
-  CollectionByBuyer = 'Collection by buyer',
-  DeliveredToBuyer = 'Delivered to buyer',
-  DigitalFulfillment = ' Digital Fulfillment'
 }
