@@ -22,36 +22,39 @@ describe('getAllSellers function', () => {
   };
 
   it('should fetch all sellers when all parameters are empty', async () => {
-    const sellersData = await getAllSellers();
+    const userData = await User.findOne({ pi_username: 'TestUser1' }) as IUser;
+    const sellersData = await getAllSellers(undefined, undefined, userData.pi_uid);
 
-    expect(sellersData).toHaveLength(await Seller.countDocuments({
-      seller_type: { $ne: SellerType.Inactive }
-    }));
+    expect(sellersData).toHaveLength(await Seller.countDocuments());
+  });
+
+  it('should fetch all applicable filtered sellers when all parameters are empty', async () => {
+    const userData = await User.findOne({ pi_username: 'TestUser2' }) as IUser;
+    const sellersData = await getAllSellers(undefined, undefined, userData.pi_uid);
+
+    // filter out inactive sellers and sellers with trust level <= 50. 
+    expect(sellersData).toHaveLength(9);
   });
 
   it('should fetch all applicable sellers when search query is provided and bounding box params are empty', async () => {
     const searchQuery = 'Vendor';
+    const userData = await User.findOne({ pi_username: 'TestUser1' }) as IUser;
     
-    const sellersData = await getAllSellers(undefined, searchQuery);
+    const sellersData = await getAllSellers(undefined, searchQuery, userData.pi_uid);
     
-    /* filter seller records to include those with "Vendor" 
-       + exclude those with seller_type "Inactive" */
+    // filter seller records to include those with "Vendor"
     expect(sellersData).toHaveLength(
-      await Seller.countDocuments({
-        $or: [
-          { name: { $regex: searchQuery, $options: 'i' } },
-          { description: { $regex: searchQuery, $options: 'i' } }
-        ],
-        seller_type: { $ne: SellerType.Inactive }
-      })
+      await Seller.find({
+        $text: { $search: searchQuery, $caseSensitive: false },
+      }).countDocuments()
     ); // Ensure length matches expected sellers
   });
 
   it('should fetch all applicable sellers when bounding box params are provided and search query param is empty', async () => {
-    const sellersData = await getAllSellers(mockBoundingBox, undefined);
+    const userData = await User.findOne({ pi_username: 'TestUser1' }) as IUser;
+    const sellersData = await getAllSellers(mockBoundingBox, undefined, userData.pi_uid);
     
-    /* filter seller records to exclude those with seller_type "Inactive"
-       + include those with sell_map_center within geospatial bounding box */
+    // filter seller records to include those with sell_map_center within geospatial bounding box
     expect(sellersData).toHaveLength(
       await Seller.countDocuments({
         seller_type: { $ne: SellerType.Inactive },
@@ -68,30 +71,13 @@ describe('getAllSellers function', () => {
   });
 
   it('should fetch all applicable sellers when all parameters are provided', async () => {
-    const searchQuery = 'Vendor';
+    const userData = await User.findOne({ pi_username: 'TestUser1' }) as IUser;
 
-    const sellersData = await getAllSellers(mockBoundingBox, 'Vendor');
+    const sellersData = await getAllSellers(mockBoundingBox, 'Vendor', userData.pi_uid);
 
-    /* filter seller records to exclude those with seller_type "Inactive"
-       + include those with "Vendor"
+    /* filter seller records to include those with "Vendor"
        + include those with sell_map_center within geospatial bounding box */
-    expect(sellersData).toHaveLength(
-      await Seller.countDocuments({
-        $or: [
-          { name: { $regex: searchQuery, $options: 'i' } },
-          { description: { $regex: searchQuery, $options: 'i' } }
-        ],
-        seller_type: { $ne: SellerType.Inactive },
-        'sell_map_center.coordinates': {
-          $geoWithin: {
-            $box: [
-              [mockBoundingBox.sw_lng, mockBoundingBox.sw_lat],
-              [mockBoundingBox.ne_lng, mockBoundingBox.ne_lat]
-            ]
-          },
-        },
-      })
-    ); // Ensure length matches expected sellers
+    expect(sellersData).toHaveLength(3);
   });
 });
 
@@ -239,14 +225,14 @@ describe('addOrUpdateSellerItem function', () => {
       plainObject.price = Number(plainObject.price);
     }
     
-    if (plainObject.created_at) {
-      plainObject.created_at = new Date(plainObject.created_at);
-      plainObject.created_at.setHours(0, 0, 0, 0);
+    if (plainObject.createdAt) {
+      plainObject.createdAt = new Date(plainObject.createdAt);
+      plainObject.createdAt.setHours(0, 0, 0, 0);
     }
 
-    if (plainObject.updated_at) {
-      plainObject.updated_at = new Date(plainObject.updated_at);
-      plainObject.updated_at.setHours(0, 0, 0, 0);
+    if (plainObject.updatedAt) {
+      plainObject.updatedAt = new Date(plainObject.updatedAt);
+      plainObject.updatedAt.setHours(0, 0, 0, 0);
     }
 
     if (plainObject.expired_by) {
@@ -262,7 +248,7 @@ describe('addOrUpdateSellerItem function', () => {
   };
 
   const assertUpdatedSellerItem = (actual: any, expected: any) => {
-    const { __v, created_at, ...filteredActual } = actual; // ignore DB values.
+    const { __v, createdAt, ...filteredActual } = actual; // ignore DB values.
     expect(filteredActual).toEqual(expect.objectContaining({ ...expected, _id: actual._id }));
   };
 
@@ -274,7 +260,8 @@ describe('addOrUpdateSellerItem function', () => {
       price: 0.50,
       stock_level: "Many available",
       duration: 2,
-      image: 'http://example.com/testSellerThreeItemOne.jpg'
+      image: 'http://example.com/testSellerThreeItemOne.jpg',
+      createdAt: '2025-02-20T00:00:00.000Z'
     } as unknown as ISellerItem;
 
     const sellerItemData = (await addOrUpdateSellerItem(
@@ -300,9 +287,9 @@ describe('addOrUpdateSellerItem function', () => {
       stock_level: sellerItem.stock_level,
       duration: sellerItem.duration,
       image: sellerItem.image,
-      created_at: current_date,
-      updated_at: current_date,
-      expired_by: expired_date
+      expired_by: expired_date,
+      createdAt: current_date,
+      updatedAt: current_date
     });
   });
 
@@ -343,8 +330,8 @@ describe('addOrUpdateSellerItem function', () => {
       stock_level: sellerItem.stock_level,
       duration: sellerItem.duration,
       image: sellerItem.image,
-      updated_at: current_date,
-      expired_by: expired_date
+      expired_by: expired_date,
+      updatedAt: current_date
     });
   });
 
@@ -381,11 +368,11 @@ describe('deleteSellerItem function', () => {
     }
 
     // Normalize timestamps
-    if (plainObject.created_at instanceof Date) {
-      plainObject.created_at = plainObject.created_at.toISOString();
+    if (plainObject.createdAt instanceof Date) {
+      plainObject.createdAt = plainObject.createdAt.toISOString();
     }
-    if (plainObject.updated_at instanceof Date) {
-      plainObject.updated_at = plainObject.updated_at.toISOString();
+    if (plainObject.updatedAt instanceof Date) {
+      plainObject.updatedAt = plainObject.updatedAt.toISOString();
     }
     if (plainObject.expired_by instanceof Date) {
       plainObject.expired_by = plainObject.expired_by.toISOString();
@@ -409,8 +396,8 @@ describe('deleteSellerItem function', () => {
       stock_level: "Ongoing service",
       duration: 1,
       image: 'http://example.com/testSellerTwoItemTwo.jpg',
-      created_at: '2025-01-10T00:00:00.000Z',
-      updated_at: '2025-01-10T00:00:00.000Z',
+      createdAt: '2025-01-10T00:00:00.000Z',
+      updatedAt: '2025-01-10T00:00:00.000Z',
       expired_by: '2025-01-17T00:00:00.000Z'
     } as unknown as ISellerItem;
 
@@ -429,8 +416,8 @@ describe('deleteSellerItem function', () => {
       stock_level: sellerItem.stock_level,
       duration: sellerItem.duration,
       image: sellerItem.image,
-      created_at: sellerItem.created_at,
-      updated_at: sellerItem.updated_at,
+      createdAt: sellerItem.createdAt,
+      updatedAt: sellerItem.updatedAt,
       expired_by: sellerItem.expired_by
     });
   });

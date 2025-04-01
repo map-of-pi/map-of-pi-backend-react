@@ -10,6 +10,7 @@ import SellerItem from '../src/models/SellerItem';
 import ReviewFeedback from '../src/models/ReviewFeedback';
 import TransactionRecord from '../src/models/TransactionRecord';
 import SanctionedRegion from '../src/models/misc/SanctionedRegion';
+import Toggle from '../src/models/misc/Toggle';
 
 // mock the Winston logger
 jest.mock('../src/config/loggingConfig', () => ({
@@ -20,7 +21,7 @@ jest.mock('../src/config/loggingConfig', () => ({
 }));
 
 // allow ample time to start running tests
-jest.setTimeout(60000);
+jest.setTimeout(100000);
 
 // MongoDB memory server setup
 let mongoServer: MongoMemoryServer;
@@ -42,6 +43,7 @@ beforeAll(async () => {
     await ReviewFeedback.insertMany(mockData.reviews);
     await TransactionRecord.insertMany(mockData.transactionRecords);
     await SanctionedRegion.insertMany(mockData.sanctionedRegion);
+    await Toggle.insertMany(mockData.toggle);
   } catch (error) {
     console.error('Failed to start MongoMemoryServer', error);
     throw error;

@@ -1,10 +1,11 @@
 import { Document, Types } from "mongoose";
 import { DeviceLocationType } from "./models/enums/deviceLocationType";
 import { RatingScale } from "./models/enums/ratingScale";
-import { SellerType, FulfillmentType } from "./models/enums/sellerType";
+import { MembershipClassType } from "./models/enums/membershipClassType";
+import { SellerType } from "./models/enums/sellerType";
+import { FulfillmentType } from "./models/enums/fulfillmentType";
 import { StockLevelType } from "./models/enums/stockLevelType";
 import { TrustMeterScale } from "./models/enums/trustMeterScale";
-import { MembershipClassType } from "./models/enums/membershipClassType";
 import { TransactionType } from "./models/enums/transactionType";
 import { RestrictedArea } from "./models/enums/restrictedArea";
 
@@ -25,6 +26,15 @@ export interface IUserSettings extends Document {
   search_map_center?: {
     type: 'Point';
     coordinates: [number, number];
+  };
+  search_filters?: {
+    include_active_sellers: Boolean;
+    include_inactive_sellers: Boolean;
+    include_test_sellers: Boolean;
+    include_trust_level_100: Boolean;
+    include_trust_level_80: Boolean;
+    include_trust_level_50: Boolean;
+    include_trust_level_0: Boolean;
   };
 }
 
@@ -61,9 +71,9 @@ export interface ISellerItem extends Document {
   stock_level: StockLevelType;
   image?: string;
   duration: number;
-  created_at: Date;
-  updated_at: Date;
   expired_by: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface ITransactionRecord extends Document {
@@ -119,3 +129,11 @@ export type PartialReview = {
 export interface IReviewFeedbackOutput extends IReviewFeedback, PartialReview {}
 
 export type SanctionedSeller = Pick<ISeller, 'seller_id' | 'name' | 'address' | 'sell_map_center'> & { sanctioned_location: string };
+
+export interface IToggle extends Document {
+  name: string;
+  enabled: boolean;
+  description?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
