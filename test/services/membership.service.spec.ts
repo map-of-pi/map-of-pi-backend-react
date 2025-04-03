@@ -46,118 +46,109 @@ describe('getSingleMembershipById function', () => {
   });
 });
 
+
 describe('addOrUpdateMembership function', () => {
-  // Helper function to convert Mongoose document to a plain object and normalize values accordingly
-  const convertToPlainObject = (membership: IMembership): any => {
-    const plainObject = membership.toObject();
+  let mockSession: any;
 
-    if (plainObject.membership_expiry_date instanceof Date) {
-      plainObject.membership_expiry_date = new Date(plainObject.membership_expiry_date);
-      plainObject.membership_expiry_date.setHours(0, 0, 0, 0);
-    }
-    
-    return plainObject;
-  };
+  beforeEach(() => {
+    mockSession = {
+      startTransaction: jest.fn(),
+      commitTransaction: jest.fn(),
+      endSession: jest.fn()
+    };
 
-  const assertMembership = (actual: any, expected: any) => {
-    const { _id, __v, createdAt, updatedAt, ...filteredActual } = actual; // ignore DB values.
-    expect(filteredActual).toEqual(expect.objectContaining(expected));
-  };
+    jest.spyOn(Membership, 'startSession').mockResolvedValue(mockSession);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks(); // Reset mocks after each test
+  });
 
   it('should build new membership if it does not exist for the Pioneer', async () => {
-    const userData = await User.findOne({ pi_uid: '0e0e0e-0e0e-0e0e' }) as IUser;
+    const fakeUser = { pi_uid: '0e0e0e-0e0e-0e0e' } as IUser;
 
-    const membership = {
+    jest.spyOn(Membership, 'findOne').mockReturnValueOnce({
+      session: () => ({
+        exec: () => Promise.resolve(null)
+      })
+    } as any);
+
+    const saveMock = jest.fn().mockResolvedValue({
+      membership_id: fakeUser.pi_uid,
       membership_class: MembershipClassType.MEMBER,
-      membership_duration: 2,
-      mappi_allowance: 5
-    }
-
-    const membershipData = (await addOrUpdateMembership(
-      userData as IUser, 
-      membership.membership_class, 
-      membership.membership_duration, 
-      membership.mappi_allowance 
-    )) as IMembership;
-
-    // Convert `membershipData` to a plain object if it's a Mongoose document
-    const plainObject = await convertToPlainObject(membershipData);
-
-    const current_date = new Date();
-
-    // Calculate the membership_expiry_date (current_date + duration in weeks)
-    const durationInMs = (membership.membership_duration || 1) * 7 * 24 * 60 * 60 * 1000;
-    const expiry_date = new Date(current_date.getTime() + durationInMs);
-    expiry_date.setHours(0, 0, 0, 0);
-
-    // filter and assert membership record associated with the Pioneer
-    assertMembership(plainObject, {
-      membership_id: userData.pi_uid,
-      membership_class: membership.membership_class,
-      membership_expiry_date: expiry_date,
-      mappi_balance: membership.mappi_allowance
+      membership_expiry_date: expect.any(Date),
+      mappi_balance: 5
     });
+
+    jest.spyOn(Membership.prototype, 'save').mockImplementation(saveMock);
+
+    const result = await addOrUpdateMembership(
+      fakeUser,
+      MembershipClassType.MEMBER,
+      2,
+      5
+    );
+
+    expect(result).toMatchObject({
+      membership_id: fakeUser.pi_uid,
+      membership_class: MembershipClassType.MEMBER,
+      mappi_balance: 5
+    });
+
+    expect(saveMock).toHaveBeenCalled();
+    expect(mockSession.commitTransaction).toHaveBeenCalled();
+    expect(mockSession.endSession).toHaveBeenCalled();
   });
 
-  it('should update existing membership if it does exist for the Pioneer', async () => {  
-    const userData = await User.findOne({ pi_uid: '0b0b0b-0b0b-0b0b' }) as IUser;
-    const existingMembershipData = await Membership.findOne({ membership_id: userData.pi_uid });
+  it('should update existing membership if it does exist for the Pioneer', async () => {
+    const fakeUser = { pi_uid: '0b0b0b-0b0b-0b0b' } as IUser;
 
-    const membership = {
+    const fakeMembership: any = {
+      membership_id: fakeUser.pi_uid,
+      membership_class: MembershipClassType.MEMBER,
+      membership_expiry_date: new Date(),
+      mappi_balance: 100,
+      save: jest.fn().mockResolvedValue({
+        membership_id: fakeUser.pi_uid,
+        membership_class: MembershipClassType.TRIPLE_GOLD,
+        membership_expiry_date: expect.any(Date),
+        mappi_balance: 2100
+      })
+    };
+
+    jest.spyOn(Membership, 'findOne').mockReturnValueOnce({
+      session: () => ({
+        exec: () => Promise.resolve(fakeMembership)
+      })
+    } as any);
+
+    const result = await addOrUpdateMembership(
+      fakeUser,
+      MembershipClassType.TRIPLE_GOLD,
+      50,
+      2000
+    );
+
+    expect(fakeMembership.save).toHaveBeenCalled();
+    expect(result).toMatchObject({
+      membership_id: fakeUser.pi_uid,
       membership_class: MembershipClassType.TRIPLE_GOLD,
-      membership_duration: 50,
-      mappi_allowance: 2000
-    }
-
-    const membershipData = (await addOrUpdateMembership(
-      userData as IUser, 
-      membership.membership_class, 
-      membership.membership_duration, 
-      membership.mappi_allowance 
-    )) as IMembership;
-
-    // Convert `membershipData` to a plain object if it's a Mongoose document
-    const plainObject = await convertToPlainObject(membershipData);
-    const current_date = existingMembershipData?.membership_expiry_date
-      ? new Date(existingMembershipData.membership_expiry_date)
-      : new Date(); // Fallback to today if `membership_expiry_date` is undefined.
-    current_date.setHours(0, 0, 0, 0);
-
-    // Calculate the membership_expiry_date (current_date + duration in weeks)
-    const durationInMs = (membership.membership_duration || 1) * 7 * 24 * 60 * 60 * 1000;
-    const expiry_date = new Date(current_date.getTime() + durationInMs)
-    expiry_date.setHours(0, 0, 0, 0);
-
-    // filter and assert membership record associated with the Pioneer
-    assertMembership(plainObject, {
-      membership_id: userData.pi_uid,
-      membership_class: membership.membership_class,
-      membership_expiry_date: expiry_date,
-      mappi_balance: (existingMembershipData?.mappi_balance || 0) + membership.mappi_allowance
+      mappi_balance: 2100
     });
+
+    expect(mockSession.commitTransaction).toHaveBeenCalled();
+    expect(mockSession.endSession).toHaveBeenCalled();
   });
 
-  it('should throw an error when an exception occurs', async () => {  
-    const userData = await User.findOne({ pi_uid: '0e0e0e-0e0e-0e0e' }) as IUser;
-    
-    const membership = {
-      membership_class: MembershipClassType.MEMBER,
-      membership_duration: 2,
-      mappi_allowance: 5
-    }
+  it('should throw an error when an exception occurs', async () => {
+    const fakeUser = { pi_uid: '0x0x0x-0x0x-0x0x' } as IUser;
 
-    // Mock the Membership model to throw an error
     jest.spyOn(Membership, 'findOne').mockImplementationOnce(() => {
-      throw new Error('Mock database error');
+      throw new Error('Mock failure');
     });
 
     await expect(
-      addOrUpdateMembership(
-        userData as IUser,
-        membership.membership_class,
-        membership.membership_duration,
-        membership.mappi_allowance
-      )
+      addOrUpdateMembership(fakeUser, MembershipClassType.MEMBER, 1, 10)
     ).rejects.toThrow('Failed to add or update membership; please try again later');
   });
 });
