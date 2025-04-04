@@ -1,5 +1,5 @@
 export enum OrderItemStatusType { 
   Pending = 'pending',
-  Fulfilled = "fufilled",
+  Fulfilled = "fulfilled",
   Refunded = 'refunded'
 }

@@ -33,7 +33,7 @@ export const createOrder = async (req: Request, res: Response) => {
   try {
     const { orderId, orderData, orderItems } = req.body;
     
-    const updatedOrder = await orderService.createOrder(orderId, orderData, orderItems);
+    const updatedOrder = await orderService.createOrder(orderData, orderItems);
     res.status(200).json(updatedOrder);
   } catch (error:any) {
     res.status(500).json({ message: error.message });
@@ -65,6 +65,23 @@ export const getOrderItems = async (req: Request, res: Response) => {
     res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch order items" });
+  }
+};
+
+export const updateCompleteOrder = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const updatedOrder = await orderService.completeOrder(id);
+
+    if (!updatedOrder) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.status(200).json(updatedOrder);
+  }
+  catch (error) {
+    logger.error("Error completing order: ", error);
+    res.status(500).json({ message: "Failed to complete order" });
   }
 };
 

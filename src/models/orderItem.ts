@@ -8,10 +8,12 @@ const orderItemSchema = new Schema<IOrderItem>(
     order_id: {
       type: SchemaTypes.ObjectId,
       required: true,
+      ref: "Order",
     },
     seller_item_id: {
       type: SchemaTypes.ObjectId,
       required: true,
+      ref: "Seller-Item", 
     },
     quantity: {
       type: Number,

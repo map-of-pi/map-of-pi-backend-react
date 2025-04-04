@@ -49,6 +49,6 @@ const paymentSchema = new Schema<IPayment>(
 );
 
 // Creating the Payment model from the schema
-const Payment = mongoose.model<IPayment>("Transaction", paymentSchema);
+const Payment = mongoose.model<IPayment>("Payment", paymentSchema);
 
 export default Payment;

@@ -9,15 +9,18 @@ const orderSchema = new Schema<IOrder>(
     payment_id: {
       type: SchemaTypes.ObjectId,
       required: true,
-      default: null
+      default: null,
+      ref: "Payment",
     },
     buyer_id: {
-      type: String,
+      type: SchemaTypes.ObjectId,
       required: true,
+      ref: "User",
     },
     seller_id: {
-      type: String,
+      type: SchemaTypes.ObjectId,
       required: true,
+      ref: "Seller",
     },
     total_amount: {
       type: Types.Decimal128,

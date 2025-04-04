@@ -123,10 +123,30 @@ export interface IToggle extends Document {
   updatedAt: Date;
 }
 
+export interface PickedItems {
+  itemId: string,
+  quantity: number,
+}
+
+export interface PaymentMetadataType {
+  items: PickedItems[],
+  buyer: string, // ref user model pi_uid
+  seller: string, // ref seller model seller_id
+  fulfillment_method: FulfillmentType | undefined,
+  seller_fulfillment_description:string | undefined,
+  buyer_fulfillment_description: string
+}
+
+export type PaymentDataType = {
+  amount: Types.Decimal128;
+  memo: string;
+  metadata: PaymentMetadataType;
+}
+
   export interface IOrder extends Document {
-    buyer_id: string;
-    seller_id: string;
-    payment_id: Types.ObjectId;
+    buyer_id: Types.ObjectId; // ref user model
+    seller_id: Types.ObjectId; // ref seller model
+    payment_id: Types.ObjectId; // ref payment model
     total_amount: Types.Decimal128;
     status: OrderStatusType;
     is_paid: boolean;

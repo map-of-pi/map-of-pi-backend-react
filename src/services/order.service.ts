@@ -1,111 +1,97 @@
 import mongoose from "mongoose";
 import Order from "../models/Order";
-import { IOrder } from "../types";
+import { IOrder, PickedItems } from "../types";
 import logger from "../config/loggingConfig";
 import SellerItem from "../models/SellerItem";
 import OrderItem from "../models/orderItem";
 import { OrderItemStatusType } from "../models/enums/orderItemStatusType";
 import User from "../models/User";
+import Seller from "../models/Seller";
+import { StringDecoder } from "string_decoder";
+import { OrderStatusType } from "../models/enums/orderStatusType";
 
-/**
- * Adds a new order or updates an existing one.
- * @param {string | null} orderId - Existing order ID (if updating).
- * @param {IOrder} orderData - Order details.
- * @param {IOrderItem[]} orderItems - List of order items.
- * @returns {Promise<IOrder>} - The newly created or updated order.
- */
+
 export const createOrder = async (
-  orderId: string | null,
-  orderData: IOrder,
-  orderItems: {itemId: string, quantity: number}[]
+  orderData: Partial<IOrder>,
+  orderItems: PickedItems[]
 ) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    let order;
-    let sellerItem
-    if (orderId) {
-      // Update existing order
-      order = await Order.findByIdAndUpdate(orderId, orderData, { new: true, session });
-      if (!order) {
-        throw new Error("Order not found");
-      }
-    } else {
-      // Create new order
-      order = new Order(orderData);
-      await order.save({ session });
-    }
+    // Create new order
+    const order = new Order(orderData);
+    const newOrder = await order.save({ session });
 
-    // Handle order items
-    for (const item of orderItems) {
-      if (item.itemId) {
-        sellerItem = await SellerItem.findById(item.itemId);
-        if (!sellerItem) {
-          console.log(`Seller item not found for ID: ${item.itemId}`)
-          throw new Error(`Seller item not found for ID: ${item.itemId}`);
-        }
-        // Create new order item linked to the order
-        const newItem = new OrderItem({
-          order: order._id,
-          seller_item: sellerItem._id, // Store only the ObjectId
-          quantity: item.quantity,
-          sub_total_amount: item.quantity * parseFloat(sellerItem?.price.toString()), // Corrected field
-          status: OrderItemStatusType.Pending,
-        });
-        sellerItem = await newItem.save({ session });
-      }
-    }
+    // Fetch all seller items in bulk
+    const sellerItemIds = orderItems.map((item) => item.itemId);
+    const sellerItems = await SellerItem.find({ _id: { $in: sellerItemIds } }).lean();
 
-    // use bulk item creation/update instead of
+    // Create a lookup for seller items
+    const sellerItemLookup = sellerItems.reduce((acc, sellerItem) => {
+      acc[sellerItem._id.toString()] = sellerItem;
+      return acc;
+    }, {} as Record<string, any>);
+
+    // Prepare bulk order items
+    const bulkOrderItems = orderItems.map((item) => {
+      const sellerItem = sellerItemLookup[item.itemId];
+      if (!sellerItem) {
+        throw new Error(`Seller item not found for ID: ${item.itemId}`);
+      }
+
+      return {
+        order_id: newOrder._id,
+        seller_item_id: sellerItem._id, // Store only the ObjectId
+        quantity: item.quantity,
+        subtotal: item.quantity * parseFloat(sellerItem.price.toString()),
+        status: OrderItemStatusType.Pending,
+      };
+    });
+
+    // Insert all order items in bulk
+    await OrderItem.insertMany(bulkOrderItems, { session });
 
     await session.commitTransaction();
     session.endSession();
-    console.log('seller item: ', sellerItem);
-    console.log('order: ', order);
-    sellerItem
-    return order;
+
+    return newOrder;
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    
+
     logger.error("Error adding/updating order: ", error);
     throw new Error("Error processing order");
   }
 };
 
-export const getSellerOrdersById = async (sellerId: string) => {
+export const updatePaidOrder = async (paymentId:string, updateData:Partial<IOrder>): Promise<IOrder | null> => {
   try {
-    // Fetch orders matching the seller_id and sorted in descending order
-    const orders = await Order.find({ seller_id: sellerId }).sort({ updatedAt: -1 }).lean();
+    const updatedOrder = await Order.findOneAndUpdate({payment_id: paymentId}, updateData, { new: true }).exec();
+    if (!updatedOrder) {
+      logger.error(`Failed to update order for payment ID ${paymentId}`);
+      return null
+    }
+    return updatedOrder
+  } catch (error:any) {
+    logger.error(`Error updating order for payment ID ${paymentId}: `, error);
+    return null
+  }  
+}
 
-    // Extract all unique buyer `pi_uid`s from the orders
-    const buyerPiUids = [...new Set(orders.map((order) => order.buyer_id))];
-
-    // Fetch user details using `pi_uid`
-    const users = await User.find({ pi_uid: { $in: buyerPiUids } })
-      .select("pi_uid pi_username")
-      .lean();
-
-    // Create a lookup object for quick access
-    const userLookup = users.reduce((acc, user) => {
-      acc[user.pi_uid] = user.pi_username;
-      return acc;
-    }, {} as Record<string, string>);
-
-    // Attach `pi_username` to each order
-    const ordersWithUsernames = orders.map((order) => ({
-      ...order,
-      pi_username: userLookup[order.buyer_id] || null, // Attach username if found
-    }));
-
-    console.log("Fetched orders: ", ordersWithUsernames.length);
-    return ordersWithUsernames;
-  } catch (error) {
-    logger.error("Error fetching seller orders: ", error);
-    throw new Error("Error fetching orders");
-  }
-};
+export const getSellerOrdersById = async (piUid:string) => {
+    try {
+      const seller = await Seller.exists({seller_id: piUid});
+      const orders = await Order.find({seller_id: seller?._id, is_paid: true})
+        .populate('buyer_id', 'pi_username -_id') // Populate buyer_id with pi_username
+        .sort({ createdAt: -1 }) // Sort by createdAt in descending order
+        .lean();
+      return orders;
+    } catch (error) {
+        console.error('Error fetching seller orders:', error);
+        throw error;
+    }
+}
 
 export const deleteOrderById = async (orderId: string) => {
   try {
@@ -119,19 +105,19 @@ export const deleteOrderById = async (orderId: string) => {
 export const getOrderItems = async (orderId: string) => {
   try {
     // Fetch the base order
-    let order = await Order.findById(orderId);
+    let order = await Order.findById(orderId).lean();
     if (!order) {
       return null; // Order not found
     }
 
     // Fetch the user's pi_username based on buyer_id matching pi_uid
-    const user = await User.findOne({ pi_uid: order.buyer_id }, "pi_username");
+    const user = await User.findById(order.buyer_id, "pi_username");
 
     // Fetch the items linked to the order
     const orderItems = await OrderItem.find({ order_id: orderId })
     .populate({ path: "seller_item_id", model: "Seller-Item" }) // Populate seller item details
       .exec();
-    logger.info('fetched order items: ', orderItems);
+    logger.info('fetched order items: ', orderItems.length);
     return { 
       order, 
       orderItems: orderItems, 
@@ -142,6 +128,32 @@ export const getOrderItems = async (orderId: string) => {
     throw new Error("Error fetching order and items");
   }
 };
+
+export const completeOrder = async (orderId: string) => {
+  try {
+    // update all related order items status to completed
+    const orderItems = await OrderItem.find({ order_id: orderId }).exec();
+    const orderItemIds = orderItems.map((item) => item._id);
+    await OrderItem.updateMany(
+      { _id: { $in: orderItemIds } },
+      { status: OrderItemStatusType.Fulfilled },
+      { new: true }
+    ).exec();
+    
+    // update order status to completed
+    const updatedOrder = await Order.findByIdAndUpdate(orderId, {
+      status: OrderStatusType.Completed
+    }, {new: true}).exec();
+    if (!updatedOrder) return null
+    const orders = await getOrderItems(orderId)
+    return { 
+      ...orders 
+    };
+  }catch (error:any){
+    logger.error(`Error updating order item for order ${orderId}: `, error);
+    throw new Error("Error updating order item");
+  }  
+}
 
 export const updateOrderItemStatus = async (itemId: string, itemStatus: string) => {
   try {

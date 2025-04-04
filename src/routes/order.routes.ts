@@ -11,6 +11,7 @@ orderRoutes.get("/seller-order", verifyToken, isSellerFound, orderController.get
 orderRoutes.get("/:id", verifyToken, orderController.getSingleOrder);
 orderRoutes.post("/", verifyToken, orderController.createOrder);
 orderRoutes.delete("/:id", verifyToken, orderController.deleteOrder);
+orderRoutes.put("/complete/:id", verifyToken, orderController.updateCompleteOrder);
 orderRoutes.put("/:id", verifyToken, isSellerFound, orderController.updateOrderItemStatus);
 
 export default orderRoutes;
