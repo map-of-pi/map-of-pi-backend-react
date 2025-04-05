@@ -58,7 +58,7 @@ export const onIncompletePaymentFound = async (
     }).exec()
     // return res.status(400).json({ message: "finding old payment failed" });
 
-    await platformAPIClient.post(`/payments/${paymentId}/complete`, {
+    await platformAPIClient.post(`/v2/payments/${paymentId}/complete`, {
       txid,
     });
 
