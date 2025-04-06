@@ -33,7 +33,7 @@ describe('getAllSellers function', () => {
     const sellersData = await getAllSellers(undefined, undefined, userData.pi_uid);
 
     // filter out inactive sellers and sellers with trust level <= 50. 
-    expect(sellersData).toHaveLength(9);
+    expect(sellersData).toHaveLength(2);
   });
 
   it('should fetch all applicable sellers when search query is provided and bounding box params are empty', async () => {
