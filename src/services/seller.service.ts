@@ -41,7 +41,7 @@ const resolveSellerSettings = async (
     if (trustLevelFilters && !trustLevelFilters.includes(trustMeterRating)) {
       return null; // Exclude this seller
     }
-
+    
     try {
       return {
         ...sellerObject,
@@ -83,15 +83,19 @@ export const getAllSellers = async (
 
     // Construct base filter criteria
     const baseCriteria: Record<string, any> = {};
+    
+    // [Seller Type Filter]
     const sellerTypeFilters: SellerType[] = [];
-
     if (searchFilters.include_active_sellers) sellerTypeFilters.push(SellerType.Active);
     if (searchFilters.include_inactive_sellers) sellerTypeFilters.push(SellerType.Inactive);
     if (searchFilters.include_test_sellers) sellerTypeFilters.push(SellerType.Test);
-    // include filtered seller types
-    if (sellerTypeFilters.length) baseCriteria.seller_type = { $in: sellerTypeFilters };
 
-    // Trust Level Filters
+    // include filtered seller types
+    if (sellerTypeFilters.length > 0) { 
+      baseCriteria.seller_type = { $in: sellerTypeFilters };
+    }
+
+    // [Trust Level Filters]
     const trustLevels = [
       { key: "include_trust_level_100", value: TrustMeterScale.HUNDRED },
       { key: "include_trust_level_80", value: TrustMeterScale.EIGHTY },
@@ -102,7 +106,7 @@ export const getAllSellers = async (
       .filter(({ key }) => searchFilters[key]) // Only include checked trust levels
       .map(({ value }) => value);
 
-    // Search Query Filter
+    // [Search Query Filter]
     const searchCriteria = search_query
       ? {
           $text: {
@@ -112,45 +116,40 @@ export const getAllSellers = async (
         }
       : {}; // default to empty object if search_query not provided
 
-    // Merge filters
-    const aggregatedCriteria = { ...baseCriteria, ...searchCriteria };
-
-    let sellers: ISeller[];
-    // If bounds are provided, use MongoDB's $geometry operator
-    if (bounds && !search_query) {
-      sellers = await Seller.find({
-        ...aggregatedCriteria,
-        sell_map_center: {
-          $geoWithin: {
-            $geometry: {
-              type: "Polygon",
-              coordinates: [ [
-                [bounds.sw_lng, bounds.sw_lat],
-                [bounds.ne_lng, bounds.sw_lat],
-                [bounds.ne_lng, bounds.ne_lat],
-                [bounds.sw_lng, bounds.ne_lat],
-                [bounds.sw_lng, bounds.sw_lat]
-              ] ]
-            }
-          }
+    // [Geo Filter]
+    const locationCriteria = bounds
+      ? {
+          sell_map_center: {
+            $geoWithin: {
+              $geometry: {
+                type: "Polygon",
+                coordinates: [[
+                  [bounds.sw_lng, bounds.sw_lat],
+                  [bounds.ne_lng, bounds.sw_lat],
+                  [bounds.ne_lng, bounds.ne_lat],
+                  [bounds.sw_lng, bounds.ne_lat],
+                  [bounds.sw_lng, bounds.sw_lat],
+                ]],
+              },
+            },
+          },
         }
-      })
-      .sort({ updatedAt: -1 }) // Sort by last updated
+      : {};
+
+    // [Final Aggregated Criteria]
+    const aggregatedCriteria = {
+      ...baseCriteria,
+      ...searchCriteria,
+      ...locationCriteria,
+    };
+
+    const sellers = await Seller.find(aggregatedCriteria)
+      .sort({ updatedAt: -1 })
       .limit(maxNumSellers)
-      .hint({ 'updatedAt': -1, 'sell_map_center.coordinates': '2dsphere' })
       .exec();
-    } else {
-      // If no bounds are provided, return all sellers (without geo-filtering)  
-      sellers = await Seller.find(aggregatedCriteria)
-        .sort({ updated_at: -1 })
-        .limit(maxNumSellers)
-        .exec();
-    }
 
     // Fetch and merge the settings for each seller
     const sellersWithSettings = await resolveSellerSettings(sellers, trustLevelFilters);
-
-    // Return sellers with their settings merged
     return sellersWithSettings;
   } catch (error) {
     logger.error('Failed to get all sellers:', error);
