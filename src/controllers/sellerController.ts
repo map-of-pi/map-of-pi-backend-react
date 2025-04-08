@@ -12,10 +12,10 @@ export const fetchSellersByCriteria = async (req: Request, res: Response) => {
     const sellers = await sellerService.getAllSellers(bounds, search_query, userId);
 
     if (!sellers || sellers.length === 0) {
-      logger.warn(`No sellers found within bounds (${bounds?.sw_lat}, ${bounds?.sw_lng}) to (${bounds?.ne_lat}, ${bounds?.ne_lng}) with "${search_query ?? 'undefined'}"`);
+      logger.warn(`No sellers found within bounds (${bounds?.sw_lat}, ${bounds?.sw_lng}) to (${bounds?.ne_lat}, ${bounds?.ne_lng}) with ${search_query}`);
       return res.status(204).json({ message: "Sellers not found" });
     }
-    logger.info(`Fetched ${sellers.length} sellers within bounds (${bounds?.sw_lat}, ${bounds?.sw_lng}) to (${bounds?.ne_lat}, ${bounds?.ne_lng}) with "${search_query ?? 'undefined'}"`);
+    logger.info(`Fetched ${sellers.length} sellers within bounds (${bounds?.sw_lat}, ${bounds?.sw_lng}) to (${bounds?.ne_lat}, ${bounds?.ne_lng}) with ${search_query}`);
     return res.status(200).json(sellers);
   } catch (error) {
     logger.error('Failed to fetch sellers by criteria:', error);
