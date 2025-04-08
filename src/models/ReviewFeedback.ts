@@ -37,6 +37,9 @@ const reviewFeedbackSchema = new Schema<IReviewFeedback>(
       required: true
     }
   },
+  {
+    timestamps:true
+  }
 );
 
 const ReviewFeedback = mongoose.model<IReviewFeedback>("Review-Feedback", reviewFeedbackSchema);

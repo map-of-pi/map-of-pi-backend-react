@@ -11,6 +11,8 @@ export interface IUser extends Document {
   pi_uid: string;
   pi_username: string;
   user_name: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface IUserSettings extends Document {
@@ -36,6 +38,30 @@ export interface IUserSettings extends Document {
   };
 }
 
+
+
+
+  export interface ISanctionedRegion extends Document {
+    location: RestrictedArea;
+    boundary: {
+      type: 'Polygon';
+      coordinates: [[[number, number]]];
+    };
+    createdAt?:Date,
+    updatedAt?:Date
+  }
+
+  export interface CompleteFeedback {
+    givenReviews: IReviewFeedbackOutput[];
+    receivedReviews: IReviewFeedbackOutput[];
+  }
+
+  export interface IMapCenter {
+    type: 'Point';
+    coordinates: [number, number];
+  };
+  
+
 export interface ISeller extends Document {
   seller_id: string;
   name: string;
@@ -51,6 +77,8 @@ export interface ISeller extends Document {
   order_online_enabled_pref: boolean;
   fulfillment_method: FulfillmentType;
   fulfillment_description?: string;
+  createdAt?:Date,
+  updatedAt?:Date
 }
 
 export interface ISellerItem extends Document {
@@ -75,25 +103,14 @@ export interface IReviewFeedback extends Document {
   comment?: string;
   image?: string;
   review_date: Date;
+  createdAt?:Date,
+  updatedAt?:Date
 }
 
-export interface ISanctionedRegion extends Document {
-  location: RestrictedArea;
-  boundary: {
-    type: 'Polygon';
-    coordinates: [[[number, number]]];
-  };
-}
 
-export interface CompleteFeedback {
-  givenReviews: IReviewFeedbackOutput[];
-  receivedReviews: IReviewFeedbackOutput[];
-}
 
-export interface IMapCenter {
-  type: 'Point';
-  coordinates: [number, number];
-}
+
+
 
 // Select specific fields from IUserSettings
 export type PartialUserSettings = Pick<IUserSettings, 'user_name' | 'email' | 'phone_number' | 'findme' | 'trust_meter_rating'>;
@@ -116,4 +133,14 @@ export interface IToggle extends Document {
   description?: string;
   createdAt: Date;
   updatedAt: Date;
+}
+  
+export interface IAdmin extends Document {
+  email: string;  
+  username: string;
+  password: string;       
+  role?: string;          
+  createdAt?: Date;      
+  updatedAt?: Date;    
+  isActive?: boolean;   
 }

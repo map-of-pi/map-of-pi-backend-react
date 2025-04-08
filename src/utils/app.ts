@@ -16,6 +16,8 @@ import reviewFeedbackRoutes from "../routes/reviewFeedback.routes";
 import mapCenterRoutes from "../routes/mapCenter.routes";
 import reportRoutes from "../routes/report.routes";
 import toggleRoutes from "../routes/toggle.routes";
+import adminRoutes from "../routes/admin.routes";
+import statisticRoutes from "../routes/statistics.routes";
 
 dotenv.config();
 
@@ -26,7 +28,7 @@ app.use(express.json());
 app.use(requestLogger);
 
 app.use(cors({
-    origin: process.env.CORS_ORIGIN_URL,
+    origin: [`${process.env.CORS_ORIGIN_URL}`,`${process.env.ADMIN_URL}`],
     credentials: true
 }));
 app.use(cookieParser());
@@ -48,6 +50,11 @@ app.use("/api/v1/review-feedback", reviewFeedbackRoutes);
 app.use("/api/v1/map-center", mapCenterRoutes);
 app.use("/api/v1/reports", reportRoutes);
 app.use("/api/v1/toggles", toggleRoutes);
+
+////
+
+app.use("/api/v1/admin",adminRoutes)
+app.use("/api/v1/statistics",statisticRoutes)
 
 app.use("/", homeRoutes);
 
