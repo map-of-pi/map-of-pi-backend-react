@@ -36,24 +36,24 @@ export interface IUserSettings extends Document {
   };
 }
 
-  export interface ISeller extends Document {
-    seller_id: string;
-    name: string;
-    seller_type: SellerType;
-    description: string;
-    image?: string;
-    address?: string;
-    average_rating: Types.Decimal128;
-    sell_map_center: {
-      type: 'Point';
-      coordinates: [number, number];
-    };
-    order_online_enabled_pref: boolean;
-    fulfillment_method: FulfillmentType;
-    fulfillment_description?: string;
-    pre_restriction_seller_type?: SellerType | null;
-    isPreRestricted: boolean;
-  }
+export interface ISeller extends Document {
+  seller_id: string;
+  name: string;
+  seller_type: SellerType;
+  description: string;
+  image?: string;
+  address?: string;
+  average_rating: Types.Decimal128;
+  sell_map_center: {
+    type: 'Point';
+    coordinates: [number, number];
+  };
+  order_online_enabled_pref: boolean;
+  fulfillment_method: FulfillmentType;
+  fulfillment_description?: string;
+  pre_restriction_seller_type?: SellerType | null;
+  isPreRestricted: boolean;
+}
 
 export interface ISellerItem extends Document {
   _id: string;
@@ -68,6 +68,7 @@ export interface ISellerItem extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
+
 export interface IReviewFeedback extends Document {
   _id: string;
   review_receiver_id: string;
