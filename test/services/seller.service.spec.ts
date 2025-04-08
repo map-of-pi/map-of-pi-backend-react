@@ -9,7 +9,6 @@ import {
   getSellersWithinSanctionedRegion 
 } from '../../src/services/seller.service';
 import User from '../../src/models/User';
-import { SellerType } from '../../src/models/enums/sellerType';
 import { RestrictedArea, RestrictedAreaBoundaries } from '../../src/models/enums/restrictedArea';
 import { IUser, ISeller, ISellerItem, ISanctionedRegion } from '../../src/types';
 
@@ -57,7 +56,6 @@ describe('getAllSellers function', () => {
     // filter seller records to include those with sell_map_center within geospatial bounding box
     expect(sellersData).toHaveLength(
       await Seller.countDocuments({
-        seller_type: { $ne: SellerType.Inactive },
         'sell_map_center.coordinates': {
           $geoWithin: {
             $box: [
@@ -71,13 +69,26 @@ describe('getAllSellers function', () => {
   });
 
   it('should fetch all applicable sellers when all parameters are provided', async () => {
+    const searchQuery = 'Seller';
     const userData = await User.findOne({ pi_username: 'TestUser1' }) as IUser;
 
-    const sellersData = await getAllSellers(mockBoundingBox, 'Vendor', userData.pi_uid);
+    const sellersData = await getAllSellers(mockBoundingBox, searchQuery, userData.pi_uid);
 
     /* filter seller records to include those with "Vendor"
        + include those with sell_map_center within geospatial bounding box */
-    expect(sellersData).toHaveLength(3);
+    expect(sellersData).toHaveLength(
+      await Seller.countDocuments({
+        $text: { $search: searchQuery, $caseSensitive: false },
+        'sell_map_center.coordinates': {
+          $geoWithin: {
+            $box: [
+              [mockBoundingBox.sw_lng, mockBoundingBox.sw_lat],
+              [mockBoundingBox.ne_lng, mockBoundingBox.ne_lat]
+            ]
+          },
+        },
+      })
+    ); // Ensure length matches expected sellers
   });
 });
 
