@@ -7,16 +7,22 @@ import { IUser } from "../types";
 import logger from '../config/loggingConfig';
 
 export const authenticateUser = async (req: Request, res: Response) => {
+
   const auth = req.body;
+  if (!auth?.user) {
+    logger.error('Missing user in auth request body');
+    return res.status(400).json({ message: 'Invalid request' });
+  }
 
   try {
     const user = await userService.authenticate(auth.user);
+
     const token = jwtHelper.generateUserToken(user);
     const expiresDate = new Date(Date.now() + 1 * 24 * 60 * 60 * 1000); // 1 day
 
     logger.info(`User authenticated: ${user.pi_uid}`);
 
-    return res.cookie("token", token, {httpOnly: true, expires: expiresDate, secure: true, priority: "high", sameSite: "lax"}).status(200).json({
+    return res.cookie("token", token, {httpOnly: true, expires: expiresDate, secure: true, priority: "high", sameSite: "none"}).status(200).json({
       user,
       token,
     });
