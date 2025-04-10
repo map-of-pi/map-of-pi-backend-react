@@ -57,7 +57,7 @@ describe("isToggle function", () => {
 
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
-      message: `Failed to fetch toggle ${ toggleName }; please try again later`,
+      message: 'Failed to determine feature state; please try again later',
     });
     expect(next).not.toHaveBeenCalled();
 
