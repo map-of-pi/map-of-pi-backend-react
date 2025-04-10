@@ -20,7 +20,7 @@ export const isToggle = (toggleName: string) => async (
   } catch (error) {
     logger.error(`Failed to fetch toggle ${toggleName}:`, error);
     return res.status(500).json({ 
-      message: `Failed to fetch toggle ${toggleName}; please try again later` 
+      message: 'Failed to determine feature state; please try again later' 
     });
   }
 };
