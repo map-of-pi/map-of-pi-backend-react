@@ -6,6 +6,7 @@ export function createBulkPreRestrictionOperation(sellersInRestrictedRegions: IS
     // Create a single update object for $set that includes both fields.
     const setObj: any = { isPreRestricted: true };
     if (seller.seller_type !== SellerType.Restricted) {
+        // Copy seller type value into pre_restriction_seller_type field.
         setObj.pre_restriction_seller_type = seller.seller_type;
     }
     return {

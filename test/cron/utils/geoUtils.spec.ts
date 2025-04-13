@@ -1,11 +1,9 @@
-import { Types } from "mongoose";
 import { 
   createBulkPreRestrictionOperation, 
   createGeoQueries 
 } from "../../../src/cron/utils/geoUtils";
 import { SellerType } from "../../../src/models/enums/sellerType";
 import { ISanctionedRegion, ISeller } from "../../../src/types";
-import { FulfillmentType } from "../../../src/models/enums/fulfillmentType";
 
 describe("createBulkPreRestrictionOperation function", () => {
   it("should create update operations for sellers in restricted regions", () => {
