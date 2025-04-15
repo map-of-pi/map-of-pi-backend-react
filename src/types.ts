@@ -43,6 +43,29 @@ export interface IMembership extends Document {
   membership_class: MembershipClassType;
   membership_expiry_date: Date | null;
   mappi_balance: number;
+  mappi_used_to_date: number;
+  payment_history: Types.ObjectId[];
+  user: Types.ObjectId;
+}
+
+export interface IPayment extends Document {
+  _id: Types.ObjectId | string;
+  user: Types.ObjectId | string;
+  pi_payment_id: string;
+  txid?: string;
+  amount: number;
+  memo?: string;
+  status: "pending" | "approved" | "completed" | "failed";
+  paid: boolean;
+  cancelled: boolean;
+  payment_type: "Membership Upgrade" | "Buyer Checkout";
+  metadata?: {
+    membership_class?: MembershipClassType;
+    durationWeeks?: number;
+    mappiAllowance?: number;
+  };
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface ISeller extends Document {
