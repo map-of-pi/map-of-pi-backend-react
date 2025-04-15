@@ -5,6 +5,35 @@ import { TransactionType } from "../models/enums/transactionType";
 import { createTransactionRecord } from "./transaction.service";
 import logger from "../config/loggingConfig";
 
+export async function updateMembershipAfterPayment(
+  authUser: IUser,
+  paymentMetadata: {
+    membership_class?: MembershipClassType;
+    durationWeeks?: number;
+    mappi_allowance?: number;
+  }
+): Promise<IMembership | null> {
+  if (!paymentMetadata?.membership_class) {
+    // Not actually a membership purchase
+    return null;
+  }
+
+  // Fallback logic for duration & allowance if not provided
+  const membershipClass = paymentMetadata.membership_class;
+  const membership_duration = paymentMetadata.durationWeeks ?? 4; // Default to 4 weeks
+  const mappi_allowance = paymentMetadata.mappi_allowance ?? 0;   // Default to 0
+
+  // Reuse existing function
+  const updatedMembership = await addOrUpdateMembership(
+    authUser,
+    membershipClass,
+    membership_duration,
+    mappi_allowance
+  );
+
+  return updatedMembership;
+}
+
 // Fetch a single membership by ID
 export const getSingleMembershipById = async (membership_id: string): Promise<IMembership | null> => {
   try {
