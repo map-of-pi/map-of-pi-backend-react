@@ -4,7 +4,7 @@ import { platformAPIClient } from "../config/platformAPIclient";
 import { v4 as uuidv4 } from "uuid";
 
 // Models
-import Payment from "../models/payment";
+import Payment from "../models/Payment";
 import { MembershipClassType } from "../models/enums/membershipClassType";
 
 // Services
