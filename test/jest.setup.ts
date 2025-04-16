@@ -35,7 +35,7 @@ beforeAll(async () => {
     // Load the mock data into Map of PI DB collections
     await User.insertMany(mockData.users);
     await UserSettings.insertMany(mockData.userSettings);
-    await Membership.insertMany(mockData.memberships);
+    // await Membership.insertMany(mockData.memberships);
     // Ensure indexes are created for the schema models before running tests
     await Seller.createIndexes();
     await Seller.insertMany(mockData.sellers);
