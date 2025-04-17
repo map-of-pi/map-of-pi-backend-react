@@ -13,6 +13,8 @@ export const env = {
   ADMIN_API_PASSWORD: process.env.ADMIN_API_PASSWORD || '',
   UPLOAD_PATH: process.env.UPLOAD_PATH || '',
   MONGODB_URL: process.env.MONGODB_URL || '',
+  MONGODB_MIN_POOL_SIZE: Number(process.env.MONGODB_MIN_POOL_SIZE) || 1,
+  MONGODB_MAX_POOL_SIZE: Number(process.env.MONGODB_MAX_POOL_SIZE) || 5,
   SENTRY_DSN: process.env.SENTRY_DSN || '',
   CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || '',
   CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY || '',
