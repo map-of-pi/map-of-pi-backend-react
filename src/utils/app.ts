@@ -36,9 +36,6 @@ app.use(cookieParser());
 
 // serve static files for Swagger documentation
 app.use('/api/docs', express.static(path.join(__dirname, '../config/docs')));
-app.use('/api/docs/enum', express.static(path.join(__dirname, '../config/docs/enum')));
-// Serve Swagger UI static files
-app.use('/api/docs/swagger-ui', express.static(path.join(__dirname, '../node_modules/swagger-ui-dist')));
 
 // Swagger OpenAPI documentation
 app.use("/api/docs", docRouter);
