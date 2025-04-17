@@ -99,6 +99,62 @@
       "phone_number": "555-555-5555",
       "findme": "deviceGPS",
       "trust_meter_rating": 100
+    },
+    {
+      "user_settings_id": "0f0f0f-0f0f-0f0f",
+      "user_name": "Test Six",
+      "email": "test-six@test.com",
+      "phone_number": "666-666-6666",
+      "findme": "deviceGPS",
+      "trust_meter_rating": 50
+    },
+    {
+      "user_settings_id": "0g0g0g-0g0g-0g0g",
+      "user_name": "Test Seven",
+      "email": "test-seven@test.com",
+      "phone_number": "777-777-7777",
+      "findme": "deviceGPS",
+      "trust_meter_rating": 50
+    },
+    {
+      "user_settings_id": "0h0h0h-0h0h-0h0h",
+      "user_name": "Test Eight",
+      "email": "test-eight@test.com",
+      "phone_number": "888-888-8888",
+      "findme": "deviceGPS",
+      "trust_meter_rating": 50
+    },
+    {
+      "user_settings_id": "0i0i0i-0i0i-0i0i",
+      "user_name": "Test Nine",
+      "email": "test-nine@test.com",
+      "phone_number": "999-999-9999",
+      "findme": "deviceGPS",
+      "trust_meter_rating": 50
+    },
+    {
+      "user_settings_id": "0j0j0j-0j0j-0j0j",
+      "user_name": "Test Ten",
+      "email": "test-ten@test.com",
+      "phone_number": "101-101-1010",
+      "findme": "deviceGPS",
+      "trust_meter_rating": 50
+    },
+    {
+      "user_settings_id": "0k0k0k-0k0k-0k0k",
+      "user_name": "Test Eleven",
+      "email": "test-eleven@test.com",
+      "phone_number": "111-111-1111",
+      "findme": "deviceGPS",
+      "trust_meter_rating": 50
+    },
+    {
+      "user_settings_id": "0l0l0l-0l0l-0l0l",
+      "user_name": "Test Twelve",
+      "email": "test-twelve@test.com",
+      "phone_number": "121-121-1212",
+      "findme": "deviceGPS",
+      "trust_meter_rating": 50
     }
   ],
   "memberships": [
