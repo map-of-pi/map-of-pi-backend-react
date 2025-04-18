@@ -12,11 +12,13 @@ const paymentSchema = new Schema<IPayment>(
     pi_payment_id: {
       type: String,
       required: true,
+      unique: true,
       default: null
     },
     txid: {
       type: String,
       required: false,
+      unique: true,
       default: null
     },
     amount: {
