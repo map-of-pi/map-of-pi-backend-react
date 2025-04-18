@@ -66,7 +66,7 @@ interface U2URefDataType {
   u2uStatus: U2UPaymentStatus,
   a2uPaymentId: string | null,
 }
-export const createOrUpdateU2UReference = async (orderId: string, refData: U2URefDataType): Promise<IPaymentCrossReference> => {
+export const createOrUpdatePaymentCrossReference = async (orderId: string, refData: U2URefDataType): Promise<IPaymentCrossReference> => {
   try {
     const existRef = await PaymentCrossReference.findOne({ order_id: orderId }).exec();
 
@@ -179,7 +179,7 @@ export const createA2UPayment = async ( a2uPaymentData:A2UPaymentDataType ): Pro
       u2uStatus: U2UPaymentStatus.A2UCompleted,
       a2uPaymentId: updatedPayment?._id as string,
     }
-    const u2uRef = await createOrUpdateU2UReference(a2uPaymentData.orderId, u2uRefData)
+    const u2uRef = await createOrUpdatePaymentCrossReference(a2uPaymentData.orderId, u2uRefData)
     logger.info("updated U2U Ref record ")
     if (!u2uRef) {
       throw new Error("Failed to update U2U reference with A2U payment details");

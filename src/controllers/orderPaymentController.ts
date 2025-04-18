@@ -9,7 +9,7 @@ import { cancelOrder, createOrder, updatePaidOrder } from "../services/order.ser
 import { PaymentDataType } from "../types";
 import { OrderStatusType } from "../models/enums/orderStatusType";
 import logger from "../config/loggingConfig";
-import { cancelPayment, completePayment, createA2UPayment, createOrUpdateU2UReference, createPayment, getPayment } from "../services/payment.service";
+import { cancelPayment, completePayment, createA2UPayment, createOrUpdatePaymentCrossReference, createPayment, getPayment } from "../services/payment.service";
 import { PaymentType } from "../models/enums/paymentType";
 import { U2UPaymentStatus } from "../models/enums/u2uPaymentStatus";
 import { FulfillmentType } from "../models/enums/fulfillmentType";
@@ -176,7 +176,7 @@ export const onPaymentCompletion = async (
       u2uStatus: U2UPaymentStatus.U2ACompleted,
       a2uPaymentId: null,
     }
-    const u2uRef = await createOrUpdateU2UReference(order?._id as string, u2uRefData)
+    const u2uRef = await createOrUpdatePaymentCrossReference(order?._id as string, u2uRefData)
     logger.info("U2U Ref record created/updated", u2uRef)
 
     if (!order?.total_amount) {
