@@ -115,7 +115,7 @@ export const updatePaidOrder = async (paymentId:string): Promise<IOrder> => {
 
 export const getSellerOrdersById = async (piUid:string) => {
     try {
-      const seller = await Seller.exists({seller_id: piUid});
+      const seller = await Seller.exists({seller_id: piUid}).lean();
       const orders = await Order.find({seller_id: seller?._id, is_paid: true})
         .populate('buyer_id', 'pi_username -_id') // Populate buyer_id with pi_username
         .sort({ createdAt: -1 }) // Sort by createdAt in descending order
@@ -125,6 +125,20 @@ export const getSellerOrdersById = async (piUid:string) => {
         console.error('Error fetching seller orders:', error);
         throw error;
     }
+}
+
+export const getBuyerOrdersById = async (piUid:string) => {
+  try {
+    const buyer = await User.exists({pi_uid: piUid});
+    const orders = await Order.find({buyer_id: buyer?._id, is_paid: true})
+      .populate('seller_id', 'name -_id') // Populate seller_id with pi_username
+      .sort({ createdAt: -1 }) // Sort by createdAt in descending order
+      .lean();
+    return orders;
+  } catch (error) {
+      console.error('Error fetching seller orders:', error);
+      throw error;
+  }
 }
 
 export const deleteOrderById = async (orderId: string) => {
@@ -139,7 +153,9 @@ export const deleteOrderById = async (orderId: string) => {
 export const getOrderItems = async (orderId: string) => {
   try {
     // Fetch the base order
-    let order = await Order.findById(orderId).lean();
+    let order = await Order.findById(orderId)
+    .populate('seller_id', 'name -_id')
+    .lean();
     if (!order) {
       return null; // Order not found
     }

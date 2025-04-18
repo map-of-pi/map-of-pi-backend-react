@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import *  as orderService from "../services/order.service";
 import logger from "../config/loggingConfig";
+import { IUser } from "../types";
 
 export const getSellerOrders= async (req: Request, res: Response) => {
   try {
@@ -9,6 +10,18 @@ export const getSellerOrders= async (req: Request, res: Response) => {
     const orders = await orderService.getSellerOrdersById(seller.seller_id);
 
     res.status(200).json(orders);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch orders" });
+  }
+};
+
+export const getBuyerOrders= async (req: Request, res: Response) => {
+  try {
+    const buyer = req.currentUser as IUser; // Assuming currentUser is the buyer
+
+    const orders = await orderService.getBuyerOrdersById(buyer.pi_uid);
+    res.status(200).json(orders);
+
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch orders" });
   }
