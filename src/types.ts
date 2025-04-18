@@ -6,7 +6,7 @@ import { FulfillmentType } from "./models/enums/fulfillmentType";
 import { StockLevelType } from "./models/enums/stockLevelType";
 import { TrustMeterScale } from "./models/enums/trustMeterScale";
 import { RestrictedArea } from "./models/enums/restrictedArea";
-import { OrderStatusType } from "./models/enums/orderStatusType";
+import { OrderStatusType } from "./models/enums/OrderStatusType";
 import { OrderItemStatusType } from "./models/enums/orderItemStatusType";
 import { PaymentType } from "./models/enums/paymentType";
 import { U2UPaymentStatus } from "./models/enums/u2uPaymentStatus";

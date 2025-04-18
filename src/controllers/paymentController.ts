@@ -7,7 +7,7 @@ import Seller from "../models/Seller";
 import User from "../models/User";
 import { createOrder } from "../services/order.service";
 import { IOrder, IPayment, PaymentDataType, PaymentMetadataType } from "../types";
-import { OrderStatusType } from "../models/enums/orderStatusType";
+import { OrderStatusType } from "../models/enums/OrderStatusType";
 import { Types } from "mongoose";
 import logger from "../config/loggingConfig";
 import { createPayment } from "../services/payment.service";
