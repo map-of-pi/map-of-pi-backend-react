@@ -128,19 +128,32 @@ export interface PickedItems {
   quantity: number,
 }
 
-export interface PaymentMetadataType {
+export type PaymentMetadataType = {
+  OrderPayment: OrderPaymentMetadataType,
+  MembershipPayment: MembershipPaymentMetadataType
+}
+
+export type OrderPaymentMetadataType = {
   items: PickedItems[],
-  buyer: string, // ref user model pi_uid
-  seller: string, // ref seller model seller_id
+  buyer: string,
+  seller: string,
   fulfillment_method: FulfillmentType | undefined,
   seller_fulfillment_description:string | undefined,
   buyer_fulfillment_description: string
 }
 
+type MembershipPaymentMetadataType = {
+  membership_id: string
+}
+
 export type PaymentDataType = {
   amount: string;
   memo: string;
-  metadata: PaymentMetadataType;
+  metadata: {
+    payment_type: PaymentType,
+    OrderPayment?: OrderPaymentMetadataType,
+    MembershipPayment?: MembershipPaymentMetadataType
+  }
 }
 
   export interface IOrder extends Document {

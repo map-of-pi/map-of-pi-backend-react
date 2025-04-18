@@ -1,18 +1,13 @@
 import { Request, Response } from "express";
 import axios from "axios";
 import { platformAPIClient } from "../config/platformAPIclient";
-import Payment from "../models/Payment";
-import Order from "../models/Order";
-import Seller from "../models/Seller";
-import User from "../models/User";
-import { cancelOrder, createOrder, updatePaidOrder } from "../services/order.service";
-import { PaymentDataType } from "../types";
-import { OrderStatusType } from "../models/enums/orderStatusType";
+import { cancelOrder, updatePaidOrder } from "../services/order.service";
+import { IUser, PaymentDataType } from "../types";
 import logger from "../config/loggingConfig";
 import { cancelPayment, completePayment, createA2UPayment, createOrUpdatePaymentCrossReference, createPayment, getPayment } from "../services/payment.service";
 import { PaymentType } from "../models/enums/paymentType";
 import { U2UPaymentStatus } from "../models/enums/u2uPaymentStatus";
-import { FulfillmentType } from "../models/enums/fulfillmentType";
+import OrderCheckout from "../helpers/orderCheckout";
 
 interface PaymentInfo {
   identifier: string;
@@ -22,10 +17,7 @@ interface PaymentInfo {
   };
 }
 
-export const onIncompletePaymentFound = async (
-  req: Request,
-  res: Response
-) => {
+export const onIncompletePaymentFound = async ( req:Request, res:Response ) => {
   const currentUser = req.currentUser;
 
   try {
@@ -51,8 +43,11 @@ export const onIncompletePaymentFound = async (
 
     const updatedPayment = await completePayment(paymentId, txid as string);
     logger.warn("old payment found and updated");
-    const paidOrder = await updatePaidOrder(updatedPayment?._id as string)
-    logger.warn("old order found and updated");
+
+    if (updatedPayment && updatedPayment.payment_type===PaymentType.BuyerCheckout) {
+      const paidOrder = await updatePaidOrder(updatedPayment?._id as string)
+      logger.warn("old order found and updated");
+    }
 
     await platformAPIClient.post(`/v2/payments/${paymentId}/complete`, {
       txid,
@@ -73,7 +68,7 @@ export const onIncompletePaymentFound = async (
 };
 
 export const onPaymentApproval = async (req: Request, res: Response) => {
-  const currentUser = req.currentUser;
+  const currentUser = req.currentUser as IUser;
 
   try {
     const { paymentId } = req.body;
@@ -85,52 +80,26 @@ export const onPaymentApproval = async (req: Request, res: Response) => {
     const oldPayment = await getPayment(paymentId);
 
     // create new transaction only not exist
-    if (!oldPayment) {
-      const seller = await Seller.findOne({ seller_id: currentPayment.metadata.seller });
-      const buyer = await User.findOne({ pi_uid: currentUser?.pi_uid });
-
-      if (!buyer || !seller) {
-        logger.error("Seller or buyer not found");
-        return res.status(404).json({ message: "Seller or buyer not found" });
-      }
-
-      const paymentData = {
-        piPaymentId: paymentId as string,
-        userId: buyer?._id as string,
-        memo: currentPayment.memo as string,
-        amount: currentPayment.amount as string,
-        paymentType: PaymentType.BuyerCheckout
-      };
-
-      const newPayment = await createPayment(paymentData)
-
-      if (!newPayment) {
-        logger.info("Unable to create payment record")
-        return res.status(404).json({ message: "Unable to create payment record" });
-      }
-
-      // logger.info("new payment successfull: ", newPayment)
-      const orderData = {    
-        buyerId: buyer?._id as string,
-        sellerId: seller?._id as string,        
-        paymentId: newPayment._id as string,
-        totalAmount: currentPayment.amount as string,
-        status: OrderStatusType.Initialized,
-        fulfillmentMethod: currentPayment.metadata.fulfillment_method as FulfillmentType,
-        sellerFulfillmentDescription: currentPayment.metadata.seller_fulfillment_description as string,
-        buyerFulfillmentDescription: currentPayment.metadata.buyer_fulfillment_description as string,
-      };
-
-      const orderItemsData = currentPayment.metadata.items;
-
-      // create order and order items
-      const newOrder = await createOrder(orderData, orderItemsData);
-      logger.info('order created successfully');
-
+    if (oldPayment) {
+      logger.info("payment record already exist: ", oldPayment._id);
+      return res.status(200).json({
+        status: "not ok",
+        message: `Payment with id ${paymentId} already exists`,
+        success: false,
+      }); 
     }
-       
+
+    if (currentPayment.metadata.payment_type === PaymentType.BuyerCheckout) {
+      logger.info("payment type not supported: ", currentPayment.metadata.payment_type);
+      const newOrder = await OrderCheckout(paymentId, currentUser, currentPayment);
+      logger.info("order created successfully: ", newOrder._id);
+
+    } else if (currentPayment.metadata.payment_type === PaymentType.Membership) {
+      logger.info("membership subscription successfully ");
+    }
+    
     // Approve payment request
-    const response = await platformAPIClient.post(`/v2/payments/${paymentId}/approve`);
+    await platformAPIClient.post(`/v2/payments/${paymentId}/approve`);
 
     // logger.info("Response from Pi server while approving payment: ", response.data);
     return res.status(200).json({
@@ -150,10 +119,7 @@ export const onPaymentApproval = async (req: Request, res: Response) => {
   }
 };
 
-export const onPaymentCompletion = async (
-  req: Request,
-  res: Response
-) => {
+export const onPaymentCompletion = async ( req: Request, res: Response ) => {
   try {
     // const currentUser = req.currentUser;
     const paymentId: string = req.body.paymentId;
@@ -167,38 +133,39 @@ export const onPaymentCompletion = async (
     const completedPayment = await completePayment(paymentId, txid );
     logger.info("payment record completed")
 
-    // update Order status to paid on sucessfull payment
-    const order = await updatePaidOrder(completedPayment?._id as string)
-    logger.info("order record updated to paid")
+    if (completedPayment && completedPayment.payment_type===PaymentType.BuyerCheckout) {
+      // update Order status to paid on sucessfull payment
+      const order = await updatePaidOrder(completedPayment?._id as string)
+      logger.info("order record updated to paid")
 
-    const u2uRefData = {
-      u2aPaymentId: completedPayment?._id as string,
-      u2uStatus: U2UPaymentStatus.U2ACompleted,
-      a2uPaymentId: null,
+      const u2uRefData = {
+        u2aPaymentId: completedPayment?._id as string,
+        u2uStatus: U2UPaymentStatus.U2ACompleted,
+        a2uPaymentId: null,
+      }
+      const u2uRef = await createOrUpdatePaymentCrossReference(order?._id as string, u2uRefData)
+      logger.info("U2U Ref record created/updated", u2uRef)
+
+      const response = await platformAPIClient.post( `/v2/payments/${paymentId}/complete`, { txid } );
+
+      if (!order?.total_amount) {
+        throw new Error("Order total_amount is undefined");
+      }
+      // start A2U payment flow
+      const a2uPaymentData = {
+        sellerId: order?.seller_id.toString(),
+        amount: order?.total_amount.toString(), 
+        buyerId: order?.buyer_id.toString(),
+        paymentType: PaymentType.BuyerCheckout,
+        orderId: order?._id as string
+      }
+      await createA2UPayment(a2uPaymentData);
+
+    } else if (completedPayment && completedPayment.payment_type===PaymentType.Membership) {
+      const response = await platformAPIClient.post( `/v2/payments/${paymentId}/complete`, { txid } );
+      logger.info("membesrship subscription completed")
     }
-    const u2uRef = await createOrUpdatePaymentCrossReference(order?._id as string, u2uRefData)
-    logger.info("U2U Ref record created/updated", u2uRef)
-
-    if (!order?.total_amount) {
-      throw new Error("Order total_amount is undefined");
-    }
-
-    const response = await platformAPIClient.post(
-      `/v2/payments/${paymentId}/complete`,
-      { txid }
-    );
-
-    // start A2U payment flow
-    const a2uPaymentData = {
-      sellerId: order?.seller_id.toString(),
-      amount: order?.total_amount.toString(), 
-      buyerId: order?.buyer_id.toString(),
-      paymentType: PaymentType.BuyerCheckout,
-      orderId: order?._id as string
-    }
-
-    await createA2UPayment(a2uPaymentData);
-
+    
     return res
       .status(200)
       .json({ status: "ok", success: true, message: `Completed the payment with id ${paymentId}` });
@@ -213,19 +180,21 @@ export const onPaymentCompletion = async (
   }
 };
 
-export const onPaymentCancellation = async (
-  req: Request,
-  res: Response
-) => {
+export const onPaymentCancellation = async ( req: Request, res: Response ) => {
   try {
     const { paymentId } = req.body;
 
     // update payment cancelled to true on cancel payment
     const cancelledPayment = await cancelPayment(paymentId);
 
-    // update Order status to cancelled on cancel payment
-    await cancelOrder(cancelledPayment?._id as string)
-    logger.info("order record updated to cancelled")
+    if (cancelledPayment && cancelledPayment.payment_type===PaymentType.BuyerCheckout) {
+      // update Order status to cancelled on cancel payment
+      await cancelOrder(cancelledPayment?._id as string)
+      logger.info("order record updated to cancelled")
+
+    } else if (cancelledPayment && cancelledPayment.payment_type===PaymentType.Membership) {
+      logger.info("membership subscription cancelled")
+    }
 
     await platformAPIClient.post( `/v2/payments/${paymentId}/cancel` );
     logger.info( "response from Pi server on payment cancellation " );

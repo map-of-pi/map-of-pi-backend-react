@@ -4,7 +4,7 @@ import {
   onPaymentApproval, 
   onPaymentCancellation, 
   onPaymentCompletion 
-} from "../controllers/orderPaymentController";
+} from "../controllers/paymentController";
 import { verifyToken } from "../middlewares/verifyToken";
 
 const paymentsRouter = Router();
