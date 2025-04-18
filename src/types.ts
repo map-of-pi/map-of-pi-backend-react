@@ -138,7 +138,7 @@ export interface PaymentMetadataType {
 }
 
 export type PaymentDataType = {
-  amount: Types.Decimal128;
+  amount: string;
   memo: string;
   metadata: PaymentMetadataType;
 }
@@ -181,14 +181,23 @@ export type PaymentDataType = {
     createdAt: Date;
   }
 
-  export interface PaymentCrossReferenceType {
+  export interface IPaymentCrossReference {
     _id: Types.ObjectId;
-    u2a_payment_id: Types.ObjectId;
-    a2u_payment_id: Types.ObjectId;
+    order_id: Types.ObjectId;
+    u2a_payment_id: Types.ObjectId | null;
+    a2u_payment_id: Types.ObjectId | null;
     u2u_status: U2UPaymentStatus;
     error_message: string;
     u2a_completed_at: Date;
     a2u_completed_at: Date;
     createdAt: Date;
     updatedAt: Date;
+  }
+
+  export interface PaymentInfo {
+    identifier: string;
+    transaction?: {
+      txid: string;
+      _link: string;
+    };
   }

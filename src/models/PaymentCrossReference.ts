@@ -1,20 +1,26 @@
 import mongoose, { Schema, SchemaTypes } from "mongoose";
-import { PaymentCrossReferenceType } from "../types";
+import { IPaymentCrossReference } from "../types";
 import { U2UPaymentStatus } from "./enums/u2uPaymentStatus";
 
-const paymentCrossReferenceSchema = new Schema<PaymentCrossReferenceType>(
+const paymentCrossReferenceSchema = new Schema<IPaymentCrossReference>(
   {
+    order_id: {
+      type: SchemaTypes.ObjectId,
+      require: true,
+      unique: true,
+      ref: "Order"
+    },
     u2a_payment_id: {
       type: SchemaTypes.ObjectId,
       required: true,
-      nullable: true,
-      default: null
+      default: null,
+      ref: "Payment",
     },
     a2u_payment_id: {
       type: SchemaTypes.ObjectId,
-      required: true,
-      nullable: true,
-      default: null
+      required: false,
+      default: null,
+      ref: "Payment",
     },
     u2u_status: {
       type: String,
@@ -39,6 +45,6 @@ const paymentCrossReferenceSchema = new Schema<PaymentCrossReferenceType>(
   }, {timestamps: true} // Adds timestamps to track creation and update times
 );
 
-const PaymentCrossReference = mongoose.model<PaymentCrossReferenceType>("PaymentCrossReference", paymentCrossReferenceSchema);
+const PaymentCrossReference = mongoose.model<IPaymentCrossReference>("PaymentCrossReference", paymentCrossReferenceSchema);
 
 export default PaymentCrossReference;

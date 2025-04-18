@@ -5,12 +5,14 @@ import Payment from "../models/Payment";
 import Order from "../models/Order";
 import Seller from "../models/Seller";
 import User from "../models/User";
-import { createOrder } from "../services/order.service";
-import { IOrder, IPayment, PaymentDataType, PaymentMetadataType } from "../types";
+import { cancelOrder, createOrder, updatePaidOrder } from "../services/order.service";
+import { PaymentDataType } from "../types";
 import { OrderStatusType } from "../models/enums/orderStatusType";
-import { Types } from "mongoose";
 import logger from "../config/loggingConfig";
-import { createPayment } from "../services/payment.service";
+import { cancelPayment, completePayment, createA2UPayment, createOrUpdateU2UReference, createPayment, getPayment } from "../services/payment.service";
+import { PaymentType } from "../models/enums/paymentType";
+import { U2UPaymentStatus } from "../models/enums/u2uPaymentStatus";
+import { FulfillmentType } from "../models/enums/fulfillmentType";
 
 interface PaymentInfo {
   identifier: string;
@@ -33,7 +35,7 @@ export const onIncompletePaymentFound = async (
     const txURL = payment.transaction?._link;
     logger.info("incomplete payment data: ", payment);
 
-    const incompletePayment = await Payment.findOne({ pi_payment_id: paymentId });
+    const incompletePayment = await getPayment(paymentId);
 
     if (!incompletePayment) {
       logger.warn("no incomplete payment")
@@ -42,21 +44,15 @@ export const onIncompletePaymentFound = async (
 
     const horizonResponse = await axios.create({ timeout: 20000 }).get(txURL!);
     const paymentIdOnBlock = horizonResponse.data.memo;
-    console.info("paymentIdOnBlock: ", paymentIdOnBlock);
+    logger.info("paymentIdOnBlock: ", paymentIdOnBlock);
     if (paymentIdOnBlock !== incompletePayment.pi_payment_id) {
       return res.status(400).json({ error: "Payment not found" });
     }
 
-    const updatedPayment = await Payment.findOneAndUpdate({ pi_payment_id: paymentId }, { $set: { txid, paid: true } }, {new: true}).exec();
-    logger.warn("old payment found");
-    await Order.findOneAndUpdate({payment_id: updatedPayment?._id}, 
-      { $set: {
-        updatedAt: new Date(),
-        paid: true,
-        status: OrderStatusType.Pending
-      }
-    }).exec()
-    // return res.status(400).json({ message: "finding old payment failed" });
+    const updatedPayment = await completePayment(paymentId, txid as string);
+    logger.warn("old payment found and updated");
+    const paidOrder = await updatePaidOrder(updatedPayment?._id as string)
+    logger.warn("old order found and updated");
 
     await platformAPIClient.post(`/v2/payments/${paymentId}/complete`, {
       txid,
@@ -70,7 +66,9 @@ export const onIncompletePaymentFound = async (
 
     return res
       .status(500)
-      .json({ error: "Internal server error", ref: error.message });
+      .json(
+        { success: false, error: error.message || error, message: "error completing pi payment" }
+      );
   }
 };
 
@@ -84,7 +82,7 @@ export const onPaymentApproval = async (req: Request, res: Response) => {
 
     const currentPayment: PaymentDataType = resp.data;
 
-    const oldPayment = await Payment.findOne({pi_payment_id: paymentId})
+    const oldPayment = await getPayment(paymentId);
 
     // create new transaction only not exist
     if (!oldPayment) {
@@ -96,14 +94,12 @@ export const onPaymentApproval = async (req: Request, res: Response) => {
         return res.status(404).json({ message: "Seller or buyer not found" });
       }
 
-      const paymentData: Partial<IPayment> = {
-        pi_payment_id: paymentId,
-        user_id: buyer?._id as Types.ObjectId,
-        txid: null,
-        memo: currentPayment.memo,
-        amount: currentPayment.amount,
-        paid: false,
-        cancelled: false,
+      const paymentData = {
+        piPaymentId: paymentId as string,
+        userId: buyer?._id as string,
+        memo: currentPayment.memo as string,
+        amount: currentPayment.amount as string,
+        paymentType: PaymentType.BuyerCheckout
       };
 
       const newPayment = await createPayment(paymentData)
@@ -114,25 +110,25 @@ export const onPaymentApproval = async (req: Request, res: Response) => {
       }
 
       // logger.info("new payment successfull: ", newPayment)
-      const orderData: Partial<IOrder> = {    
-        buyer_id: buyer?._id as Types.ObjectId,
-        seller_id: seller?._id as Types.ObjectId,        
-        payment_id: newPayment._id as Types.ObjectId,
-        total_amount: currentPayment.amount,
+      const orderData = {    
+        buyerId: buyer?._id as string,
+        sellerId: seller?._id as string,        
+        paymentId: newPayment._id as string,
+        totalAmount: currentPayment.amount as string,
         status: OrderStatusType.Initialized,
-        fulfillment_method: currentPayment.metadata.fulfillment_method,
-        seller_fulfillment_description: currentPayment.metadata.seller_fulfillment_description,
-        buyer_fulfillment_description: currentPayment.metadata.buyer_fulfillment_description,
+        fulfillmentMethod: currentPayment.metadata.fulfillment_method as FulfillmentType,
+        sellerFulfillmentDescription: currentPayment.metadata.seller_fulfillment_description as string,
+        buyerFulfillmentDescription: currentPayment.metadata.buyer_fulfillment_description as string,
       };
 
       const orderItemsData = currentPayment.metadata.items;
 
       // create order and order items
       const newOrder = await createOrder(orderData, orderItemsData);
-      logger.info('order created successfully', newOrder);
+      logger.info('order created successfully');
 
     }
-    
+       
     // Approve payment request
     const response = await platformAPIClient.post(`/v2/payments/${paymentId}/approve`);
 
@@ -148,7 +144,7 @@ export const onPaymentApproval = async (req: Request, res: Response) => {
     return res.status(500).json({
       status: "not ok",
       success: false,
-      message: "Internal server error",
+      message: "Pi payment approval error",
       error: error.message || error,
     });
   }
@@ -167,34 +163,45 @@ export const onPaymentCompletion = async (
       `/v2/payments/${paymentId}`
     );
 
+    // complete payment status to paid on sucessfull payment
+    const completedPayment = await completePayment(paymentId, txid );
+    logger.info("payment record completed")
+
+    // update Order status to paid on sucessfull payment
+    const order = await updatePaidOrder(completedPayment?._id as string)
+    logger.info("order record updated to paid")
+
+    const u2uRefData = {
+      u2aPaymentId: completedPayment?._id as string,
+      u2uStatus: U2UPaymentStatus.U2ACompleted,
+      a2uPaymentId: null,
+    }
+    const u2uRef = await createOrUpdateU2UReference(order?._id as string, u2uRefData)
+    logger.info("U2U Ref record created/updated", u2uRef)
+
+    if (!order?.total_amount) {
+      throw new Error("Order total_amount is undefined");
+    }
+
     const response = await platformAPIClient.post(
       `/v2/payments/${paymentId}/complete`,
       { txid }
     );
 
-    // update transaction status to paid on sucessfull payment
-    const payment = await Payment.findOneAndUpdate({ pi_payment_id: paymentId }, { $set: { txid: txid, paid: true } }).exec();
+    // start A2U payment flow
+    const a2uPaymentData = {
+      sellerId: order?.seller_id.toString(),
+      amount: order?.total_amount.toString(), 
+      buyerId: order?.buyer_id.toString(),
+      paymentType: PaymentType.BuyerCheckout,
+      orderId: order?._id as string
+    }
 
-    // logger.info("payment record updated")
-
-    // update Order status to paid on sucessfull payment
-    await Order.findOneAndUpdate({payment_id: payment?._id}, 
-      { $set: {
-        updatedAt: new Date(),
-        is_paid: true,
-        status: OrderStatusType.Pending
-      }
-    }).exec()
-    logger.info("order record updated")
-    
-    // logger.info(
-    //   "response from Pi server while completing payment: ",
-    //   response.data
-    // );
+    await createA2UPayment(a2uPaymentData);
 
     return res
       .status(200)
-      .json({ success: true, message: `Completed the payment with id ${paymentId}` });
+      .json({ status: "ok", success: true, message: `Completed the payment with id ${paymentId}` });
 
   } catch (error: any) {
     logger.error("Error while completing payment: ", error.message);
@@ -212,32 +219,23 @@ export const onPaymentCancellation = async (
 ) => {
   try {
     const { paymentId } = req.body;
-    const response = await platformAPIClient.post(
-      `/v2/payments/${paymentId}/cancel`
-    );
 
-    logger.info(
-      "response from Pi server on payment cancellation: ",
-      response.data.message
-    );
+    // update payment cancelled to true on cancel payment
+    const cancelledPayment = await cancelPayment(paymentId);
 
-    // update transaction status to paid on sucessfull payment
-    const payment = await Payment.findOneAndUpdate({ pi_payment_id: paymentId }, { $set: { cancelled: true, paid: false } }).exec();
+    // update Order status to cancelled on cancel payment
+    await cancelOrder(cancelledPayment?._id as string)
+    logger.info("order record updated to cancelled")
 
-    // update Order status to paid on sucessfull payment
-    await Order.findOneAndUpdate({payment_id: payment?._id}, 
-      { $set: {
-        updatedAt: new Date(),
-        is_paid: false,
-        status: OrderStatusType.Cancelled
-      }
-    }).exec()
+    await platformAPIClient.post( `/v2/payments/${paymentId}/cancel` );
+    logger.info( "response from Pi server on payment cancellation " );
 
     return res
       .status(200)
       .json({ success: true, message: `Cancelled the payment ${paymentId}` });
+      
   } catch (error: any) {
     logger.error("Error while canceling transaction: ", error.message);
-    return res.status(500).json({ success: false, message: "Internal Server Error" });
+    return res.status(400).json({ success: false, message: "Internal Server Error" });
   }
 };

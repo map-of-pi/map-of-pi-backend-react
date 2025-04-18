@@ -7,12 +7,21 @@ import OrderItem from "../models/orderItem";
 import { OrderItemStatusType } from "../models/enums/orderItemStatusType";
 import User from "../models/User";
 import Seller from "../models/Seller";
-import { StringDecoder } from "string_decoder";
 import { OrderStatusType } from "../models/enums/orderStatusType";
+import { FulfillmentType } from "../models/enums/fulfillmentType";
 
-
+interface NewOrder {    
+  buyerId: string,
+  sellerId: string,        
+  paymentId: string,
+  totalAmount: string,
+  status: OrderStatusType,
+  fulfillmentMethod: FulfillmentType,
+  sellerFulfillmentDescription: string,
+  buyerFulfillmentDescription: string,
+};
 export const createOrder = async (
-  orderData: Partial<IOrder>,
+  orderData: NewOrder,
   orderItems: PickedItems[]
 ) => {
   const session = await mongoose.startSession();
@@ -20,8 +29,24 @@ export const createOrder = async (
 
   try {
     // Create new order
-    const order = new Order(orderData);
+    const order = new Order({
+      buyer_id: orderData.buyerId,
+      seller_id: orderData.sellerId,
+      payment_id: orderData.paymentId,
+      total_amount: orderData.totalAmount,
+      status: orderData.status,
+      is_paid: false,
+      is_fulfilled: false,
+      fulfillment_method: orderData.fulfillmentMethod,
+      seller_fulfillment_description: orderData.sellerFulfillmentDescription,
+      buyer_fulfillment_description: orderData.buyerFulfillmentDescription, 
+    });
     const newOrder = await order.save({ session });
+
+    if (!newOrder){
+      logger.error("error creating new order")
+      throw new Error("error creating new order")
+    }
 
     // Fetch all seller items in bulk
     const sellerItemIds = orderItems.map((item) => item.itemId);
@@ -65,17 +90,26 @@ export const createOrder = async (
   }
 };
 
-export const updatePaidOrder = async (paymentId:string, updateData:Partial<IOrder>): Promise<IOrder | null> => {
+export const updatePaidOrder = async (paymentId:string): Promise<IOrder> => {
   try {
-    const updatedOrder = await Order.findOneAndUpdate({payment_id: paymentId}, updateData, { new: true }).exec();
+    const updatedOrder = await Order.findOneAndUpdate(
+      {payment_id: paymentId}, 
+      { $set: {
+          updatedAt: new Date(),
+          is_paid: true,
+          status: OrderStatusType.Pending
+        }
+      },
+      { new: true }
+  ).exec()
     if (!updatedOrder) {
       logger.error(`Failed to update order for payment ID ${paymentId}`);
-      return null
+      throw new Error("Failed to update order");
     }
     return updatedOrder
   } catch (error:any) {
     logger.error(`Error updating order for payment ID ${paymentId}: `, error);
-    return null
+    throw new Error("Error updating order");
   }  
 }
 
@@ -168,5 +202,28 @@ export const updateOrderItemStatus = async (itemId: string, itemStatus: string) 
     throw new Error("Error updating order item");
   }
   
+}
+
+export const cancelOrder = async (paymentId: string) => {
+  try {
+    const cancelledOrder = await Order.findOneAndUpdate({payment_id: paymentId}, 
+      { $set: {
+          updatedAt: new Date(),
+          is_paid: false,
+          status: OrderStatusType.Cancelled
+        }
+      },
+      { new: true } 
+    ).exec()
+    if (!cancelledOrder) {
+      logger.error(`Failed to cancel order for payment ID ${paymentId}`);
+      throw new Error("Failed to cancel order");
+    } 
+
+    return cancelledOrder
+  } catch (error:any) {
+    logger.error(`Error cancelling order for payment ID ${paymentId}: `, error);
+    throw new Error("Error cancelling order");
+  }
 }
 
