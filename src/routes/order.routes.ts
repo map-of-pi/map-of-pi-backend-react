@@ -7,7 +7,8 @@ import { isSellerFound } from "../middlewares/isSellerFound";
 const orderRoutes = Router();
 
 // orderRoutes.get("/", orderController.getOrderItems);
-orderRoutes.get("/seller-order", verifyToken, isSellerFound, orderController.getSellerOrders)
+orderRoutes.get("/seller-order", verifyToken, isSellerFound, orderController.getSellerOrders);
+orderRoutes.get("/review/buyer-order", verifyToken, orderController.getBuyerOrders);
 orderRoutes.get("/:id", verifyToken, orderController.getSingleOrder);
 orderRoutes.post("/", verifyToken, orderController.createOrder);
 orderRoutes.delete("/:id", verifyToken, orderController.deleteOrder);
