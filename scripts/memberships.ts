@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import Membership from "../../src/models/Membership";
-import User from "../../src/models/User";
+import Membership from "../src/models/Membership";
+import User from "../src/models/User";
 
 dotenv.config();
 

@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import User from "../../src/models/User";
-import { env } from "../../src/utils/env"
+import User from "../src/models/User";
+import { env } from "../src/utils/env"
 
 dotenv.config();
 
-const run = async () => {
+const dedupeUsers = async () => {
   await mongoose.connect(env.MONGODB_URL);
 
   const duplicates = await User.aggregate([
@@ -23,4 +23,4 @@ const run = async () => {
   await mongoose.disconnect();
 };
 
-run();
+dedupeUsers();

@@ -1,10 +1,10 @@
 import mongoose from 'mongoose';
 import * as dotenv from 'dotenv';
-import Seller from '../../src/models/Seller';
-import ReviewFeedback from '../../src/models/ReviewFeedback';
-import { SellerType } from '../../src/models/enums/sellerType';
-import { RatingScale } from '../../src/models/enums/ratingScale';
-import { IReviewFeedback, ISeller } from '../../src/types';
+import Seller from '../src/models/Seller';
+import ReviewFeedback from '../src/models/ReviewFeedback';
+import { SellerType } from '../src/models/enums/sellerType';
+import { RatingScale } from '../src/models/enums/ratingScale';
+import { IReviewFeedback, ISeller } from '../src/types';
 
 dotenv.config();
 

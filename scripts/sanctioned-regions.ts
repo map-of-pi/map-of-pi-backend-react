@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import * as dotenv from 'dotenv';
-import SanctionedRegion from '../../src/models/misc/SanctionedRegion';
-import { RestrictedAreaBoundaries } from '../../src/models/enums/restrictedArea';
+import SanctionedRegion from '../src/models/misc/SanctionedRegion';
+import { RestrictedAreaBoundaries } from '../src/models/enums/restrictedArea';
 
 dotenv.config();
 
