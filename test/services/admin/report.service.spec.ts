@@ -9,14 +9,15 @@ jest.mock('../../../src/helpers/location', () => ({
 
 describe('reportSanctionedSellers function', () => {
   it('should build sanctioned sellers report for affected sellers', async () => {
-    ( reverseLocationDetails as jest.Mock)
+    (reverseLocationDetails as jest.Mock)
       .mockResolvedValueOnce({ data: { display_name: 'Cuba' } })
       .mockResolvedValueOnce({ data: { display_name: 'Iran' } })
       .mockResolvedValueOnce({ data: { display_name: 'North Korea' } })
       .mockResolvedValueOnce({ data: { display_name: 'Syria' } })
       .mockResolvedValueOnce({ data: { display_name: 'Republic of Crimea' } })
       .mockResolvedValueOnce({ data: { display_name: 'Donetsk Oblast' } })
-      .mockResolvedValueOnce({ data: { display_name: 'Luhansk Oblast' } });
+      .mockResolvedValueOnce({ data: { display_name: 'Luhansk Oblast' } })
+      .mockResolvedValue({ data: { display_name: 'Russia' } });
 
     const sanctionedSellers = await reportSanctionedSellers();
 
