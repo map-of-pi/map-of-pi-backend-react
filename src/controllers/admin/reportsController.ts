@@ -1,6 +1,6 @@
 import {Request, Response} from "express";
-import {reportSanctionedSellers} from "../services/report.service";
-import logger from "../config/loggingConfig";
+import {reportSanctionedSellers} from "../../services/admin/report.service";
+import logger from "../../config/loggingConfig";
 
 export const getSanctionedSellersReport = async (req: Request, res: Response) => {
   try {
