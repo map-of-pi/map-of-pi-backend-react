@@ -65,7 +65,7 @@ export const processSellerGeocoding = async (
   seller: ISeller, 
   sanctionedRegion: string
 ): Promise<SanctionedSeller | null> => {
-  const { seller_id, name, address, sell_map_center } = seller;
+  const { seller_id, name, address, sell_map_center, pre_restriction_seller_type } = seller;
   const [longitude, latitude] = sell_map_center.coordinates;
 
   try {
@@ -87,7 +87,8 @@ export const processSellerGeocoding = async (
         name,
         address,
         sell_map_center, 
-        sanctioned_location: locationName 
+        sanctioned_location: locationName,
+        pre_restriction_seller_type
       };
     }
   } catch (error) {
