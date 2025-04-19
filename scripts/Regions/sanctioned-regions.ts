@@ -7,7 +7,7 @@ dotenv.config();
 
 // insert sanctioned areas into MongoDB
 const insertSanctionedRegions = async () => {
-  const mongoUri = 'mongodb+srv://mapofpi:mapofpi@mapofpi.vibqtx2.mongodb.net/map-of-pi?retryWrites=true&w=majority';
+  const mongoUri = process.env.MONGODB_URL;
   if (!mongoUri) {
     console.error("MongoDB connection string is not defined in the environment variables.");
     return;
