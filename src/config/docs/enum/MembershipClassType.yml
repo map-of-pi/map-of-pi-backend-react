@@ -1,0 +1,12 @@
+components:
+  schemas:
+    MembershipClassType:
+      type: string
+      enum:
+        - Casual
+        - Member
+        - Green
+        - Gold
+        - Double Gold
+        - Triple Gold
+      description: The type of Membership class.

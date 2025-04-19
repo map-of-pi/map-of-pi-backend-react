@@ -1,10 +1,12 @@
 import { Document, Types } from "mongoose";
 import { DeviceLocationType } from "./models/enums/deviceLocationType";
 import { RatingScale } from "./models/enums/ratingScale";
+import { MembershipClassType } from "./models/enums/membershipClassType";
 import { SellerType } from "./models/enums/sellerType";
 import { FulfillmentType } from "./models/enums/fulfillmentType";
 import { StockLevelType } from "./models/enums/stockLevelType";
 import { TrustMeterScale } from "./models/enums/trustMeterScale";
+import { TransactionType } from "./models/enums/transactionType";
 import { RestrictedArea } from "./models/enums/restrictedArea";
 
 export interface IUser extends Document {
@@ -34,6 +36,36 @@ export interface IUserSettings extends Document {
     include_trust_level_50: Boolean;
     include_trust_level_0: Boolean;
   };
+}
+
+export interface IMembership extends Document {
+  membership_id: string;
+  membership_class: MembershipClassType;
+  membership_expiry_date: Date | null;
+  mappi_balance: number;
+  mappi_used_to_date: number;
+  payment_history: Types.ObjectId[];
+  user: Types.ObjectId;
+}
+
+export interface IPayment extends Document {
+  _id: Types.ObjectId | string;
+  user: Types.ObjectId | string;
+  pi_payment_id: string;
+  txid?: string;
+  amount: number;
+  memo?: string;
+  status: "pending" | "approved" | "completed" | "failed";
+  paid: boolean;
+  cancelled: boolean;
+  payment_type: "Membership Upgrade" | "Buyer Checkout";
+  metadata?: {
+    membership_class?: MembershipClassType;
+    durationWeeks?: number;
+    mappiAllowance?: number;
+  };
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface ISeller extends Document {
@@ -66,6 +98,17 @@ export interface ISellerItem extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface ITransactionRecord extends Document {
+  transaction_id: string;
+  transaction_records: {
+    transaction_type: TransactionType;
+    date: Date; 
+    reason: string;
+    amount: number;
+  }[];
+}
+
 export interface IReviewFeedback extends Document {
   _id: string;
   review_receiver_id: string;
