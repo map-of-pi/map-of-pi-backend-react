@@ -1,8 +1,7 @@
 import { SellerType } from "../../models/enums/sellerType";
 import { ISanctionedRegion, ISeller } from "../../types";
 
-export function createBulkPreRestrictionOperation(sellersToEvaluate
-                                                      : ISeller[]) {
+export function createBulkPreRestrictionOperation(sellersToEvaluate: ISeller[]) {
   return sellersToEvaluate.map(seller => {
     // Create a single update object for $set that includes both fields.
     const setObj: any = { isPreRestricted: true };

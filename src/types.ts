@@ -1,11 +1,11 @@
-import {Document, Types} from "mongoose";
-import {DeviceLocationType} from "./models/enums/deviceLocationType";
-import {RatingScale} from "./models/enums/ratingScale";
-import {SellerType} from "./models/enums/sellerType";
-import {FulfillmentType} from "./models/enums/fulfillmentType";
-import {StockLevelType} from "./models/enums/stockLevelType";
-import {TrustMeterScale} from "./models/enums/trustMeterScale";
-import {RestrictedArea} from "./models/enums/restrictedArea";
+import { Document, Types } from "mongoose";
+import { DeviceLocationType } from "./models/enums/deviceLocationType";
+import { RatingScale } from "./models/enums/ratingScale";
+import { SellerType } from "./models/enums/sellerType";
+import { FulfillmentType } from "./models/enums/fulfillmentType";
+import { StockLevelType } from "./models/enums/stockLevelType";
+import { TrustMeterScale } from "./models/enums/trustMeterScale";
+import { RestrictedArea } from "./models/enums/restrictedArea";
 
 export interface IUser extends Document {
 	pi_uid: string;
@@ -110,8 +110,7 @@ export type PartialReview = {
 	receiver: string;
 }
 
-export interface IReviewFeedbackOutput extends IReviewFeedback, PartialReview {
-}
+export interface IReviewFeedbackOutput extends IReviewFeedback, PartialReview {}
 
 export type SanctionedSeller = Pick<ISeller, 'seller_id' | 'name' | 'address' | 'sell_map_center'> & {
 	sanctioned_location: string,
