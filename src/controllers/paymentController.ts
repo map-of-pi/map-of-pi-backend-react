@@ -9,6 +9,7 @@ import { MembershipClassType } from "../models/enums/membershipClassType";
 
 // Services
 import * as membershipService from "../services/membership.service";
+import { paymentType } from "../models/enums/paymentType";
 
 export const initiatePayment = async (req: Request, res: Response) => {
   try {
@@ -46,7 +47,7 @@ export const initiatePayment = async (req: Request, res: Response) => {
         : "",
       paid: false,
       cancelled: false,
-      payment_type: "Membership Upgrade",
+      payment_type: paymentType.MEMBERSHIP_UPGRADE,
       metadata,
     });
 
