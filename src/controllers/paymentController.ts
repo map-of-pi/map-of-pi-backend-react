@@ -44,7 +44,6 @@ export const initiatePayment = async (req: Request, res: Response) => {
       memo: metadata?.membership_class
         ? `Membership purchase for ${metadata.membership_class}`
         : "",
-      status: "pending",
       paid: false,
       cancelled: false,
       payment_type: "Membership Upgrade",
