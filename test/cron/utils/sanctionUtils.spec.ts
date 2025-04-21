@@ -9,7 +9,6 @@ import Seller from "../../../src/models/Seller";
 import { SellerType } from "../../../src/models/enums/sellerType";
 import { ISanctionedRegion, ISeller, SanctionedSellerStatus } from "../../../src/types";
 import { RestrictedArea } from "../../../src/models/enums/restrictedArea";
-import SanctionedRegion from "../../../src/models/misc/SanctionedRegion";
 
 jest.mock("../../../src/models/Seller");
 jest.mock("../../../src/services/admin/report.service");

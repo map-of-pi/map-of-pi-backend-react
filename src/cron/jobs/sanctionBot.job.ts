@@ -22,13 +22,13 @@ export async function runSanctionBot(): Promise<void> {
     await Seller.updateMany({}, { isPreRestricted: false }).exec();
     logger.info('Reset [isPreRestricted] for all sellers.');
 
-		 /* Step 2: Get the list of all sanctioned regions */
-     const sanctionedRegions = await getAllSanctionedRegions();
-     // If no sanctioned regions are found, log the info and exit the job
-     if (!sanctionedRegions.length) {
-       logger.info('No sanctioned regions found. Exiting job.');
-       return;
-     }
+    /* Step 2: Get the list of all sanctioned regions */
+    const sanctionedRegions = await getAllSanctionedRegions();
+    // If no sanctioned regions are found, log the info and exit the job
+    if (!sanctionedRegions.length) {
+      logger.info('No sanctioned regions found. Exiting job.');
+      return;
+    }
 
     /* Step 3: Create geo-based queries and identify sellers to evaluate */
 		const geoQueries = createGeoQueries(sanctionedRegions);
