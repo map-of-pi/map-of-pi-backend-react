@@ -117,6 +117,12 @@ export type SanctionedSeller = Pick<ISeller, 'seller_id' | 'name' | 'address' | 
 	pre_restriction_seller_type?: SellerType | null
 };
 
+export type SanctionedSellerStatus = {
+  seller_id: string;
+  pre_restriction_seller_type: SellerType | null;
+  isSanctionedRegion: boolean;
+}
+
 export interface IToggle extends Document {
 	name: string;
 	enabled: boolean;

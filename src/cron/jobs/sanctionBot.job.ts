@@ -1,4 +1,5 @@
 import Seller from "../../models/Seller";
+import { SanctionedSellerStatus } from "../../types";
 import { getAllSanctionedRegions } from "../../services/admin/report.service";
 import { 
   createBulkPreRestrictionOperation, 
@@ -7,9 +8,8 @@ import {
 import {
   getSellersToEvaluate,
   processSellersGeocoding,
-  processInZoneSellers,
-  processOutZoneSellers,
-  ProcessedSellerResult
+  processSanctionedSellers,
+  processUnsanctionedSellers
 } from "../utils/sanctionUtils";
 import logger from "../../config/loggingConfig";
 
@@ -47,17 +47,16 @@ export async function runSanctionBot(): Promise<void> {
 		logger.info(`${preRestrictedSellers.length} sellers are Pre-Restricted`);
 
 		/* Step 6: Process geocoding validation */
-    const results: ProcessedSellerResult[] = await processSellersGeocoding(
+    const results: SanctionedSellerStatus[] = await processSellersGeocoding(
       preRestrictedSellers,
       sanctionedRegions
     );
-		const inZone = results.filter(r => r.inZone);
-		const outOfZone = results.filter(r => !r.inZone);
-		logger.info(`In zone sellers: ${inZone.length} sellers; Out zone sellers: ${outOfZone.length}`);
+		const inZone = results.filter(r => r.isSanctionedRegion);
+		const outOfZone = results.filter(r => !r.isSanctionedRegion);
 
     /* Step 7: Apply restrictions of in-zone sellers or restoration of out-zone sellers */
-		await processInZoneSellers(inZone);
-		await processOutZoneSellers(outOfZone);
+		await processSanctionedSellers(inZone);
+		await processUnsanctionedSellers(outOfZone);
 
     /* Step 8: Clean up temp pre-restriction flags */
 		await Seller.updateMany({isPreRestricted: true}, {isPreRestricted: false}).exec();

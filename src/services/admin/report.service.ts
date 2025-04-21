@@ -1,6 +1,7 @@
 import Bottleneck from "bottleneck";
 
 import SanctionedRegion from "../../models/misc/SanctionedRegion";
+import { RestrictedArea } from "../../models/enums/restrictedArea";
 import { getSellersWithinSanctionedRegion } from "../seller.service";
 import { reverseLocationDetails } from "../../helpers/location";
 import { ISanctionedRegion, ISeller, SanctionedSeller } from "../../types";
@@ -63,7 +64,7 @@ export const getAllSanctionedRegions = async (): Promise<ISanctionedRegion[]> =>
 // Function to handle geocoding for a single seller
 export const processSellerGeocoding = async (
   seller: ISeller, 
-  sanctionedRegion: string
+  sanctionedRegion: RestrictedArea
 ): Promise<SanctionedSeller | null> => {
   const { seller_id, name, address, sell_map_center, pre_restriction_seller_type } = seller;
   const [longitude, latitude] = sell_map_center.coordinates;

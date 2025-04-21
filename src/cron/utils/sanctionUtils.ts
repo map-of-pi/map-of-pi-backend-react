@@ -1,14 +1,8 @@
 import Seller from "../../models/Seller";
 import { SellerType } from "../../models/enums/sellerType";
-import { ISanctionedRegion, ISeller } from "../../types";
+import { ISanctionedRegion, ISeller, SanctionedSellerStatus } from "../../types";
 import { processSellerGeocoding } from "../../services/admin/report.service";
 import logger from "../../config/loggingConfig";
-
-export interface ProcessedSellerResult {
-  seller_id: string;
-  pre_restriction_seller_type: SellerType | null | undefined;
-  inZone: boolean;
-}
 
 interface GeoQuery {
   sell_map_center: {
@@ -31,29 +25,29 @@ export async function getSellersToEvaluate(geoQueries: GeoQuery[]) {
 }
 
 export async function processSellersGeocoding(
-  flagged: ISeller[], 
+  flaggedSellers: ISeller[], 
   sanctionedRegions: ISanctionedRegion[]
-): Promise<ProcessedSellerResult[]> {
+): Promise<SanctionedSellerStatus[]> {
 	return await Promise.all(
-		flagged.map(async seller => {
+		flaggedSellers.map(async seller => {
 			for (const region of sanctionedRegions) {
 				const match = await processSellerGeocoding(seller, region.location);
 				if (match) return {
 					seller_id: match.seller_id,
-					pre_restriction_seller_type: match.pre_restriction_seller_type,
-					inZone: true
+					pre_restriction_seller_type: match.pre_restriction_seller_type ?? null,
+					isSanctionedRegion: true
 				};
 			}
 			return {
 				seller_id: seller.seller_id,
-				pre_restriction_seller_type: seller.pre_restriction_seller_type,
-				inZone: false
+				pre_restriction_seller_type: seller.pre_restriction_seller_type ?? null,
+				isSanctionedRegion: false
 			};
 		})
 	);
 }
 
-export async function processInZoneSellers(inZone: ProcessedSellerResult[]) {
+export async function processSanctionedSellers(inZone: SanctionedSellerStatus[]) {
 	if (!inZone.length) return;
   
   await Seller.bulkWrite(
@@ -70,10 +64,10 @@ export async function processInZoneSellers(inZone: ProcessedSellerResult[]) {
       }
     }))
   );
-  logger.info(`Restricted ${inZone.length} in-zone sellers.`);
+  logger.info(`Restricted ${inZone.length} sanctioned sellers.`);
 }
 
-export async function processOutZoneSellers(outOfZone: ProcessedSellerResult[]) {
+export async function processUnsanctionedSellers(outOfZone: SanctionedSellerStatus[]) {
 	if (!outOfZone.length) return;
 
   const result = await Seller.bulkWrite(
@@ -83,14 +77,11 @@ export async function processOutZoneSellers(outOfZone: ProcessedSellerResult[]) 
         update: {
           $set: {
             seller_type: s.pre_restriction_seller_type ?? SellerType.Test,
-            pre_restriction_seller_type: ""
+            pre_restriction_seller_type: null
           },
         }
       }
     }))
   );
-  logger.info(`Restored ${outOfZone.length} out-zone sellers.`, {
-    matchedCount: result.matchedCount,
-    modifiedCount: result.modifiedCount,
-  });
+  logger.info(`Restored ${outOfZone.length} sellers.`);
 }
