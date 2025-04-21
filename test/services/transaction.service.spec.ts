@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Membership from '../../src/models/Membership';
 import TransactionRecord from '../../src/models/TransactionRecord';
 import { MembershipClassType } from '../../src/models/enums/membershipClassType';
@@ -108,6 +109,11 @@ describe('getAllTransactionRecords function', () => {
 });
 
 describe('processTransaction function', () => {
+  afterEach(async () => {
+    await Membership.deleteMany({});
+    await TransactionRecord.deleteMany({});
+  });
+
   // Helper function to convert Mongoose document to a plain object and normalize values accordingly
   const convertToMembershipPlainObject = (membership: IMembership): any => {
     const plainObject = membership.toObject();
@@ -138,6 +144,11 @@ describe('processTransaction function', () => {
     return plainObject;
   };
 
+  afterEach(async () => {
+    await Membership.deleteMany({});
+    await TransactionRecord.deleteMany({});
+  });
+
   const assertObjects = (actual: any, expected: any) => {
     const { _id, __v, createdAt, updatedAt, ...filteredActual } = actual;
   
@@ -154,94 +165,113 @@ describe('processTransaction function', () => {
     expect(filteredActual).toEqual(expect.objectContaining(expected));
   };
 
-  it('should create the transaction record and update the Mappi balance successfully', async () => {    
+  it('should create the transaction record and update the Mappi balance successfully', async () => {
     try {
+      await Membership.create({
+        user: new mongoose.Types.ObjectId(),
+        membership_id: '0c0c0c-0c0c-0c0c',
+        membership_class: MembershipClassType.GOLD,
+        membership_expiry_date: new Date('2025-04-23T00:00:00.000Z'),
+        mappi_balance: 200,
+        mappi_used_to_date: 0,
+        payment_history: [],
+      });
+  
       const transactionRecord = await processTransaction(
-        '0b0b0b-0b0b-0b0b', TransactionType.MAPPI_DEPOSIT, 100, "Mappi credited for updated Membership to Gold"
-      ) as ITransactionRecord;
-
-      const existingMembershipData = await Membership.findOne({ membership_id: '0b0b0b-0b0b-0b0b' }) as IMembership; 
-      
+        '0c0c0c-0c0c-0c0c',
+        TransactionType.MAPPI_DEPOSIT, // ✅ make it a MAPPI_DEPOSIT so mappi_balance updates
+        100,
+        'Mappi credited for updated Membership to Gold'
+      );
+  
+      const existingMembershipData = await Membership.findOne({ membership_id: '0c0c0c-0c0c-0c0c' }) as IMembership;
+  
       const expectedMembership = {
-        membership_id: '0b0b0b-0b0b-0b0b',
-        membership_class: MembershipClassType.DOUBLE_GOLD,
-        membership_expiry_date: '2025-06-30T00:00:00.000Z',
-        mappi_balance: 500
-      }
-
+        membership_id: '0c0c0c-0c0c-0c0c',
+        membership_class: MembershipClassType.GOLD, // <- stays GOLD unless you're testing an upgrade
+        membership_expiry_date: '2025-04-23T00:00:00.000Z',
+        mappi_balance: 300, // 200 original + 100 deposit
+      };
+  
       const expectedTransactionRecord = {
-        transaction_id: '0b0b0b-0b0b-0b0b',
+        transaction_id: '0c0c0c-0c0c-0c0c',
         transaction_records: [
           {
             transaction_type: TransactionType.MAPPI_DEPOSIT,
             amount: 100,
             reason: 'Mappi credited for updated Membership to Gold',
             date: new Date(new Date().setHours(0, 0, 0, 0)).toISOString(),
-          }
-        ]
+          },
+        ],
       };
-
-      // Convert Mongoose document to plain object
+  
       const plainObjectMembership = convertToMembershipPlainObject(existingMembershipData);
       const plainObjectTransactionRecord = convertToTransactionRecordPlainObject(transactionRecord);
-
-      // Assert that the both transaction record and membership was updated correctly
+  
       assertObjects(plainObjectMembership, expectedMembership);
       assertObjects(plainObjectTransactionRecord, expectedTransactionRecord);
-
+  
     } catch (error: any) {
       throw new Error(`Process transaction test failed with error: ${error.message}`);
     }
+  });  
+
+  it('should create the transaction record but not update the Mappi balance because the Transaction Type is not applicable', async () => {
+    // Just spy — do NOT mock a return value
+    const updateMappiBalanceMock = jest.spyOn(membershipService, 'updateMappiBalance');
+
+    await Membership.create({
+      user: new mongoose.Types.ObjectId(),
+      membership_id: '0c0c0c-0c0c-0c0c',
+      membership_class: MembershipClassType.GOLD,
+      membership_expiry_date: new Date('2025-04-23T00:00:00.000Z'),
+      mappi_balance: 200,
+      mappi_used_to_date: 0,
+      payment_history: [],
+    });    
+  
+    const transactionRecord = await processTransaction(
+      '0c0c0c-0c0c-0c0c',
+      TransactionType.PI_WITHDRAWAL,
+      10,
+      'Purchased seller item'
+    );
+  
+    const existingMembershipData = await Membership.findOne({
+      membership_id: '0c0c0c-0c0c-0c0c',
+    }) as IMembership;
+  
+    const expectedMembership = {
+      membership_id: '0c0c0c-0c0c-0c0c',
+      membership_class: MembershipClassType.GOLD,
+      membership_expiry_date: '2025-04-23T00:00:00.000Z',
+      mappi_balance: 200, // should not change
+    };
+  
+    const expectedTransactionRecord = {
+      transaction_id: '0c0c0c-0c0c-0c0c',
+      transaction_records: [
+        {
+          transaction_type: TransactionType.PI_WITHDRAWAL,
+          amount: -10,
+          reason: 'Purchased seller item',
+          date: new Date(new Date().setHours(0, 0, 0, 0)).toISOString(),
+        },
+      ],
+    };
+  
+    const plainObjectMembership = convertToMembershipPlainObject(existingMembershipData);
+    const plainObjectTransactionRecord = convertToTransactionRecordPlainObject(transactionRecord);
+  
+    assertObjects(plainObjectMembership, expectedMembership);
+    assertObjects(plainObjectTransactionRecord, expectedTransactionRecord);
+  
+    // ✅ This is what you're testing
+    expect(updateMappiBalanceMock).not.toHaveBeenCalled();
+  
+    updateMappiBalanceMock.mockRestore();
   });
-
-  it('should create the transaction record but not update the Mappi balance because the Transaction Type is not applicable', async () => {    
-    // Use jest.spyOn to mock the updateMappiBalance function within this test only
-    const updateMappiBalanceMock = jest.spyOn(membershipService, 'updateMappiBalance').mockResolvedValue({} as IMembership);
-    
-    try {
-      const transactionRecord = await processTransaction(
-        '0c0c0c-0c0c-0c0c', TransactionType.PI_WITHDRAWAL, 10, "Purchased seller item"
-      ) as ITransactionRecord;
-
-      const existingMembershipData = await Membership.findOne({ membership_id: '0c0c0c-0c0c-0c0c' }) as IMembership; 
-      
-      const expectedMembership = {
-        membership_id: '0c0c0c-0c0c-0c0c',
-        membership_class: MembershipClassType.GOLD,
-        membership_expiry_date: '2025-04-23T00:00:00.000Z',
-        mappi_balance: 200 // Unchanged Mappi balance
-      }
-
-      const expectedTransactionRecord = {
-        transaction_id: '0c0c0c-0c0c-0c0c',
-        transaction_records: [
-          {
-            transaction_type: TransactionType.PI_WITHDRAWAL,
-            amount: -10,
-            reason: 'Purchased seller item',
-            date: new Date(new Date().setHours(0, 0, 0, 0)).toISOString(),
-          }
-        ]
-      };
-
-      // Convert Mongoose document to plain object
-      const plainObjectMembership = convertToMembershipPlainObject(existingMembershipData);
-      const plainObjectTransactionRecord = convertToTransactionRecordPlainObject(transactionRecord);
-
-      // Assert that the both transaction record and membership was updated correctly
-      assertObjects(plainObjectMembership, expectedMembership);
-      assertObjects(plainObjectTransactionRecord, expectedTransactionRecord);
-
-      // Verify that the updateMappiBalance function was not called
-      expect(updateMappiBalanceMock).not.toHaveBeenCalled();
-
-    } catch (error: any) {
-      throw new Error(`Process transaction test failed with error: ${error.message}`);
-    } finally {
-      // Restore the original implementation of the updateMappiBalance function
-      updateMappiBalanceMock.mockRestore();
-    }
-  });
+  
 
   it('should throw an error when an exception occurs', async () => {  
     // Mock the TransactionRecord model to throw an error
@@ -296,7 +326,25 @@ describe('createTransactionRecord function', () => {
     expect(filteredActual).toEqual(expect.objectContaining(expected));
   };
 
-  it('should add a new transaction record to existing transaction records for the Pioneer', async () => {    
+  it('should add a new transaction record to existing transaction records for the Pioneer', async () => {
+    await TransactionRecord.create({
+      transaction_id: '0a0a0a-0a0a-0a0a',
+      transaction_records: [
+        {
+          transaction_type: TransactionType.MAPPI_DEPOSIT,
+          amount: 100,
+          reason: 'Mappi credited for updated Membership to Gold',
+          date: new Date('2025-02-10T00:00:00.000Z')
+        },
+        {
+          transaction_type: TransactionType.MAPPI_WITHDRAWAL,
+          amount: -1,
+          reason: 'Sell item 1 week',
+          date: new Date('2025-02-10T00:00:00.000Z')
+        }
+      ]
+    });
+    
     const existingTransactionRecords = await TransactionRecord.findOne({ transaction_id: '0a0a0a-0a0a-0a0a' });
     // Count the number of previous transaction entries (if any)
     const existingTransactionRecordsCount = existingTransactionRecords ? existingTransactionRecords.transaction_records.length : 0;
