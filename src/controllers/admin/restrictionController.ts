@@ -14,7 +14,9 @@ export const  checkSanctionStatus = async (req: Request, res: Response) => {
 	try {
 		const result = await restrictionService.validateSellerLocation(longitude, latitude);
 		const isSanctioned = !!result;
-    logger.info(`User at [${latitude}, ${longitude}] is ${isSanctioned ? '' : 'not '} in a sanctioned zone.`);
+
+    const status = isSanctioned ? 'in a sanctioned zone' : 'not in a sanctioned zone';
+    logger.info(`User at [${latitude}, ${longitude}] is ${status}.`);
 		return res.status(200).json({
 			message: `Sell center is set within a ${isSanctioned ? 'sanctioned' : 'unsanctioned' } zone`,
 			isSanctioned
