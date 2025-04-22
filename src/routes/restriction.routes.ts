@@ -1,25 +1,21 @@
 import {Router} from "express";
-import { verifyAdminToken } from "../middlewares/verifyToken";
-import * as sanctionedRegionsController from "../controllers/sanctionedRegionsController"
+import * as restrictionController from "../controllers/admin/restrictionController";
 
-const sanctionedRegionsRoutes = Router();
+const restrictionRoutes = Router();
 
 /**
  * @swagger
- * /api/v1/reports/check-in-sanctioned-region:
+ * /api/v1/restrictions/check-sanction-status:
  *   post:
  *     tags:
- *       - Report
- *     summary: Check if a point is within a sanctioned region
+ *       - Restriction
+ *     summary: Check if a [latitude, longitude] coordinate is within sanctioned boundaries.
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - latitude
- *               - longitude
  *             properties:
  *               latitude:
  *                 type: number
@@ -27,26 +23,28 @@ const sanctionedRegionsRoutes = Router();
  *               longitude:
  *                 type: number
  *                 example: 30.0588
+ *             required:
+ *               - latitude
+ *               - longitude
  *     responses:
  *       200:
- *         description: Indicates whether the point is in a sanctioned region
+ *         description: Successful response
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 isRestricted:
+ *                 isSanctioned:
  *                   type: boolean
  *                   example: true
  *       400:
- *         description: Invalid coordinates provided
+ *         description: Bad request
  *       500:
  *         description: Internal server error
  */
-sanctionedRegionsRoutes.post(
-  "/check-in-sanctioned-region",
-  // verifyAdminToken,
-  sanctionedRegionsController.checkIfPointInRegion
+restrictionRoutes.post(
+  "/check-sanction-status",
+  restrictionController.checkSanctionStatus
 );
 
-export default sanctionedRegionsRoutes;
+export default restrictionRoutes;
