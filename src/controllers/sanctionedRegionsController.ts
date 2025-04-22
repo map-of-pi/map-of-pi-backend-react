@@ -10,20 +10,7 @@ export async function checkIfPointInRegion(req: Request, res: Response) {
 	}
 
 	try {
-		// Build a GeoJSON Point for the query (lon/lat order!).
-		const point = {
-			type: 'Point' as const,
-			coordinates: [longitude, latitude],
-		};
-
-		// Ask MongoDB if any `boundary` polygon intersects this point.
-		const matchingRegion = await SanctionedRegion.findOne({
-			boundary: {
-				$geoIntersects: {
-					$geometry: point
-				}
-			}
-		}).exec();
+		const matchingRegion = await checkInSanctionedRegion(longitude, latitude);
 
 		const isRestricted = !!matchingRegion;
 		logger.info(`User at [${latitude},${longitude}] is ${isRestricted ? '' : 'not '}in a restricted zone.`);
@@ -35,4 +22,22 @@ export async function checkIfPointInRegion(req: Request, res: Response) {
 		logger.error('Error checking sanctioned location:', error);
 		return res.status(500).json({ error: 'Internal server error.' });
 	}
+}
+
+async function checkInSanctionedRegion(longitude: number, latitude: number) {
+	// Build a GeoJSON Point for the query (lon/lat order!).
+	const point = {
+		type: 'Point' as const,
+		coordinates: [longitude, latitude],
+	};
+
+	// Ask MongoDB if any `boundary` polygon intersects this point.
+	const matchingRegion = await SanctionedRegion.findOne({
+		boundary: {
+			$geoIntersects: {
+				$geometry: point
+			}
+		}
+	}).exec();
+	return matchingRegion;
 }
