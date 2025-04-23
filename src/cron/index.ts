@@ -1,21 +1,23 @@
+import schedule from "node-schedule";
 import { runSanctionBot } from "./jobs/sanctionBot.job";
 import logger from "../config/loggingConfig";
-
-const schedule = require("node-schedule");
 
 export const scheduleCronJobs = () => {
   logger.info("Initializing scheduled cron jobs...");
 
-  // Schedule the Sanction Bot cron job to run daily at 22:00 UTC using node-schedule.
-  schedule.scheduleJob('0 22 * * * *', async () => {
-    logger.info('Scheduled job triggered at 22:00 UTC.');
+  // Run the Sanction Bot job daily at 22:00 UTC
+  const sanctionJobTime = '0 0 22 * * *';
+
+  schedule.scheduleJob(sanctionJobTime, async () => {
+    logger.info('🕒 Sanction Bot job triggered (22:00 UTC).');
+
     try {
       await runSanctionBot();
-      logger.info("Sanction Bot cron job finished execution.");
+      logger.info("✅ Sanction Bot job completed successfully.");
     } catch (error) {
-      logger.error("Sanction Bot cron job failed:", error);
+      logger.error("❌ Sanction Bot job failed:", error);
     }
   });
 
-  logger.info("All scheduled cron jobs initialized.");
+  logger.info("✅ All cron jobs have been scheduled.");
 };
