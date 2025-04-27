@@ -1,10 +1,11 @@
 import Bottleneck from "bottleneck";
 
-import SanctionedRegion from "../models/misc/SanctionedRegion";
-import { getSellersWithinSanctionedRegion } from "./seller.service";
-import { reverseLocationDetails } from "../helpers/location";
-import { ISanctionedRegion, ISeller, SanctionedSeller } from "../types";
-import logger from "../config/loggingConfig";
+import SanctionedRegion from "../../models/misc/SanctionedRegion";
+import { RestrictedArea } from "../../models/enums/restrictedArea";
+import { getSellersWithinSanctionedRegion } from "../seller.service";
+import { reverseLocationDetails } from "../../helpers/location";
+import { ISanctionedRegion, ISeller, SanctionedSeller } from "../../types";
+import logger from "../../config/loggingConfig";
 
 const requestLimiter = new Bottleneck({ minTime: 1000 });
 
@@ -45,7 +46,7 @@ export const reportSanctionedSellers = async (): Promise<SanctionedSeller[]> => 
 };
 
 // Fetch all sanctioned regions
-const getAllSanctionedRegions = async (): Promise<ISanctionedRegion[]> => {
+export const getAllSanctionedRegions = async (): Promise<ISanctionedRegion[]> => {
   try {
     const regions = await SanctionedRegion.find();
     if (!regions || regions.length === 0) {
@@ -61,11 +62,11 @@ const getAllSanctionedRegions = async (): Promise<ISanctionedRegion[]> => {
 };
 
 // Function to handle geocoding for a single seller
-const processSellerGeocoding = async (
+export const processSellerGeocoding = async (
   seller: ISeller, 
-  sanctionedRegion: string
+  sanctionedRegion: RestrictedArea
 ): Promise<SanctionedSeller | null> => {
-  const { seller_id, name, address, sell_map_center } = seller;
+  const { seller_id, name, address, sell_map_center, pre_restriction_seller_type } = seller;
   const [longitude, latitude] = sell_map_center.coordinates;
 
   try {
@@ -87,7 +88,8 @@ const processSellerGeocoding = async (
         name,
         address,
         sell_map_center, 
-        sanctioned_location: locationName 
+        sanctioned_location: locationName,
+        pre_restriction_seller_type
       };
     }
   } catch (error) {

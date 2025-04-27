@@ -18,7 +18,11 @@ import mapCenterRoutes from "../routes/mapCenter.routes";
 import transactionRoutes from "../routes/transactionRecord.routes";
 import reportRoutes from "../routes/report.routes";
 import toggleRoutes from "../routes/toggle.routes";
+
 import paymentRoutes from "../routes/payment.routes";
+
+import restrictionRoutes from "../routes/restriction.routes";
+
 
 dotenv.config();
 
@@ -50,7 +54,11 @@ app.use("/api/v1/memberships", membershipRoutes);
 app.use("/api/v1/transactions", transactionRoutes);
 app.use("/api/v1/reports", reportRoutes);
 app.use("/api/v1/toggles", toggleRoutes);
+
 app.use("/api/v1/payments", paymentRoutes);
+
+app.use("/api/v1/restrictions", restrictionRoutes);
+
 
 app.use("/", homeRoutes);
 
