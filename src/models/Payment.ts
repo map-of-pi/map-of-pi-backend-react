@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { IPayment } from "../types";
+import { paymentType } from "./enums/paymentType";
 
 const paymentSchema = new Schema<IPayment>(
   {
@@ -36,7 +37,7 @@ const paymentSchema = new Schema<IPayment>(
     },
     payment_type: {
       type: String,
-      enum: ["Membership Upgrade", "Buyer Checkout"],
+      enum: Object.values(paymentType),
       required: true,
     },
   },

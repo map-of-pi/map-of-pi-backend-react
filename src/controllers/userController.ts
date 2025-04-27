@@ -22,7 +22,7 @@ export const authenticateUser = async (req: Request, res: Response) => {
 
     logger.info(`User authenticated: ${user.pi_uid}`);
 
-    return res.cookie("token", token, {httpOnly: true, expires: expiresDate, secure: true, priority: "high", sameSite: "none"}).status(200).json({
+    return res.cookie("token", token, {httpOnly: true, expires: expiresDate, secure: true, priority: "high", sameSite: "lax"}).status(200).json({
       user,
       token,
     });

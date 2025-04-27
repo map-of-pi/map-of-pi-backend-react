@@ -1,41 +1,27 @@
 import { Request, Response } from "express";
 import logger from "../config/loggingConfig";
 import { platformAPIClient } from "../config/platformAPIclient";
-import { v4 as uuidv4 } from "uuid";
 
-// Models
 import Payment from "../models/Payment";
 import { MembershipClassType } from "../models/enums/membershipClassType";
 
-// Services
 import * as membershipService from "../services/membership.service";
+import { paymentType } from "../models/enums/paymentType";
 
 export const initiatePayment = async (req: Request, res: Response) => {
   try {
     const authUser = req.currentUser;
-    const { amount, metadata } = req.body;
+    const { amount, metadata, paymentId } = req.body;
 
     if (!authUser) {
       logger.warn("User not authenticated at initiatePayment");
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    if (!amount) {
-      return res
-        .status(400)
-        .json({ error: "Missing required field: amount" });
+    if (!amount || !paymentId) {
+      return res.status(400).json({ error: "Missing required fields: amount or paymentId" });
     }
 
-    // Validate membership_class if provided
-    if (metadata?.membership_class) {
-      if (!Object.values(MembershipClassType).includes(metadata.membership_class)) {
-        return res
-          .status(400)
-          .json({ error: `Invalid membership_class: ${metadata.membership_class}` });
-      }
-    }
-
-    const paymentId = uuidv4();
 
     const payment = await Payment.create({
       user: authUser._id,
@@ -44,10 +30,9 @@ export const initiatePayment = async (req: Request, res: Response) => {
       memo: metadata?.membership_class
         ? `Membership purchase for ${metadata.membership_class}`
         : "",
-      status: "pending",
       paid: false,
       cancelled: false,
-      payment_type: "Membership Upgrade",
+      payment_type: paymentType.MEMBERSHIP_UPGRADE,
       metadata,
     });
 

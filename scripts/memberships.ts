@@ -2,13 +2,14 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import Membership from "../src/models/Membership";
 import User from "../src/models/User";
+import { env } from "../src/utils/env";
 
 dotenv.config();
 
 const populateMemberships = async () => {
   try {
     // Connect to the database
-    await mongoose.connect(process.env.MONGO_URI || "mongodb+srv://mapofpi:mapofpi@mapofpi.vibqtx2.mongodb.net/map-of-pi?retryWrites=true&w=majority");
+    await mongoose.connect(env.MONGODB_URL);
 
     // Fetch all users
     const users = await User.find({});

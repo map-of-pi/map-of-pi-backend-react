@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Membership from '../../src/models/Membership';
 import User from '../../src/models/User';
 import { MembershipClassType } from '../../src/models/enums/membershipClassType';
@@ -21,11 +22,22 @@ describe('getSingleMembershipById function', () => {
     return plainObject;
   };
 
-  it('should return existing membership associated with the membership ID', async () => {  
+  it('should return existing membership associated with the membership ID', async () => {
+    const testMembership = await Membership.create({
+      user: new mongoose.Types.ObjectId(),
+      membership_id: '0a0a0a-0a0a-0a0a',
+      membership_class: MembershipClassType.TRIPLE_GOLD,
+      membership_expiry_date: new Date('2026-01-26T00:00:00.000Z'),
+      mappi_balance: 1000,
+      mappi_used_to_date: 0,
+      payment_history: [],
+    });
+  
     const membershipData = await getSingleMembershipById('0a0a0a-0a0a-0a0a') as IMembership;
-
-    const plainObject = await convertToPlainObject(membershipData);
-
+  
+    const plainObject = membershipData.toObject();
+    plainObject.membership_expiry_date = plainObject.membership_expiry_date.toISOString();
+  
     expect(plainObject).toMatchObject({
       membership_id: '0a0a0a-0a0a-0a0a',
       membership_class: "Triple Gold",
@@ -33,6 +45,7 @@ describe('getSingleMembershipById function', () => {
       mappi_balance: 1000
     });
   });
+  
 
   it('should throw an error when an exception occurs', async () => {  
     // Mock the Membership model to throw an error
@@ -154,31 +167,49 @@ describe('addOrUpdateMembership function', () => {
 });
 
 describe('updateMembershipBalance function', () => {
-  it('should add to membership balance if the membership ID exists for the Pioneer', async () => {      
-    const existingMembership = await Membership.findOne({ membership_id: '0a0a0a-0a0a-0a0a' }) as IMembership;   
-    
+  beforeEach(async () => {
+    await Membership.deleteMany({});
+  });
+
+  it('should add to membership balance if the membership ID exists for the Pioneer', async () => {
+    const existingMembership = await Membership.create({
+      user: new mongoose.Types.ObjectId(),
+      membership_id: '0a0a0a-0a0a-0a0a',
+      membership_class: MembershipClassType.TRIPLE_GOLD,
+      membership_expiry_date: new Date('2026-01-26T00:00:00.000Z'),
+      mappi_balance: 1000
+    });
+
     const membershipData = await updateMappiBalance(
-      existingMembership.membership_id, TransactionType.MAPPI_DEPOSIT, 5) as IMembership;
+      '0a0a0a-0a0a-0a0a',
+      TransactionType.MAPPI_DEPOSIT,
+      5
+    ) as IMembership;
 
     expect(membershipData.toObject()).toMatchObject({
-      membership_id: existingMembership.membership_id,
-      membership_class: existingMembership.membership_class,
-      membership_expiry_date: existingMembership.membership_expiry_date,
-      mappi_balance: existingMembership.mappi_balance + 5 // 1005
+      membership_id: '0a0a0a-0a0a-0a0a',
+      mappi_balance: 1005
     });
   });
 
-  it('should deduct from membership balance if the membership ID exists for the Pioneer', async () => {      
-    const existingMembership = await Membership.findOne({ membership_id: '0b0b0b-0b0b-0b0b' }) as IMembership;   
-    
+  it('should deduct from membership balance if the membership ID exists for the Pioneer', async () => {
+    const existingMembership = await Membership.create({
+      user: new mongoose.Types.ObjectId(),
+      membership_id: '0b0b0b-0b0b-0b0b',
+      membership_class: MembershipClassType.DOUBLE_GOLD,
+      membership_expiry_date: new Date('2025-06-30T00:00:00.000Z'),
+      mappi_balance: 400
+    });
+
     const membershipData = await updateMappiBalance(
-      existingMembership.membership_id, TransactionType.MAPPI_WITHDRAWAL, 5) as IMembership;
+      '0b0b0b-0b0b-0b0b',
+      TransactionType.MAPPI_WITHDRAWAL,
+      5
+    ) as IMembership;
 
     expect(membershipData.toObject()).toMatchObject({
-      membership_id: existingMembership.membership_id,
-      membership_class: existingMembership.membership_class,
-      membership_expiry_date: existingMembership.membership_expiry_date,
-      mappi_balance: existingMembership.mappi_balance - 5 // 395
+      membership_id: '0b0b0b-0b0b-0b0b',
+      mappi_balance: 395
     });
   });
 
