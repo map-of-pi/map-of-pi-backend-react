@@ -14,7 +14,7 @@ const insertSanctionedRegions = async () => {
   }
 
   try {
-    console.log('Attempting to connect to MongoDB...');
+    console.log("Attempting to connect to MongoDB...");
     await mongoose.connect(mongoUri);
     console.log("Connected to MongoDB");
 
@@ -26,12 +26,12 @@ const insertSanctionedRegions = async () => {
     await SanctionedRegion.deleteMany(); // clear existing data
     await SanctionedRegion.insertMany(regions); // insert new data
 
-    console.log('Inserted sanctioned regions into MongoDB');
+    console.log("Inserted sanctioned regions into MongoDB");
   } catch (error) {
     console.error("Error inserting sanctioned regions:", (error as Error).message);
   } finally {
     await mongoose.disconnect();
-    console.log('Disconnected from MongoDB');
+    console.log("Disconnected from MongoDB");
   }
 };
 
