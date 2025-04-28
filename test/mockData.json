@@ -155,6 +155,38 @@
       "phone_number": "121-121-1212",
       "findme": "deviceGPS",
       "trust_meter_rating": 50
+    },
+    {
+      "user_settings_id": "0m0m0m-0m0m-0m0m",
+      "user_name": "Test Thirteen",
+      "email": "test-thirteen@test.com",
+      "phone_number": "131-131-1313",
+      "findme": "deviceGPS",
+      "trust_meter_rating": 0
+    },
+    {
+      "user_settings_id": "0n0n0n-0n0n-0n0n",
+      "user_name": "Test Fourteen",
+      "email": "test-fourteen@test.com",
+      "phone_number": "141-141-1414",
+      "findme": "deviceGPS",
+      "trust_meter_rating": 0
+    },
+    {
+      "user_settings_id": "0o0o0o-0o0o-0o0o",
+      "user_name": "Test Fifteen",
+      "email": "test-fifteen@test.com",
+      "phone_number": "151-151-1515",
+      "findme": "deviceGPS",
+      "trust_meter_rating": 0
+    },
+    {
+      "user_settings_id": "0p0p0p-0p0p-0p0p",
+      "user_name": "Test Sixteen",
+      "email": "test-sixteen@test.com",
+      "phone_number": "161-161-1616",
+      "findme": "deviceGPS",
+      "trust_meter_rating": 0
     }
   ],
   "sellers": [
@@ -285,6 +317,50 @@
       "sell_map_center": {
         "type": "Point",
         "coordinates": [39.9930, 49.5582]
+      }
+    },
+    {
+      "seller_id": "0m0m0m-0m0m-0m0m",
+      "name": "Test Seller Sanctioned 13",
+      "description": "Test Seller Sanctioned 13 Description",
+      "address": "Sanctioned Region Russia West",
+      "seller_type": "testSeller",
+      "sell_map_center": {
+          "type": "Point",
+          "coordinates": [38.3174, 56.0084]
+      }
+    },
+    {
+      "seller_id": "0n0n0n-0n0n-0n0n",
+      "name": "Test Seller Sanctioned 14",
+      "description": "Test Seller Sanctioned 14 Description",
+      "address": "Sanctioned Region Russia Central",
+      "seller_type": "testSeller",
+      "sell_map_center": {
+          "type": "Point",
+          "coordinates": [87.9806, 61.6986]
+      }
+    },
+    {
+      "seller_id": "0o0o0o-0o0o-0o0o",
+      "name": "Test Seller Sanctioned 15",
+      "description": "Test Seller Sanctioned 15 Description",
+      "address": "Sanctioned Region Russia East",
+      "seller_type": "testSeller",
+      "sell_map_center": {
+          "type": "Point",
+          "coordinates": [-175.5260, 66.1756]
+      }
+    },
+    {
+      "seller_id": "0p0p0p-0p0p-0p0p",
+      "name": "Test Seller Sanctioned 16",
+      "description": "Test Seller Sanctioned 16 Description",
+      "address": "Sanctioned Region Russia Polar",
+      "seller_type": "testSeller",
+      "sell_map_center": {
+          "type": "Point",
+          "coordinates": [60.753873, 80.534107]
       }
     }
   ],
@@ -479,6 +555,49 @@
           [37.5, 50.3],
           [37.5, 47.0]
         ]]
+      }
+    },
+    {
+      "location": "Russia",
+      "boundary": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [[
+            [27.3, 77.0],
+            [27.3, 41.1],
+            [69.1, 41.1],
+            [69.1, 77.0],
+            [27.3, 77.0]
+          ]],
+          [[
+            [69.1, 77.8],
+            [69.1, 49.1],
+            [114.0, 49.1],
+            [114.0, 77.8],
+            [69.1, 77.8]
+          ]],
+          [[
+            [114.0, 77.2],
+            [114.0, 42.3],
+            [180, 42.3],
+            [180, 77.2],
+            [114.0, 77.2]
+          ]],
+          [[
+            [-180.0, 62.0],
+            [-170.0, 62.0],
+            [-170.0, 72.0],
+            [-180.0, 72.0],
+            [-180.0, 62.0]
+          ]],
+          [[
+            [44.8, 81.9],
+            [44.8, 77.9],
+            [107.9, 77.9],
+            [107.9, 81.9],
+            [44.8, 81.9]
+          ]]
+        ]
       }
     }
   ],
