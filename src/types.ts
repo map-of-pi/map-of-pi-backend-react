@@ -53,6 +53,16 @@ export interface ISeller extends Document {
   fulfillment_description?: string;
 }
 
+export interface INotification extends Document {
+  _id: string;
+  pi_uid: string;
+  is_cleared: boolean;
+  reason: string;
+  createdAt: Date;
+  updatedAt: Date;
+
+}
+
 export interface ISellerItem extends Document {
   _id: string;
   seller_id: string;
