@@ -29,7 +29,6 @@ export const getNotifications = async (req: Request, res: Response) => {
     if (!notifications) {
       return res.status(200).json([]);
     }
-    console.log("Fetched notifications:", notifications);
 
     res.status(200).json(notifications);
   } catch (error) {
