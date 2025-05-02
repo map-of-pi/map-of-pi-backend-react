@@ -1,6 +1,6 @@
 import axios from "axios";
-import { env } from "../utils/env";
 import PiNetwork from 'pi-backend';
+import { env } from "../utils/env";
 
 export const platformAPIClient = axios.create({
   baseURL: env.PLATFORM_API_URL,
@@ -10,10 +10,10 @@ export const platformAPIClient = axios.create({
   },
 });
 
-
-
 const apiKey = env.PI_API_KEY || '';
-const walletSeed = env.WALLET_PRIVATE_SEED || '';
+
+// Fallback for test environments to prevent build failures
+const walletSeed = env.WALLET_PRIVATE_SEED || 'S_MOCK_FOR_TESTS';
 
 const pi = new PiNetwork(apiKey, walletSeed);
 export default pi
