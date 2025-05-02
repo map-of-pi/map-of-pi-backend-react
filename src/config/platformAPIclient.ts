@@ -12,9 +12,9 @@ export const platformAPIClient = axios.create({
 
 const apiKey = env.PI_API_KEY || '';
 
-/* Fallback randomly generated seed for test environments to prevent build failures 
+/* Fallback 'swoocn-test-pi' app generated secret seed for test environments to prevent build failures 
    Starts with 'S' + 56 characters + passes Stellar's base32 & checksum rules */
-const walletSeed = env.WALLET_PRIVATE_SEED || 'SB3KUB62T4U4W3RJG6CLOZXXI5ECRNYI2SSVK7QEXKAXNQQFH7MGAF4C';
+const walletSeed = env.WALLET_PRIVATE_SEED || 'SBGANHY32HNHWSKEY4OFU4DE7J4S3VZZZFFBHKEVMDTRTYNIJDVQKQAA';
 
 const pi = new PiNetwork(apiKey, walletSeed);
 export default pi
