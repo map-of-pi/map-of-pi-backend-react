@@ -7,7 +7,7 @@ import OrderItem from "../models/orderItem";
 import { OrderItemStatusType } from "../models/enums/orderItemStatusType";
 import User from "../models/User";
 import Seller from "../models/Seller";
-import { OrderStatusType } from "../models/enums/orderStatusType";
+import { OrderStatusType } from "../models/enums/OrderStatusType";
 import { FulfillmentType } from "../models/enums/fulfillmentType";
 
 interface NewOrder {    
