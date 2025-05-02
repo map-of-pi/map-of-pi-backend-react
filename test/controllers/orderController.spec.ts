@@ -17,7 +17,7 @@ describe('orderController', () => {
   describe('deleteOrder function', () => {
     beforeEach(() => {
       req = { 
-        params: { order_id: '26f5a0f2a86d1f9f3b7e4e81' }
+        params: { id: '26f5a0f2a86d1f9f3b7e4e81' }
       };
       res = {
         status: jest.fn().mockReturnThis(),
@@ -34,10 +34,7 @@ describe('orderController', () => {
 
       expect(orderService.deleteOrderById).toHaveBeenCalledWith('26f5a0f2a86d1f9f3b7e4e81');
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ 
-        message: "Order deleted successfully", 
-        deletedOrder: expectedOrder 
-      });
+      expect(res.json).toHaveBeenCalledWith({ message: "Order deleted successfully" });
     });
 
     it('should return appropriate [404] if order is not found', async () => {

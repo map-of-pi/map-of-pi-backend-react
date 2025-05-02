@@ -62,7 +62,7 @@ export const deleteOrder = async (req: Request, res: Response) => {
     res.status(200).json({ message: "Order deleted successfully" });
   } catch (error) {
     logger.error("Error deleting order: ", error);
-    res.status(500).json({ message: "Failed to delete order" });
+    res.status(500).json({ message: 'An error occurred while deleting order; please try again later' });
   }
 };
 
