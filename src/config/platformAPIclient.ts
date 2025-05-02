@@ -13,7 +13,7 @@ export const platformAPIClient = axios.create({
 const apiKey = env.PI_API_KEY || '';
 
 // Fallback for test environments to prevent build failures
-const walletSeed = env.WALLET_PRIVATE_SEED || 'S_MOCK_FOR_TESTS';
+const walletSeed = env.WALLET_PRIVATE_SEED || 'S'.padEnd(56, 'X');
 
 const pi = new PiNetwork(apiKey, walletSeed);
 export default pi
