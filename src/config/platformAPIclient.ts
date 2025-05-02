@@ -14,7 +14,7 @@ const apiKey = env.PI_API_KEY || '';
 
 /* Fallback randomly generated seed for test environments to prevent build failures 
    Starts with 'S' + 56 characters + passes Stellar's base32 & checksum rules */
-const walletSeed = env.WALLET_PRIVATE_SEED || 'SCOMN4G6WNHWDZ3YCCYJ5NBGQG6FQOVPCCXKDPLH7VQFPLM5PY5X6Z3D';
+const walletSeed = env.WALLET_PRIVATE_SEED || 'SB3KUB62T4U4W3RJG6CLOZXXI5ECRNYI2SSVK7QEXKAXNQQFH7MGAF4C';
 
 const pi = new PiNetwork(apiKey, walletSeed);
 export default pi
