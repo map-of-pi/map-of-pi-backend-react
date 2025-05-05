@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 import Order from "../models/Order";
-import OrderItem from "../models/orderItemBackup";
+import OrderItem from "../models/OrderItem";
 import Seller from "../models/Seller";
 import SellerItem from "../models/SellerItem";
 import User from "../models/User";
-import { OrderStatusType } from "../models/enums/OrderStatusTypeBackup";
+import { OrderStatusType } from "../models/enums/orderStatusType";
 import { OrderItemStatusType } from "../models/enums/orderItemStatusType";
 import { FulfillmentType } from "../models/enums/fulfillmentType";
 import { IOrder, PickedItems } from "../types";

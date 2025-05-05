@@ -8,9 +8,8 @@ import {
   updateOrderStatus,
   updateOrderItemStatus, 
 } from '../../src/controllers/orderController';
+import { OrderStatusType } from '../../src/models/enums/orderStatusType';
 import { OrderItemStatusType } from '../../src/models/enums/orderItemStatusType';
-import { OrderStatusType } from '../../src/models/enums/OrderStatusTypeBackup';
-
 import * as orderService from '../../src/services/order.service';
 
 jest.mock('../../src/services/order.service', () => ({

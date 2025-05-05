@@ -5,7 +5,7 @@ import { SellerType } from "./models/enums/sellerType";
 import { FulfillmentType } from "./models/enums/fulfillmentType";
 import { StockLevelType } from "./models/enums/stockLevelType";
 import { TrustMeterScale } from "./models/enums/trustMeterScale";
-import { OrderStatusType } from "./models/enums/OrderStatusTypeBackup";
+import { OrderStatusType } from "./models/enums/orderStatusType";
 import { OrderItemStatusType } from "./models/enums/orderItemStatusType";
 import { PaymentType } from "./models/enums/paymentType";
 import { U2UPaymentStatus } from "./models/enums/u2uPaymentStatus";

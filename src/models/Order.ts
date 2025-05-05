@@ -1,7 +1,7 @@
 import mongoose, { Schema, SchemaTypes, Types } from "mongoose";
 
 import { FulfillmentType } from "./enums/fulfillmentType";
-import { OrderStatusType } from "./enums/OrderStatusTypeBackup";
+import { OrderStatusType } from "./enums/orderStatusType";
 import { IOrder } from "../types";
 
 const orderSchema = new Schema<IOrder>(
