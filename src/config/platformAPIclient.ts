@@ -14,4 +14,5 @@ const apiKey = env.PI_API_KEY || '';
 const walletSeed = env.WALLET_PRIVATE_SEED || '';
 
 const pi = new PiNetwork(apiKey, walletSeed);
-export default pi
+
+export default pi;

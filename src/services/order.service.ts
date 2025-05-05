@@ -3,11 +3,11 @@ import Order from "../models/Order";
 import { IOrder, PickedItems } from "../types";
 import logger from "../config/loggingConfig";
 import SellerItem from "../models/SellerItem";
-import OrderItem from "../models/orderItem";
+import OrderItem from "../models/OrderItem";
 import { OrderItemStatusType } from "../models/enums/orderItemStatusType";
 import User from "../models/User";
 import Seller from "../models/Seller";
-import { OrderStatusType } from "../models/enums/OrderStatusType";
+import { OrderStatusType } from "../models/enums/orderStatusType";
 import { FulfillmentType } from "../models/enums/fulfillmentType";
 
 interface NewOrder {    
@@ -20,6 +20,7 @@ interface NewOrder {
   sellerFulfillmentDescription: string,
   buyerFulfillmentDescription: string,
 };
+
 export const createOrder = async (
   orderData: NewOrder,
   orderItems: PickedItems[]
@@ -179,29 +180,42 @@ export const getOrderItems = async (orderId: string) => {
   }
 };
 
-export const completeOrder = async (orderId: string) => {
+export const updateOrderStatus = async (orderId: string, orderStatus: OrderStatusType) => {
   try {
-    // update all related order items status to completed
-    const orderItems = await OrderItem.find({ order_id: orderId }).exec();
-    const orderItemIds = orderItems.map((item) => item._id);
-    await OrderItem.updateMany(
-      { _id: { $in: orderItemIds } },
-      { status: OrderItemStatusType.Fulfilled },
+    switch (orderStatus) {
+      case OrderStatusType.Completed:
+        // Update all related order items to fulfilled
+        const orderItems = await OrderItem.find({ order_id: orderId }).exec();
+        const orderItemIds = orderItems.map((item) => item._id);
+        await OrderItem.updateMany(
+          { _id: { $in: orderItemIds } },
+          { status: OrderItemStatusType.Fulfilled },
+          { new: true }
+        ).exec();
+
+        break;
+      
+      default:
+        logger.error(`Unhandled order status type: ${ orderStatus }`);
+        break;
+    }
+
+    // Update order status
+    const updatedOrder = await Order.findByIdAndUpdate(
+      orderId, 
+      { status: orderStatus },
       { new: true }
     ).exec();
     
-    // update order status to completed
-    const updatedOrder = await Order.findByIdAndUpdate(orderId, {
-      status: OrderStatusType.Completed
-    }, {new: true}).exec();
-    if (!updatedOrder) return null
-    const orders = await getOrderItems(orderId)
-    return { 
-      ...orders 
-    };
-  }catch (error:any){
-    logger.error(`Error updating order item for order ${orderId}: `, error);
-    throw new Error("Error updating order item");
+    if (!updatedOrder) return null;
+
+    // Return order items
+    const orderItems = await getOrderItems(orderId);
+    return { ...orderItems };
+
+  } catch (error) {
+    logger.error(`Error updating order status for order ${ orderId }: `, error);
+    throw new Error("Error updating order status");
   }  
 }
 
