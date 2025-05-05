@@ -1,6 +1,6 @@
 import logger from "../config/loggingConfig";
 import { FulfillmentType } from "../models/enums/fulfillmentType";
-import { OrderStatusType } from "../models/enums/orderStatusType";
+import { OrderStatusType } from "../models/enums/OrderStatusTypeBackup";
 import { PaymentType } from "../models/enums/paymentType";
 import Seller from "../models/Seller";
 import User from "../models/User";
