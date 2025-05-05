@@ -1,14 +1,14 @@
 import mongoose from "mongoose";
 import Order from "../models/Order";
+import OrderItem from "../models/OrderItem";
+import Seller from "../models/Seller";
+import SellerItem from "../models/SellerItem";
+import User from "../models/User";
+import { OrderStatusType } from "../models/enums/orderStatusType";
+import { OrderItemStatusType } from "../models/enums/orderItemStatusType";
+import { FulfillmentType } from "../models/enums/fulfillmentType";
 import { IOrder, PickedItems } from "../types";
 import logger from "../config/loggingConfig";
-import SellerItem from "../models/SellerItem";
-import OrderItem from "../models/OrderItem";
-import { OrderItemStatusType } from "../models/enums/orderItemStatusType";
-import User from "../models/User";
-import Seller from "../models/Seller";
-import { OrderStatusType } from "../models/enums/orderStatusType";
-import { FulfillmentType } from "../models/enums/fulfillmentType";
 
 interface NewOrder {    
   buyerId: string,
