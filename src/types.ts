@@ -5,8 +5,16 @@ import { SellerType } from "./models/enums/sellerType";
 import { FulfillmentType } from "./models/enums/fulfillmentType";
 import { StockLevelType } from "./models/enums/stockLevelType";
 import { TrustMeterScale } from "./models/enums/trustMeterScale";
+import { OrderStatusType } from "./models/enums/orderStatusType";
+import { OrderItemStatusType } from "./models/enums/orderItemStatusType";
+import { PaymentType } from "./models/enums/paymentType";
+import { U2UPaymentStatus } from "./models/enums/u2uPaymentStatus";
 import { RestrictedArea } from "./models/enums/restrictedArea";
 
+
+// ========================
+// USER MODELS
+// ========================
 export interface IUser extends Document {
 	pi_uid: string;
 	pi_username: string;
@@ -36,6 +44,20 @@ export interface IUserSettings extends Document {
 	};
 }
 
+// Select specific fields from IUserSettings
+export type PartialUserSettings = Pick<IUserSettings, 'user_name' | 'email' | 'phone_number' | 'findme' | 'trust_meter_rating'>;
+
+// ========================
+// MAP / GEOLOCATION TYPES
+// ========================
+export interface IMapCenter {
+	type: 'Point';
+	coordinates: [number, number];
+}
+
+// ========================
+// SELLER MODELS
+// ========================
 export interface ISeller extends Document {
 	seller_id: string;
 	name: string;
@@ -55,6 +77,9 @@ export interface ISeller extends Document {
 	isPreRestricted: boolean;
 }
 
+// Combined interface representing a seller with selected user settings
+export interface ISellerWithSettings extends ISeller, PartialUserSettings {}
+
 export interface ISellerItem extends Document {
 	_id: string;
 	seller_id: string;
@@ -69,6 +94,9 @@ export interface ISellerItem extends Document {
 	updatedAt: Date;
 }
 
+// ========================
+// REVIEW / FEEDBACK MODELS
+// ========================
 export interface IReviewFeedback extends Document {
 	_id: string;
 	review_receiver_id: string;
@@ -80,29 +108,9 @@ export interface IReviewFeedback extends Document {
 	review_date: Date;
 }
 
-export interface ISanctionedRegion extends Document {
-	location: RestrictedArea;
-	boundary: {
-		type: 'Polygon';
-		coordinates: [[[number, number]]];
-	};
-}
-
 export interface CompleteFeedback {
 	givenReviews: IReviewFeedbackOutput[];
 	receivedReviews: IReviewFeedbackOutput[];
-}
-
-export interface IMapCenter {
-	type: 'Point';
-	coordinates: [number, number];
-}
-
-// Select specific fields from IUserSettings
-export type PartialUserSettings = Pick<IUserSettings, 'user_name' | 'email' | 'phone_number' | 'findme' | 'trust_meter_rating'>;
-
-// Combined interface representing a seller with selected user settings
-export interface ISellerWithSettings extends ISeller, PartialUserSettings {
 }
 
 export type PartialReview = {
@@ -111,6 +119,117 @@ export type PartialReview = {
 }
 
 export interface IReviewFeedbackOutput extends IReviewFeedback, PartialReview {}
+
+// ========================
+// BUYER MODELS
+// ========================
+export interface PickedItems {
+  itemId: string,
+  quantity: number,
+}
+
+// ========================
+// ORDER MODELS
+// ========================
+export interface IOrder extends Document {
+  buyer_id: Types.ObjectId; // ref user model
+  seller_id: Types.ObjectId; // ref seller model
+  payment_id: Types.ObjectId; // ref payment model
+  total_amount: Types.Decimal128;
+  status: OrderStatusType;
+  is_paid: boolean;
+  is_fulfilled: boolean;
+  fulfillment_method: FulfillmentType;
+  seller_fulfillment_description: string;
+  buyer_fulfillment_description: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IOrderItem extends Document {
+  order_id: Types.ObjectId;
+  seller_item_id: Types.ObjectId;
+  quantity: number;
+  subtotal: Types.Decimal128;
+  status: OrderItemStatusType;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type OrderPaymentMetadataType = {
+  items: PickedItems[],
+  buyer: string,
+  seller: string,
+  fulfillment_method: FulfillmentType | undefined,
+  seller_fulfillment_description:string | undefined,
+  buyer_fulfillment_description: string
+}
+
+// ========================
+// PAYMENT MODELS
+// ========================
+export interface IPayment extends Document {
+  user_id: Types.ObjectId;
+  amount: Types.Decimal128;
+  paid: boolean;
+  memo: string;
+  pi_payment_id: string;
+  txid: string | null;
+  payment_type: PaymentType;
+  cancelled: boolean;
+  createdAt: Date;
+}
+
+export interface PaymentInfo {
+  identifier: string;
+  transaction?: {
+    txid: string;
+    _link: string;
+  };
+}
+
+export type PaymentDataType = {
+  amount: string;
+  memo: string;
+  metadata: {
+    payment_type: PaymentType,
+    OrderPayment?: OrderPaymentMetadataType,
+    MembershipPayment?: MembershipPaymentMetadataType
+  }
+}
+
+export type PaymentMetadataType = {
+  OrderPayment: OrderPaymentMetadataType,
+  MembershipPayment: MembershipPaymentMetadataType
+}
+
+type MembershipPaymentMetadataType = {
+  membership_id: string
+}
+
+export interface IPaymentCrossReference {
+  _id: Types.ObjectId;
+  order_id: Types.ObjectId;
+  u2a_payment_id: Types.ObjectId | null;
+  a2u_payment_id: Types.ObjectId | null;
+  u2u_status: U2UPaymentStatus;
+  error_message: string;
+  u2a_completed_at: Date;
+  a2u_completed_at: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// ========================
+// SANCTIONS / GEO-RESTRICTIONS
+// ========================
+export interface ISanctionedRegion extends Document {
+	location: RestrictedArea;
+	boundary: {
+		type: 'Polygon';
+		coordinates: [[[number, number]]];
+	};
+}
 
 export type SanctionedSeller = Pick<ISeller, 'seller_id' | 'name' | 'address' | 'sell_map_center'> & {
 	sanctioned_location: string,
@@ -123,6 +242,9 @@ export type SanctionedSellerStatus = {
   isSanctionedRegion: boolean;
 }
 
+// ========================
+// TOGGLES
+// ========================
 export interface IToggle extends Document {
 	name: string;
 	enabled: boolean;
