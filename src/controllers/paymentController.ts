@@ -15,7 +15,7 @@ import {
 } from "../services/payment.service";
 import { IUser, PaymentDataType, PaymentInfo } from "../types";
 
-export const onIncompletePaymentFound = async ( req: Request, res: Response ) => {
+export const onIncompletePaymentFound = async (req: Request, res: Response) => {
   try {
     const payment: PaymentInfo = req.body.payment;
     const paymentId = payment.identifier;
@@ -171,7 +171,7 @@ export const onPaymentCompletion = async (req: Request, res: Response) => {
   }
 };
 
-export const onPaymentCancellation = async ( req: Request, res: Response ) => {
+export const onPaymentCancellation = async (req: Request, res: Response) => {
   try {
     const { paymentId } = req.body;
 

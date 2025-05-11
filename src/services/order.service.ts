@@ -6,20 +6,8 @@ import SellerItem from "../models/SellerItem";
 import User from "../models/User";
 import { OrderStatusType } from "../models/enums/orderStatusType";
 import { OrderItemStatusType } from "../models/enums/orderItemStatusType";
-import { FulfillmentType } from "../models/enums/fulfillmentType";
-import { IOrder, PickedItems } from "../types";
+import { IOrder, NewOrder, PickedItems } from "../types";
 import logger from "../config/loggingConfig";
-
-interface NewOrder {    
-  buyerId: string,
-  sellerId: string,        
-  paymentId: string,
-  totalAmount: string,
-  status: OrderStatusType,
-  fulfillmentMethod: FulfillmentType,
-  sellerFulfillmentDescription: string,
-  buyerFulfillmentDescription: string,
-};
 
 export const createOrder = async (
   orderData: NewOrder,
@@ -44,7 +32,7 @@ export const createOrder = async (
     });
     const newOrder = await order.save({ session });
 
-    if (!newOrder){
+    if (!newOrder) {
       logger.error("error creating new order")
       throw new Error("error creating new order")
     }
@@ -108,24 +96,24 @@ export const updatePaidOrder = async (paymentId:string): Promise<IOrder> => {
       throw new Error("Failed to update order");
     }
     return updatedOrder
-  } catch (error:any) {
+  } catch (error) {
     logger.error(`Error updating order for payment ID ${paymentId}: `, error);
     throw new Error("Error updating order");
   }  
 }
 
 export const getSellerOrdersById = async (piUid:string) => {
-    try {
-      const seller = await Seller.exists({seller_id: piUid}).lean();
-      const orders = await Order.find({seller_id: seller?._id, is_paid: true})
-        .populate('buyer_id', 'pi_username -_id') // Populate buyer_id with pi_username
-        .sort({ createdAt: -1 }) // Sort by createdAt in descending order
-        .lean();
-      return orders;
-    } catch (error) {
-        console.error('Error fetching seller orders:', error);
-        throw error;
-    }
+  try {
+    const seller = await Seller.exists({seller_id: piUid}).lean();
+    const orders = await Order.find({seller_id: seller?._id, is_paid: true})
+      .populate('buyer_id', 'pi_username -_id') // Populate buyer_id with pi_username
+      .sort({ createdAt: -1 }) // Sort by createdAt in descending order
+      .lean();
+    return orders;
+  } catch (error) {
+    logger.error('Error fetching seller orders:', error);
+    throw error;
+  }
 }
 
 export const getBuyerOrdersById = async (piUid:string) => {

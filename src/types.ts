@@ -11,7 +11,6 @@ import { PaymentType } from "./models/enums/paymentType";
 import { U2UPaymentStatus } from "./models/enums/u2uPaymentStatus";
 import { RestrictedArea } from "./models/enums/restrictedArea";
 
-
 // ========================
 // USER MODELS
 // ========================
@@ -19,7 +18,7 @@ export interface IUser extends Document {
 	pi_uid: string;
 	pi_username: string;
 	user_name: string;
-}
+};
 
 export interface IUserSettings extends Document {
 	user_settings_id: string;
@@ -42,7 +41,7 @@ export interface IUserSettings extends Document {
 		include_trust_level_50: Boolean;
 		include_trust_level_0: Boolean;
 	};
-}
+};
 
 // Select specific fields from IUserSettings
 export type PartialUserSettings = Pick<IUserSettings, 'user_name' | 'email' | 'phone_number' | 'findme' | 'trust_meter_rating'>;
@@ -53,7 +52,7 @@ export type PartialUserSettings = Pick<IUserSettings, 'user_name' | 'email' | 'p
 export interface IMapCenter {
 	type: 'Point';
 	coordinates: [number, number];
-}
+};
 
 // ========================
 // SELLER MODELS
@@ -75,10 +74,10 @@ export interface ISeller extends Document {
 	fulfillment_description?: string;
 	pre_restriction_seller_type?: SellerType | null;
 	isPreRestricted: boolean;
-}
+};
 
 // Combined interface representing a seller with selected user settings
-export interface ISellerWithSettings extends ISeller, PartialUserSettings {}
+export interface ISellerWithSettings extends ISeller, PartialUserSettings {};
 
 export interface ISellerItem extends Document {
 	_id: string;
@@ -92,7 +91,7 @@ export interface ISellerItem extends Document {
 	expired_by: Date;
 	createdAt: Date;
 	updatedAt: Date;
-}
+};
 
 // ========================
 // REVIEW / FEEDBACK MODELS
@@ -106,17 +105,17 @@ export interface IReviewFeedback extends Document {
 	comment?: string;
 	image?: string;
 	review_date: Date;
-}
+};
 
 export interface CompleteFeedback {
 	givenReviews: IReviewFeedbackOutput[];
 	receivedReviews: IReviewFeedbackOutput[];
-}
+};
 
 export type PartialReview = {
 	giver: string;
 	receiver: string;
-}
+};
 
 export interface IReviewFeedbackOutput extends IReviewFeedback, PartialReview {}
 
@@ -126,7 +125,7 @@ export interface IReviewFeedbackOutput extends IReviewFeedback, PartialReview {}
 export interface PickedItems {
   itemId: string,
   quantity: number,
-}
+};
 
 // ========================
 // ORDER MODELS
@@ -144,7 +143,7 @@ export interface IOrder extends Document {
   buyer_fulfillment_description: string;
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
 export interface IOrderItem extends Document {
   order_id: Types.ObjectId;
@@ -154,7 +153,18 @@ export interface IOrderItem extends Document {
   status: OrderItemStatusType;
   createdAt: Date;
   updatedAt: Date;
-}
+};
+
+export interface NewOrder {    
+  buyerId: string,
+  sellerId: string,        
+  paymentId: string,
+  totalAmount: string,
+  status: OrderStatusType,
+  fulfillmentMethod: FulfillmentType,
+  sellerFulfillmentDescription: string,
+  buyerFulfillmentDescription: string,
+};
 
 export type OrderPaymentMetadataType = {
   items: PickedItems[],
@@ -163,7 +173,7 @@ export type OrderPaymentMetadataType = {
   fulfillment_method: FulfillmentType | undefined,
   seller_fulfillment_description:string | undefined,
   buyer_fulfillment_description: string
-}
+};
 
 // ========================
 // PAYMENT MODELS
@@ -178,7 +188,7 @@ export interface IPayment extends Document {
   payment_type: PaymentType;
   cancelled: boolean;
   createdAt: Date;
-}
+};
 
 export interface PaymentInfo {
   identifier: string;
@@ -186,7 +196,29 @@ export interface PaymentInfo {
     txid: string;
     _link: string;
   };
-}
+};
+
+export interface NewPayment {
+  piPaymentId: string,
+  userId: string,
+  memo:  string,
+  amount: string,
+  paymentType: PaymentType
+};
+
+export interface U2URefDataType {
+  u2aPaymentId?: string,
+  u2uStatus: U2UPaymentStatus,
+  a2uPaymentId: string | null,
+};
+
+export interface A2UPaymentDataType {
+  sellerId: string,
+  amount: string,
+  buyerId: string,
+  paymentType: PaymentType,
+  orderId: string
+};
 
 export type PaymentDataType = {
   amount: string;
@@ -196,16 +228,16 @@ export type PaymentDataType = {
     OrderPayment?: OrderPaymentMetadataType,
     MembershipPayment?: MembershipPaymentMetadataType
   }
-}
+};
 
 export type PaymentMetadataType = {
   OrderPayment: OrderPaymentMetadataType,
   MembershipPayment: MembershipPaymentMetadataType
-}
+};
 
 type MembershipPaymentMetadataType = {
   membership_id: string
-}
+};
 
 export interface IPaymentCrossReference {
   _id: Types.ObjectId;
@@ -218,7 +250,7 @@ export interface IPaymentCrossReference {
   a2u_completed_at: Date;
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
 // ========================
 // SANCTIONS / GEO-RESTRICTIONS
@@ -229,7 +261,7 @@ export interface ISanctionedRegion extends Document {
 		type: 'Polygon';
 		coordinates: [[[number, number]]];
 	};
-}
+};
 
 export type SanctionedSeller = Pick<ISeller, 'seller_id' | 'name' | 'address' | 'sell_map_center'> & {
 	sanctioned_location: string,
@@ -240,7 +272,7 @@ export type SanctionedSellerStatus = {
   seller_id: string;
   pre_restriction_seller_type: SellerType | null;
   isSanctionedRegion: boolean;
-}
+};
 
 // ========================
 // TOGGLES
@@ -251,4 +283,4 @@ export interface IToggle extends Document {
 	description?: string;
 	createdAt: Date;
 	updatedAt: Date;
-}
+};
