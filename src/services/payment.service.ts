@@ -27,9 +27,9 @@ export const createPayment = async (paymentData: NewPayment): Promise<IPayment> 
 
     return await payment.save();
 
-  } catch (error) {
-    logger.error(`Failed to create payment for piPaymentID ${ paymentData.piPaymentId }:`, error);
-    throw new Error('Failed to create payment; please try again later');
+  } catch (error: any) {
+    logger.error(`Failed to create payment for piPaymentID ${ paymentData.piPaymentId }: ${ error.message }`);
+    throw error;
   }
 };
 
@@ -50,9 +50,9 @@ export const completePayment = async (
     }
     return updatedPayment;
     
-  } catch (error) {
-    logger.error(`Failed to complete payment for piPaymentID ${ piPaymentId }:`, error);
-    throw new Error('Failed to complete payment; please try again later');
+  } catch (error: any) {
+    logger.error(`Failed to complete payment for piPaymentID ${ piPaymentId }: ${ error.message }`);
+    throw error;
   }
 };
 
@@ -92,9 +92,9 @@ export const createOrUpdatePaymentCrossReference = async (
 
     return await newRef.save();
 
-  } catch (error) {
-    logger.error(`Failed to create/ update Payment xRef for orderID ${ orderId }:`, error);
-    throw new Error('Failed to create/ update Payment xRef; please try again later');
+  } catch (error: any) {
+    logger.error(`Failed to create/ update Payment xRef for orderID ${ orderId }: ${ error.message }`);
+    throw error;
   }
 };
 
@@ -201,9 +201,9 @@ export const getPayment = async (piPaymentId: string): Promise<IPayment | null> 
     }
     return existingPayment;
 
-  } catch (error) {
-    logger.error(`Failed to get payment for piPaymentID ${ piPaymentId }:`, error);
-    throw new Error('Failed to get payment; please try again later');
+  } catch (error: any) {
+    logger.error(`Failed to get payment for piPaymentID ${ piPaymentId }: ${ error.messsage }`);
+    throw error;
   }
 };
 
@@ -214,15 +214,15 @@ export const cancelPayment = async (piPaymentId: string): Promise<IPayment | nul
       { $set: { cancelled: true, paid: false } }, 
       {new:true}
     ).exec();
-    
+
     if (!cancelledPayment) {
       logger.error(`Failed to cancel payment; no record found for piPaymentID ${ piPaymentId }`);
       throw new Error('Failed to cancel payment');
     }
     return cancelledPayment;
 
-  } catch (error) {
-    logger.error(`Failed to cancel payment for piPaymentID ${ piPaymentId }:`, error);
-    throw new Error('Failed to cancel payment; please try again later');
+  } catch (error: any) {
+    logger.error(`Failed to cancel payment for piPaymentID ${ piPaymentId }: ${ error.message }`);
+    throw error;
   }
 };

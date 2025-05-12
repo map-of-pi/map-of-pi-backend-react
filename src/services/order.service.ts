@@ -12,12 +12,13 @@ import logger from "../config/loggingConfig";
 export const createOrder = async (
   orderData: NewOrder,
   orderItems: PickedItems[]
-) => {
+): Promise<IOrder> => {
   const session = await mongoose.startSession();
-  session.startTransaction();
 
   try {
-    // Create new order
+    session.startTransaction();
+
+    /* Step 1: Create a new Order record */
     const order = new Order({
       buyer_id: orderData.buyerId,
       seller_id: orderData.sellerId,
@@ -33,25 +34,27 @@ export const createOrder = async (
     const newOrder = await order.save({ session });
 
     if (!newOrder) {
-      logger.error("error creating new order")
-      throw new Error("error creating new order")
+      logger.error('Failed to create order; save returned null');
+      throw new Error('Failed to create order');
     }
+    logger.debug('Order created successfully', { orderId: newOrder._id });
 
-    // Fetch all seller items in bulk
+    /* Step 2: Fetch all SellerItem documents associated with the order */
     const sellerItemIds = orderItems.map((item) => item.itemId);
     const sellerItems = await SellerItem.find({ _id: { $in: sellerItemIds } }).lean();
 
-    // Create a lookup for seller items
+    // Build a lookup map for seller items
     const sellerItemLookup = sellerItems.reduce((acc, sellerItem) => {
       acc[sellerItem._id.toString()] = sellerItem;
       return acc;
     }, {} as Record<string, any>);
 
-    // Prepare bulk order items
+    /* Step 3: Build OrderItem documents for bulk insertion */
     const bulkOrderItems = orderItems.map((item) => {
       const sellerItem = sellerItemLookup[item.itemId];
       if (!sellerItem) {
-        throw new Error(`Seller item not found for ID: ${item.itemId}`);
+        logger.error(`Failed to find seller item for ID: ${ item.itemId }`);
+        throw new Error('Failed to find associated seller item');
       }
 
       return {
@@ -63,19 +66,23 @@ export const createOrder = async (
       };
     });
 
-    // Insert all order items in bulk
+    /* Step 4: Insert order items in bulk */
     await OrderItem.insertMany(bulkOrderItems, { session });
+    logger.debug('Order items inserted successfully', { count: bulkOrderItems.length });
 
+    /* Step 5: Commit the transaction */
     await session.commitTransaction();
-    session.endSession();
 
+    logger.info('Order and associated items created successfully', { orderId: newOrder._id });
     return newOrder;
-  } catch (error) {
+  } catch (error: any) {
+    /* Step 6: Roll back transaction on failure */
     await session.abortTransaction();
-    session.endSession();
 
-    logger.error("Error adding/updating order: ", error);
-    throw new Error("Error processing order");
+    logger.error(`Failed to create order: ${ error.message }`);
+    throw new Error('Failed to create order; please try again later');
+  } finally {
+    session.endSession();
   }
 };
 
@@ -93,12 +100,12 @@ export const updatePaidOrder = async (paymentId:string): Promise<IOrder> => {
   ).exec()
     if (!updatedOrder) {
       logger.error(`Failed to update order for payment ID ${paymentId}`);
-      throw new Error("Failed to update order");
+      throw new Error('Failed to update order');
     }
     return updatedOrder
-  } catch (error) {
-    logger.error(`Error updating order for payment ID ${paymentId}: `, error);
-    throw new Error("Error updating order");
+  } catch (error: any) {
+    logger.error(`Error updating order for payment ID ${paymentId}: ${ error.message }`);
+    throw new Error('Error updating order');
   }  
 }
 
@@ -110,8 +117,8 @@ export const getSellerOrdersById = async (piUid:string) => {
       .sort({ createdAt: -1 }) // Sort by createdAt in descending order
       .lean();
     return orders;
-  } catch (error) {
-    logger.error('Error fetching seller orders:', error);
+  } catch (error: any) {
+    logger.error(`Error fetching seller orders: ${ error.message }`);
     throw error;
   }
 }
@@ -124,8 +131,8 @@ export const getBuyerOrdersById = async (piUid:string) => {
       .sort({ createdAt: -1 }) // Sort by createdAt in descending order
       .lean();
     return orders;
-  } catch (error) {
-      console.error('Error fetching seller orders:', error);
+  } catch (error: any) {
+      logger.error(`Error fetching seller orders: ${ error.message }`);
       throw error;
   }
 }

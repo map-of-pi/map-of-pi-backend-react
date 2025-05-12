@@ -41,7 +41,6 @@ const paymentCrossReferenceSchema = new Schema<IPaymentCrossReference>(
       type: Date,
       required: false,
     },
-    
   }, {timestamps: true} // Adds timestamps to track creation and update times
 );
 
