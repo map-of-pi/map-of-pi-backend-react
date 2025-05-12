@@ -86,73 +86,93 @@ export const createOrder = async (
   }
 };
 
-export const updatePaidOrder = async (paymentId:string): Promise<IOrder> => {
+export const updatePaidOrder = async (paymentId: string): Promise<IOrder> => {
   try {
     const updatedOrder = await Order.findOneAndUpdate(
       {payment_id: paymentId}, 
-      { $set: {
-          updatedAt: new Date(),
+      { 
+        $set: {
           is_paid: true,
           status: OrderStatusType.Pending
         }
       },
       { new: true }
-  ).exec()
+    ).exec();
+    
     if (!updatedOrder) {
-      logger.error(`Failed to update order for payment ID ${paymentId}`);
-      throw new Error('Failed to update order');
+      logger.error(`Failed to update paid order for payment ID ${ paymentId }`);
+      throw new Error('Failed to update paid order');
     }
-    return updatedOrder
-  } catch (error: any) {
-    logger.error(`Error updating order for payment ID ${paymentId}: ${ error.message }`);
-    throw new Error('Error updating order');
-  }  
-}
+    return updatedOrder;
 
-export const getSellerOrdersById = async (piUid:string) => {
+  } catch (error: any) {
+    logger.error(`Failed to update paid order for paymentID ${ paymentId }: ${ error.message }`);
+    throw error;
+  }  
+};
+
+export const getSellerOrdersById = async (piUid: string) => {
   try {
-    const seller = await Seller.exists({seller_id: piUid}).lean();
-    const orders = await Order.find({seller_id: seller?._id, is_paid: true})
+    const seller = await Seller.exists({ seller_id: piUid }).lean();
+    if (!seller) {
+      logger.warn(`Seller not found for Pi UID: ${ piUid }`);
+      return [];
+    }
+
+    const orders = await Order.find({ seller_id: seller?._id, is_paid: true })
       .populate('buyer_id', 'pi_username -_id') // Populate buyer_id with pi_username
       .sort({ createdAt: -1 }) // Sort by createdAt in descending order
       .lean();
     return orders;
+
   } catch (error: any) {
-    logger.error(`Error fetching seller orders: ${ error.message }`);
+    logger.error(`Failed to get seller orders for Pi UID ${ piUid }: ${ error.message }`);
     throw error;
   }
-}
+};
 
-export const getBuyerOrdersById = async (piUid:string) => {
+export const getBuyerOrdersById = async (piUid: string) => {
   try {
-    const buyer = await User.exists({pi_uid: piUid});
-    const orders = await Order.find({buyer_id: buyer?._id, is_paid: true})
+    const buyer = await User.exists({ pi_uid: piUid });
+    if (!buyer) {
+      logger.warn(`Buyer not found for Pi UID: ${ piUid }`);
+      return [];
+    }
+
+    const orders = await Order.find({ buyer_id: buyer?._id, is_paid: true })
       .populate('seller_id', 'name -_id') // Populate seller_id with pi_username
       .sort({ createdAt: -1 }) // Sort by createdAt in descending order
       .lean();
     return orders;
+
   } catch (error: any) {
-      logger.error(`Error fetching seller orders: ${ error.message }`);
-      throw error;
+    logger.error(`Failed to get buyer orders for Pi UID ${ piUid }: ${ error.message }`);
+    throw error;
   }
-}
+};
 
 export const deleteOrderById = async (orderId: string) => {
   try {
-    return await Order.findByIdAndDelete(orderId);
-  } catch (error) {
-    logger.error("Error deleting order: ", error);
-    throw new Error("Error deleting order");
+    const deletedOrder = await Order.findByIdAndDelete(orderId);
+    if (!deletedOrder) {
+      logger.error(`Order not found to delete for orderID: ${ orderId }`);
+    }
+    return deletedOrder;
+  } catch (error: any) {
+    logger.error(`Failed to delete order for orderID ${ orderId }: ${ error.message }`);
+    throw error;
   }
 };
 
 export const getOrderItems = async (orderId: string) => {
   try {
-    // Fetch the base order
-    let order = await Order.findById(orderId)
-    .populate('seller_id', 'name -_id')
-    .lean();
+    // Fetch the base order and handle not found case
+    const order = await Order.findById(orderId)
+      .populate('seller_id', 'name -_id')
+      .lean();
+    
     if (!order) {
+      logger.warn(`Order items not found for orderID: ${ orderId }`);
       return null; // Order not found
     }
 
@@ -161,94 +181,110 @@ export const getOrderItems = async (orderId: string) => {
 
     // Fetch the items linked to the order
     const orderItems = await OrderItem.find({ order_id: orderId })
-    .populate({ path: "seller_item_id", model: "Seller-Item" }) // Populate seller item details
+      .populate({ path: "seller_item_id", model: "Seller-Item" })
       .exec();
-    logger.info('fetched order items: ', orderItems.length);
+
+    logger.info(`Fetched ${ orderItems.length } order items for orderID ${ orderId }`);
+    
     return { 
       order, 
       orderItems: orderItems, 
-      pi_username: user ? user.pi_username : ''  
+      pi_username: user?.pi_username || '',  
     };
-  } catch (error) {
-    logger.error(`Error fetching order and items for order ${orderId}: `, error);
-    throw new Error("Error fetching order and items");
+  } catch (error: any) {
+    logger.error(`Failed to get order items for orderID ${ orderId }: ${ error.message }`);
+    throw error;
   }
 };
 
-export const updateOrderStatus = async (orderId: string, orderStatus: OrderStatusType) => {
+export const updateOrderStatus = async (
+  orderId: string, 
+  orderStatus: OrderStatusType
+) => {
   try {
-    switch (orderStatus) {
-      case OrderStatusType.Completed:
-        // Update all related order items to fulfilled
-        const orderItems = await OrderItem.find({ order_id: orderId }).exec();
-        const orderItemIds = orderItems.map((item) => item._id);
-        await OrderItem.updateMany(
-          { _id: { $in: orderItemIds } },
-          { status: OrderItemStatusType.Fulfilled },
-          { new: true }
-        ).exec();
+    // Handle specific order statuses
+    if (orderStatus === OrderStatusType.Completed) {
+      const orderItems = await OrderItem.find({ order_id: orderId }).exec();
 
-        break;
-      
-      default:
-        logger.error(`Unhandled order status type: ${ orderStatus }`);
-        break;
+      if (orderItems.length > 0) {
+        await OrderItem.updateMany(
+          { _id: { $in: orderItems.map(item => item._id) } },
+          { status: OrderItemStatusType.Fulfilled }
+        ).exec();
+        logger.info(`Marked ${ orderItems.length } order items as fulfilled for orderID ${ orderId }`);
+      } else {
+        logger.warn(`No order items found to mark as fulfilled for orderID ${ orderId }`);
+      }
+    } else {
+      logger.warn(`Unhandled order status type: ${ orderStatus } for orderID ${ orderId }`);
     }
 
-    // Update order status
+    // Update the main order status
     const updatedOrder = await Order.findByIdAndUpdate(
       orderId, 
       { status: orderStatus },
       { new: true }
     ).exec();
-    
-    if (!updatedOrder) return null;
 
-    // Return order items
+    if (!updatedOrder) {
+      logger.error(`Order not found or failed to update status for orderID ${ orderId }`);
+      return null;
+    }
+
+    // Return the updated order with items
+    // TODO: Refactor to remove service layer coupling.
     const orderItems = await getOrderItems(orderId);
     return { ...orderItems };
-
-  } catch (error) {
-    logger.error(`Error updating order status for order ${ orderId }: `, error);
-    throw new Error("Error updating order status");
+  } catch (error: any) {
+    logger.error(`Failed to update order status for orderID ${ orderId }: ${ error.message }`);
+    throw error;
   }  
-}
+};
 
-export const updateOrderItemStatus = async (itemId: string, itemStatus: string) => {
+export const updateOrderItemStatus = async (
+  itemId: string, 
+  itemStatus: string
+) => {
   try {
-    const updatedItem = await OrderItem.findByIdAndUpdate(itemId, {
-      status: itemStatus,
-      updatedAt: new Date()
-    }, {new: true}).exec();
-    if (!updatedItem) return null 
-    return updatedItem
-  }catch (error:any){
-    logger.error(`Error updating order item for order ${itemId}: `, error);
-    throw new Error("Error updating order item");
+    const updatedItem = await OrderItem.findByIdAndUpdate(
+      itemId, 
+      { status: itemStatus }, 
+      { new: true }
+    ).exec();
+
+    if (!updatedItem) {
+      logger.error(`Order item not found or failed to update for itemId: ${ itemId }`);
+      return null;
+    }
+
+    logger.info(`Order item ${ itemId } updated to status "${ itemStatus }"`);
+    return updatedItem;
+  } catch (error: any) {
+    logger.error(`Failed to update order item status for orderItemID ${ itemId }: ${ error.message }`);
+    throw error;
   }
-  
-}
+};
 
 export const cancelOrder = async (paymentId: string) => {
   try {
-    const cancelledOrder = await Order.findOneAndUpdate({payment_id: paymentId}, 
-      { $set: {
-          updatedAt: new Date(),
-          is_paid: false,
-          status: OrderStatusType.Cancelled
-        }
+    const cancelledOrder = await Order.findOneAndUpdate(
+      { payment_id: paymentId }, 
+      { 
+        is_paid: false,
+        status: OrderStatusType.Cancelled
       },
       { new: true } 
-    ).exec()
+    ).exec();
+
     if (!cancelledOrder) {
-      logger.error(`Failed to cancel order for payment ID ${paymentId}`);
+      logger.error(`Failed to cancel order for paymentID ${ paymentId }`);
       throw new Error("Failed to cancel order");
     } 
 
-    return cancelledOrder
+    logger.info(`Order with paymentID ${ paymentId } successfully cancelled.`);
+    return cancelledOrder;
   } catch (error:any) {
-    logger.error(`Error cancelling order for payment ID ${paymentId}: `, error);
-    throw new Error("Error cancelling order");
+    logger.error(`Failed to cancel order for paymentID ${ paymentId }: ${ error.message }`);
+    throw error;
   }
-}
-
+};

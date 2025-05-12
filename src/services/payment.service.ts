@@ -45,8 +45,8 @@ export const completePayment = async (
     ).exec();
 
     if (!updatedPayment) {
-      logger.error(`Failed to update payment; no record found for piPaymentID ${ piPaymentId }`);
-      throw new Error('Failed to update payment; no record found');
+      logger.error(`Failed to update payment record for piPaymentID ${ piPaymentId }`);
+      throw new Error('Failed to update payment');
     }
     return updatedPayment;
     
@@ -77,7 +77,7 @@ export const createOrUpdatePaymentCrossReference = async (
 
       if (!updatedRef) {
         logger.error(`Failed to update Payment xRef for orderID ${ orderId }`);
-        throw new Error('Failed to update Payment xRef; no record found');
+        throw new Error('Failed to update Payment xRef');
       }
       return updatedRef;
     }
@@ -212,11 +212,11 @@ export const cancelPayment = async (piPaymentId: string): Promise<IPayment | nul
     const cancelledPayment = await Payment.findOneAndUpdate(
       { pi_payment_id: piPaymentId }, 
       { $set: { cancelled: true, paid: false } }, 
-      {new:true}
+      { new:true }
     ).exec();
 
     if (!cancelledPayment) {
-      logger.error(`Failed to cancel payment; no record found for piPaymentID ${ piPaymentId }`);
+      logger.error(`Failed to cancel payment record for piPaymentID ${ piPaymentId }`);
       throw new Error('Failed to cancel payment');
     }
     return cancelledPayment;
