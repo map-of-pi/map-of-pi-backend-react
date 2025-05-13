@@ -80,7 +80,7 @@ export const createOrder = async (
     await session.abortTransaction();
 
     logger.error(`Failed to create order: ${ error.message }`);
-    throw new Error('Failed to create order; please try again later');
+    throw error;
   } finally {
     session.endSession();
   }
