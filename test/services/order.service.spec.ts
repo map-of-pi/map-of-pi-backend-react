@@ -1,13 +1,19 @@
 import mongoose, { Types } from "mongoose";
 import Order from "../../src/models/Order";
 import OrderItem from "../../src/models/OrderItem";
+import Seller from "../../src/models/Seller";
 import SellerItem from "../../src/models/SellerItem";
+import User from "../../src/models/User";
 import { FulfillmentType } from "../../src/models/enums/fulfillmentType";
 import { OrderStatusType } from "../../src/models/enums/orderStatusType";
 import { OrderItemStatusType } from "../../src/models/enums/orderItemStatusType";
 import { NewOrder, PickedItems } from "../../src/types";
 import { 
-  createOrder
+  createOrder,
+  deleteOrderById,
+  getBuyerOrdersById,
+  getSellerOrdersById,
+  updatePaidOrder
 } from '../../src/services/order.service';
 
 describe('createOrder function', () => {
@@ -20,10 +26,6 @@ describe('createOrder function', () => {
 
   beforeEach(() => {
     jest.spyOn(mongoose, 'startSession').mockResolvedValue(mockSession as any);
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
   });
 
   const orderData: NewOrder = {
@@ -50,7 +52,7 @@ describe('createOrder function', () => {
       is_fulfilled: false, 
     };
 
-    // Mock order.save()
+    // Mock Order.save()
     jest.spyOn(Order.prototype, 'save').mockResolvedValue(mockSavedOrder);
 
     // Mock SellerItem.find().lean()
@@ -164,5 +166,195 @@ describe('createOrder function', () => {
   
     expect(mockSession.abortTransaction).toHaveBeenCalled();
     expect(mockSession.endSession).toHaveBeenCalled();
+  });
+});
+
+describe('updatePaidOrder function', () => {
+  it('should update the order as paid and return the updated order', async () => {
+    const paymentId = 'paymentId1_TEST';
+
+    const mockUpdatedOrder = {
+      _id: 'orderId1_TEST',
+      is_paid: true,
+      status: OrderStatusType.Pending,
+      payment_id: paymentId,
+    };
+
+    // Mock Order.findOneAndUpdate
+    jest.spyOn(Order, 'findOneAndUpdate').mockReturnValueOnce({
+      exec: jest.fn().mockResolvedValueOnce(mockUpdatedOrder),
+    } as any);
+
+    const result = await updatePaidOrder(paymentId);
+
+    expect(Order.findOneAndUpdate).toHaveBeenCalledWith(
+      { payment_id: paymentId },
+      {
+        $set: {
+          is_paid: true,
+          status: OrderStatusType.Pending,
+        },
+      },
+      { new: true }
+    );
+    expect(result).toEqual(mockUpdatedOrder);
+  });
+
+  it('should throw an error if no order is found for the paymentID', async () => {
+    const paymentId = 'paymentId2_TEST';
+
+    jest.spyOn(Order, 'findOneAndUpdate').mockReturnValueOnce({
+      exec: jest.fn().mockResolvedValueOnce(null),
+    } as any);
+
+    await expect(updatePaidOrder(paymentId)).rejects.toThrow('Failed to update paid order');
+  });
+
+  it('should throw an error if the DB update fails', async () => {
+    const paymentId = 'paymentId2_TEST';
+    const error = new Error('Mock database error');
+
+    jest.spyOn(Order, 'findOneAndUpdate').mockReturnValueOnce({
+      exec: jest.fn().mockRejectedValueOnce(error),
+    } as any);
+
+    await expect(updatePaidOrder(paymentId)).rejects.toThrow('Mock database error');
+  });
+});
+
+describe('getSellerOrdersById function', () => {
+  const mockSellerId = new Types.ObjectId();
+
+  it('should return orders for an existing seller', async () => {
+    const piUid = 'piUID1_TEST';
+
+    const mockOrders = [
+      {
+        _id: new Types.ObjectId(),
+        buyer_id: { pi_username: 'buyer1_TEST' },
+        is_paid: true,
+      },
+    ];
+
+    // Mock Seller.exists
+    jest.spyOn(Seller, 'exists').mockResolvedValueOnce({ _id: mockSellerId });
+    // Mock Order.find and nested attributes
+    jest.spyOn(Order, 'find').mockReturnValueOnce({
+      populate: jest.fn().mockReturnThis(),
+      sort: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockResolvedValueOnce(mockOrders),
+    } as any);
+
+    const result = await getSellerOrdersById(piUid);
+
+    expect(Seller.exists).toHaveBeenCalledWith({ seller_id: piUid });
+    expect(Order.find).toHaveBeenCalledWith({ seller_id: mockSellerId, is_paid: true });
+    expect(result).toEqual(mockOrders);
+  });
+
+  it('should return an empty array if seller is not found', async () => {
+    const piUid = 'piUID2_TEST';
+
+    jest.spyOn(Seller, 'exists').mockResolvedValueOnce(null);
+
+    const result = await getSellerOrdersById(piUid);
+
+    expect(Seller.exists).toHaveBeenCalledWith({ seller_id: piUid });
+    expect(result).toEqual([]);
+  });
+
+  it('should rethrow an error if fetching seller or orders fail', async () => {
+    const piUid = 'piUID3_TEST';
+    const error = new Error('Mock database error');
+
+    jest.spyOn(Seller, 'exists').mockRejectedValueOnce(error);
+
+    await expect(getSellerOrdersById(piUid)).rejects.toThrow('Mock database error');
+  });
+
+  describe('getBuyerOrdersById function', () => {
+    const mockBuyerId = new Types.ObjectId();
+
+    it('should return orders for an existing buyer', async () => {
+      const piUid = 'piUID1_TEST';
+
+      const mockOrders = [
+        {
+          _id: new Types.ObjectId(),
+          buyer_id: { pi_username: 'buyer1_TEST' },
+          is_paid: true,
+        },
+      ];
+
+      // Mock User.exists
+      jest.spyOn(User, 'exists').mockResolvedValueOnce({ _id: mockBuyerId });
+      // Mock Order.find and nested attributes
+      jest.spyOn(Order, 'find').mockReturnValueOnce({
+        populate: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockReturnThis(),
+        lean: jest.fn().mockResolvedValueOnce(mockOrders),
+      } as any);
+
+      const result = await getBuyerOrdersById(piUid);
+
+      expect(User.exists).toHaveBeenCalledWith({ pi_uid: piUid });
+      expect(Order.find).toHaveBeenCalledWith({ buyer_id: mockBuyerId, is_paid: true });
+      expect(result).toEqual(mockOrders);
+    });
+
+    it('should return an empty array if seller is not found', async () => {
+      const piUid = 'piUID2_TEST';
+  
+      jest.spyOn(User, 'exists').mockResolvedValueOnce(null);
+  
+      const result = await getBuyerOrdersById(piUid);
+  
+      expect(User.exists).toHaveBeenCalledWith({ pi_uid: piUid });
+      expect(result).toEqual([]);
+    });
+
+    it('should rethrow an error if fetching buyer or orders fails', async () => {
+      const piUid = 'piUID3_TEST';
+      const error = new Error('Mock database error');
+  
+      jest.spyOn(User, 'exists').mockRejectedValueOnce(error);
+  
+      await expect(getBuyerOrdersById(piUid)).rejects.toThrow('Mock database error');
+    });
+  });
+});
+
+describe('deleteOrderById function', () => {
+  const mockOrderId = 'order1_TEST'
+
+  it('should delete the order and return the data', async () => {
+    const mockDeletedOrder = { _id: mockOrderId, name: 'Test Order' };
+
+    // Mock Order.findByIdAndDelete
+    jest.spyOn(Order, 'findByIdAndDelete').mockResolvedValueOnce(mockDeletedOrder);
+
+    const result = await deleteOrderById(mockOrderId);
+
+    expect(Order.findByIdAndDelete).toHaveBeenCalledWith(mockOrderId);
+    expect(result).toEqual(mockDeletedOrder);
+  });
+
+  it('should return null if order is not found', async () => {
+    jest.spyOn(Order, 'findByIdAndDelete').mockResolvedValueOnce(null);
+
+    const result = await deleteOrderById(mockOrderId);
+
+    expect(Order.findByIdAndDelete).toHaveBeenCalledWith(mockOrderId);
+    expect(result).toBeNull();
+  });
+
+  it('should rethrow an error if deleting order fails', async () => {
+    const error = new Error('Mock database error');
+
+    jest.spyOn(Order, 'findByIdAndDelete').mockRejectedValueOnce(error);
+
+    await expect(deleteOrderById(mockOrderId)).rejects.toThrow('Mock database error');
+
+    expect(Order.findByIdAndDelete).toHaveBeenCalledWith(mockOrderId);
   });
 });

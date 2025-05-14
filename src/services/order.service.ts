@@ -113,7 +113,7 @@ export const updatePaidOrder = async (paymentId: string): Promise<IOrder> => {
 
 export const getSellerOrdersById = async (piUid: string) => {
   try {
-    const seller = await Seller.exists({ seller_id: piUid }).lean();
+    const seller = await Seller.exists({ seller_id: piUid });
     if (!seller) {
       logger.warn(`Seller not found for Pi UID: ${ piUid }`);
       return [];
@@ -156,6 +156,7 @@ export const deleteOrderById = async (orderId: string) => {
     const deletedOrder = await Order.findByIdAndDelete(orderId);
     if (!deletedOrder) {
       logger.error(`Order not found to delete for orderID: ${ orderId }`);
+      return null;
     }
     return deletedOrder;
   } catch (error: any) {
