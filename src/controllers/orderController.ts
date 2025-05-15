@@ -97,9 +97,10 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
   try {
     const updatedOrder = await orderService.updateOrderStatus(id, orderStatus);
     if (!updatedOrder) {
-      return res.status(404).json({ message: "Order not found" });
+      return res.status(404).json({ message: "Order not found or could not be updated" });
     }
-    return res.status(200).json(updatedOrder);
+    const orderDetails = await orderService.getOrderItems(id);
+    return res.status(200).json(orderDetails);
   } catch (error) {
     logger.error('Failed to update order status:', error);
     return res.status(500).json({ message: 'An error occurred while updating order status; please try again later' });

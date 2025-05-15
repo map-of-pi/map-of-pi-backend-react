@@ -232,10 +232,7 @@ export const updateOrderStatus = async (
       return null;
     }
 
-    // Return the updated order with items
-    // TODO: Refactor to remove service layer coupling.
-    const orderItems = await getOrderItems(orderId);
-    return { ...orderItems };
+    return updatedOrder;
   } catch (error: any) {
     logger.error(`Failed to update order status for orderID ${ orderId }: ${ error.message }`);
     throw error;

@@ -12,9 +12,17 @@ import {
   createOrder,
   deleteOrderById,
   getBuyerOrdersById,
+  getOrderItems,
   getSellerOrdersById,
+  updateOrderStatus,
   updatePaidOrder
 } from '../../src/services/order.service';
+
+jest.mock('../../src/models/Order');
+jest.mock('../../src/models/OrderItem');
+jest.mock('../../src/models/Seller');
+jest.mock('../../src/models/SellerItem');
+jest.mock('../../src/models/User');
 
 describe('createOrder function', () => {
   const mockSession = {
@@ -53,10 +61,11 @@ describe('createOrder function', () => {
     };
 
     // Mock Order.save()
-    jest.spyOn(Order.prototype, 'save').mockResolvedValue(mockSavedOrder);
+    const mockSave = jest.fn().mockResolvedValue(mockSavedOrder);
+    (Order as unknown as jest.Mock).mockImplementation(() => ({ save: mockSave }));
 
     // Mock SellerItem.find().lean()
-    jest.spyOn(SellerItem, 'find').mockReturnValueOnce({
+    (SellerItem.find as jest.Mock).mockReturnValueOnce({
       lean: jest.fn().mockResolvedValue([
         { _id: 'item1_TEST', price: 10 },
         { _id: 'item2_TEST', price: 80 },
@@ -64,7 +73,7 @@ describe('createOrder function', () => {
     } as any);
 
     // Mock OrderItem.insertMany
-    jest.spyOn(OrderItem, 'insertMany').mockResolvedValue([
+    (OrderItem.insertMany as jest.Mock).mockResolvedValue([
       {
         _id: new Types.ObjectId(),
         order_id: mockSavedOrder._id,
@@ -111,7 +120,8 @@ describe('createOrder function', () => {
   });
 
   it('should throw an error if order.save() returns null', async () => {
-    jest.spyOn(Order.prototype, 'save').mockResolvedValue(null);
+    const mockSave = jest.fn().mockResolvedValue(null);
+    (Order as unknown as jest.Mock).mockImplementation(() => ({ save: mockSave }));
   
     await expect(createOrder(orderData, orderItems)).rejects.toThrow('Failed to create order');
   
@@ -127,10 +137,11 @@ describe('createOrder function', () => {
       is_fulfilled: false, 
     };
   
-    jest.spyOn(Order.prototype, 'save').mockResolvedValue(mockSavedOrder);
+    const mockSave = jest.fn().mockResolvedValue(mockSavedOrder);
+    (Order as unknown as jest.Mock).mockImplementation(() => ({ save: mockSave }));
   
     // Return only one item even though two were expected
-    jest.spyOn(SellerItem, 'find').mockReturnValueOnce({
+    (SellerItem.find as jest.Mock).mockReturnValueOnce({
       lean: jest.fn().mockResolvedValue([
         { _id: 'item1_TEST', price: 10 },
         // item2_TEST is missing
@@ -151,16 +162,17 @@ describe('createOrder function', () => {
       is_fulfilled: false, 
     };
   
-    jest.spyOn(Order.prototype, 'save').mockResolvedValue(mockSavedOrder);
+    const mockSave = jest.fn().mockResolvedValue(mockSavedOrder);
+    (Order as unknown as jest.Mock).mockImplementation(() => ({ save: mockSave }));
   
-    jest.spyOn(SellerItem, 'find').mockReturnValueOnce({
+    (SellerItem.find as jest.Mock).mockReturnValueOnce({
       lean: jest.fn().mockResolvedValue([
         { _id: 'item1_TEST', price: 10 },
         { _id: 'item2_TEST', price: 80 },
       ]),
     } as any);
   
-    jest.spyOn(OrderItem, 'insertMany').mockRejectedValue(new Error('Mock database error'));
+    (OrderItem.insertMany as jest.Mock).mockRejectedValue(new Error('Mock database error'));
   
     await expect(createOrder(orderData, orderItems)).rejects.toThrow('Mock database error');
   
@@ -181,7 +193,7 @@ describe('updatePaidOrder function', () => {
     };
 
     // Mock Order.findOneAndUpdate
-    jest.spyOn(Order, 'findOneAndUpdate').mockReturnValueOnce({
+    (Order.findOneAndUpdate as jest.Mock).mockReturnValueOnce({
       exec: jest.fn().mockResolvedValueOnce(mockUpdatedOrder),
     } as any);
 
@@ -203,7 +215,7 @@ describe('updatePaidOrder function', () => {
   it('should throw an error if no order is found for the paymentID', async () => {
     const paymentId = 'paymentId2_TEST';
 
-    jest.spyOn(Order, 'findOneAndUpdate').mockReturnValueOnce({
+    (Order.findOneAndUpdate as jest.Mock).mockReturnValueOnce({
       exec: jest.fn().mockResolvedValueOnce(null),
     } as any);
 
@@ -214,7 +226,7 @@ describe('updatePaidOrder function', () => {
     const paymentId = 'paymentId2_TEST';
     const error = new Error('Mock database error');
 
-    jest.spyOn(Order, 'findOneAndUpdate').mockReturnValueOnce({
+    (Order.findOneAndUpdate as jest.Mock).mockReturnValueOnce({
       exec: jest.fn().mockRejectedValueOnce(error),
     } as any);
 
@@ -237,9 +249,9 @@ describe('getSellerOrdersById function', () => {
     ];
 
     // Mock Seller.exists
-    jest.spyOn(Seller, 'exists').mockResolvedValueOnce({ _id: mockSellerId });
+    (Seller.exists as jest.Mock).mockResolvedValueOnce({ _id: mockSellerId });
     // Mock Order.find and nested attributes
-    jest.spyOn(Order, 'find').mockReturnValueOnce({
+    (Order.find as jest.Mock).mockReturnValueOnce({
       populate: jest.fn().mockReturnThis(),
       sort: jest.fn().mockReturnThis(),
       lean: jest.fn().mockResolvedValueOnce(mockOrders),
@@ -255,7 +267,7 @@ describe('getSellerOrdersById function', () => {
   it('should return an empty array if seller is not found', async () => {
     const piUid = 'piUID2_TEST';
 
-    jest.spyOn(Seller, 'exists').mockResolvedValueOnce(null);
+    (Seller.exists as jest.Mock).mockResolvedValueOnce(null);
 
     const result = await getSellerOrdersById(piUid);
 
@@ -267,7 +279,7 @@ describe('getSellerOrdersById function', () => {
     const piUid = 'piUID3_TEST';
     const error = new Error('Mock database error');
 
-    jest.spyOn(Seller, 'exists').mockRejectedValueOnce(error);
+    (Seller.exists as jest.Mock).mockRejectedValueOnce(error);
 
     await expect(getSellerOrdersById(piUid)).rejects.toThrow('Mock database error');
   });
@@ -287,9 +299,9 @@ describe('getSellerOrdersById function', () => {
       ];
 
       // Mock User.exists
-      jest.spyOn(User, 'exists').mockResolvedValueOnce({ _id: mockBuyerId });
+      (User.exists as jest.Mock).mockResolvedValueOnce({ _id: mockBuyerId });
       // Mock Order.find and nested attributes
-      jest.spyOn(Order, 'find').mockReturnValueOnce({
+      (Order.find as jest.Mock).mockReturnValueOnce({
         populate: jest.fn().mockReturnThis(),
         sort: jest.fn().mockReturnThis(),
         lean: jest.fn().mockResolvedValueOnce(mockOrders),
@@ -305,7 +317,7 @@ describe('getSellerOrdersById function', () => {
     it('should return an empty array if seller is not found', async () => {
       const piUid = 'piUID2_TEST';
   
-      jest.spyOn(User, 'exists').mockResolvedValueOnce(null);
+      (User.exists as jest.Mock).mockResolvedValueOnce(null);
   
       const result = await getBuyerOrdersById(piUid);
   
@@ -317,7 +329,7 @@ describe('getSellerOrdersById function', () => {
       const piUid = 'piUID3_TEST';
       const error = new Error('Mock database error');
   
-      jest.spyOn(User, 'exists').mockRejectedValueOnce(error);
+      (User.exists as jest.Mock).mockRejectedValueOnce(error);
   
       await expect(getBuyerOrdersById(piUid)).rejects.toThrow('Mock database error');
     });
@@ -331,7 +343,7 @@ describe('deleteOrderById function', () => {
     const mockDeletedOrder = { _id: mockOrderId, name: 'Test Order' };
 
     // Mock Order.findByIdAndDelete
-    jest.spyOn(Order, 'findByIdAndDelete').mockResolvedValueOnce(mockDeletedOrder);
+    (Order.findByIdAndDelete as jest.Mock).mockResolvedValueOnce(mockDeletedOrder);
 
     const result = await deleteOrderById(mockOrderId);
 
@@ -340,7 +352,7 @@ describe('deleteOrderById function', () => {
   });
 
   it('should return null if order is not found', async () => {
-    jest.spyOn(Order, 'findByIdAndDelete').mockResolvedValueOnce(null);
+    (Order.findByIdAndDelete as jest.Mock).mockResolvedValueOnce(null);
 
     const result = await deleteOrderById(mockOrderId);
 
@@ -351,10 +363,129 @@ describe('deleteOrderById function', () => {
   it('should rethrow an error if deleting order fails', async () => {
     const error = new Error('Mock database error');
 
-    jest.spyOn(Order, 'findByIdAndDelete').mockRejectedValueOnce(error);
+    (Order.findByIdAndDelete as jest.Mock).mockRejectedValueOnce(error);
 
     await expect(deleteOrderById(mockOrderId)).rejects.toThrow('Mock database error');
 
     expect(Order.findByIdAndDelete).toHaveBeenCalledWith(mockOrderId);
+  });
+});
+
+describe('getOrderItems function', () => {
+  const mockOrderId = 'order1_TEST';
+
+  it('should fetch order items associated with the order', async () => {
+    const mockOrder = {
+      _id: mockOrderId,
+      buyer_id: 'buyer1_TEST',
+      seller_id: { name: 'seller1_TEST' },
+    };
+
+    const mockUser = { pi_username: 'piUID1_TEST' };
+
+    const mockOrderItems = [
+      {
+        _id: 'orderItem1_TEST',
+        seller_item_id: { _id: 'item1_TEST', name: 'product1_TEST' },
+      },
+    ];
+
+    // Mock Order.findById and nested attributes
+    (Order.findById as jest.Mock).mockReturnValueOnce({
+      populate: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockResolvedValue(mockOrder),
+    } as any);
+
+    // Mock User.findById
+    (User.findById as jest.Mock).mockResolvedValue(mockUser);
+
+    // Mock OrderItem.find
+    (OrderItem.find as jest.Mock).mockReturnValueOnce({
+      populate: jest.fn().mockReturnValueOnce({
+        exec: jest.fn().mockResolvedValue(mockOrderItems),
+      }),
+    } as any);
+
+    const result = await getOrderItems(mockOrderId);
+
+    expect(Order.findById).toHaveBeenCalledWith(mockOrderId);
+    expect(User.findById).toHaveBeenCalledWith('buyer1_TEST', 'pi_username');
+    expect(OrderItem.find).toHaveBeenCalledWith({ order_id: mockOrderId });
+    expect(result).toEqual({
+      order: mockOrder,
+      orderItems: mockOrderItems,
+      pi_username: 'piUID1_TEST',
+    });
+  });
+
+  it('should return null if order is not found', async () => {
+    (Order.findById as jest.Mock).mockReturnValueOnce({
+      populate: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockResolvedValue(null),
+    } as any);
+
+    const result = await getOrderItems(mockOrderId);
+
+    expect(result).toBeNull();
+  });
+
+  it('should rethrow an error if getting order items fails', async () => {
+    const error = new Error('Mock database error');
+
+    (Order.findById as jest.Mock).mockReturnValueOnce({
+      populate: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockImplementation(() => {
+        throw new Error("Mock database error");
+      }),
+    } as any);
+
+    await expect(getOrderItems(mockOrderId)).rejects.toThrow('Mock database error');
+
+    expect(Order.findById).toHaveBeenCalledWith(mockOrderId);
+  });
+});
+
+describe('updateOrderStatus function', () => {
+  const mockOrderId = 'order1_TEST';
+
+  it('should update order and mark items fulfilled if status is Completed', async () => {
+    const mockOrderItems = [
+      { _id: 'orderItem1_TEST' },
+      { _id: 'orderItem2_TEST' },
+    ];
+
+    const mockUpdatedOrder = { 
+      _id: mockOrderId, 
+      status: OrderStatusType.Completed 
+    };
+
+    // Mock OrderItem.find
+    (OrderItem.find as jest.Mock).mockReturnValue({ 
+      exec: jest.fn().mockResolvedValue(mockOrderItems) 
+    });
+
+    // Mock OrderItem.updateMany
+    (OrderItem.updateMany as jest.Mock).mockReturnValue({
+      exec: jest.fn().mockResolvedValue({ modifiedCount: 2 }) 
+    });
+
+    // Mock.Order.findByIdAndUpdate
+    (Order.findByIdAndUpdate as jest.Mock).mockReturnValue({ 
+      exec: jest.fn().mockResolvedValue(mockUpdatedOrder) 
+    });
+
+    const result = await updateOrderStatus(mockOrderId, OrderStatusType.Completed);
+
+    expect(OrderItem.find).toHaveBeenCalledWith({ order_id: mockOrderId });
+    expect(OrderItem.updateMany).toHaveBeenCalledWith(
+      { _id: { $in: ['orderItem1_TEST', 'orderItem2_TEST'] } },
+      { status: OrderItemStatusType.Fulfilled }
+    );
+    expect(Order.findByIdAndUpdate).toHaveBeenCalledWith(
+      mockOrderId,
+      { status: OrderStatusType.Completed },
+      { new: true }
+    );
+    expect(result).toEqual(mockUpdatedOrder);
   });
 });
