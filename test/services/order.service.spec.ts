@@ -222,7 +222,7 @@ describe('updatePaidOrder function', () => {
     await expect(updatePaidOrder(paymentId)).rejects.toThrow('Failed to update paid order');
   });
 
-  it('should throw an error if the DB update fails', async () => {
+  it('should throw an error if updating paid order fails', async () => {
     const paymentId = 'paymentId2_TEST';
     const error = new Error('Mock database error');
 
@@ -275,7 +275,7 @@ describe('getSellerOrdersById function', () => {
     expect(result).toEqual([]);
   });
 
-  it('should rethrow an error if fetching seller or orders fail', async () => {
+  it('should throw an error if fetching seller or orders fail', async () => {
     const piUid = 'piUID3_TEST';
     const error = new Error('Mock database error');
 
@@ -325,7 +325,7 @@ describe('getSellerOrdersById function', () => {
       expect(result).toEqual([]);
     });
 
-    it('should rethrow an error if fetching buyer or orders fails', async () => {
+    it('should throw an error if fetching buyer or orders fails', async () => {
       const piUid = 'piUID3_TEST';
       const error = new Error('Mock database error');
   
@@ -360,7 +360,7 @@ describe('deleteOrderById function', () => {
     expect(result).toBeNull();
   });
 
-  it('should rethrow an error if deleting order fails', async () => {
+  it('should throw an error if deleting order fails', async () => {
     const error = new Error('Mock database error');
 
     (Order.findByIdAndDelete as jest.Mock).mockRejectedValueOnce(error);
@@ -429,7 +429,7 @@ describe('getOrderItems function', () => {
     expect(result).toBeNull();
   });
 
-  it('should rethrow an error if getting order items fails', async () => {
+  it('should throw an error if getting order items fails', async () => {
     const error = new Error('Mock database error');
 
     (Order.findById as jest.Mock).mockReturnValueOnce({
@@ -551,7 +551,7 @@ describe('updateOrderStatus function', () => {
     expect(result).toBeNull();
   });
 
-  it('should rethrow an error if updating order status fails', async () => {
+  it('should throw an error if updating order status fails', async () => {
     const error = new Error('Mock database error');
 
     // Mock OrderItem.find
