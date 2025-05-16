@@ -488,4 +488,83 @@ describe('updateOrderStatus function', () => {
     );
     expect(result).toEqual(mockUpdatedOrder);
   });
+
+  it('should not update item statuses if no order items are found for Completed status', async () => {
+    const mockUpdatedOrder = {
+      _id: mockOrderId,
+      status: OrderStatusType.Completed
+    };
+
+    // Mock OrderItem.find
+    (OrderItem.find as jest.Mock).mockReturnValue({
+      exec: jest.fn().mockResolvedValue([])
+    });
+
+    // Mock.Order.findByIdAndUpdate
+    (Order.findByIdAndUpdate as jest.Mock).mockReturnValue({
+      exec: jest.fn().mockResolvedValue(mockUpdatedOrder)
+    });
+
+    const result = await updateOrderStatus(mockOrderId, OrderStatusType.Completed);
+
+    expect(OrderItem.find).toHaveBeenCalledWith({ order_id: mockOrderId });
+    expect(OrderItem.updateMany).not.toHaveBeenCalled();
+    expect(result).toEqual(mockUpdatedOrder);
+  });
+
+  it('should handle unhandled status types accordingly', async () => {
+    const mockUpdatedOrder = {
+      _id: mockOrderId,
+      status: OrderStatusType.Cancelled
+    };
+
+    // Mock.Order.findByIdAndUpdate
+    (Order.findByIdAndUpdate as jest.Mock).mockReturnValue({
+      exec: jest.fn().mockResolvedValue(mockUpdatedOrder)
+    });
+
+    const result = await updateOrderStatus(mockOrderId, OrderStatusType.Cancelled);
+
+    expect(OrderItem.find).not.toHaveBeenCalled();
+    expect(OrderItem.updateMany).not.toHaveBeenCalled();
+    expect(Order.findByIdAndUpdate).toHaveBeenCalledWith(
+      mockOrderId,
+      { status: OrderStatusType.Cancelled },
+      { new: true }
+    );
+    expect(result).toEqual(mockUpdatedOrder);
+  });
+
+  it('should return null if order is not found or failed to update status', async () => {
+    // Mock OrderItem.find
+    (OrderItem.find as jest.Mock).mockReturnValue({
+      exec: jest.fn().mockResolvedValue([])
+    });
+    
+    // Mock.Order.findByIdAndUpdate
+    (Order.findByIdAndUpdate as jest.Mock).mockReturnValue({
+      exec: jest.fn().mockResolvedValue(null)
+    });
+
+    const result = await updateOrderStatus(mockOrderId, OrderStatusType.Completed);
+
+    expect(result).toBeNull();
+  });
+
+  it('should rethrow an error if updating order status fails', async () => {
+    const error = new Error('Mock database error');
+
+    // Mock OrderItem.find
+    (OrderItem.find as jest.Mock).mockReturnValue({
+      exec: jest.fn().mockResolvedValue([])
+    });
+
+    // Mock.Order.findByIdAndUpdate
+    (Order.findByIdAndUpdate as jest.Mock).mockReturnValue({
+      exec: jest.fn().mockRejectedValue(error)
+    });
+
+    await expect(updateOrderStatus(mockOrderId, OrderStatusType.Completed))
+      .rejects.toThrow('Mock database error');
+  });
 });
