@@ -319,7 +319,7 @@ describe('orderController', () => {
       expect(orderService.updateOrderStatus).toHaveBeenCalledWith(mockOrderId, req.body.orderStatus);
       expect(orderService.getOrderItems).toHaveBeenCalledWith(mockOrderId);
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith(mockOrder);
+      expect(res.json).toHaveBeenCalledWith(mockOrderWithItemDetails);
     });
 
     it('should return [404] if updated order is not found', async () => {
@@ -330,7 +330,7 @@ describe('orderController', () => {
       expect(orderService.updateOrderStatus).toHaveBeenCalledWith(mockOrderId, req.body.orderStatus);
       expect(orderService.getOrderItems).not.toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Order not found' });
+      expect(res.json).toHaveBeenCalledWith({ message: 'Order not found or could not be updated' });
     });
 
     it('should return [500] if order service throws error', async () => {
