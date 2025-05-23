@@ -110,11 +110,11 @@ export const createA2UPayment = async (a2uPaymentData: A2UPaymentDataType): Prom
     }
 
     /* Step 2: Get seller's Pi UID using the seller's _id field */
-    const result = await Seller.findById(a2uPaymentData.sellerId)
-    .select('seller_id -_id')
-    .exec();
+    const existingSeller = await Seller.findById(a2uPaymentData.sellerId)
+      .select('seller_id -_id') // Include seller_id, exclude _id
+      .exec();
 
-    if (!result?.seller_id) {
+    if (!existingSeller?.seller_id) {
       logger.error(`Failed to find seller with ID ${ a2uPaymentData.sellerId }`);
       throw new Error('Failed to find seller; no record found');
     }
@@ -124,13 +124,13 @@ export const createA2UPayment = async (a2uPaymentData: A2UPaymentDataType): Prom
       amount: newAmount,
       memo: "A2U payment",
       metadata: { direction: "A2U" },
-      uid: result?.seller_id as string,
+      uid: existingSeller?.seller_id as string,
     };
 
     const paymentId = await pi.createPayment(a2uData);
     logger.debug('Payment ID: ', { paymentId });
     if (!paymentId) {
-      logger.error(`Failed to create A2U Pi payment for UID ${ result.seller_id }`);
+      logger.error(`Failed to create A2U Pi payment for UID ${ existingSeller.seller_id }`);
       throw new Error('Failed to create A2U Pi payment');
     }
 
@@ -194,7 +194,7 @@ export const createA2UPayment = async (a2uPaymentData: A2UPaymentDataType): Prom
 
 export const getPayment = async (piPaymentId: string): Promise<IPayment | null> => {
   try {
-    const existingPayment = await Payment.findOne({ pi_payment_id: piPaymentId });
+    const existingPayment = await Payment.findOne({ pi_payment_id: piPaymentId }).exec();
     if (!existingPayment) {
       logger.warn(`Failed to get payment; no record found for piPaymentID ${ piPaymentId }`);
       return null;
@@ -202,7 +202,7 @@ export const getPayment = async (piPaymentId: string): Promise<IPayment | null> 
     return existingPayment;
 
   } catch (error: any) {
-    logger.error(`Failed to get payment for piPaymentID ${ piPaymentId }: ${ error.messsage }`);
+    logger.error(`Failed to get payment for piPaymentID ${ piPaymentId }: ${ error.message }`);
     throw error;
   }
 };
