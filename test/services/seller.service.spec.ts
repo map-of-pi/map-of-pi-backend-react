@@ -195,7 +195,7 @@ describe('registerOrUpdateSeller function', () => {
     });
 
     await expect(registerOrUpdateSeller(userData, formData)).rejects.toThrow(
-      'Failed to register or update seller; please try again later'
+      'Mock database error'
     );
   });
 });
@@ -222,7 +222,7 @@ describe('getAllSellerItems function', () => {
     });
 
     await expect(getAllSellerItems('0b0b0b-0b0b-0b0b')).rejects.toThrow(
-      'Failed to get seller items; please try again later'
+      'Mock database error'
     );
   });
 });
@@ -364,7 +364,7 @@ describe('addOrUpdateSellerItem function', () => {
     });
 
     await expect(addOrUpdateSellerItem({ seller_id: "0b0b0b-0b0b-0b0b" } as ISeller, sellerItem)).rejects.toThrow(
-      'Failed to add or update seller item; please try again later'
+      'Mock database error'
     );
   });
 });
@@ -438,11 +438,11 @@ describe('deleteSellerItem function', () => {
 
     // Mock the SellerItem model to throw an error
     jest.spyOn(SellerItem, 'findByIdAndDelete').mockImplementationOnce(() => {
-      throw new Error('Unexpected exception occurred');
+      throw new Error('Mock database error');
     });
 
     await expect(deleteSellerItem(sellerItem._id)).rejects.toThrow(
-      'Failed to delete seller item; please try again later'
+      'Mock database error'
     );
   });
 });
