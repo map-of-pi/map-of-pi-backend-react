@@ -5,11 +5,6 @@ import Seller from "../../src/models/Seller";
 import { PaymentType } from "../../src/models/enums/paymentType";
 import { U2UPaymentStatus } from "../../src/models/enums/u2uPaymentStatus";
 import { 
-  A2UPaymentDataType, 
-  NewPayment, 
-  U2URefDataType 
-} from "../../src/types";
-import { 
   createPayment,
   completePayment,
   createOrUpdatePaymentCrossReference,
@@ -17,6 +12,11 @@ import {
   getPayment,
   cancelPayment
 } from '../../src/services/payment.service';
+import { 
+  A2UPaymentDataType, 
+  NewPayment, 
+  U2URefDataType 
+} from "../../src/types";
 
 jest.mock('../../src/config/platformAPIclient', () => ({
   __esModule: true,
@@ -352,11 +352,6 @@ describe('createA2UPayment function', () => {
       exec: jest.fn().mockResolvedValue(null),
     });
 
-    // Mock PaymentCrossReference.findOneAndUpdate
-    (PaymentCrossReference.findOneAndUpdate as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockResolvedValue(null),
-    });
-
     // Mock PaymentCrossReference.save
     const mockPaymentXRefSave = jest.fn().mockResolvedValue(mockNewRef);
     (PaymentCrossReference as unknown as jest.Mock).mockImplementation(() => ({ save: mockPaymentXRefSave }));
@@ -389,15 +384,6 @@ describe('createA2UPayment function', () => {
 
     const mockPaymentSave = jest.fn().mockResolvedValue(null);
     (Payment as unknown as jest.Mock).mockImplementation(() => ({ save: mockPaymentSave }));
-
-    (Payment.findOneAndUpdate as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockResolvedValueOnce(null),
-    } as any);
-
-    // Mock PaymentCrossReference.findOne
-    (PaymentCrossReference.findOne as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockResolvedValue(null),
-    });
 
     // Mock PaymentCrossReference.findOneAndUpdate
     (PaymentCrossReference.findOneAndUpdate as jest.Mock).mockReturnValue({
@@ -438,14 +424,6 @@ describe('createA2UPayment function', () => {
       exec: jest.fn().mockResolvedValueOnce(null),
     } as any);
 
-    (PaymentCrossReference.findOne as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockResolvedValue(null),
-    });
-
-    (PaymentCrossReference.findOneAndUpdate as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockResolvedValue(null),
-    });
-
     const mockPaymentXRefSave = jest.fn().mockResolvedValue(null);
     (PaymentCrossReference as unknown as jest.Mock).mockImplementation(() => ({ save: mockPaymentXRefSave }));
     
@@ -477,18 +455,6 @@ describe('createA2UPayment function', () => {
 
     const mockPaymentSave = jest.fn().mockResolvedValue(null);
     (Payment as unknown as jest.Mock).mockImplementation(() => ({ save: mockPaymentSave }));
-
-    (Payment.findOneAndUpdate as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockResolvedValueOnce(null),
-    } as any);
-
-    (PaymentCrossReference.findOne as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockResolvedValue(null),
-    });
-
-    (PaymentCrossReference.findOneAndUpdate as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockResolvedValue(null),
-    });
 
     const mockPaymentXRefSave = jest.fn().mockResolvedValue(null);
     (PaymentCrossReference as unknown as jest.Mock).mockImplementation(() => ({ save: mockPaymentXRefSave }));
@@ -523,18 +489,6 @@ describe('createA2UPayment function', () => {
 
     const mockPaymentSave = jest.fn().mockResolvedValue(mockUpdatedPayment);
     (Payment as unknown as jest.Mock).mockImplementation(() => ({ save: mockPaymentSave }));
-
-    (Payment.findOneAndUpdate as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockResolvedValueOnce(null),
-    } as any);
-
-    (PaymentCrossReference.findOne as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockResolvedValue(null),
-    });
-
-    (PaymentCrossReference.findOneAndUpdate as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockResolvedValue(null),
-    });
 
     const mockPaymentXRefSave = jest.fn().mockResolvedValue(null);
     (PaymentCrossReference as unknown as jest.Mock).mockImplementation(() => ({ save: mockPaymentXRefSave }));
@@ -571,14 +525,6 @@ describe('createA2UPayment function', () => {
     (Payment.findOneAndUpdate as jest.Mock).mockReturnValue({
       exec: jest.fn().mockResolvedValueOnce(null),
     } as any);
-
-    (PaymentCrossReference.findOne as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockResolvedValue(null),
-    });
-
-    (PaymentCrossReference.findOneAndUpdate as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockResolvedValue(null),
-    });
 
     const mockPaymentXRefSave = jest.fn().mockResolvedValue(null);
     (PaymentCrossReference as unknown as jest.Mock).mockImplementation(() => ({ save: mockPaymentXRefSave }));

@@ -2,7 +2,6 @@ import axios from 'axios';
 import { platformAPIClient } from '../config/platformAPIclient';
 import Seller from '../models/Seller';
 import User from '../models/User';
-import { FulfillmentType } from '../models/enums/fulfillmentType';
 import { OrderStatusType } from '../models/enums/orderStatusType';
 import { PaymentType } from "../models/enums/paymentType";
 import { U2UPaymentStatus } from '../models/enums/u2uPaymentStatus';
@@ -19,59 +18,93 @@ import {
   createOrder, 
   updatePaidOrder 
 } from '../services/order.service';
-import { IUser, PaymentDataType, PaymentInfo } from '../types';
+import { IUser, NewOrder, PaymentDataType, PaymentInfo } from '../types';
 import logger from '../config/loggingConfig';
 
-export const checkoutProcess = async (
+function buildPaymentData(
+  piPaymentId: string,
+  buyerId: string,
+  payment: PaymentDataType
+) {
+  return {
+    piPaymentId,
+    userId: buyerId,
+    memo: payment.memo,
+    amount: payment.amount,
+    paymentType: PaymentType.BuyerCheckout
+  };
+}
+
+function buildOrderData(
+  buyerId: string,
+  sellerId: string,
+  paymentId: string,
+  payment: PaymentDataType
+) {
+  const orderMeta = payment.metadata.OrderPayment!; // safe due to earlier guard
+
+  return {
+    buyerId,
+    sellerId,
+    paymentId,
+    totalAmount: payment.amount,
+    status: OrderStatusType.Initialized,
+    fulfillmentMethod: orderMeta.fulfillment_method,
+    sellerFulfillmentDescription: orderMeta.seller_fulfillment_description,
+    buyerFulfillmentDescription: orderMeta.buyer_fulfillment_description,
+  };
+}
+
+const checkoutProcess = async (
   piPaymentId: string, 
   authUser: IUser, 
-  currentPayment:PaymentDataType
+  currentPayment: PaymentDataType
 ) => {
-  const seller = await Seller.findOne({ seller_id: currentPayment.metadata.OrderPayment?.seller });
+
+  // Extract OrderPayment metadata from the current payment
+  const { OrderPayment } = currentPayment.metadata;
+  // Validate presence of required OrderPayment metadata
+  if (!OrderPayment) {
+    logger.error("OrderPayment metadata is missing");
+    throw new Error("OrderPayment metadata is missing");
+  }
+
+  // Look up the seller and buyer in the database
+  const seller = await Seller.findOne({ seller_id: OrderPayment.seller });
   const buyer = await User.findOne({ pi_uid: authUser?.pi_uid });
 
   if (!buyer || !seller) {
-    logger.error("Seller or buyer not found");
-    throw new Error( "Seller or buyer not found" );
+    logger.error("Seller or buyer not found", { sellerId: OrderPayment.seller, buyerId: authUser?.pi_uid });
+    throw new Error("Seller or buyer not found");
   }
 
-  const paymentData = {
-    piPaymentId: piPaymentId as string,
-    userId: buyer?._id as string,
-    memo: currentPayment.memo as string,
-    amount: currentPayment.amount as string,
-    paymentType: PaymentType.BuyerCheckout
-  };
-
+  // Construct payment data object for recording the transaction
+  const paymentData = buildPaymentData(piPaymentId, buyer._id as string, currentPayment);
+  // Create a new payment record
   const newPayment = await createPayment(paymentData)
-
+  // Validate payment record creation succeeded
   if (!newPayment) {
-    logger.info("Unable to create payment record")
-    throw new Error( "Unable to create payment record" );
+    logger.error("Unable to create payment record")
+    throw new Error("Unable to create payment record");
   }
 
-  // logger.info("new payment successfull: ", newPayment)
-  const orderData = {    
-    buyerId: buyer?._id as string,
-    sellerId: seller?._id as string,        
-    paymentId: newPayment._id as string,
-    totalAmount: currentPayment.amount as string,
-    status: OrderStatusType.Initialized,
-    fulfillmentMethod: currentPayment.metadata.OrderPayment?.fulfillment_method as FulfillmentType,
-    sellerFulfillmentDescription: currentPayment.metadata.OrderPayment?.seller_fulfillment_description as string,
-    buyerFulfillmentDescription: currentPayment.metadata.OrderPayment?.buyer_fulfillment_description as string,
-  };
-
-  const orderItemsData = currentPayment.metadata.OrderPayment?.items;
-
-  if (!orderItemsData) {
-    logger.error("Order items not found in payment metadata");
-    throw new Error( "Order items not found in payment metadata" );
+  // Ensure order items are present
+  if (!OrderPayment.items) {
+    logger.error("Order items not found in OrderPayment metadata");
+    throw new Error("Order items not found in OrderPayment metadata");
   }
-  // create order and order items
-  const newOrder = await createOrder(orderData, orderItemsData);
-  logger.info('order created successfully');
 
+  // Construct order data object
+  const orderData = buildOrderData(
+    buyer._id as string,
+    seller._id as string,
+    newPayment.pi_payment_id,
+    currentPayment
+  )
+  // Create a new order along with its items
+  const newOrder = await createOrder(orderData as NewOrder, OrderPayment.items);
+
+  logger.info('order created successfully', { orderId: newOrder._id });
   return newOrder;
 }
 
@@ -122,8 +155,8 @@ export const processPaymentApproval = async (
   currentUser: IUser
 ): Promise<{ success: boolean; message: string }> => {
   // Fetch payment details from the Pi platform using the payment ID
-  const resp = await platformAPIClient.get(`/v2/payments/${ paymentId }`);
-  const currentPayment: PaymentDataType = resp.data;
+  const res = await platformAPIClient.get(`/v2/payments/${ paymentId }`);
+  const currentPayment: PaymentDataType = res.data;
 
   // Check if a payment record with this ID already exists in the database
   const oldPayment = await getPayment(paymentId);
@@ -135,7 +168,7 @@ export const processPaymentApproval = async (
     };
   }
 
-  // Handle logic based on the BuyerCheckout payment type and create a new order
+  // Handle logic based on the payment type
   if (currentPayment?.metadata.payment_type === PaymentType.BuyerCheckout) {
     const newOrder = await checkoutProcess(paymentId, currentUser, currentPayment);
     logger.info("Order created successfully: ", newOrder._id);
