@@ -138,7 +138,7 @@ export interface IOrder extends Document {
   status: OrderStatusType;
   is_paid: boolean;
   is_fulfilled: boolean;
-  fulfillment_method: FulfillmentType;
+  fulfillment_type: FulfillmentType;
   seller_fulfillment_description: string;
   buyer_fulfillment_description: string;
   createdAt: Date;

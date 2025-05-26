@@ -43,7 +43,7 @@ const orderSchema = new Schema<IOrder>(
       required: true,
       default: OrderStatusType.Pending,
     },
-    fulfillment_method: {
+    fulfillment_type: {
       type: String,
       enum: Object.values(FulfillmentType).filter(value => typeof value === 'string'),
       default: FulfillmentType.CollectionByBuyer

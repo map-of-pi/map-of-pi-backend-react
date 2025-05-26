@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
+import { OrderItemStatusType } from "../models/enums/orderItemStatusType";
 import *  as orderService from "../services/order.service";
 import { ISeller, IUser } from "../types";
 import logger from "../config/loggingConfig";
-import { OrderItemStatusType } from "../models/enums/orderItemStatusType";
 
-export const getSellerOrders= async (req: Request, res: Response) => {
+export const getSellerOrders = async (req: Request, res: Response) => {
   const seller = req.currentSeller as ISeller; 
   try {
     const orders = await orderService.getSellerOrdersById(seller.seller_id);
@@ -17,7 +17,7 @@ export const getSellerOrders= async (req: Request, res: Response) => {
   }
 };
 
-export const getBuyerOrders= async (req: Request, res: Response) => {
+export const getBuyerOrders = async (req: Request, res: Response) => {
   const buyer = req.currentUser as IUser;
   try {
     const orders = await orderService.getBuyerOrdersById(buyer.pi_uid);
@@ -31,7 +31,7 @@ export const getBuyerOrders= async (req: Request, res: Response) => {
 };
 
 export const getSingleOrder = async (req: Request, res: Response) => {
-  const orderId = req.params.id;
+  const orderId = req.params.order_id;
   try {
     const order = await orderService.getOrderItems(orderId);
     if (!order) {
@@ -63,7 +63,7 @@ export const createOrder = async (req: Request, res: Response) => {
 
 export const deleteOrder = async (req: Request, res: Response) => {
   try {
-    const deletedOrder = await orderService.deleteOrderById(req.params.id);
+    const deletedOrder = await orderService.deleteOrderById(req.params.order_id);
     if (!deletedOrder) {
       logger.warn(`Order not found.`);
       return res.status(404).json({ message: "Order not found" });
@@ -92,15 +92,14 @@ export const getOrderItems = async (req: Request, res: Response) => {
 };
 
 export const updateOrderStatus = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { order_id } = req.params;
   const { orderStatus } = req.body;
   try {
-    const updatedOrder = await orderService.updateOrderStatus(id, orderStatus);
+    const updatedOrder = await orderService.updateOrderStatus(order_id, orderStatus);
     if (!updatedOrder) {
       return res.status(404).json({ message: "Order not found or could not be updated" });
     }
-    const orderDetails = await orderService.getOrderItems(id);
-    return res.status(200).json(orderDetails);
+    return res.status(200).json(updatedOrder);
   } catch (error) {
     logger.error('Failed to update order status:', error);
     return res.status(500).json({ message: 'An error occurred while updating order status; please try again later' });
@@ -108,19 +107,19 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
 };
 
 export const updateOrderItemStatus = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { order_id } = req.params;
   const { orderItemStatus } = req.body;
   try {
-    if (!id || !orderItemStatus) {
+    if (!order_id || !orderItemStatus) {
       return res.status(400).json({ message: 'Order item ID and order item status are required' });
     }
     if (!Object.values(OrderItemStatusType).includes(orderItemStatus)) {
       return res.status(400).json({ message: 'Invalid order item status' });
     }
 
-    const updatedOrderItem = await orderService.updateOrderItemStatus(id, orderItemStatus);
+    const updatedOrderItem = await orderService.updateOrderItemStatus(order_id, orderItemStatus);
     if (!updatedOrderItem) {
-      return res.status(404).json({ message: "Order item not found" });
+      return res.status(404).json({ message: "Order item not found or could not be updated" });
     }
     return res.status(200).json(updatedOrderItem);
   } catch (error) {

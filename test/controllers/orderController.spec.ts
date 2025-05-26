@@ -110,7 +110,7 @@ describe('orderController', () => {
 
     beforeEach(() => {
       req = {
-        params: { id: mockOrderId }
+        params: { order_id: mockOrderId }
       };
       res = {
         status: jest.fn().mockReturnThis(),
@@ -193,7 +193,7 @@ describe('orderController', () => {
   describe('deleteOrder function', () => {
     beforeEach(() => {
       req = { 
-        params: { id: '26f5a0f2a86d1f9f3b7e4e83' }
+        params: { order_id: '26f5a0f2a86d1f9f3b7e4e83' }
       };
       res = {
         status: jest.fn().mockReturnThis(),
@@ -202,7 +202,7 @@ describe('orderController', () => {
     });
 
     it('should return [200] and deletedOrder on success', async () => {
-      const deletedOrder = { _id: "25f5a0f2a86d1f9f3b7e4e83" };
+      const deletedOrder = { order_id: "25f5a0f2a86d1f9f3b7e4e83" };
       
       (orderService.deleteOrderById as jest.Mock).mockResolvedValue(deletedOrder);
       
@@ -294,7 +294,7 @@ describe('orderController', () => {
 
     beforeEach(() => {
       req = { 
-        params: { id: mockOrderId },
+        params: { order_id: mockOrderId },
         body: { orderStatus: OrderStatusType.Completed }
       };
       res = {
@@ -303,23 +303,16 @@ describe('orderController', () => {
       };
     });
 
-    it('should return [200] and order item details on success', async () => {
-      const mockOrder = { id: mockOrderId, status: OrderStatusType.Completed };
-      const mockOrderWithItemDetails = {
-        order: mockOrder,
-        items: [{ _id: 'orderItem1' }, { _id: 'orderItem2' }],
-      };
+    it('should return [200] and updated order on success', async () => {
+      const mockOrder = { order_id: mockOrderId, status: OrderStatusType.Completed };
       
       (orderService.updateOrderStatus as jest.Mock).mockResolvedValue(mockOrder);
-      (orderService.getOrderItems as jest.Mock).mockResolvedValue(mockOrderWithItemDetails);
       
       await updateOrderStatus(req, res);
 
-
       expect(orderService.updateOrderStatus).toHaveBeenCalledWith(mockOrderId, req.body.orderStatus);
-      expect(orderService.getOrderItems).toHaveBeenCalledWith(mockOrderId);
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith(mockOrderWithItemDetails);
+      expect(res.json).toHaveBeenCalledWith(mockOrder);
     });
 
     it('should return [404] if updated order is not found', async () => {
@@ -328,7 +321,6 @@ describe('orderController', () => {
       await updateOrderStatus(req, res);
   
       expect(orderService.updateOrderStatus).toHaveBeenCalledWith(mockOrderId, req.body.orderStatus);
-      expect(orderService.getOrderItems).not.toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({ message: 'Order not found or could not be updated' });
     });
@@ -341,7 +333,6 @@ describe('orderController', () => {
       await updateOrderStatus(req, res);
   
       expect(orderService.updateOrderStatus).toHaveBeenCalledWith(mockOrderId, req.body.orderStatus);
-      expect(orderService.getOrderItems).not.toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({ message: mockError.message });
     });
@@ -352,7 +343,7 @@ describe('orderController', () => {
 
     beforeEach(() => {
       req = { 
-        params: { id: mockOrderId },
+        params: { order_id: mockOrderId },
         body: { orderItemStatus: OrderItemStatusType.Fulfilled }
       };
       res = {
@@ -362,7 +353,7 @@ describe('orderController', () => {
     });
 
     it('should return [200] and updated order item on success', async () => {
-      const mockOrderItem = { id: mockOrderId, status: OrderItemStatusType.Fulfilled };
+      const mockOrderItem = { order_id: mockOrderId, status: OrderItemStatusType.Fulfilled };
       
       (orderService.updateOrderItemStatus as jest.Mock).mockResolvedValue(mockOrderItem);
       
@@ -400,7 +391,7 @@ describe('orderController', () => {
   
       expect(orderService.updateOrderItemStatus).toHaveBeenCalledWith(mockOrderId, req.body.orderItemStatus);
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Order item not found' });
+      expect(res.json).toHaveBeenCalledWith({ message: 'Order item not found or could not be updated' });
     });
 
     it('should return [500] if order service throws error', async () => {

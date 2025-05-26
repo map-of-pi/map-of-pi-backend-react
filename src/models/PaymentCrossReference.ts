@@ -1,6 +1,6 @@
 import mongoose, { Schema, SchemaTypes } from "mongoose";
-import { IPaymentCrossReference } from "../types";
 import { U2UPaymentStatus } from "./enums/u2uPaymentStatus";
+import { IPaymentCrossReference } from "../types";
 
 const paymentCrossReferenceSchema = new Schema<IPaymentCrossReference>(
   {

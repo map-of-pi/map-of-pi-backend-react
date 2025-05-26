@@ -183,13 +183,18 @@ export const getOrderItems = async (orderId: string) => {
     // Fetch the items linked to the order
     const orderItems = await OrderItem.find({ order_id: orderId })
       .populate({ path: "seller_item_id", model: "Seller-Item" })
-      .exec();
+      .lean();
 
     logger.info(`Fetched ${ orderItems.length } order items for orderID ${ orderId }`);
     
+    const result = orderItems.map(item => ({
+      ...item,
+      seller_item: item.seller_item_id,
+    }));
+
     return { 
       order, 
-      orderItems: orderItems, 
+      orderItems: result, 
       pi_username: user?.pi_username || '',  
     };
   } catch (error: any) {

@@ -390,6 +390,14 @@ describe('getOrderItems function', () => {
       },
     ];
 
+    // Expected result after transforming seller_item_id → seller_item
+    const expectedOrderItems = [
+      {
+        ...mockOrderItems[0],
+        seller_item: mockOrderItems[0].seller_item_id,
+      },
+    ];
+
     // Mock Order.findById and nested attributes
     (Order.findById as jest.Mock).mockReturnValueOnce({
       populate: jest.fn().mockReturnThis(),
@@ -402,7 +410,7 @@ describe('getOrderItems function', () => {
     // Mock OrderItem.find
     (OrderItem.find as jest.Mock).mockReturnValueOnce({
       populate: jest.fn().mockReturnValueOnce({
-        exec: jest.fn().mockResolvedValue(mockOrderItems),
+        lean: jest.fn().mockResolvedValue(mockOrderItems),
       }),
     } as any);
 
@@ -413,7 +421,7 @@ describe('getOrderItems function', () => {
     expect(OrderItem.find).toHaveBeenCalledWith({ order_id: mockOrderId });
     expect(result).toEqual({
       order: mockOrder,
-      orderItems: mockOrderItems,
+      orderItems: expectedOrderItems,
       pi_username: 'piUID1_TEST',
     });
   });
@@ -430,8 +438,6 @@ describe('getOrderItems function', () => {
   });
 
   it('should throw an error if getting order items fails', async () => {
-    const error = new Error('Mock database error');
-
     (Order.findById as jest.Mock).mockReturnValueOnce({
       populate: jest.fn().mockReturnThis(),
       lean: jest.fn().mockImplementation(() => {
