@@ -339,11 +339,11 @@ describe('orderController', () => {
   });
 
   describe('updateOrderItemStatus function', () => {
-    const mockOrderId = '24f5a0f2a86d1f9f3b7e4e86';
+    const mockOrderItemId = '24f5a0f2a86d1f9f3b7e4e86';
 
     beforeEach(() => {
       req = { 
-        params: { order_id: mockOrderId },
+        params: { orderitem_id: mockOrderItemId },
         body: { orderItemStatus: OrderItemStatusType.Fulfilled }
       };
       res = {
@@ -353,13 +353,13 @@ describe('orderController', () => {
     });
 
     it('should return [200] and updated order item on success', async () => {
-      const mockOrderItem = { order_id: mockOrderId, status: OrderItemStatusType.Fulfilled };
+      const mockOrderItem = { orderitem_id: mockOrderItemId, status: OrderItemStatusType.Fulfilled };
       
       (orderService.updateOrderItemStatus as jest.Mock).mockResolvedValue(mockOrderItem);
       
       await updateOrderItemStatus(req, res);
 
-      expect(orderService.updateOrderItemStatus).toHaveBeenCalledWith(mockOrderId, req.body.orderItemStatus);
+      expect(orderService.updateOrderItemStatus).toHaveBeenCalledWith(mockOrderItemId, req.body.orderItemStatus);
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(mockOrderItem);
     });
@@ -389,7 +389,7 @@ describe('orderController', () => {
   
       await updateOrderItemStatus(req, res);
   
-      expect(orderService.updateOrderItemStatus).toHaveBeenCalledWith(mockOrderId, req.body.orderItemStatus);
+      expect(orderService.updateOrderItemStatus).toHaveBeenCalledWith(mockOrderItemId, req.body.orderItemStatus);
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({ message: 'Order item not found or could not be updated' });
     });
@@ -401,7 +401,7 @@ describe('orderController', () => {
       
       await updateOrderItemStatus(req, res);
   
-      expect(orderService.updateOrderItemStatus).toHaveBeenCalledWith(mockOrderId, req.body.orderItemStatus);
+      expect(orderService.updateOrderItemStatus).toHaveBeenCalledWith(mockOrderItemId, req.body.orderItemStatus);
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({ message: mockError.message });
     });

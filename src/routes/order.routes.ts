@@ -95,7 +95,7 @@ orderRoutes.get("/seller-orders", verifyToken, isSellerFound, orderController.ge
 
 /**
  * @swagger
- * /api/v1/orders/reviews/buyer-orders:
+ * /api/v1/orders/review/buyer-orders:
  *   get:
  *     tags:
  *       - Order
@@ -252,18 +252,18 @@ orderRoutes.put("/update/:order_id", verifyToken, orderController.updateOrderSta
 
 /**
  * @swagger
- * /api/v1/orders/item/{order_id}:
+ * /api/v1/orders/item/{orderitem_id}:
  *   put:
  *     tags:
  *       - Order
  *     summary: Update the order item status of an existing order item *
  *     parameters:
- *       - name: order_id
+ *       - name: orderitem_id
  *         in: path
  *         required: true
  *         schema:
  *           type: string
- *         description: The order ID associated with the order item to update it's status
+ *         description: The order item ID associated with the order item to update it's status
  *     requestBody:
  *       required: true
  *       content:
@@ -291,6 +291,6 @@ orderRoutes.put("/update/:order_id", verifyToken, orderController.updateOrderSta
  *       500:
  *         description: Internal server error
  */
-orderRoutes.put("/item/:order_id", verifyToken, isSellerFound, orderController.updateOrderItemStatus);
+orderRoutes.put("/item/:orderitem_id", verifyToken, isSellerFound, orderController.updateOrderItemStatus);
 
 export default orderRoutes;

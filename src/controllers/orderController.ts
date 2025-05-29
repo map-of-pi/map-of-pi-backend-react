@@ -107,17 +107,17 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
 };
 
 export const updateOrderItemStatus = async (req: Request, res: Response) => {
-  const { order_id } = req.params;
+  const { orderitem_id } = req.params;
   const { orderItemStatus } = req.body;
   try {
-    if (!order_id || !orderItemStatus) {
+    if (!orderitem_id || !orderItemStatus) {
       return res.status(400).json({ message: 'Order item ID and order item status are required' });
     }
     if (!Object.values(OrderItemStatusType).includes(orderItemStatus)) {
       return res.status(400).json({ message: 'Invalid order item status' });
     }
 
-    const updatedOrderItem = await orderService.updateOrderItemStatus(order_id, orderItemStatus);
+    const updatedOrderItem = await orderService.updateOrderItemStatus(orderitem_id, orderItemStatus);
     if (!updatedOrderItem) {
       return res.status(404).json({ message: "Order item not found or could not be updated" });
     }
