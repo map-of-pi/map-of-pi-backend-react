@@ -98,7 +98,7 @@ const checkoutProcess = async (
   const orderData = buildOrderData(
     buyer._id as string,
     seller._id as string,
-    newPayment.pi_payment_id,
+    newPayment._id as string,
     currentPayment
   )
   // Create a new order along with its items
