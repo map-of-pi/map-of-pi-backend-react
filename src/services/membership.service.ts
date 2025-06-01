@@ -4,6 +4,7 @@ import { MembershipClassType } from "../models/enums/membershipClassType";
 import { TransactionType } from "../models/enums/transactionType";
 import { createTransactionRecord } from "./transaction.service";
 import logger from "../config/loggingConfig";
+import { isTierDowngrade } from "../utils/membershipUtils";
 
 export async function updateMembershipAfterPayment(
   authUser: IUser,
@@ -67,13 +68,21 @@ export const addOrUpdateMembership = async (
     const existingMembership = await Membership.findOne({ membership_id: authUser.pi_uid }).session(session).exec();
 
     if (existingMembership) {
-      const baseDate = existingMembership.membership_expiry_date
-        ? new Date(Math.max(existingMembership.membership_expiry_date.getTime(), today.getTime()))
-        : today;
+      let newExpirationDate: Date;
+      let newMappiBalance: number;
 
-      const newExpirationDate = new Date(baseDate.getTime() + durationInMs);
-      const newMappiBalance = existingMembership.mappi_balance + mappi_allowance;
-
+      if (isTierDowngrade(existingMembership.membership_class, membership_class)) {
+        // Downgrade: reset everything
+        newExpirationDate = new Date(today.getTime() + durationInMs);
+        newMappiBalance = mappi_allowance;
+      } else {
+        // Renewal or upgrade
+        const baseDate = existingMembership.membership_expiry_date
+          ? new Date(Math.max(existingMembership.membership_expiry_date.getTime(), today.getTime()))
+          : today;
+        newExpirationDate = new Date(baseDate.getTime() + durationInMs);
+        newMappiBalance = existingMembership.mappi_balance + mappi_allowance;
+      }
       existingMembership.membership_class = membership_class;
       existingMembership.membership_expiry_date = newExpirationDate;
       existingMembership.mappi_balance = newMappiBalance;
