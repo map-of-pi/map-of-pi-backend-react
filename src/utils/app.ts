@@ -18,7 +18,11 @@ import mapCenterRoutes from "../routes/mapCenter.routes";
 import transactionRoutes from "../routes/transactionRecord.routes";
 import reportRoutes from "../routes/report.routes";
 import toggleRoutes from "../routes/toggle.routes";
+
 import paymentRoutes from "../routes/payment.routes";
+
+import restrictionRoutes from "../routes/restriction.routes";
+
 
 dotenv.config();
 
@@ -36,9 +40,6 @@ app.use(cookieParser());
 
 // serve static files for Swagger documentation
 app.use('/api/docs', express.static(path.join(__dirname, '../config/docs')));
-app.use('/api/docs/enum', express.static(path.join(__dirname, '../config/docs/enum')));
-// Serve Swagger UI static files
-app.use('/api/docs/swagger-ui', express.static(path.join(__dirname, '../node_modules/swagger-ui-dist')));
 
 // Swagger OpenAPI documentation
 app.use("/api/docs", docRouter);
@@ -53,7 +54,11 @@ app.use("/api/v1/memberships", membershipRoutes);
 app.use("/api/v1/transactions", transactionRoutes);
 app.use("/api/v1/reports", reportRoutes);
 app.use("/api/v1/toggles", toggleRoutes);
+
 app.use("/api/v1/payments", paymentRoutes);
+
+app.use("/api/v1/restrictions", restrictionRoutes);
+
 
 app.use("/", homeRoutes);
 

@@ -1,5 +1,5 @@
 import {Router} from "express";
-import * as reportController from "../controllers/reportsController";
+import * as reportController from "../controllers/admin/reportsController";
 import { verifyAdminToken } from "../middlewares/verifyToken";
 
 const reportRoutes = Router();
@@ -10,7 +10,7 @@ const reportRoutes = Router();
  *   post:
  *     tags:
  *       - Report
- *     summary: Gather and build a report for sellers in sanctioned regions.
+ *     summary: Gather and build a report for sellers in sanctioned regions *
  *     security:
  *       - AdminPasswordAuth: []
  *     responses:

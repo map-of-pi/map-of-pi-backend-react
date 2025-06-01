@@ -1,22 +1,23 @@
-import Seller from '../../src/models/Seller';
-import { reverseLocationDetails } from '../../src/helpers/location';
-import { RestrictedAreaBoundaries } from '../../src/models/enums/restrictedArea';
-import { reportSanctionedSellers } from '../../src/services/report.service';
+import Seller from '../../../src/models/Seller';
+import { reverseLocationDetails } from '../../../src/helpers/location';
+import { RestrictedAreaBoundaries } from '../../../src/models/enums/restrictedArea';
+import { reportSanctionedSellers } from '../../../src/services/admin/report.service';
 
-jest.mock('../../src/helpers/location', () => ({
+jest.mock('../../../src/helpers/location', () => ({
   reverseLocationDetails: jest.fn()
 }));
 
 describe('reportSanctionedSellers function', () => {
   it('should build sanctioned sellers report for affected sellers', async () => {
-    ( reverseLocationDetails as jest.Mock)
+    (reverseLocationDetails as jest.Mock)
       .mockResolvedValueOnce({ data: { display_name: 'Cuba' } })
       .mockResolvedValueOnce({ data: { display_name: 'Iran' } })
       .mockResolvedValueOnce({ data: { display_name: 'North Korea' } })
       .mockResolvedValueOnce({ data: { display_name: 'Syria' } })
       .mockResolvedValueOnce({ data: { display_name: 'Republic of Crimea' } })
       .mockResolvedValueOnce({ data: { display_name: 'Donetsk Oblast' } })
-      .mockResolvedValueOnce({ data: { display_name: 'Luhansk Oblast' } });
+      .mockResolvedValueOnce({ data: { display_name: 'Luhansk Oblast' } })
+      .mockResolvedValue({ data: { display_name: 'Russia' } });
 
     const sanctionedSellers = await reportSanctionedSellers();
 

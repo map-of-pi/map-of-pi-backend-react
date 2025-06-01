@@ -120,7 +120,7 @@ describe('membershipController', () => {
         mappi_allowance: 100
       };
       
-      const mockError = new Error('An error occurred while getting single membership; please try again later');
+      const mockError = new Error('An error occurred while managing membership; please try again later');
       
       (membershipService.addOrUpdateMembership as jest.Mock).mockRejectedValue(mockError);
       
