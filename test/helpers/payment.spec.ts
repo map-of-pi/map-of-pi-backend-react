@@ -261,7 +261,7 @@ describe('processPaymentApproval function', () => {
   } as IUser;
 
   const mockPayment = {
-    pi_payment_id: mockPiPaymentId,
+    _id: mockPiPaymentId,
     txid: mockTxid,
     paid: false,
     user_id: 'userId1_TEST',
@@ -317,7 +317,7 @@ describe('processPaymentApproval function', () => {
     expect(createOrder).toHaveBeenCalledWith({
       buyerId: mockBuyer._id,
       sellerId: mockSeller._id,
-      paymentId: mockPiPaymentId,
+      paymentId: mockPayment._id,
       totalAmount: mockPayment.amount,
       status: OrderStatusType.Initialized,
       fulfillmentMethod: currentPayment.metadata.OrderPayment?.fulfillment_method,
