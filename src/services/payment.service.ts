@@ -1,3 +1,4 @@
+import axios from "axios";
 import pi from "../config/platformAPIclient";
 import Payment from "../models/Payment";
 import PaymentCrossReference from "../models/PaymentCrossReference";
@@ -186,8 +187,19 @@ export const createA2UPayment = async (a2uPaymentData: A2UPaymentDataType): Prom
     logger.info(`A2U payment process completed successfully for Order ID ${ a2uPaymentData.orderId }`);
     return updatedPayment;
 
-  } catch (error) {
-    logger.error(`Failed to create A2U payment for Order ID ${ a2uPaymentData.orderId }:`, error);
+  } catch (error: any) {
+    if (axios.isAxiosError(error)) {
+      logger.error(`Axios error during A2U payment: ${error.message}`, {
+        status: error.response?.status,
+        data: error.response?.data,
+        config: error.config,
+      });
+    } else {
+      logger.error(`Failed to create A2U payment for Order ID ${a2uPaymentData.orderId}:`, {
+        message: error.message,
+        stack: error.stack,
+      });
+    }
     return null;
   }
 };

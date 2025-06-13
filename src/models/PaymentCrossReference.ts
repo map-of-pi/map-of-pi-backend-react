@@ -44,6 +44,6 @@ const paymentCrossReferenceSchema = new Schema<IPaymentCrossReference>(
   }, {timestamps: true} // Adds timestamps to track creation and update times
 );
 
-const PaymentCrossReference = mongoose.model<IPaymentCrossReference>("PaymentCrossReference", paymentCrossReferenceSchema);
+const PaymentCrossReference = mongoose.model<IPaymentCrossReference>("PaymentXRef", paymentCrossReferenceSchema);
 
 export default PaymentCrossReference;
