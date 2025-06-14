@@ -18,7 +18,6 @@ const paymentSchema = new Schema<IPayment>(
     txid: {
       type: String,
       required: false,
-      unique: true,
       default: null
     },
     amount: {
@@ -49,6 +48,12 @@ const paymentSchema = new Schema<IPayment>(
     }
   }, { timestamps: true } // Adds timestamps to track creation and update times
 );
+
+// Creating a partial index to enforce uniqueness if txid is a string 
+paymentSchema.index({ txid: 1 }, {
+  unique: true,
+  partialFilterExpression: { txid: { $type: "string" } }
+});
 
 // Creating the Payment model from the schema
 const Payment = mongoose.model<IPayment>("Payment", paymentSchema);

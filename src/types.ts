@@ -184,7 +184,7 @@ export interface IPayment extends Document {
   paid: boolean;
   memo: string;
   pi_payment_id: string;
-  txid: string | null;
+  txid?: string;
   payment_type: PaymentType;
   cancelled: boolean;
   createdAt: Date;
