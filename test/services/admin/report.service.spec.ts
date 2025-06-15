@@ -1,9 +1,9 @@
-import Seller from '../../src/models/Seller';
-import { reverseLocationDetails } from '../../src/helpers/location';
-import { RestrictedAreaBoundaries } from '../../src/models/enums/restrictedArea';
-import { reportSanctionedSellers } from '../../src/services/report.service';
+import Seller from '../../../src/models/Seller';
+import { reverseLocationDetails } from '../../../src/helpers/location';
+import { RestrictedAreaBoundaries } from '../../../src/models/enums/restrictedArea';
+import { reportSanctionedSellers } from '../../../src/services/admin/report.service';
 
-jest.mock('../../src/helpers/location', () => ({
+jest.mock('../../../src/helpers/location', () => ({
   reverseLocationDetails: jest.fn()
 }));
 

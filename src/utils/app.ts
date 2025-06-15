@@ -12,11 +12,14 @@ import homeRoutes from "../routes/home.routes";
 import userRoutes from "../routes/user.routes";
 import userPreferencesRoutes from "../routes/userPreferences.routes";
 import sellerRoutes from "../routes/seller.routes";
+import orderRoutes from "../routes/order.routes";
+import paymentsRouter from "../routes/payment.routes";
 import reviewFeedbackRoutes from "../routes/reviewFeedback.routes";
 import mapCenterRoutes from "../routes/mapCenter.routes";
 import reportRoutes from "../routes/report.routes";
-import toggleRoutes from "../routes/notification.routes";
 import notificationRoutes from "../routes/notification.routes";
+import restrictionRoutes from "../routes/restriction.routes";
+import toggleRoutes from "../routes/notification.routes";
 
 dotenv.config();
 
@@ -42,11 +45,14 @@ app.use("/api/v1", appRouter);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/user-preferences", userPreferencesRoutes);
 app.use("/api/v1/sellers", sellerRoutes);
+app.use("/api/v1/orders", orderRoutes);
+app.use('/api/v1/payments', paymentsRouter);
 app.use("/api/v1/review-feedback", reviewFeedbackRoutes);
 app.use("/api/v1/map-center", mapCenterRoutes);
 app.use("/api/v1/reports", reportRoutes);
-app.use("/api/v1/toggles", toggleRoutes);
 app.use("/api/v1/notification", notificationRoutes);
+app.use("/api/v1/restrictions", restrictionRoutes);
+app.use("/api/v1/toggles", toggleRoutes);
 
 app.use("/", homeRoutes);
 
