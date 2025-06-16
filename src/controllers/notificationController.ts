@@ -1,23 +1,22 @@
 import { Request, Response } from "express";
-import Notification from "../models/Notification";
+import * as notificationService from '../services/notification.service';
+import logger from "../config/loggingConfig";
 
-export const sendNotification = async (req: Request, res: Response) => {
-  const { reason } = req.body;
+export const createNotification = async (req: Request, res: Response) => {
   const authUser = req.currentUser;
 
+  // Check if authUser is defined
+  if (!authUser) {
+    logger.warn('No authenticated user found when trying to create notification.');
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  const { reason } = req.body;
   try {
-    const notification = await Notification.create({
-      pi_uid: authUser?.pi_uid,
-      reason,
-      is_cleared: false,
-    });
-
-    console.log("Notification sent:", notification);
-
-    res.status(200).json({ message: "Notification sent successfully" });
+    const notification = await notificationService.addNotification(authUser?.pi_uid, reason);
+    return res.status(200).json({ message: "Notification created successfully", notification });
   } catch (error) {
-    console.error("Error sending notification:", error);
-    res.status(500).json({ message: "Failed to send notification" });
+    logger.error('Failed to create notification', error);
+    return res.status(500).json({ message: 'An error occurred while creating notification; please try again later' });
   }
 };
 
@@ -25,34 +24,25 @@ export const getNotifications = async (req: Request, res: Response) => {
   const { pi_uid } = req.params;
   const { skip, limit } = req.query;
   try {
-    const notifications = await Notification.find({ pi_uid }).sort({createdAt: -1}).skip(Number(skip)).limit(Number(limit)).exec();
-    if (!notifications) {
-      return res.status(200).json([]);
-    }
-
-    res.status(200).json(notifications);
+    const notifications = await notificationService.getNotifications(pi_uid, Number(skip), Number(limit));
+    return res.status(200).json(notifications);
   } catch (error) {
-    console.error("Error fetching notifications:", error);
-    res.status(500).json({ message: "Failed to fetch notifications" });
+    logger.error('Failed to get notifications', error);
+    return res.status(500).json({ message: 'An error occurred while getting notification; please try again later' });
   }
 };
 
-export const updateNotifications = async (req: Request, res: Response) => {
+export const updateNotification = async (req: Request, res: Response) => {
   const { id } = req.params;
-  // const { is_cleared } = req.body;
-
   try {
-    const notification = await Notification.findByIdAndUpdate({
-      _id: id,
-    }, { is_cleared: true }, { new: true }).exec();
-    
-    if (!notification) {
+    const updatedNotification = await notificationService.updateNotification(id);
+    if (!updatedNotification) {
       return res.status(404).json({ message: "Notification not found" });
     }
-    console.log("Notification updated:", notification);
-    res.status(200).json({ message: "Notification updated successfully" });
+    logger.info("Notification updated:", updatedNotification);
+    return res.status(200).json({ message: "Notification updated successfully", updatedNotification });
   } catch (error) {
-    console.error("Error updating notification:", error);
-    res.status(500).json({ message: "Failed to update notification" });
+    logger.error('Failed to update notification', error);
+    return res.status(500).json({ message: 'An error occurred while updating notification; please try again later' });
   }
 };
