@@ -217,7 +217,8 @@ export interface A2UPaymentDataType {
   amount: string,
   buyerId: string,
   paymentType: PaymentType,
-  orderId: string
+  orderId: string,
+  memo: string
 };
 
 export type PaymentDataType = {

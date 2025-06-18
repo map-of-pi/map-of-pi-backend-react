@@ -9,7 +9,7 @@ import {
   getPayment, 
   createPayment, 
   completePayment, 
-  createOrUpdatePaymentCrossReference,
+  createPaymentCrossReference,
   createA2UPayment,
   cancelPayment
 } from '../services/payment.service';
@@ -233,16 +233,19 @@ export const processPaymentCompletion = async (paymentId: string, txid: string) 
         u2uStatus: U2UPaymentStatus.U2ACompleted,
         a2uPaymentId: null,
       };
-      await createOrUpdatePaymentCrossReference(order._id as string, u2uRefData);
+      await createPaymentCrossReference(order._id as string, u2uRefData);
       logger.info("U2U cross-reference saved", u2uRefData);
 
       // Notify Pi Platform of successful completion
-      await platformAPIClient.post(`/v2/payments/${ paymentId }/complete`, { txid });
-
-      // Ensure order amount is available before creating seller payout
-      if (!order.total_amount) {
-        throw new Error("Order total_amount is undefined");
+      const completedPiPayment = await platformAPIClient.post(`/v2/payments/${ paymentId }/complete`, { txid });
+      
+      if (completedPiPayment.status!==200) {
+        throw new Error("failed to mark U2A payment completed on Pi blockchain");
       }
+
+      logger.info("Payment marked completed on Pi blockchain", completedPiPayment.status);
+
+      const payentMemo = completedPiPayment.data.memo as string
 
       // Start A2U (App-to-User) payment to the seller
       await createA2UPayment({
@@ -250,7 +253,8 @@ export const processPaymentCompletion = async (paymentId: string, txid: string) 
         amount: order.total_amount.toString(),
         buyerId: order.buyer_id.toString(),
         paymentType: PaymentType.BuyerCheckout,
-        orderId: order._id as string
+        orderId: order._id as string,
+        memo: payentMemo
       });
 
     } else if (completedPayment?.payment_type === PaymentType.Membership) {
