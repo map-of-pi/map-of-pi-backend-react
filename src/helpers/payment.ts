@@ -20,6 +20,7 @@ import {
 } from '../services/order.service';
 import { IUser, NewOrder, PaymentDataType, PaymentInfo } from '../types';
 import logger from '../config/loggingConfig';
+import { onIncompletePaymentFound } from '../controllers/paymentController';
 
 function buildPaymentData(
   piPaymentId: string,
@@ -174,13 +175,34 @@ export const processPaymentApproval = async (
     const currentPayment: PaymentDataType = res.data;
 
     // Check if a payment record with this ID already exists in the database
-    const oldPayment = await getPayment(paymentId);
+    const oldPayment = await getPayment(res.data.identifier);
     if (oldPayment) {
       logger.info("Payment record already exists: ", oldPayment._id);
-      return {
-        success: false,
-        message: `Payment with ID ${paymentId} already exists`,
-      };
+
+      // handle existing payment
+      const transaction = res.data.transaction;
+      if (transaction) {        
+        const PaymentData = {
+          identifier: res.data.identifier,
+          transaction: {
+            txid: transaction.txid,
+            _link: transaction._link,
+          }
+        };
+        await processIncompletePayment(res.data.identifier);
+        return {
+          success: false,
+          message: `Payment with ID ${paymentId} already exists with transaction data found and handled`,
+        };
+
+      } else {
+        logger.warn("Cancel payment if no transaction data found for existing payment");
+        await processPaymentCancellation(paymentId);
+        return {
+          success: false,
+          message: `Payment with ID ${paymentId} already exists with no transaction data found and cancelled`,
+        };
+      }
     }
 
     // Handle logic based on the payment type
