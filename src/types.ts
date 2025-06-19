@@ -284,3 +284,16 @@ export interface IToggle extends Document {
 	createdAt: Date;
 	updatedAt: Date;
 };
+
+// ========================
+// Memberships
+// ========================
+export interface IMembership extends Document {
+  user_id: Types.ObjectId;
+  pi_uid: string;
+  membership_class: MembershipType;
+  mappi_balance: number;
+  membership_expiration: Date | null;
+  mappi_used_to_date: number;
+}
+
