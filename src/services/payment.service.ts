@@ -1,5 +1,5 @@
 import axios from "axios";
-import pi from "../config/platformAPIclient";
+import { piNetwork as pi }  from "../config/platformAPIclient";
 import Payment from "../models/Payment";
 import PaymentCrossReference from "../models/PaymentCrossReference";
 import Seller from "../models/Seller";
