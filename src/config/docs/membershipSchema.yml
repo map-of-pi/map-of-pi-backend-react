@@ -1,0 +1,68 @@
+components:
+  schemas:
+    GetSingleMembershipRs:
+      type: object
+      properties:
+        pi_uid:
+          type: string
+          description: The Pi Network user ID (used as membership identifier)
+          example: pi_f392cb3b73913bcb2d1e5b69
+        membership_class:
+          $ref: '/api/docs/enum/MembershipClassType.yml#/components/schemas/MembershipClassType'
+        membership_expiration:
+          type: string
+          format: date-time
+          example: 2024-12-21T00:00:00.000Z
+        mappi_balance:
+          type: number
+          example: 100
+        mappi_used_to_date:
+          type: number
+          example: 25
+        _id:
+          type: string
+          example: 66741c62b175e7d059a2639e
+        __v:
+          type: number
+          example: 0
+
+    ManageMembershipRq:
+      type: object
+      properties:
+        membership_class:
+          $ref: '/api/docs/enum/MembershipClassType.yml#/components/schemas/MembershipClassType'
+        membership_duration:
+          type: number 
+          example: 4
+        mappi_allowance:
+          type: number
+          example: 100
+      required:
+        - membership_class
+        - membership_duration
+        - mappi_allowance
+
+    ManageMembershipRs:
+      type: object
+      properties:
+        pi_uid:
+          type: string
+          example: pi_f392cb3b73913bcb2d1e5b69
+        membership_class:
+          $ref: '/api/docs/enum/MembershipClassType.yml#/components/schemas/MembershipClassType'
+        membership_expiration:
+          type: string
+          format: date-time
+          example: 2024-12-21T00:00:00.000Z
+        mappi_balance:
+          type: number
+          example: 200
+        mappi_used_to_date:
+          type: number
+          example: 0
+        _id:
+          type: string
+          example: 66741c62b175e7d059a2639e
+        __v:
+          type: number
+          example: 0
