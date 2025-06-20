@@ -1,8 +1,8 @@
 import { IMembership, IUser } from "../types";
 import Membership from "../models/membership";
 import { MembershipClassType } from "../models/enums/membershipClassType";
-import { TransactionType } from "../models/enums/transactionType";
-import { createTransactionRecord } from "./transaction.service";
+// import { TransactionType } from "../models/enums/transactionType";
+// import { createTransactionRecord } from "./transaction.service";
 import logger from "../config/loggingConfig";
 
 // Fetch a single membership by ID
@@ -58,12 +58,12 @@ export const addOrUpdateMembership = async (
 
       const updatedMembership = await existingMembership.save({ session });
 
-      await createTransactionRecord(
-        authUser.pi_uid,
-        TransactionType.MAPPI_DEPOSIT,
-        mappi_allowance,
-        `Mappi credited for updated Membership to ${membership_class}`
-      );
+      // await createTransactionRecord(
+      //   authUser.pi_uid,
+      //   TransactionType.MAPPI_DEPOSIT,
+      //   mappi_allowance,
+      //   `Mappi credited for updated Membership to ${membership_class}`
+      // );
 
       await session.commitTransaction();
       session.endSession();
@@ -82,12 +82,12 @@ export const addOrUpdateMembership = async (
 
       const savedMembership = await newMembership.save({ session });
 
-      await createTransactionRecord(
-        authUser.pi_uid,
-        TransactionType.MAPPI_DEPOSIT,
-        mappi_allowance,
-        `Membership initiated to ${membership_class}`
-      );
+      // await createTransactionRecord(
+      //   authUser.pi_uid,
+      //   TransactionType.MAPPI_DEPOSIT,
+      //   mappi_allowance,
+      //   `Membership initiated to ${membership_class}`
+      // );
 
       await session.commitTransaction();
       session.endSession();
@@ -104,7 +104,7 @@ export const addOrUpdateMembership = async (
 // Update Mappi Balance associated with the membership
 export const updateMappiBalance = async (
   membership_id: string,
-  transaction_type: TransactionType,
+  // transaction_type: TransactionType,
   amount: number
 ): Promise<IMembership> => {
   try {
@@ -113,11 +113,11 @@ export const updateMappiBalance = async (
       throw new Error(`Membership not found for membership ID: ${membership_id}`);
     }
 
-    const adjustment =
-      transaction_type === TransactionType.MAPPI_DEPOSIT ? amount :
-      transaction_type === TransactionType.MAPPI_WITHDRAWAL ? -amount : 0;
+    // const adjustment =
+    //   transaction_type === TransactionType.MAPPI_DEPOSIT ? amount :
+    //   transaction_type === TransactionType.MAPPI_WITHDRAWAL ? -amount : 0;
 
-    membership.mappi_balance += adjustment;
+    // membership.mappi_balance += adjustment;
 
     const updatedMembership = await membership.save();
 
