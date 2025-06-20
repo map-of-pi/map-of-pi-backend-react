@@ -9,7 +9,7 @@ import {
   getPayment, 
   createPayment, 
   completePayment, 
-  createOrUpdatePaymentCrossReference,
+  createPaymentCrossReference,
   createA2UPayment,
   cancelPayment
 } from '../services/payment.service';
@@ -18,8 +18,9 @@ import {
   createOrder, 
   updatePaidOrder 
 } from '../services/order.service';
-import { IUser, NewOrder, PaymentDataType, PaymentInfo } from '../types';
+import { IUser, NewOrder, PaymentDataType, PaymentDTO, PaymentInfo } from '../types';
 import logger from '../config/loggingConfig';
+import { onIncompletePaymentFound } from '../controllers/paymentController';
 
 function buildPaymentData(
   piPaymentId: string,
@@ -113,7 +114,7 @@ export const processIncompletePayment = async (payment: PaymentInfo) => {
     const paymentId = payment.identifier;
     const txid = payment.transaction?.txid;
     const txURL = payment.transaction?._link;
-    logger.info("Incomplete payment data: ", payment);
+    // logger.info("Incomplete payment data: ", payment);
 
     // Retrieve the original (incomplete) payment record by its identifier
     const incompletePayment = await getPayment(paymentId);
@@ -174,12 +175,13 @@ export const processPaymentApproval = async (
     const currentPayment: PaymentDataType = res.data;
 
     // Check if a payment record with this ID already exists in the database
-    const oldPayment = await getPayment(paymentId);
+    const oldPayment = await getPayment(res.data.identifier);
     if (oldPayment) {
       logger.info("Payment record already exists: ", oldPayment._id);
+
       return {
         success: false,
-        message: `Payment with ID ${paymentId} already exists`,
+        message: `Payment already exists with id ${ paymentId }`,
       };
     }
 
@@ -221,7 +223,6 @@ export const processPaymentCompletion = async (paymentId: string, txid: string) 
     // Mark the payment as completed
     const completedPayment = await completePayment(paymentId, txid);
     logger.info("Payment record marked as completed");
-
     if (completedPayment?.payment_type === PaymentType.BuyerCheckout) {
       // Update the associated order's status to paid
       const order = await updatePaidOrder(completedPayment._id as string);
@@ -233,16 +234,19 @@ export const processPaymentCompletion = async (paymentId: string, txid: string) 
         u2uStatus: U2UPaymentStatus.U2ACompleted,
         a2uPaymentId: null,
       };
-      await createOrUpdatePaymentCrossReference(order._id as string, u2uRefData);
-      logger.info("U2U cross-reference saved", u2uRefData);
+      await createPaymentCrossReference(order._id as string, u2uRefData);
+      logger.info("U2U cross-reference created", u2uRefData);
 
       // Notify Pi Platform of successful completion
-      await platformAPIClient.post(`/v2/payments/${ paymentId }/complete`, { txid });
-
-      // Ensure order amount is available before creating seller payout
-      if (!order.total_amount) {
-        throw new Error("Order total_amount is undefined");
+      const completedPiPayment = await platformAPIClient.post(`/v2/payments/${ paymentId }/complete`, { txid });
+      
+      if (completedPiPayment.status!==200) {
+        throw new Error("failed to mark U2A payment completed on Pi blockchain");
       }
+
+      logger.info("Payment marked completed on Pi blockchain", completedPiPayment.status);
+
+      const payentMemo = completedPiPayment.data.memo as string
 
       // Start A2U (App-to-User) payment to the seller
       await createA2UPayment({
@@ -250,7 +254,8 @@ export const processPaymentCompletion = async (paymentId: string, txid: string) 
         amount: order.total_amount.toString(),
         buyerId: order.buyer_id.toString(),
         paymentType: PaymentType.BuyerCheckout,
-        orderId: order._id as string
+        orderId: order._id as string,
+        memo: payentMemo
       });
 
     } else if (completedPayment?.payment_type === PaymentType.Membership) {
@@ -318,3 +323,46 @@ export const processPaymentCancellation = async (paymentId: string) => {
     throw(error);
   }
 };
+
+export const processPaymentError = async (paymentDTO: PaymentDTO) => {
+  try {
+    // handle existing payment
+    const transaction = paymentDTO.transaction;
+    const paymentId = paymentDTO.identifier;
+
+    if (transaction) {        
+      const PaymentData = {
+        identifier: paymentId,
+        transaction: {
+          txid: transaction.txid,
+          _link: transaction._link,
+        }
+      };
+      await processIncompletePayment(PaymentData);
+      return {
+        success: true,
+        message: `Payment Error with ID ${paymentId} handled and completed successfully`,
+      };
+
+    } else {
+      logger.warn("No transaction data found for existing payment");
+      await processPaymentCancellation(paymentId);
+      return {
+        success: false,
+        message: `Payment Error with ID ${paymentId} cancelled successfully`,
+      };
+    }
+  } catch (error: any) {
+    if (error.response) {
+      logger.error("platformAPIClient error", {
+        url: error.config?.url,
+        method: error.config?.method,
+        status: error.response.status,
+        data: error.response.data,
+      });
+    } else {
+      logger.error("Unhandled error during handling payment error", { message: error.message, stack: error.stack });
+    }
+    throw(error);
+  }
+}
