@@ -10,6 +10,7 @@ import {
   NewPayment, 
   U2URefDataType,
   A2UPaymentDataType,
+  PaymentDTO,
 } from "../types";
 import logger from "../config/loggingConfig";
 
@@ -127,7 +128,7 @@ export const createA2UPayment = async (a2uPaymentData: A2UPaymentDataType): Prom
     const a2uData = {
       amount: newAmount,
       memo: a2uPaymentData.memo,
-      metadata: { direction: "A2U" },
+      metadata: { direction: "A2U", orderId: a2uPaymentData.orderId, sellerId: a2uPaymentData.sellerId, buyerId: a2uPaymentData.buyerId },
       uid: existingSeller?.seller_id as string,
     };
 
@@ -143,7 +144,7 @@ export const createA2UPayment = async (a2uPaymentData: A2UPaymentDataType): Prom
       piPaymentId: paymentId,
       userId: a2uPaymentData.buyerId as string,
       amount: newAmount.toString(),
-      memo: "A2U payment",
+      memo: a2uPaymentData.memo,
       paymentType: a2uPaymentData.paymentType
     });
     logger.info('New A2U payment record created');
@@ -204,9 +205,98 @@ export const createA2UPayment = async (a2uPaymentData: A2UPaymentDataType): Prom
         stack: error.stack,
       });
     }
+
+    // Handle cancellation of the payment if it was created but not completed
+    const {incomplete_server_payments} = await getIncompleteServerPayments();
+    logger.info("found incomplete server payments", incomplete_server_payments);
+    if (incomplete_server_payments && incomplete_server_payments.length > 0) {
+      await completeServerPayment(incomplete_server_payments);
+    }
     return null;
   }
 };
+
+export const getIncompleteServerPayments = async (): Promise<any> => {
+  try {
+    const serverpayments = await pi.getIncompleteServerPayments();
+    if (!serverpayments || serverpayments.length === 0) { 
+      logger.info('No incomplete Pi payments found on the server');
+      return [];
+    }
+    logger.info(`Found ${ serverpayments.length } incomplete Pi payments on the server`, serverpayments);
+    return serverpayments;
+  } catch (error: any) {
+    logger.error(`Failed to fetch incomplete Pi payments from server: ${ error.message }`);
+    throw error;
+  }
+};
+
+export const completeServerPayment = async (serverPayments: PaymentDTO[]): Promise<void> => {
+  if (!Array.isArray(serverPayments) || serverPayments.length === 0) {
+    logger.warn('No server payments to complete');
+    return;
+  }
+
+  for (const payment of serverPayments) {
+    let transaction = payment.transaction || null;
+    const piPaymentId = payment.identifier;
+    const metadata = payment.metadata as { orderId: string; sellerId: string; buyerId: string };
+
+    if (!piPaymentId) {
+      logger.error('Missing Pi payment ID');
+      continue;
+    }
+
+    try {
+      let txid = transaction?.txid;
+
+      // Submit payment if txid not yet assigned
+      if (!txid) {
+        txid = await pi.submitPayment(piPaymentId);
+        if (!txid) {
+          throw new Error(`Failed to submit Pi payment with ID ${piPaymentId}`);
+        }
+      }
+
+      // Mark the payment as completed in your DB
+      const updatedPayment = await completePayment(piPaymentId, txid);
+      if (!updatedPayment) {
+        throw new Error(`Failed to update payment DB for payment ID ${piPaymentId}`);
+      }
+      logger.info(`Marked A2U payment as completed for ${piPaymentId}`);
+
+      // Update U2U payment cross reference
+      const u2uRef = await updatePaymentCrossReference(metadata?.orderId, {
+        u2uStatus: U2UPaymentStatus.A2UCompleted,
+        a2uPaymentId: updatedPayment._id as string,
+      });
+
+      if (!u2uRef) {
+        throw new Error(`Failed to update payment cross reference for order ${metadata.orderId}`);
+      }
+
+      logger.info('Updated U2U reference record', u2uRef);
+
+      // Final confirmation with Pi network
+      const completedPiPayment = await pi.completePayment(piPaymentId, txid);
+      if (!completedPiPayment) {
+        throw new Error(`Failed to confirm Pi payment on blockchain for ${piPaymentId}`);
+      }
+
+      logger.info(`✅ A2U payment process completed for Order ID: ${metadata.orderId}`);
+    } catch (error: any) {
+      if (axios.isAxiosError(error)) {
+        logger.error(`Axios error during A2U payment for order ${metadata.orderId || 'unknown'}: ${error.message}`, {
+          status: error.response?.status,
+          data: error.response?.data,
+        });
+      } else {
+        logger.error(`❌ Error completing server payment for Order ID ${metadata.orderId || 'unknown'}: ${error.message}`);
+      }
+    }
+  }
+};
+
 
 export const getPayment = async (piPaymentId: string): Promise<IPayment | null> => {
   try {
