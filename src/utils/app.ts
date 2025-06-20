@@ -19,6 +19,8 @@ import mapCenterRoutes from "../routes/mapCenter.routes";
 import reportRoutes from "../routes/report.routes";
 import restrictionRoutes from "../routes/restriction.routes";
 import toggleRoutes from "../routes/toggle.routes";
+import membershipRoutes from "../routes/membership.routes";
+
 
 dotenv.config();
 
@@ -51,6 +53,7 @@ app.use("/api/v1/map-center", mapCenterRoutes);
 app.use("/api/v1/reports", reportRoutes);
 app.use("/api/v1/toggles", toggleRoutes);
 app.use("/api/v1/restrictions", restrictionRoutes);
+app.use("/api/v1/memberships", membershipRoutes);
 
 app.use("/", homeRoutes);
 
