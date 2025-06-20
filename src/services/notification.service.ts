@@ -12,7 +12,7 @@ export const addNotification = async (pi_uid: string, reason: string): Promise<I
   }
 };
 
-export const getNotifications = async (pi_uid: string, skip = 0, limit = 20): Promise<INotification[]> => {
+export const getNotifications = async (pi_uid: string, skip: number, limit: number): Promise<INotification[]> => {
   try {
     const notifications = await Notification.find({ pi_uid })
       .sort({ createdAt: -1 })
@@ -27,17 +27,17 @@ export const getNotifications = async (pi_uid: string, skip = 0, limit = 20): Pr
   }
 };
 
-export const updateNotification = async (id: string): Promise<INotification | null> => {
+export const clearNotification = async (id: string): Promise<INotification | null> => {
   try {
-    const updatedNotification = await Notification.findByIdAndUpdate(
+    const clearedNotification = await Notification.findByIdAndUpdate(
       { _id: id },
       { is_cleared: true },
       { new: true }
     ).exec();
 
-    return updatedNotification as INotification | null;
+    return clearedNotification as INotification | null;
   } catch (error: any) {
-    logger.error(`Failed to update notification for ID ${ id }: ${error.message}`);
+    logger.error(`Failed to clear notification for ID ${ id }: ${error.message}`);
     throw error;
   }
 };
