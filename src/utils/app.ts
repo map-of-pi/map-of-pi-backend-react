@@ -50,7 +50,7 @@ app.use('/api/v1/payments', paymentsRouter);
 app.use("/api/v1/review-feedback", reviewFeedbackRoutes);
 app.use("/api/v1/map-center", mapCenterRoutes);
 app.use("/api/v1/reports", reportRoutes);
-app.use("/api/v1/notification", notificationRoutes);
+app.use("/api/v1/notifications", notificationRoutes);
 app.use("/api/v1/restrictions", restrictionRoutes);
 app.use("/api/v1/toggles", toggleRoutes);
 

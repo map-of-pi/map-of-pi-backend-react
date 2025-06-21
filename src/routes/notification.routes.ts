@@ -21,8 +21,117 @@ import { verifyToken } from "../middlewares/verifyToken";
  */
 const notificationRoutes = Router();
 
-notificationRoutes.post("/send", verifyToken, notificationController.createNotification);
-notificationRoutes.get("/get/:pi_uid", notificationController.getNotifications);
+/**
+ * @swagger
+ * /api/v1/notifications/{pi_uid}:
+ *   get:
+ *     tags: 
+ *      - Notification
+ *     summary: Get notifications associated with the user
+ *     parameters:
+ *       - name: pi_uid
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The Pi UID of the notifications to retrieve
+ *       - name: skip
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *         description: Number of notifications to skip
+ *       - name: limit
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Maximum number of notifications to return
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '/api/docs/NotificationsSchema.yml#/components/schemas/Notification'
+ *       500:
+ *         description: Internal server error
+ */
+notificationRoutes.get("/:pi_uid", notificationController.getNotifications);
+
+/**
+ * @swagger
+ * /api/v1/notifications/:
+ *   post:
+ *     tags: 
+ *      - Notification
+ *     summary: Create a new notification *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *               properties:
+ *                 reason:
+ *                   type: string
+ *                   example: This is a sample reason for notification.
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Notification created successfully
+ *                 notification:
+ *                   $ref: '/api/docs/NotificationsSchema.yml#/components/schemas/Notification'
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+notificationRoutes.post("/", verifyToken, notificationController.createNotification);
+
+/**
+ * @swagger
+ * /api/v1/notifications/update/{notification_id}:
+ *   put:
+ *     tags:
+ *       - Notification
+ *     summary: Update the notification status to cleared *
+ *     parameters:
+ *       - name: notification_id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the notification to clear
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Notification cleared successfully
+ *                 notification:
+ *                   $ref: '/api/docs/NotificationsSchema.yml#/components/schemas/Notification'
+ *       404:
+ *         description: Notification not found or could not be updated
+ *       500:
+ *         description: Internal server error
+ */
 notificationRoutes.put("/update/:notification_id", verifyToken, notificationController.clearNotification);
 
 export default notificationRoutes;

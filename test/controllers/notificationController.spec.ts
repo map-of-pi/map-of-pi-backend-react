@@ -161,6 +161,15 @@ describe('notificationController', () => {
       });
     });
 
+    it('should return [404] if notification not found', async () => {
+      (notificationService.clearNotification as jest.Mock).mockResolvedValue(null);
+        
+      await clearNotification(req, res);
+  
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({ message: 'Notification not found or could not be updated' });
+    });
+
     it('should return [500] if clearing notification fails', async () => {
       const error = new Error('Service layer error');
       (notificationService.clearNotification as jest.Mock).mockRejectedValue(error);

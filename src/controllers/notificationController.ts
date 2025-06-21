@@ -39,7 +39,7 @@ export const clearNotification = async (req: Request, res: Response) => {
   try {
     const clearedNotification = await notificationService.clearNotification(notification_id);
     if (!clearedNotification) {
-      return res.status(404).json({ message: "Notification not found" });
+      return res.status(404).json({ message: "Notification not found or could not be updated" });
     }
     logger.info("Notification cleared:", clearedNotification);
     return res.status(200).json({ message: "Notification cleared successfully", updatedNotification: clearedNotification });
