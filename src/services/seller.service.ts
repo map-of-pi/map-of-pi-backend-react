@@ -78,8 +78,19 @@ export const getAllSellers = async (
 ): Promise<ISellerWithSettings[]> => {
   try {
     const maxNumSellers = 50;
-    let userSettings: any = userId ? await getUserSettingsById(userId) : {};
-    const searchFilters = userSettings.search_filters || {};
+    let userSettings: any = userId ? await getUserSettingsById(userId) ?? {} : {};
+    
+    const defaultSearchFilters = {
+      include_active_sellers: true,
+      include_inactive_sellers: false,
+      include_test_sellers: false,
+      include_trust_level_100: true,
+      include_trust_level_80: true,
+      include_trust_level_50: true,
+      include_trust_level_0: false,
+    };
+
+    const searchFilters = userSettings.search_filters ?? defaultSearchFilters;
 
     // Construct base filter criteria
     const baseCriteria: Record<string, any> = {};
