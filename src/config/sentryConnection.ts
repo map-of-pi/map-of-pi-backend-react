@@ -17,7 +17,7 @@ if (env.NODE_ENV === 'production') {
     });
 
   } catch (error: any) {
-    throw new Error(`Failed connection to Sentry: ${error.message}`);
+    throw new Error(`Failed connection to Sentry: ${error}`);
   }
 }
 
@@ -27,10 +27,15 @@ class SentryTransport extends transports.Stream {
     setImmediate(() => this.emit('logged', info));
 
     if (info.level === 'error') {
-      Sentry.captureException(new Error(info.message));
+      if (info.error instanceof Error) {
+        Sentry.captureException(info.error);
+      } else {
+        // fallback to message if error is not passed properly
+        Sentry.captureMessage(info.message || JSON.stringify(info), 'error');
+      }
+      callback();
+      return true;
     }
-    callback();
-    return true;
   }
 }
 

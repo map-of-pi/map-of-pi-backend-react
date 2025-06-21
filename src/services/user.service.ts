@@ -56,7 +56,7 @@ export const authenticate = async (currentUser: IUser): Promise<IUser> => {
       return newUser;
     }
   } catch (error: any) {
-    logger.error(`Failed to authenticate user: ${ error.message }`);
+    logger.error(`Failed to authenticate user: ${ error }`);
     throw error;
   }
 };
@@ -66,7 +66,7 @@ export const getUser = async (pi_uid: string): Promise<IUser | null> => {
     const user = await User.findOne({ pi_uid }).exec();
     return user ? user as IUser : null;
   } catch (error: any) {
-    logger.error(`Failed to retrieve user for piUID ${ pi_uid }: ${ error.message }`);
+    logger.error(`Failed to retrieve user for piUID ${ pi_uid }: ${ error }`);
     throw error;
   }
 };
@@ -88,7 +88,7 @@ export const deleteUser = async (pi_uid: string | undefined): Promise<{ user: IU
       userSetting: deletedUserSettings as IUserSettings
     }
   } catch (error: any) {
-    logger.error(`Failed to delete user or user association for piUID ${ pi_uid }: ${ error.message }`);
+    logger.error(`Failed to delete user or user association for piUID ${ pi_uid }: ${ error }`);
     throw error;
   }
 };

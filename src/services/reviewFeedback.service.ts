@@ -51,7 +51,7 @@ const computeRatings = async (user_settings_id: string) => {
     await UserSettings.findOneAndUpdate({ user_settings_id }, { trust_meter_rating: value });
     return value;
   } catch (error: any) {
-    logger.error(`Failed to compute ratings for userSettingsID ${ user_settings_id }: ${ error.message }`);
+    logger.error(`Failed to compute ratings for userSettingsID ${ user_settings_id }: ${ error }`);
     throw error;
   }
 };
@@ -113,7 +113,7 @@ export const getReviewFeedback = async (
     } as unknown as CompleteFeedback;
 
   } catch (error: any) {
-    logger.error(`Failed to retrieve reviews for reviewReceiverID ${ review_receiver_id }: ${ error.message }`);
+    logger.error(`Failed to retrieve reviews for reviewReceiverID ${ review_receiver_id }: ${ error }`);
     throw error;
   }
 };
@@ -167,7 +167,7 @@ export const getReviewFeedbackById = async (review_id: string): Promise<{
       replies: updatedReplyList as unknown as IReviewFeedbackOutput[],
     };
   } catch (error: any) {
-    logger.error(`Failed to retrieve review for reviewID ${ review_id }: ${ error.message }`);
+    logger.error(`Failed to retrieve review for reviewID ${ review_id }: ${ error }`);
     throw error;
   }
 };
@@ -191,7 +191,7 @@ export const addReviewFeedback = async (authUser: IUser, formData: any, image: s
 
     return savedReviewFeedback as IReviewFeedback;
   } catch (error: any) {
-    logger.error(`Failed to add review: ${ error.message }`);
+    logger.error(`Failed to add review: ${ error }`);
     throw error;
   }
 };

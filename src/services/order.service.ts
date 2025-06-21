@@ -79,7 +79,7 @@ export const createOrder = async (
     /* Step 6: Roll back transaction on failure */
     await session.abortTransaction();
 
-    logger.error(`Failed to create order: ${ error.message }`);
+    logger.error(`Failed to create order: ${ error }`);
     throw error;
   } finally {
     session.endSession();
@@ -106,7 +106,7 @@ export const updatePaidOrder = async (paymentId: string): Promise<IOrder> => {
     return updatedOrder;
 
   } catch (error: any) {
-    logger.error(`Failed to update paid order for paymentID ${ paymentId }: ${ error.message }`);
+    logger.error(`Failed to update paid order for paymentID ${ paymentId }: ${ error }`);
     throw error;
   }  
 };
@@ -126,7 +126,7 @@ export const getSellerOrdersById = async (piUid: string) => {
     return orders;
 
   } catch (error: any) {
-    logger.error(`Failed to get seller orders for Pi UID ${ piUid }: ${ error.message }`);
+    logger.error(`Failed to get seller orders for Pi UID ${ piUid }: ${ error }`);
     throw error;
   }
 };
@@ -146,7 +146,7 @@ export const getBuyerOrdersById = async (piUid: string) => {
     return orders;
 
   } catch (error: any) {
-    logger.error(`Failed to get buyer orders for Pi UID ${ piUid }: ${ error.message }`);
+    logger.error(`Failed to get buyer orders for Pi UID ${ piUid }: ${ error }`);
     throw error;
   }
 };
@@ -160,7 +160,7 @@ export const deleteOrderById = async (orderId: string) => {
     }
     return deletedOrder;
   } catch (error: any) {
-    logger.error(`Failed to delete order for orderID ${ orderId }: ${ error.message }`);
+    logger.error(`Failed to delete order for orderID ${ orderId }: ${ error }`);
     throw error;
   }
 };
@@ -198,7 +198,7 @@ export const getOrderItems = async (orderId: string) => {
       pi_username: user?.pi_username || '',  
     };
   } catch (error: any) {
-    logger.error(`Failed to get order items for orderID ${ orderId }: ${ error.message }`);
+    logger.error(`Failed to get order items for orderID ${ orderId }: ${ error }`);
     throw error;
   }
 };
@@ -239,7 +239,7 @@ export const updateOrderStatus = async (
 
     return updatedOrder;
   } catch (error: any) {
-    logger.error(`Failed to update order status for orderID ${ orderId }: ${ error.message }`);
+    logger.error(`Failed to update order status for orderID ${ orderId }: ${ error }`);
     throw error;
   }  
 };
@@ -263,7 +263,7 @@ export const updateOrderItemStatus = async (
     logger.info(`Order item ${ itemId } updated to status "${ itemStatus }"`);
     return updatedItem;
   } catch (error: any) {
-    logger.error(`Failed to update order item status for orderItemID ${ itemId }: ${ error.message }`);
+    logger.error(`Failed to update order item status for orderItemID ${ itemId }: ${ error }`);
     throw error;
   }
 };
@@ -287,7 +287,7 @@ export const cancelOrder = async (paymentId: string) => {
     logger.info(`Order with paymentID ${ paymentId } successfully cancelled.`);
     return cancelledOrder;
   } catch (error:any) {
-    logger.error(`Failed to cancel order for paymentID ${ paymentId }: ${ error.message }`);
+    logger.error(`Failed to cancel order for paymentID ${ paymentId }: ${ error }`);
     throw error;
   }
 };

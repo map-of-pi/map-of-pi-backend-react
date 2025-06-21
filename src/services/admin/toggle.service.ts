@@ -9,7 +9,7 @@ export const getToggles = async (): Promise<IToggle[]> => {
     logger.info(`Successfully retrieved ${toggles.length} toggle(s)`);    
     return toggles;
   } catch (error: any) {
-    logger.error(`Failed to retrieve toggles: ${ error.message }`);
+    logger.error(`Failed to retrieve toggles: ${ error }`);
     throw error;
   }
 };
@@ -19,7 +19,7 @@ export const getToggleByName = async (name: string): Promise<IToggle | null> => 
     const toggle = await Toggle.findOne({ name }).exec();    
     return toggle ? toggle as IToggle : null;
   } catch (error: any) {
-    logger.error(`Failed to retrieve toggle with identifier ${ name }: ${ error.message }`);
+    logger.error(`Failed to retrieve toggle with identifier ${ name }: ${ error }`);
     throw error;
   }
 };
@@ -42,7 +42,7 @@ export const addToggle = async (toggleData: IToggle): Promise<IToggle> => {
     if (error.message.includes('already exists')) {
       throw error;
     }
-    logger.error(`Failed to add toggle: ${ error.message }`);
+    logger.error(`Failed to add toggle: ${ error }`);
     throw error;
   }
 };
@@ -77,7 +77,7 @@ export const updateToggle = async (
     if (error.message.includes('does not exist')) {
       throw error;
     }
-    logger.error(`Failed to update toggle: ${ error.message }`);
+    logger.error(`Failed to update toggle: ${ error }`);
     throw error;
   }
 };
@@ -93,7 +93,7 @@ export const deleteToggleByName = async (name: string): Promise<IToggle | null> 
     logger.info('Toggle successfully deleted in the database:', deletedToggle);
     return deletedToggle as IToggle;
   } catch (error: any) {
-    logger.error(`Failed to delete toggle with identifier ${ name }: ${ error.message }`);
+    logger.error(`Failed to delete toggle with identifier ${ name }: ${ error }`);
     throw error;
   }
 };
