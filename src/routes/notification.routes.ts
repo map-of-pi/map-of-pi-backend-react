@@ -23,6 +23,6 @@ const notificationRoutes = Router();
 
 notificationRoutes.post("/send", verifyToken, notificationController.createNotification);
 notificationRoutes.get("/get/:pi_uid", notificationController.getNotifications);
-notificationRoutes.put("/update/:id", verifyToken, notificationController.clearNotification);
+notificationRoutes.put("/update/:notification_id", verifyToken, notificationController.clearNotification);
 
 export default notificationRoutes;

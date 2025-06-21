@@ -135,7 +135,7 @@ describe('notificationController', () => {
     beforeEach(() => {
       req = {
         params: { 
-          id: '64f5a0f2a86d1f9f3b7e4e87',
+          id: 'notificationId1_TEST',
         }
       };
       res = {

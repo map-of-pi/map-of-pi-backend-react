@@ -79,16 +79,6 @@ export interface ISeller extends Document {
 // Combined interface representing a seller with selected user settings
 export interface ISellerWithSettings extends ISeller, PartialUserSettings {};
 
-export interface INotification extends Document {
-  _id: string;
-  pi_uid: string;
-  is_cleared: boolean;
-  reason: string;
-  createdAt: Date;
-  updatedAt: Date;
-
-}
-
 export interface ISellerItem extends Document {
 	_id: string;
 	seller_id: string;
@@ -258,6 +248,18 @@ export interface IPaymentCrossReference {
   error_message: string;
   u2a_completed_at: Date;
   a2u_completed_at: Date;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+// ========================
+// NOTIFICATION
+// ========================
+export interface INotification extends Document {
+  _id: string;
+  pi_uid: string;
+  is_cleared: boolean;
+  reason: string;
   createdAt: Date;
   updatedAt: Date;
 };
