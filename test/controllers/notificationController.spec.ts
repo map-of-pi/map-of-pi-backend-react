@@ -135,7 +135,7 @@ describe('notificationController', () => {
     beforeEach(() => {
       req = {
         params: { 
-          id: 'notificationId1_TEST',
+          notification_id: 'notificationId1_TEST',
         }
       };
       res = {
@@ -153,7 +153,7 @@ describe('notificationController', () => {
 
       await clearNotification(req, res);
 
-      expect(notificationService.clearNotification).toHaveBeenCalledWith('64f5a0f2a86d1f9f3b7e4e87');
+      expect(notificationService.clearNotification).toHaveBeenCalledWith('notificationId1_TEST');
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         message: 'Notification cleared successfully',
