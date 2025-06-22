@@ -27,17 +27,23 @@ export const getNotifications = async (pi_uid: string, skip: number, limit: numb
   }
 };
 
-export const clearNotification = async (id: string): Promise<INotification | null> => {
+export const toggleNotificationStatus = async (notification_id: string): Promise<INotification | null> => {
   try {
-    const clearedNotification = await Notification.findByIdAndUpdate(
-      { _id: id },
-      { is_cleared: true },
+    const notification = await Notification.findById(notification_id).exec();
+
+    if (!notification) {
+      return null;
+    }
+
+    const updatedNotification = await Notification.findByIdAndUpdate(
+      { _id: notification_id },
+      { is_cleared: !notification.is_cleared },
       { new: true }
     ).exec();
 
-    return clearedNotification as INotification | null;
+    return updatedNotification as INotification;
   } catch (error: any) {
-    logger.error(`Failed to clear notification for ID ${ id }: ${error.message}`);
+    logger.error(`Failed to toggle notification status for ID ${ notification_id }: ${error.message}`);
     throw error;
   }
 };

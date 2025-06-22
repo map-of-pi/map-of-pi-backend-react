@@ -107,14 +107,14 @@ notificationRoutes.post("/", verifyToken, notificationController.createNotificat
  *   put:
  *     tags:
  *       - Notification
- *     summary: Update the notification status to cleared *
+ *     summary: Update by toggling the notification status *
  *     parameters:
  *       - name: notification_id
  *         in: path
  *         required: true
  *         schema:
  *           type: string
- *         description: The ID of the notification to clear
+ *         description: The ID of the notification to toggle
  *     responses:
  *       200:
  *         description: Successful response
@@ -125,7 +125,7 @@ notificationRoutes.post("/", verifyToken, notificationController.createNotificat
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Notification cleared successfully
+ *                   example: Notification updated successfully
  *                 notification:
  *                   $ref: '/api/docs/NotificationsSchema.yml#/components/schemas/Notification'
  *       404:
@@ -133,6 +133,6 @@ notificationRoutes.post("/", verifyToken, notificationController.createNotificat
  *       500:
  *         description: Internal server error
  */
-notificationRoutes.put("/update/:notification_id", verifyToken, notificationController.clearNotification);
+notificationRoutes.put("/update/:notification_id", verifyToken, notificationController.updateNotification);
 
 export default notificationRoutes;

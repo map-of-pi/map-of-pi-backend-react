@@ -1,14 +1,14 @@
 import { 
   createNotification,
   getNotifications,
-  clearNotification 
+  updateNotification
 } from '../../src/controllers/notificationController';
 import * as notificationService from '../../src/services/notification.service';
 
 jest.mock('../../src/services/notification.service', () => ({
   addNotification: jest.fn(),
   getNotifications: jest.fn(),
-  clearNotification: jest.fn()
+  toggleNotificationStatus: jest.fn()
 }));
 
 describe('notificationController', () => {
@@ -131,7 +131,7 @@ describe('notificationController', () => {
     });
   });
 
-  describe('clearNotification function', () => {
+  describe('updateNotification function', () => {
     beforeEach(() => {
       req = {
         params: { 
@@ -144,41 +144,41 @@ describe('notificationController', () => {
       };
     });
 
-    it('should clear notification and return [200] on success', async () => {
+    it('should update notification and return [200] on success', async () => {
       const mockUpdatedNotification = [
         { pi_uid: '0a0a0a-0a0a-0a0a', is_cleared: true, reason: 'TEST_REASON_A' }
       ];
       
-      (notificationService.clearNotification as jest.Mock).mockResolvedValue(mockUpdatedNotification);
+      (notificationService.toggleNotificationStatus as jest.Mock).mockResolvedValue(mockUpdatedNotification);
 
-      await clearNotification(req, res);
+      await updateNotification(req, res);
 
-      expect(notificationService.clearNotification).toHaveBeenCalledWith('notificationId1_TEST');
+      expect(notificationService.toggleNotificationStatus).toHaveBeenCalledWith('notificationId1_TEST');
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        message: 'Notification cleared successfully',
+        message: 'Notification updated successfully',
         updatedNotification: mockUpdatedNotification
       });
     });
 
     it('should return [404] if notification not found', async () => {
-      (notificationService.clearNotification as jest.Mock).mockResolvedValue(null);
+      (notificationService.toggleNotificationStatus as jest.Mock).mockResolvedValue(null);
         
-      await clearNotification(req, res);
+      await updateNotification(req, res);
   
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({ message: 'Notification not found or could not be updated' });
     });
 
-    it('should return [500] if clearing notification fails', async () => {
+    it('should return [500] if updating notification fails', async () => {
       const error = new Error('Service layer error');
-      (notificationService.clearNotification as jest.Mock).mockRejectedValue(error);
+      (notificationService.toggleNotificationStatus as jest.Mock).mockRejectedValue(error);
   
-      await clearNotification(req, res);
+      await updateNotification(req, res);
   
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
-        message: 'An error occurred while clearing notification; please try again later',
+        message: 'An error occurred while updating notification; please try again later',
       });
     });
   });

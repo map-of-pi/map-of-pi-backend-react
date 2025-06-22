@@ -2,7 +2,7 @@ import Notification from "../../src/models/Notification";
 import {
   addNotification,
   getNotifications,
-  clearNotification,
+  toggleNotificationStatus
 } from '../../src/services/notification.service';
 
 jest.mock('../../src/models/Notification');
@@ -93,11 +93,16 @@ describe('getNotifications function', () => {
   });
 });
 
-describe('clearNotification function', () => {
+describe('toggleNotificationStatus function', () => {
   const notification_id = 'notificationId1_TEST';
 
-  it('should clear and return the notification', async () => {
-    const mockClearedNotification = { 
+  it('should toggle the notification status and return the notification', async () => {
+    const mockExistingNotification = {
+      _id: notification_id,
+      is_cleared: false
+    };
+    
+    const mockUpdatedNotification = { 
       _id: notification_id,
       pi_uid: '0c0c0c-0c0c-0c0c', 
       is_cleared: true, 
@@ -105,27 +110,35 @@ describe('clearNotification function', () => {
       createdAt: new Date(),
     };
 
-    const execMock = jest.fn().mockResolvedValue(mockClearedNotification);
-    (Notification.findByIdAndUpdate as jest.Mock).mockReturnValue({ exec: execMock });
+    (Notification.findById as jest.Mock).mockReturnValue({ exec: jest.fn().mockResolvedValue(mockExistingNotification) });
+    (Notification.findByIdAndUpdate as jest.Mock).mockReturnValue({ exec: jest.fn().mockResolvedValue(mockUpdatedNotification) });
 
-    const clearedNotification = await clearNotification(notification_id);
+    const updatedNotification = await toggleNotificationStatus(notification_id);
     
+    expect(Notification.findById).toHaveBeenCalledWith(notification_id);
     expect(Notification.findByIdAndUpdate).toHaveBeenCalledWith(
       { _id: notification_id },
       { is_cleared: true },
       { new: true }
     );
-    expect(execMock).toHaveBeenCalled();
-    expect(clearedNotification).toEqual(mockClearedNotification);
+    expect(updatedNotification).toEqual(mockUpdatedNotification);
   });
 
-  it('should throw an error if clearing notification fails', async () => {
+  it('should return null if notification does not exist', async () => {
+    (Notification.findById as jest.Mock).mockReturnValue({ exec: jest.fn().mockResolvedValue(null) });
+  
+    const notification = await toggleNotificationStatus(notification_id);
+
+    expect(notification).toBeNull();
+    expect(Notification.findByIdAndUpdate).not.toHaveBeenCalled();
+  });
+
+  it('should throw an error if toggling notification status fails', async () => {
     const mockError = new Error('Mock database error');
 
-    (Notification.findByIdAndUpdate as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockRejectedValue(mockError),
-    });
+    (Notification.findById as jest.Mock).mockReturnValue({ exec: jest.fn().mockRejectedValue(mockError) });
 
-    await expect(clearNotification(notification_id)).rejects.toThrow('Mock database error');
+    await expect(toggleNotificationStatus(notification_id)).rejects.toThrow('Mock database error');
+    expect(Notification.findByIdAndUpdate).not.toHaveBeenCalled();
   });
 });
