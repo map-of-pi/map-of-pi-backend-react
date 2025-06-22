@@ -1,4 +1,5 @@
 import { Router } from "express";
+
 import * as notificationController from "../controllers/notificationController";
 import { verifyToken } from "../middlewares/verifyToken";
 
@@ -76,10 +77,10 @@ notificationRoutes.get("/:pi_uid", notificationController.getNotifications);
  *         application/json:
  *           schema:
  *             type: object
- *               properties:
- *                 reason:
- *                   type: string
- *                   example: This is a sample reason for notification.
+ *             properties:
+ *               reason:
+ *                 type: string
+ *                 example: This is a sample reason for notification.
  *     responses:
  *       200:
  *         description: Successful response
