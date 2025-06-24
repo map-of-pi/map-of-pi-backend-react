@@ -10,7 +10,7 @@ export const getSingleMembershipById = async (
   membership_id: string
 ): Promise<IMembership | null> => {
   try {
-    const membership = await Membership.findOne({ membership_id }).exec();
+    const membership = await Membership.findById(membership_id).exec();
 
     if (!membership) {
       logger.warn(`Membership does not exist for membership ID: ${membership_id}`);
