@@ -1,6 +1,7 @@
 import express from "express";
 import { verifyToken } from "../middlewares/verifyToken";
-import * as membershipController from "../controllers/membershipController";
+import * as membershipLegacyController from "../controllers/membershipLegacy.controller";
+import * as membershipController from "../controllers/membershipController"
 
 const membershipRoutes = express.Router();
 
@@ -68,7 +69,7 @@ membershipRoutes.get(
 membershipRoutes.put(
   "/manage",
   verifyToken,
-  membershipController.manageMembership
+  membershipLegacyController.manageMembership
 );
 
 export default membershipRoutes;
