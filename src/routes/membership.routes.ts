@@ -43,8 +43,8 @@ membershipRoutes.get(
  *   put:
  *     tags:
  *       - Membership
- *     summary: [LEGACY] Register or update membership (non-payment flow)
- *     description: !!! Legacy endpoint — production upgrades must go through Pi payment flow (U2A).
+ *     summary: Register or update membership (non-payment flow) Legacy
+ *     description: Legacy endpoint — production upgrades must go through Pi payment flow (U2A).
  *     requestBody:
  *       required: true
  *       content:
