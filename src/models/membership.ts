@@ -11,6 +11,7 @@ const membershipSchema = new mongoose.Schema(
     pi_uid: {
       type: String,
       required: true,
+      unique: true,
     },
     membership_class: {
       type: String,
@@ -41,8 +42,7 @@ const membershipSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Indexes
+// Index
 membershipSchema.index({ user_id: 1 });
-membershipSchema.index({ pi_uid: 1 });
 
 export default mongoose.model('Membership', membershipSchema);
