@@ -25,7 +25,7 @@ export const getSingleMembershipById = async (
 };
 
 // Manage Membership
-// !!! Legacy function — used only by legacy manageMembership controller.
+// Legacy function — used only by legacy manageMembership controller.
 // Membership upgrades in production should go through the U2A payment flow.
 export const addOrUpdateMembership = async (
   authUser: IUser,
@@ -41,7 +41,7 @@ export const addOrUpdateMembership = async (
     session.startTransaction();
 
     const existingMembership = await Membership.findOne({
-      membership_id: authUser.pi_uid
+      pi_uid: authUser.pi_uid
     }).session(session).exec();
 
     if (existingMembership) {
@@ -75,6 +75,8 @@ export const addOrUpdateMembership = async (
 
       const newMembership = new Membership({
         membership_id: authUser.pi_uid,
+        user_id: authUser._id,
+        pi_uid: authUser.pi_uid,
         membership_class,
         membership_expiration: newExpirationDate,
         mappi_balance: mappi_allowance
