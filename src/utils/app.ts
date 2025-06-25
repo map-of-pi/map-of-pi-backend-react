@@ -19,7 +19,7 @@ import mapCenterRoutes from "../routes/mapCenter.routes";
 import reportRoutes from "../routes/report.routes";
 import notificationRoutes from "../routes/notification.routes";
 import restrictionRoutes from "../routes/restriction.routes";
-import toggleRoutes from "../routes/notification.routes";
+import toggleRoutes from "../routes/toggle.routes";
 
 dotenv.config();
 
