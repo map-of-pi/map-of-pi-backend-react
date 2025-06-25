@@ -21,9 +21,9 @@ const MembershipSubscription = async () => {
     };
 
     logger.info("Processed Membership Subscription Data: ", processedData);
-  } catch (error: any) {
-    logger.error("Error processing membership subscription: ", error.message);
-    throw new Error("Error processing membership subscription: " + error.message);
+  } catch (error) {
+    logger.error(`Error processing membership subscription: ${error}`);
+    throw error;
   }
 }
 
