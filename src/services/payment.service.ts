@@ -29,7 +29,7 @@ export const createPayment = async (paymentData: NewPayment): Promise<IPayment> 
     return await payment.save();
 
   } catch (error: any) {
-    logger.error(`Failed to create payment for piPaymentID ${ paymentData.piPaymentId }: ${ error.message }`);
+    logger.error(`Failed to create payment for piPaymentID ${ paymentData.piPaymentId }: ${ error }`);
     throw error;
   }
 };
@@ -52,7 +52,7 @@ export const completePayment = async (
     return updatedPayment;
     
   } catch (error: any) {
-    logger.error(`Failed to complete payment for piPaymentID ${ piPaymentId }: ${ error.message }`);
+    logger.error(`Failed to complete payment for piPaymentID ${ piPaymentId }: ${ error }`);
     throw error;
   }
 };
@@ -94,7 +94,7 @@ export const createOrUpdatePaymentCrossReference = async (
     return await newRef.save();
 
   } catch (error: any) {
-    logger.error(`Failed to create/ update Payment xRef for orderID ${ orderId }: ${ error.message }`);
+    logger.error(`Failed to create/ update Payment xRef for orderID ${ orderId }: ${ error }`);
     throw error;
   }
 };
@@ -189,7 +189,7 @@ export const createA2UPayment = async (a2uPaymentData: A2UPaymentDataType): Prom
 
   } catch (error: any) {
     if (axios.isAxiosError(error)) {
-      logger.error(`Axios error during A2U payment: ${error.message}`, {
+      logger.error(`Axios error during A2U payment: ${error}`, {
         status: error.response?.status,
         data: error.response?.data,
         config: error.config,
@@ -214,7 +214,7 @@ export const getPayment = async (piPaymentId: string): Promise<IPayment | null> 
     return existingPayment;
 
   } catch (error: any) {
-    logger.error(`Failed to get payment for piPaymentID ${ piPaymentId }: ${ error.message }`);
+    logger.error(`Failed to get payment for piPaymentID ${ piPaymentId }: ${ error }`);
     throw error;
   }
 };
@@ -234,7 +234,7 @@ export const cancelPayment = async (piPaymentId: string): Promise<IPayment | nul
     return cancelledPayment;
 
   } catch (error: any) {
-    logger.error(`Failed to cancel payment for piPaymentID ${ piPaymentId }: ${ error.message }`);
+    logger.error(`Failed to cancel payment for piPaymentID ${ piPaymentId }: ${ error }`);
     throw error;
   }
 };

@@ -9,6 +9,7 @@ import {
   getSellersWithinSanctionedRegion 
 } from '../../src/services/seller.service';
 import User from '../../src/models/User';
+import UserSettings from '../../src/models/UserSettings';
 import { RestrictedArea, RestrictedAreaBoundaries } from '../../src/models/enums/restrictedArea';
 import { IUser, ISeller, ISellerItem, ISanctionedRegion } from '../../src/types';
 
@@ -20,11 +21,22 @@ describe('getAllSellers function', () => {
     ne_lng: -73.8000
   };
 
-  it('should fetch all sellers when all parameters are empty', async () => {
+  it('should fetch all applicable sellers when all parameters are empty', async () => {
     const userData = await User.findOne({ pi_username: 'TestUser1' }) as IUser;
     const sellersData = await getAllSellers(undefined, undefined, userData.pi_uid);
 
     expect(sellersData).toHaveLength(await Seller.countDocuments());
+  });
+
+  it('should fetch all applicable sellers when all parameters are empty and userSettings does not exist', async () => {
+    const userData = await User.findOne({ pi_username: 'TestUser17' }) as IUser;
+    const userSettings = await UserSettings.findOne({ user_settings_id: userData.pi_uid });
+    expect(userSettings).toBeNull();
+
+    const sellersData = await getAllSellers(undefined, undefined, userData.pi_uid);
+
+    // filter out inactive + test sellers and sellers with trust level < 50.
+    expect(sellersData).toHaveLength(1);
   });
 
   it('should fetch all applicable filtered sellers when all parameters are empty', async () => {
@@ -89,6 +101,19 @@ describe('getAllSellers function', () => {
         },
       })
     ); // Ensure length matches expected sellers
+  });
+
+  it('should throw an error when an exception occurs', async () => { 
+    const userData = await User.findOne({ pi_username: 'TestUser13' }) as IUser;
+    
+    // Mock the Seller model to throw an error
+    jest.spyOn(Seller, 'find').mockImplementationOnce(() => {
+      throw new Error('Mock database error');
+    });
+
+    await expect(getAllSellers(undefined, undefined, userData.pi_uid)).rejects.toThrow(
+      'Mock database error'
+    );
   });
 });
 
