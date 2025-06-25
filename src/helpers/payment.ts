@@ -11,7 +11,9 @@ import {
   completePayment, 
   createPaymentCrossReference,
   createA2UPayment,
-  cancelPayment
+  cancelPayment,
+  updatePaymentCrossReference,
+  getxRefByOrderId
 } from '../services/payment.service';
 import { 
   cancelOrder, 
@@ -20,7 +22,7 @@ import {
 } from '../services/order.service';
 import { IUser, NewOrder, PaymentDataType, PaymentDTO, PaymentInfo } from '../types';
 import logger from '../config/loggingConfig';
-import { onIncompletePaymentFound } from '../controllers/paymentController';
+import { drainQueue } from '../utils/queues/queue';
 
 function buildPaymentData(
   piPaymentId: string,
@@ -139,9 +141,25 @@ export const processIncompletePayment = async (payment: PaymentInfo) => {
 
     // If the completed payment was for a buyer checkout, update the associated order
     if (updatedPayment?.payment_type === PaymentType.BuyerCheckout) {
-      await updatePaidOrder(updatedPayment._id as string);
+      const updatedOrder = await updatePaidOrder(updatedPayment._id as string);
       logger.warn("Old order found and updated");
-    }
+
+      // update the payment cross-reference if it exists else create a new one
+      const xRef = getxRefByOrderId(updatedOrder._id as string);
+
+      if (!xRef) {
+        logger.warn("No existing payment cross-reference found, creating a new one");
+        const xRefData = {
+        orderId: updatedOrder._id as string,
+        u2aPaymentId: updatedPayment._id as string,
+        u2uStatus: U2UPaymentStatus.U2ACompleted,
+        u2aCompletedAt: new Date(),
+        a2uPaymentId: null,
+        sellerId: updatedPayment.user_id.toString(),
+      }
+        await createPaymentCrossReference(xRefData);
+      } 
+    }    
 
     // Notify the Pi Platform that the payment is complete
     await platformAPIClient.post(`/v2/payments/${ paymentId }/complete`, { txid });
@@ -232,10 +250,12 @@ export const processPaymentCompletion = async (paymentId: string, txid: string) 
       const u2uRefData = {
         u2aPaymentId: completedPayment._id as string,
         u2uStatus: U2UPaymentStatus.U2ACompleted,
+        orderId: order._id as string,
+        u2aCompletedAt: new Date(),
         a2uPaymentId: null,
       };
-      await createPaymentCrossReference(order._id as string, u2uRefData);
-      logger.info("U2U cross-reference created", u2uRefData);
+      await createPaymentCrossReference(u2uRefData);
+      logger.info("U2U cross-reference created", u2uRefData);      
 
       // Notify Pi Platform of successful completion
       const completedPiPayment = await platformAPIClient.post(`/v2/payments/${ paymentId }/complete`, { txid });
@@ -246,17 +266,20 @@ export const processPaymentCompletion = async (paymentId: string, txid: string) 
 
       logger.info("Payment marked completed on Pi blockchain", completedPiPayment.status);
 
-      const payentMemo = completedPiPayment.data.memo as string
+      await drainQueue();
 
       // Start A2U (App-to-User) payment to the seller
-      await createA2UPayment({
-        sellerId: order.seller_id.toString(),
-        amount: order.total_amount.toString(),
-        buyerId: order.buyer_id.toString(),
-        paymentType: PaymentType.BuyerCheckout,
-        orderId: order._id as string,
-        memo: payentMemo
-      });
+      // await createA2UPayment({
+      //   sellerId: order.seller_id.toString(),
+      //   amount: order.total_amount.toString(),
+      //   buyerId: order.buyer_id.toString(),
+      //   paymentType: PaymentType.BuyerCheckout,
+      //   xRefId: xRef._id as string,
+      //   memo: payentMemo
+      // });
+
+      // const paymentList = await gasSaver()
+      // logger.info('Gas saver payment list:', paymentList);
 
     } else if (completedPayment?.payment_type === PaymentType.Membership) {
       // Notify Pi platform for membership payment completion

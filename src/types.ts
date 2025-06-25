@@ -74,6 +74,7 @@ export interface ISeller extends Document {
 	fulfillment_description?: string;
 	pre_restriction_seller_type?: SellerType | null;
 	isPreRestricted: boolean;
+  gas_saver: boolean;
 };
 
 // Combined interface representing a seller with selected user settings
@@ -178,6 +179,19 @@ export type OrderPaymentMetadataType = {
 // ========================
 // PAYMENT MODELS
 // ========================
+
+
+export interface IA2UJob extends Document {
+  sellerPiUid: string;
+  amount: number;
+  orders: string[];
+  memo: string,
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  attempts: number;
+  last_error?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
 export interface IPayment extends Document {
   user_id: Types.ObjectId;
   amount: Types.Decimal128;
@@ -231,15 +245,14 @@ export interface NewPayment {
 export interface U2URefDataType {
   u2aPaymentId?: string,
   u2uStatus: U2UPaymentStatus,
+  orderId?: string,
   a2uPaymentId: string | null,
 };
 
 export interface A2UPaymentDataType {
   sellerId: string,
   amount: string,
-  buyerId: string,
-  paymentType: PaymentType,
-  orderId: string,
+  xRefIds: string[],
   memo: string
 };
 

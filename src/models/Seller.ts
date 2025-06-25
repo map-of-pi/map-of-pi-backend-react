@@ -75,6 +75,11 @@ const sellerSchema = new Schema<ISeller>(
       type: Boolean,
       default: false,
       required: false
+    },
+    gas_saver: {
+      type: Boolean,
+      default: true,
+      required: false
     }
   },
   { timestamps: true } // Adds timestamps to track creation and update times
