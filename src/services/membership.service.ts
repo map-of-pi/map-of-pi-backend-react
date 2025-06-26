@@ -5,6 +5,25 @@ import { MembershipClassType, tierRank } from "../models/enums/membershipClassTy
 // import { createTransactionRecord } from "./transaction.service";
 import logger from "../config/loggingConfig";
 
+const isExpired = (date?: Date) => !date || date < new Date();
+
+const isOnlineClass = (tier: MembershipClassType): boolean => {
+  return [
+    MembershipClassType.GOLD,
+    MembershipClassType.DOUBLE_GOLD,
+    MembershipClassType.TRIPLE_GOLD,
+    MembershipClassType.GREEN,
+  ].includes(tier);
+};
+
+const isInstoreClass = (tier: MembershipClassType): boolean => {
+  return tier === MembershipClassType.MEMBER;
+};
+
+const isSameCategory = (a: MembershipClassType, b: MembershipClassType): boolean => {
+  return (isOnlineClass(a) && isOnlineClass(b)) || (isInstoreClass(a) && isInstoreClass(b));
+};
+
 // Fetch a single membership by ID
 export const getSingleMembershipById = async (
   membership_id: string
@@ -27,22 +46,21 @@ export const getSingleMembershipById = async (
 export const updateOrRenewMembership = async ({
   pi_uid,
   membership_class,
-  duration_weeks,
+  membership_duration,
   mappi_allowance,
 }: {
   pi_uid: string;
   membership_class: MembershipClassType;
-  duration_weeks: number;
+  membership_duration: number;
   mappi_allowance: number;
 }): Promise<IMembership> => {
   const today = new Date();
-  const durationMs = duration_weeks * 7 * 24 * 60 * 60 * 1000;
+  const durationMs = membership_duration * 7 * 24 * 60 * 60 * 1000;
 
   const existing = await Membership.findOne({ pi_uid }).exec();
-  const isExpired = !existing?.membership_expiration || new Date(existing.membership_expiration) < today;
 
   if (!existing) {
-    // No existing membership — create fresh
+    // Fresh membership
     const newMembership = new Membership({
       pi_uid,
       membership_class,
@@ -56,11 +74,18 @@ export const updateOrRenewMembership = async ({
     return saved as unknown as IMembership;
   }
 
+  // 🔐 Category restriction check
+  if (!isSameCategory(existing.membership_class, membership_class)) {
+    logger.error(`Cross-category transition from ${existing.membership_class} to ${membership_class} is not allowed`);
+    throw new Error("Cannot switch between online and instore memberships");
+  }
+
   const currentTier = tierRank[existing.membership_class];
   const incomingTier = tierRank[membership_class];
+  const expired = isExpired(existing.membership_expiration ?? undefined);
 
-  // 🟡 Case 1: Same Tier + Still Active = Extend expiration
-  if (incomingTier === currentTier && !isExpired) {
+  // 🟡 Same Tier + Active → Extend expiration
+  if (incomingTier === currentTier && !expired) {
     existing.membership_expiration = new Date(
       (existing.membership_expiration?.getTime() ?? today.getTime()) + durationMs
     );
@@ -70,8 +95,8 @@ export const updateOrRenewMembership = async ({
     return updated.toObject() as unknown as IMembership;
   }
 
-  // 🟠 Case 2: Same Tier + Expired = Treat as new membership
-  if (incomingTier === currentTier && isExpired) {
+  // 🟠 Same Tier + Expired → Renew
+  if (incomingTier === currentTier && expired) {
     existing.membership_expiration = new Date(today.getTime() + durationMs);
     existing.mappi_balance = mappi_allowance;
     existing.mappi_used_to_date = 0;
@@ -81,19 +106,19 @@ export const updateOrRenewMembership = async ({
     return updated.toObject() as unknown as IMembership;
   }
 
-  // 🟢 Case 3: Upgrade (higher tier)
+  // 🟢 Upgrade
   if (incomingTier > currentTier) {
     existing.membership_class = membership_class;
     existing.membership_expiration = new Date(today.getTime() + durationMs);
     existing.mappi_balance += mappi_allowance;
-    existing.mappi_used_to_date = 0; // optional: reset if needed
+    existing.mappi_used_to_date = 0;
 
     const updated = await existing.save();
     logger.info(`Upgraded membership for ${pi_uid}`);
     return updated.toObject() as unknown as IMembership;
   }
 
-  // 🔴 Case 4: Downgrade
+  // 🔴 Downgrade
   if (incomingTier < currentTier) {
     existing.membership_class = membership_class;
     existing.membership_expiration = new Date(today.getTime() + durationMs);
@@ -105,7 +130,7 @@ export const updateOrRenewMembership = async ({
     return updated.toObject() as unknown as IMembership;
   }
 
-  // 🧯 Case 5: Unknown fallback
+  // 🧯 Fallback
   logger.error(`Unhandled membership transition for ${pi_uid}`);
   throw new Error("Unhandled membership transition");
 };
