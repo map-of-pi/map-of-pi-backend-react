@@ -9,9 +9,7 @@ dotenv.config();
 const populateMemberships = async () => {
   try {
     await mongoose.connect(
-      process.env.MONGO_URI ||
-      "mongodb+srv://mapofpi:mapofpi@mapofpi.vibqtx2.mongodb.net/map-of-pi?retryWrites=true&w=majority"
-    );
+      process.env.MONGO_URI!);
 
     const users = await User.find({});
     if (!users.length) {
