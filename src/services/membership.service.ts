@@ -74,6 +74,25 @@ export const updateOrRenewMembership = async ({
     return saved as unknown as IMembership;
   }
 
+  const maxMembershipDurations: Record<MembershipClassType, number> = {
+    [MembershipClassType.TRIPLE_GOLD]: 50,
+    [MembershipClassType.DOUBLE_GOLD]: 20,
+    [MembershipClassType.GOLD]: 10,
+    [MembershipClassType.GREEN]: 4,
+    [MembershipClassType.MEMBER]: 50, // "White"
+    [MembershipClassType.CASUAL]: 0,
+  };
+  
+  const maxAllowedDuration = maxMembershipDurations[membership_class];
+  
+  if (maxAllowedDuration === undefined) {
+    throw new Error(`Invalid membership class: ${membership_class}`);
+  }
+  
+  if (membership_duration > maxAllowedDuration) {
+    throw new Error(`${membership_class} cannot exceed ${maxAllowedDuration} weeks`);
+  }  
+
   // 🔐 Category restriction check
   if (!isSameCategory(existing.membership_class, membership_class)) {
     logger.error(`Cross-category transition from ${existing.membership_class} to ${membership_class} is not allowed`);
