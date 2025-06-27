@@ -69,7 +69,7 @@ membershipRoutes.get(
 membershipRoutes.put(
   "/manage",
   verifyToken,
-  membershipLegacyController.manageMembership
+  membershipController.updateOrRenewMembership 
 );
 
 export default membershipRoutes;
