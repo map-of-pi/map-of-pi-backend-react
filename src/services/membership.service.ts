@@ -90,10 +90,6 @@ export const updateOrRenewMembership = async ({
     throw new Error(`${membership_class} cannot exceed ${maxAllowedDuration} weeks`);
   }
 
-  if (mappi_allowance !== requiredMappi) {
-    throw new Error(`${membership_class} requires exactly ${requiredMappi} mappi`);
-  }
-
   if (!existing) {
     // Fresh membership
     const newMembership = new Membership({
@@ -123,44 +119,46 @@ export const updateOrRenewMembership = async ({
     return updated.toObject() as unknown as IMembership;
   }  
 
-  const currentTier = tierRank[existing.membership_class];
-  const incomingTier = tierRank[membership_class];
-  const expired = isExpired(existing.membership_expiration ?? undefined);
+    const currentTier = tierRank[existing.membership_class];
+    const incomingTier = tierRank[membership_class];
+    const expired = isExpired(existing.membership_expiration ?? undefined);
 
-  // Same Tier + Active → Extend expiration
-  if (incomingTier === currentTier && !expired) {
+    // Same Tier + Active → Extend expiration
+    if (incomingTier === currentTier && !expired) {
     existing.membership_expiration = new Date(
       (existing.membership_expiration?.getTime() ?? today.getTime()) + durationMs
     );
+    existing.mappi_balance = requiredMappi; // RESET mappi
+    existing.mappi_used_to_date = 0;
 
     const updated = await existing.save();
-    logger.info(`Extended current membership for ${pi_uid}`);
+    logger.info(`Renewed (active) membership for ${pi_uid} with fresh mappi`);
     return updated.toObject() as unknown as IMembership;
   }
 
-    // Same Tier + Expired → Renew
-    if (incomingTier === currentTier && expired) {
-      existing.membership_expiration = new Date(today.getTime() + durationMs);
-      existing.mappi_balance = requiredMappi;
-      existing.mappi_used_to_date = 0;
+  // Same Tier + Expired → Renew
+  if (incomingTier === currentTier && expired) {
+    existing.membership_expiration = new Date(today.getTime() + durationMs);
+    existing.mappi_balance = requiredMappi;
+    existing.mappi_used_to_date = 0;
 
-      const updated = await existing.save();
-      logger.info(`Renewed expired membership for ${pi_uid}`);
-      return updated.toObject() as unknown as IMembership;
-    }
+    const updated = await existing.save();
+    logger.info(`Renewed expired membership for ${pi_uid}`);
+    return updated.toObject() as unknown as IMembership;
+  }
 
-    // Upgrade to a higher tier
-    if (incomingTier > currentTier) {
-      existing.membership_class = membership_class;
-      existing.membership_expiration = new Date(today.getTime() + durationMs);
+  // Upgrade to a higher tier
+  if (incomingTier > currentTier) {
+    existing.membership_class = membership_class;
+    existing.membership_expiration = new Date(today.getTime() + durationMs);
 
-      existing.mappi_balance = requiredMappi; // overwrite, no stacking
-      existing.mappi_used_to_date = 0;
+    existing.mappi_balance = requiredMappi; // overwrite, no stacking
+    existing.mappi_used_to_date = 0;
 
-      const updated = await existing.save();
-      logger.info(`Upgraded membership for ${pi_uid}`);
-      return updated.toObject() as unknown as IMembership;
-    }
+    const updated = await existing.save();
+    logger.info(`Upgraded membership for ${pi_uid}`);
+    return updated.toObject() as unknown as IMembership;
+  }
 
   if (mappi_allowance !== requiredMappi) {
     throw new Error(`${membership_class} requires exactly ${requiredMappi} mappi`);
@@ -190,7 +188,7 @@ export const updateMappiBalance = async (
   amount: number
 ): Promise<IMembership> => {
   try {
-    const membership = await Membership.findOne({ membership_id }).exec();
+    const membership = await Membership.findById(membership_id).exec();
     if (!membership) {
       throw new Error(`Membership not found for membership ID: ${membership_id}`);
     }
