@@ -21,3 +21,25 @@ export const getSingleMembership = async (req: Request, res: Response) => {
     return res.status(500).json({ message: 'An error occurred while getting single membership; please try again later' });
   }
 };
+
+export const updateOrRenewMembership = async (req: Request, res: Response) => {
+ if (!req.currentUser) {
+  return res.status(401).json({ error: "Unauthorized - user not authenticated "});
+ }
+ 
+  try {
+    const { membership_class, membership_duration, mappi_allowance } = req.body;
+
+    const updated = await membershipService.updateOrRenewMembership({
+      user: req.currentUser,
+      membership_class,
+      membership_duration,
+      mappi_allowance,
+    });
+
+    return res.status(200).json(updated);
+  } catch (error: any) {
+    logger.error("Failed to update or renew membership:", error);
+    return res.status(400).json({ error: error.message });
+  }
+};
