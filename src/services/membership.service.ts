@@ -59,6 +59,40 @@ export const updateOrRenewMembership = async ({
 
   const existing = await Membership.findOne({ pi_uid }).exec();
 
+  // Validation maps
+  const maxMembershipDurations: Record<MembershipClassType, number> = {
+    [MembershipClassType.TRIPLE_GOLD]: 50,
+    [MembershipClassType.DOUBLE_GOLD]: 20,
+    [MembershipClassType.GOLD]: 10,
+    [MembershipClassType.GREEN]: 4,
+    [MembershipClassType.MEMBER]: 50,
+    [MembershipClassType.CASUAL]: 0,
+  };
+
+  const requiredMappiAllowances: Record<MembershipClassType, number> = {
+    [MembershipClassType.TRIPLE_GOLD]: 1600,
+    [MembershipClassType.DOUBLE_GOLD]: 1200,
+    [MembershipClassType.GOLD]: 800,
+    [MembershipClassType.GREEN]: 400,
+    [MembershipClassType.MEMBER]: 400,
+    [MembershipClassType.CASUAL]: 0,
+  };
+
+  const maxAllowedDuration = maxMembershipDurations[membership_class];
+  const requiredMappi = requiredMappiAllowances[membership_class];
+
+  if (maxAllowedDuration === undefined || requiredMappi === undefined) {
+    throw new Error(`Invalid membership class: ${membership_class}`);
+  }
+
+  if (membership_duration > maxAllowedDuration) {
+    throw new Error(`${membership_class} cannot exceed ${maxAllowedDuration} weeks`);
+  }
+
+  if (mappi_allowance !== requiredMappi) {
+    throw new Error(`${membership_class} requires exactly ${requiredMappi} mappi`);
+  }
+
   if (!existing) {
     // Fresh membership
     const newMembership = new Membership({
@@ -74,26 +108,7 @@ export const updateOrRenewMembership = async ({
     return saved as unknown as IMembership;
   }
 
-  const maxMembershipDurations: Record<MembershipClassType, number> = {
-    [MembershipClassType.TRIPLE_GOLD]: 50,
-    [MembershipClassType.DOUBLE_GOLD]: 20,
-    [MembershipClassType.GOLD]: 10,
-    [MembershipClassType.GREEN]: 4,
-    [MembershipClassType.MEMBER]: 50, // "White"
-    [MembershipClassType.CASUAL]: 0,
-  };
-  
-  const maxAllowedDuration = maxMembershipDurations[membership_class];
-  
-  if (maxAllowedDuration === undefined) {
-    throw new Error(`Invalid membership class: ${membership_class}`);
-  }
-  
-  if (membership_duration > maxAllowedDuration) {
-    throw new Error(`${membership_class} cannot exceed ${maxAllowedDuration} weeks`);
-  }  
-
-  // 🔐 Category restriction check
+  // Category restriction check
   if (!isSameCategory(existing.membership_class, membership_class)) {
     logger.error(`Cross-category transition from ${existing.membership_class} to ${membership_class} is not allowed`);
     throw new Error("Cannot switch between online and instore memberships");
@@ -103,7 +118,7 @@ export const updateOrRenewMembership = async ({
   const incomingTier = tierRank[membership_class];
   const expired = isExpired(existing.membership_expiration ?? undefined);
 
-  // 🟡 Same Tier + Active → Extend expiration
+  // Same Tier + Active → Extend expiration
   if (incomingTier === currentTier && !expired) {
     existing.membership_expiration = new Date(
       (existing.membership_expiration?.getTime() ?? today.getTime()) + durationMs
@@ -114,10 +129,10 @@ export const updateOrRenewMembership = async ({
     return updated.toObject() as unknown as IMembership;
   }
 
-  // 🟠 Same Tier + Expired → Renew
+  // Same Tier + Expired → Renew
   if (incomingTier === currentTier && expired) {
     existing.membership_expiration = new Date(today.getTime() + durationMs);
-    existing.mappi_balance = mappi_allowance;
+    existing.mappi_balance = requiredMappi;
     existing.mappi_used_to_date = 0;
 
     const updated = await existing.save();
@@ -125,11 +140,11 @@ export const updateOrRenewMembership = async ({
     return updated.toObject() as unknown as IMembership;
   }
 
-  // 🟢 Upgrade
+  // Upgrade to a higher tier
   if (incomingTier > currentTier) {
     existing.membership_class = membership_class;
     existing.membership_expiration = new Date(today.getTime() + durationMs);
-    existing.mappi_balance += mappi_allowance;
+    existing.mappi_balance = requiredMappi; // overwrite, no stacking
     existing.mappi_used_to_date = 0;
 
     const updated = await existing.save();
@@ -137,19 +152,23 @@ export const updateOrRenewMembership = async ({
     return updated.toObject() as unknown as IMembership;
   }
 
-  // 🔴 Downgrade
+  if (mappi_allowance !== requiredMappi) {
+    throw new Error(`${membership_class} requires exactly ${requiredMappi} mappi`);
+  }
+  
+  // Downgrade to a lower tier
   if (incomingTier < currentTier) {
     existing.membership_class = membership_class;
     existing.membership_expiration = new Date(today.getTime() + durationMs);
-    existing.mappi_balance = mappi_allowance;
+    existing.mappi_balance = requiredMappi; // reset to new tier's cap
     existing.mappi_used_to_date = 0;
 
-    const updated = await existing.save();
-    logger.info(`Downgraded membership for ${pi_uid}`);
-    return updated.toObject() as unknown as IMembership;
+  const updated = await existing.save();
+  logger.info(`Downgraded membership for ${pi_uid}`);
+  return updated.toObject() as unknown as IMembership;
   }
 
-  // 🧯 Fallback
+  // Fallback
   logger.error(`Unhandled membership transition for ${pi_uid}`);
   throw new Error("Unhandled membership transition");
 };
