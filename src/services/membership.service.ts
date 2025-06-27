@@ -44,20 +44,21 @@ export const getSingleMembershipById = async (
 };
 
 export const updateOrRenewMembership = async ({
-  pi_uid,
+  user,
   membership_class,
   membership_duration,
   mappi_allowance,
 }: {
-  pi_uid: string;
+  user: IUser;
   membership_class: MembershipClassType;
   membership_duration: number;
   mappi_allowance: number;
 }): Promise<IMembership> => {
+  const { _id: user_id, pi_uid } = user;
   const today = new Date();
   const durationMs = membership_duration * 7 * 24 * 60 * 60 * 1000;
 
-  const existing = await Membership.findOne({ pi_uid }).exec();
+  const existing = await Membership.findOne({ user_id }).exec();
 
   // Validation maps
   const maxMembershipDurations: Record<MembershipClassType, number> = {
@@ -96,6 +97,7 @@ export const updateOrRenewMembership = async ({
   if (!existing) {
     // Fresh membership
     const newMembership = new Membership({
+      user_id,
       pi_uid,
       membership_class,
       membership_expiration: new Date(today.getTime() + durationMs),
