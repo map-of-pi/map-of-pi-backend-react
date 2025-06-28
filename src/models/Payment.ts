@@ -45,7 +45,12 @@ const paymentSchema = new Schema<IPayment>(
       enum: Object.values(PaymentType).filter(value => typeof value === 'string'),
       required: true,
       default: PaymentType.BuyerCheckout,
-    }
+    },
+     metadata: {
+      type: Schema.Types.Mixed,
+      required: false,
+      default: {},
+    },
   }, { timestamps: true } // Adds timestamps to track creation and update times
 );
 
