@@ -189,6 +189,7 @@ export interface IPayment extends Document {
   payment_type: PaymentType;
   cancelled: boolean;
   createdAt: Date;
+  metadata: MembershipPaymentMetadataType;
 };
 
 export interface PaymentInfo {
@@ -236,8 +237,12 @@ export type PaymentMetadataType = {
   MembershipPayment: MembershipPaymentMetadataType
 };
 
-type MembershipPaymentMetadataType = {
-  membership_id: string
+export type MembershipPaymentMetadataType = {
+  pi_uid: string;
+  membership_class: MembershipClassType;
+  membership_duration: number;
+  mappi_allowance: number;
+  membership_id?: string;  
 };
 
 export interface IPaymentCrossReference {
