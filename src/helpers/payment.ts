@@ -20,6 +20,7 @@ import {
 } from '../services/order.service';
 import { IUser, NewOrder, PaymentDataType, PaymentInfo } from '../types';
 import logger from '../config/loggingConfig';
+import { updateOrRenewMembershipAfterPayment  } from '../services/membership.service';
 
 function buildPaymentData(
   piPaymentId: string,
@@ -183,21 +184,30 @@ export const processPaymentApproval = async (
       };
     }
 
-    // Handle logic based on the payment type
-    if (currentPayment?.metadata.payment_type === PaymentType.BuyerCheckout) {
-      const newOrder = await checkoutProcess(paymentId, currentUser, currentPayment);
-      logger.info("Order created successfully: ", newOrder._id);
-    } else if (currentPayment?.metadata.payment_type === PaymentType.Membership) {
-      logger.info("Membership subscription processed successfully");
+  // Handle logic based on the payment type
+  if (currentPayment?.metadata.payment_type === PaymentType.BuyerCheckout) {
+    const newOrder = await checkoutProcess(paymentId, currentUser, currentPayment);
+    logger.info("Order created successfully: ", newOrder._id);
+
+  } else if (currentPayment?.metadata.payment_type === PaymentType.Membership) {
+    const metadata = currentPayment.metadata.MembershipPayment;
+
+    if (!metadata || !metadata.membership_id) {
+      throw new Error("Missing or invalid membership metadata");
     }
 
-    // Approve the payment on the Pi platform
-    await platformAPIClient.post(`/v2/payments/${ paymentId }/approve`);
+    await updateOrRenewMembershipAfterPayment(currentPayment);
+    logger.info(`Membership subscription processed successfully for pi_uid: ${metadata.pi_uid}`);
+  }
 
-    return {
-      success: true,
-      message: `Payment approved with id ${ paymentId }`,
-    };
+  // Approve the payment on the Pi platform
+  await platformAPIClient.post(`/v2/payments/${ paymentId }/approve`);
+
+  return {
+    success: true,
+    message: `Payment approved with id ${ paymentId }`,
+  };
+
   } catch (error: any) {
     if (error.response) {
       logger.error("platformAPIClient error", {
