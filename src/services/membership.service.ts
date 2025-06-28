@@ -1,9 +1,10 @@
-import { IMembership, IUser } from "../types";
+import { IMembership, PaymentDataType, IUser } from "../types";
 import Membership from "../models/membership";
 import { MembershipClassType, tierRank } from "../models/enums/membershipClassType";
 // import { TransactionType } from "../models/enums/transactionType";
 // import { createTransactionRecord } from "./transaction.service";
 import logger from "../config/loggingConfig";
+import User from "../models/User";
 
 const isExpired = (date?: Date) => !date || date < new Date();
 
@@ -41,6 +42,39 @@ export const getSingleMembershipById = async (
     logger.error(`Failed to retrieve membership for membership ID: ${membership_id}:`, error);
     throw new Error("Failed to get membership; please try again later");
   }
+};
+
+export const updateOrRenewMembershipAfterPayment = async (
+  currentPayment: PaymentDataType
+) => {
+  const metadata = currentPayment.metadata?.MembershipPayment;
+
+  if (!metadata) {
+    throw new Error("MembershipPayment metadata is missing");
+  }
+
+  const { pi_uid, membership_class, membership_duration, mappi_allowance } = metadata;
+
+  if (!pi_uid || !membership_class || !membership_duration || mappi_allowance === undefined) {
+    throw new Error("Missing required metadata fields for membership update");
+  }
+
+  logger.info(`Processing membership update for pi_uid: ${pi_uid}, tier: ${membership_class}, duration: ${membership_duration}`);
+
+  const user = await User.findOne({ pi_uid });
+
+  if (!user) {
+    throw new Error(`User not found with pi_uid: ${pi_uid}`);
+  }
+
+  const updatedMembership = await updateOrRenewMembership({
+    user,
+    membership_class,
+    membership_duration,
+    mappi_allowance,
+  });
+
+  return updatedMembership;
 };
 
 export const updateOrRenewMembership = async ({
