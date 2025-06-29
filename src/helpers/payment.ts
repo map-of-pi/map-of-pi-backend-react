@@ -80,7 +80,8 @@ const checkoutProcess = async (
   }
 
   // Construct payment data object for recording the transaction
-  const paymentData = buildPaymentData(piPaymentId, buyer._id as string, currentPayment);
+  const paymentData = buildPaymentData(piPaymentId, buyer._id.toString()
+, currentPayment);
   // Create a new payment record
   const newPayment = await createPayment(paymentData)
   // Validate payment record creation succeeded
@@ -97,7 +98,7 @@ const checkoutProcess = async (
 
   // Construct order data object
   const orderData = buildOrderData(
-    buyer._id as string,
+    buyer._id.toString(),
     seller._id as string,
     newPayment._id as string,
     currentPayment
