@@ -208,6 +208,11 @@ export interface NewPayment {
   memo:  string,
   amount: string,
   paymentType: PaymentType
+  metadata?: {
+    payment_type: PaymentType;
+    OrderPayment?: OrderPaymentMetadataType;
+    MembershipPayment?: MembershipPaymentMetadataType;
+  };
 };
 
 export interface U2URefDataType {
