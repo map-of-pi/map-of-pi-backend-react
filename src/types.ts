@@ -198,6 +198,28 @@ export interface PaymentInfo {
   };
 };
 
+export interface PaymentDTO {
+  amount: number,
+  user_uid: string,
+  created_at: string,
+  identifier: string,
+  metadata: Object,
+  memo: string,
+  status: {
+    developer_approved: boolean,
+    transaction_verified: boolean,
+    developer_completed: boolean,
+    cancelled: boolean,
+    user_cancelled: boolean,
+  },
+  to_address: string,
+  transaction: null | {
+    txid: string,
+    verified: boolean,
+    _link: string,
+  },
+};
+
 export interface NewPayment {
   piPaymentId: string,
   userId: string,
@@ -217,10 +239,12 @@ export interface A2UPaymentDataType {
   amount: string,
   buyerId: string,
   paymentType: PaymentType,
-  orderId: string
+  orderId: string,
+  memo: string
 };
 
 export type PaymentDataType = {
+  identifier: string;
   amount: string;
   memo: string;
   metadata: {

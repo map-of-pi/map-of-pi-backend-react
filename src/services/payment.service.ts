@@ -10,6 +10,7 @@ import {
   NewPayment, 
   U2URefDataType,
   A2UPaymentDataType,
+  PaymentDTO,
 } from "../types";
 import logger from "../config/loggingConfig";
 
@@ -57,33 +58,11 @@ export const completePayment = async (
   }
 };
 
-export const createOrUpdatePaymentCrossReference = async (
-  orderId: string, 
+export const createPaymentCrossReference = async (
+  orderId: string,
   refData: U2URefDataType
 ): Promise<IPaymentCrossReference> => {
   try {
-    const existingRef = await PaymentCrossReference.findOne({ order_id: orderId }).exec();
-
-    if (existingRef) {
-      // Update existing reference and return the updated document
-      const updatedRef = await PaymentCrossReference.findOneAndUpdate(
-        { order_id: orderId },
-        {
-          a2u_payment_id: refData.a2uPaymentId,
-          a2u_completed_at: new Date(),
-          u2u_status: refData.u2uStatus
-        },
-        { new: true }
-      ).exec();
-
-      if (!updatedRef) {
-        logger.error(`Failed to update Payment xRef for orderID ${ orderId }`);
-        throw new Error('Failed to update Payment xRef');
-      }
-      return updatedRef;
-    }
-
-    // Create a new reference if none exists
     const newRef = new PaymentCrossReference({
       order_id: orderId,
       u2a_payment_id: refData.u2aPaymentId,
@@ -92,9 +71,34 @@ export const createOrUpdatePaymentCrossReference = async (
     });
 
     return await newRef.save();
-
   } catch (error: any) {
-    logger.error(`Failed to create/ update Payment xRef for orderID ${ orderId }: ${ error }`);
+    logger.error(`Failed to create Payment xRef for orderID ${ orderId }: ${ error }`);
+    throw error;
+  }
+};
+
+export const updatePaymentCrossReference = async (
+  orderId: string,
+  refData: U2URefDataType
+): Promise<IPaymentCrossReference> => {
+  try {
+    const updatedRef = await PaymentCrossReference.findOneAndUpdate(
+      { order_id: orderId },
+      {
+        a2u_payment_id: refData.a2uPaymentId,
+        a2u_completed_at: new Date(),
+        u2u_status: refData.u2uStatus
+      },
+      { new: true }
+    ).lean().exec();
+
+    if (!updatedRef) {
+      logger.error(`No Payment xRef found to update for orderID ${ orderId }`);
+      throw new Error('No Payment xRef found to update');
+    }
+    return updatedRef;
+  } catch (error: any) {
+    logger.error(`Failed to update Payment xRef for orderID ${ orderId }: ${ error }`);
     throw error;
   }
 };
@@ -104,7 +108,7 @@ export const createA2UPayment = async (a2uPaymentData: A2UPaymentDataType): Prom
     /* Step 1: Subtract gas fee from original amount to calculate net transfer payment amount */
     const gasFee = 0.01;
     const newAmount = parseFloat(a2uPaymentData.amount) - gasFee;
-    logger.debug('Adjusted A2U payment amount: ', { newAmount });
+    logger.info('Adjusted A2U payment amount: ', { newAmount });
     if (newAmount <= 0) {
       logger.error(`Invalid A2U payment amount ${ newAmount }; must be > 0 after gas fee deduction`);
       throw new Error('Invalid A2U payment amount');
@@ -123,8 +127,13 @@ export const createA2UPayment = async (a2uPaymentData: A2UPaymentDataType): Prom
     /* Step 3: Create a Pi blockchain payment request using seller's Pi UID */
     const a2uData = {
       amount: newAmount,
-      memo: "A2U payment",
-      metadata: { direction: "A2U" },
+      memo: a2uPaymentData.memo,
+      metadata: { 
+        direction: "A2U", 
+        orderId: a2uPaymentData.orderId, 
+        sellerId: a2uPaymentData.sellerId, 
+        buyerId: a2uPaymentData.buyerId 
+      },
       uid: existingSeller?.seller_id as string,
     };
 
@@ -140,7 +149,7 @@ export const createA2UPayment = async (a2uPaymentData: A2UPaymentDataType): Prom
       piPaymentId: paymentId,
       userId: a2uPaymentData.buyerId as string,
       amount: newAmount.toString(),
-      memo: "A2U payment",
+      memo: a2uPaymentData.memo,
       paymentType: a2uPaymentData.paymentType
     });
     logger.info('New A2U payment record created');
@@ -170,12 +179,13 @@ export const createA2UPayment = async (a2uPaymentData: A2UPaymentDataType): Prom
       u2uStatus: U2UPaymentStatus.A2UCompleted,
       a2uPaymentId: updatedPayment?._id as string,
     }
-    const u2uRef = await createOrUpdatePaymentCrossReference(a2uPaymentData.orderId, u2uRefData);
-    logger.info('Created/ updated Payment xRef record');
+    const u2uRef = await updatePaymentCrossReference(a2uPaymentData.orderId, u2uRefData);
     if (!u2uRef) {
-      logger.error(`Failed to create/ update Payment xRef with A2U Payment ID ${ updatedPayment?._id }`);
-      throw new Error('Failed to create/ update Payment xRef with A2U payment data');
+      logger.error(`Failed to update Payment xRef with A2U Payment ID ${ updatedPayment?._id }`);
+      throw new Error('Failed to update Payment xRef with A2U payment data');
     }
+
+    logger.info('Updated Payment xRef record', u2uRef);
 
     /* Step 8: Mark the payment as complete in the Pi blockchain (final confirmation) */
     const completedPiPayment = await pi.completePayment(paymentId, txid);
@@ -200,7 +210,95 @@ export const createA2UPayment = async (a2uPaymentData: A2UPaymentDataType): Prom
         stack: error.stack,
       });
     }
+
+    // Handle cancellation of the payment if it was created but not completed
+    const {incomplete_server_payments} = await getIncompleteServerPayments();
+    logger.info("Found incomplete server payments", incomplete_server_payments);
+    if (incomplete_server_payments && incomplete_server_payments.length > 0) {
+      await completeServerPayment(incomplete_server_payments);
+    }
     return null;
+  }
+};
+
+export const getIncompleteServerPayments = async (): Promise<any> => {
+  try {
+    const serverPayments = await pi.getIncompleteServerPayments();
+    if (!serverPayments || serverPayments.length === 0) { 
+      logger.info('No incomplete Pi payments found on the server');
+      return [];
+    }
+    logger.info(`Found ${ serverPayments.length } incomplete Pi payments on the server`, serverPayments);
+    return serverPayments;
+  } catch (error: any) {
+    logger.error(`Failed to fetch incomplete Pi payments from server: ${ error.message }`);
+    throw error;
+  }
+};
+
+export const completeServerPayment = async (serverPayments: PaymentDTO[]): Promise<void> => {
+  if (!Array.isArray(serverPayments) || serverPayments.length === 0) {
+    logger.warn('No server payments to complete');
+    return;
+  }
+
+  for (const payment of serverPayments) {
+    let transaction = payment.transaction || null;
+    const piPaymentId = payment.identifier;
+    const metadata = payment.metadata as { orderId: string; sellerId: string; buyerId: string };
+
+    if (!piPaymentId) {
+      logger.error(`Missing Pi payment ID for payment: ${JSON.stringify(payment)}`);
+      continue;
+    }
+
+    try {
+      let txid = transaction?.txid;
+
+      // Submit payment if txid not yet assigned
+      if (!txid) {
+        txid = await pi.submitPayment(piPaymentId);
+        if (!txid) {
+          throw new Error(`Failed to submit Pi payment with ID ${piPaymentId}`);
+        }
+      }
+
+      // Mark the payment as completed in your DB
+      const updatedPayment = await completePayment(piPaymentId, txid);
+      if (!updatedPayment) {
+        throw new Error(`Failed to update payment DB for payment ID ${piPaymentId}`);
+      }
+      logger.info(`Marked A2U payment as completed for ${piPaymentId}`);
+
+      // Update U2U payment cross reference
+      const u2uRef = await updatePaymentCrossReference(metadata?.orderId, {
+        u2uStatus: U2UPaymentStatus.A2UCompleted,
+        a2uPaymentId: updatedPayment._id as string,
+      });
+
+      if (!u2uRef) {
+        throw new Error(`Failed to update payment cross reference for order ${metadata.orderId}`);
+      }
+
+      logger.info('Updated U2U reference record', u2uRef);
+
+      // Final confirmation with Pi network
+      const completedPiPayment = await pi.completePayment(piPaymentId, txid);
+      if (!completedPiPayment) {
+        throw new Error(`Failed to confirm Pi payment on blockchain for ${piPaymentId}`);
+      }
+
+      logger.info(`✅ A2U payment process completed for Order ID: ${metadata.orderId}`);
+    } catch (error: any) {
+      if (axios.isAxiosError(error)) {
+        logger.error(`Axios error during A2U payment for order ${metadata.orderId || 'unknown'}: ${error.message}`, {
+          status: error.response?.status,
+          data: error.response?.data,
+        });
+      } else {
+        logger.error(`❌ Error completing server payment for Order ID ${metadata.orderId || 'unknown'}: ${error.message}`);
+      }
+    }
   }
 };
 

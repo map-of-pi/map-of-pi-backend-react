@@ -1,11 +1,14 @@
 import { Request, Response } from "express";
 import logger from "../config/loggingConfig";
+import pi from "../config/platformAPIclient";
 import { 
   processIncompletePayment, 
   processPaymentApproval, 
   processPaymentCancellation, 
-  processPaymentCompletion
+  processPaymentCompletion,
+  processPaymentError
 } from "../helpers/payment";
+import { getIncompleteServerPayments } from "../services/payment.service";
 import { IUser } from "../types";
 
 export const onIncompletePaymentFound = async (req: Request, res: Response) => {
@@ -61,6 +64,72 @@ export const onPaymentCancellation = async (req: Request, res: Response) => {
     return res.status(500).json({
       success: false,
       message: 'An error occurred while cancelling Pi payment; please try again later',
+    });
+  }
+};
+
+export const onPaymentError = async (req: Request, res: Response) => {
+  const { paymentDTO, error } = req.body;
+
+  logger.error(`Received payment error callback from Pi:`, error);
+  
+  if (!paymentDTO) {
+    return res.status(400).json({
+      success: true,
+      message: `No Payment data provided for the error: ${ error }`
+    })
+  }
+
+  try {
+    const erroredPayment = await processPaymentError(paymentDTO);
+    return res.status(200).json(erroredPayment);
+  } catch (error_) {
+    logger.error(`Failed to process payment error`, error_);
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred while erroring Pi payment; please try again later' 
+    });
+  } 
+};
+
+export const getPendingServerPayments = async (req: Request, res: Response) => {
+  try {
+    const serverPayments = await getIncompleteServerPayments();
+    return res.status(200).json(serverPayments);
+  } catch (error) {
+    logger.error('Failed to fetch pending server payments:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred while fetching pending server payments; please try again later'
+    });
+  }
+};
+
+export const onPaymentOngoingToCompleteOrCancel = async (req: Request, res: Response) => {
+  const { paymentId, txid } = req.body;
+
+  if (!paymentId) {
+    return res.status(400).json({
+      success: false,
+      message: 'Payment ID is required'
+    });
+  }
+
+  try {
+    const paymentResult = txid
+      ? await pi.completePayment(paymentId, txid)
+      : await pi.cancelPayment(paymentId);
+
+    return res.status(200).json({
+      success: true,
+      message: `Payment ${txid ? "completed" : "cancelled"} with ID ${ paymentId }`,
+      paymentResult
+    });
+  } catch (error: any) {
+    logger.error(`Error completing or cancelling payment (ID: ${ paymentId }, TXID: ${ txid || 'N/A'}):`, error);
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred while completing/ cancelling Pi payment; please try again later' 
     });
   }
 };

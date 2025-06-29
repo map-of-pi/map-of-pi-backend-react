@@ -7,7 +7,8 @@ import { U2UPaymentStatus } from "../../src/models/enums/u2uPaymentStatus";
 import { 
   createPayment,
   completePayment,
-  createOrUpdatePaymentCrossReference,
+  createPaymentCrossReference,
+  updatePaymentCrossReference,
   createA2UPayment,
   getPayment,
   cancelPayment
@@ -24,6 +25,7 @@ jest.mock('../../src/config/platformAPIclient', () => ({
     createPayment: jest.fn(),
     submitPayment: jest.fn(),
     completePayment: jest.fn(),
+    getIncompleteServerPayments: jest.fn()
   },
 }));
 
@@ -129,7 +131,7 @@ describe('completePayment function', () => {
   });
 });
 
-describe('createOrUpdatePaymentCrossReference function', () => {
+describe('createPaymentCrossReference function', () => {
   const mockOrderId = 'order1_TEST';
   const mockRefData: U2URefDataType = {
     u2aPaymentId: 'u2aPaymentId1_TEST',
@@ -137,9 +139,44 @@ describe('createOrUpdatePaymentCrossReference function', () => {
     u2uStatus: U2UPaymentStatus.Completed
   };
 
-  it('should update an existing cross-reference and return the updated document', async () => {
-    const mockExistingRef = { order_id: mockOrderId };
+  it('should create a new payment xref successfully', async () => {
+    const mockNewRef = {
+      order_id: mockOrderId,
+      u2a_payment_id: mockRefData.u2aPaymentId,
+      u2a_completed_at: expect.any(Date),
+      a2u_payment_id: null,
+    };
 
+    // Mock PaymentCrossReference.save
+    const mockSave = jest.fn().mockResolvedValue(mockNewRef);
+    (PaymentCrossReference as unknown as jest.Mock).mockImplementation(() => ({ save: mockSave }));
+
+    const result = await createPaymentCrossReference(mockOrderId, mockRefData);
+
+    expect(mockSave).toHaveBeenCalled();
+    expect(result).toEqual(mockNewRef);
+  });
+
+  it('should throw an error if creating payment xref fails', async () => {
+    const mockError = new Error('Mock database error');
+
+    jest.spyOn(PaymentCrossReference.prototype, 'save').mockRejectedValueOnce(mockError);
+
+    await expect(createPaymentCrossReference(mockOrderId, mockRefData)).rejects.toThrow(
+      'Mock database error'
+    );
+  });
+});
+
+describe('updatePaymentCrossReference function', () => {
+  const mockOrderId = 'order1_TEST';
+  const mockRefData: U2URefDataType = {
+    u2aPaymentId: 'u2aPaymentId1_TEST',
+    a2uPaymentId: 'a2uPaymentId1_TEST',
+    u2uStatus: U2UPaymentStatus.Completed
+  };
+
+  it('should update an existing payment xref and return the updated document', async () => {
     const mockUpdatedRef = {
       order_id: mockOrderId,
       a2u_payment_id: mockRefData.a2uPaymentId,
@@ -147,19 +184,15 @@ describe('createOrUpdatePaymentCrossReference function', () => {
       a2u_completed_at: expect.any(Date),
     };
 
-    // Mock PaymentCrossReference.findOne
-    (PaymentCrossReference.findOne as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockResolvedValue(mockExistingRef),
-    });
-
     // Mock PaymentCrossReference.findOneAndUpdate
-    (PaymentCrossReference.findOneAndUpdate as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockResolvedValue(mockUpdatedRef),
+    (PaymentCrossReference.findOneAndUpdate as jest.Mock).mockReturnValueOnce({
+      lean: jest.fn(() => ({
+        exec: jest.fn().mockResolvedValue(mockUpdatedRef)
+      })),
     });
 
-    const result = await createOrUpdatePaymentCrossReference(mockOrderId, mockRefData);
+    const result = await updatePaymentCrossReference(mockOrderId, mockRefData);
 
-    expect(PaymentCrossReference.findOne).toHaveBeenCalledWith({ order_id: mockOrderId });
     expect(PaymentCrossReference.findOneAndUpdate).toHaveBeenCalledWith(
       { order_id: mockOrderId },
       {
@@ -172,56 +205,27 @@ describe('createOrUpdatePaymentCrossReference function', () => {
     expect(result).toEqual(mockUpdatedRef);
   });
 
-  it('should create a new cross-reference if one does not exist', async () => {
-    const mockNewRef = {
-      order_id: mockOrderId,
-      u2a_payment_id: mockRefData.u2aPaymentId,
-      u2a_completed_at: expect.any(Date),
-      a2u_payment_id: null,
-    };
-
-    // Mock PaymentCrossReference.findOne
-    (PaymentCrossReference.findOne as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockResolvedValue(null),
-    });
-
-    // Mock PaymentCrossReference.save
-    const mockSave = jest.fn().mockResolvedValue(mockNewRef);
-    (PaymentCrossReference as unknown as jest.Mock).mockImplementation(() => ({ save: mockSave }));
-
-    const result = await createOrUpdatePaymentCrossReference(mockOrderId, mockRefData);
-
-    expect(PaymentCrossReference.findOne).toHaveBeenCalledWith({ order_id: mockOrderId });
-    expect(mockSave).toHaveBeenCalled();
-    expect(result).toEqual(mockNewRef);
-  });
-
-  it('should throw an error if update returns null', async () => {
-    const mockExistingRef = { order_id: mockOrderId };
-
-    // Mock PaymentCrossReference.findOne
-    (PaymentCrossReference.findOne as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockResolvedValue(mockExistingRef),
-    });
-
-    // Mock PaymentCrossReference.findOneAndUpdate
+  it('should throw an error if no document was found to update', async () => {
     (PaymentCrossReference.findOneAndUpdate as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockResolvedValue(null),
+      lean: jest.fn(() => ({
+        exec: jest.fn().mockResolvedValue(null)
+      })),
     });
 
-    await expect(createOrUpdatePaymentCrossReference(mockOrderId, mockRefData)).rejects.toThrow(
-      'Failed to update Payment xRef'
-    );
+    await expect(updatePaymentCrossReference(mockOrderId, mockRefData)).rejects.toThrow(
+      'No Payment xRef found to update');
   });
 
-  it('should throw an error if creating/ updating payment cross reference fails', async () => {
+  it('should throw an error if updating payment xref fails', async () => {
     const mockError = new Error('Mock database error');
 
-    (PaymentCrossReference.findOne as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockRejectedValue(mockError),
+    (PaymentCrossReference.findOneAndUpdate as jest.Mock).mockReturnValue({
+      lean: jest.fn(() => ({
+        exec: jest.fn().mockRejectedValue(mockError),
+      })),
     });
 
-    await expect(createOrUpdatePaymentCrossReference(mockOrderId, mockRefData)).rejects.toThrow(
+    await expect(updatePaymentCrossReference(mockOrderId, mockRefData)).rejects.toThrow(
       'Mock database error'
     );
   });
@@ -233,7 +237,6 @@ describe('createA2UPayment function', () => {
   const mockPiPaymentId = 'piPaymentId1_TEST';
   const mockTxid = 'txid1_TEST';
   const mockCompletedPiPayment = { completed: true };
-  const mockExistingRef = { order_id: 'order1_TEST' };
 
   const mockUpdatedPayment = {
     pi_payment_id: mockPiPaymentId,
@@ -246,6 +249,15 @@ describe('createA2UPayment function', () => {
     cancelled: false,
     createdAt: expect.any(Date)
   };
+
+  const mockServerPayments = [
+    {
+      identifier: mockPiPaymentId,
+      user_uid: mockUpdatedPayment.user_id,
+      amount: mockUpdatedPayment.amount,
+      memo: mockUpdatedPayment.memo,
+    }
+  ];
   
   const mockRefData: U2URefDataType = {
     u2aPaymentId: 'u2aPaymentId1_TEST',
@@ -265,6 +277,7 @@ describe('createA2UPayment function', () => {
     sellerId: 'seller1_TEST',
     buyerId: 'buyer1_TEST',
     amount: '1.00',
+    memo: 'A2U payment',
     paymentType: PaymentType.BuyerCheckout
   };
 
@@ -273,9 +286,10 @@ describe('createA2UPayment function', () => {
     (pi.createPayment as jest.Mock).mockResolvedValue(mockPiPaymentId);
     (pi.submitPayment as jest.Mock).mockResolvedValue(mockTxid);
     (pi.completePayment as jest.Mock).mockResolvedValue(mockCompletedPiPayment);
+    (pi.getIncompleteServerPayments as jest.Mock).mockResolvedValue(mockServerPayments);
   });
 
-  it('should successfully process and return completed A2U payment with existing payment cross reference', async () => {    
+  it('should successfully process and return completed A2U payment', async () => {    
     // Mock Seller.findById()
     (Seller.findById as jest.Mock).mockReturnValue({
       select: jest.fn().mockReturnValue({
@@ -291,87 +305,34 @@ describe('createA2UPayment function', () => {
     (Payment.findOneAndUpdate as jest.Mock).mockReturnValue({
       exec: jest.fn().mockResolvedValueOnce(mockUpdatedPayment),
     } as any);
-
-    // Mock PaymentCrossReference.findOne
-    (PaymentCrossReference.findOne as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockResolvedValue(mockExistingRef),
-    });
 
     // Mock PaymentCrossReference.findOneAndUpdate
     (PaymentCrossReference.findOneAndUpdate as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockResolvedValue(mockUpdatedRef),
+      lean: jest.fn(() => ({
+        exec: jest.fn().mockResolvedValue(mockUpdatedRef)
+      }))
     });
 
-    // Mock PaymentCrossReference.save
-    const mockPaymentXRefSave = jest.fn().mockResolvedValue(mockUpdatedPayment);
-    (PaymentCrossReference as unknown as jest.Mock).mockImplementation(() => ({ save: mockPaymentXRefSave }));
-    
     const result = await createA2UPayment(mockA2UPaymentData);
 
     expect(Seller.findById).toHaveBeenCalledWith(mockA2UPaymentData.sellerId);
     expect(pi.createPayment).toHaveBeenCalledWith({
       amount: 0.99,
       memo: 'A2U payment',
-      metadata: { direction: 'A2U' },
+      metadata: { 
+        direction: 'A2U',
+        orderId: mockA2UPaymentData.orderId,
+        sellerId: mockA2UPaymentData.sellerId,
+        buyerId: mockA2UPaymentData.buyerId   
+      },
       uid: mockSeller.seller_id,
     });
     expect(mockPaymentSave).toHaveBeenCalled();
     expect(pi.submitPayment).toHaveBeenCalledWith(mockPiPaymentId);
     expect(Payment.findOneAndUpdate).toHaveBeenCalled();
-    expect(PaymentCrossReference.findOne).toHaveBeenCalled();
     expect(PaymentCrossReference.findOneAndUpdate).toHaveBeenCalled();
-    expect(mockPaymentXRefSave).not.toHaveBeenCalled();
     expect(pi.completePayment).toHaveBeenCalledWith(mockPiPaymentId, mockTxid);
-    expect(result).toEqual(mockUpdatedPayment);
-  });
-
-  it('should successfully process and return completed A2U payment with new payment cross reference', async () => {
-    const mockNewRef = {
-      order_id: mockOrderId,
-      u2a_payment_id: mockRefData.u2aPaymentId
-    };
-    
-    // Mock Seller.findById()
-    (Seller.findById as jest.Mock).mockReturnValue({
-      select: jest.fn().mockReturnValue({
-        exec: jest.fn().mockResolvedValue(mockSeller),
-      }),
-    });
-
-    // Mock Payment.save()
-    const mockPaymentSave = jest.fn().mockResolvedValue(mockUpdatedPayment);
-    (Payment as unknown as jest.Mock).mockImplementation(() => ({ save: mockPaymentSave }));
-
-    // Mock Payment.findOneAndUpdate
-    (Payment.findOneAndUpdate as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockResolvedValueOnce(mockUpdatedPayment),
-    } as any);
-
-    // Mock PaymentCrossReference.findOne
-    (PaymentCrossReference.findOne as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockResolvedValue(null),
-    });
-
-    // Mock PaymentCrossReference.save
-    const mockPaymentXRefSave = jest.fn().mockResolvedValue(mockNewRef);
-    (PaymentCrossReference as unknown as jest.Mock).mockImplementation(() => ({ save: mockPaymentXRefSave }));
-    
-    const result = await createA2UPayment(mockA2UPaymentData);
-
-    expect(Seller.findById).toHaveBeenCalledWith(mockA2UPaymentData.sellerId);
-    expect(pi.createPayment).toHaveBeenCalledWith({
-      amount: 0.99,
-      memo: 'A2U payment',
-      metadata: { direction: 'A2U' },
-      uid: mockSeller.seller_id,
-    });
-    expect(mockPaymentSave).toHaveBeenCalled();
-    expect(pi.submitPayment).toHaveBeenCalledWith(mockPiPaymentId);
-    expect(Payment.findOneAndUpdate).toHaveBeenCalled();
-    expect(PaymentCrossReference.findOne).toHaveBeenCalled();
-    expect(PaymentCrossReference.findOneAndUpdate).not.toHaveBeenCalled();
-    expect(mockPaymentXRefSave).toHaveBeenCalled();
-    expect(pi.completePayment).toHaveBeenCalledWith(mockPiPaymentId, mockTxid);
+    expect(pi.getIncompleteServerPayments).not.toHaveBeenCalled();
     expect(result).toEqual(mockUpdatedPayment);
   });
 
@@ -385,14 +346,11 @@ describe('createA2UPayment function', () => {
     const mockPaymentSave = jest.fn().mockResolvedValue(null);
     (Payment as unknown as jest.Mock).mockImplementation(() => ({ save: mockPaymentSave }));
 
-    // Mock PaymentCrossReference.findOneAndUpdate
     (PaymentCrossReference.findOneAndUpdate as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockResolvedValue(null),
+      lean: jest.fn(() => ({
+        exec: jest.fn().mockResolvedValue(null)
+      }))
     });
-
-    // Mock PaymentCrossReference.save
-    const mockPaymentXRefSave = jest.fn().mockResolvedValue(mockUpdatedPayment);
-    (PaymentCrossReference as unknown as jest.Mock).mockImplementation(() => ({ save: mockPaymentXRefSave }));
 
     const result = await createA2UPayment(mockA2UPaymentData);
 
@@ -401,10 +359,9 @@ describe('createA2UPayment function', () => {
     expect(mockPaymentSave).not.toHaveBeenCalled();
     expect(pi.submitPayment).not.toHaveBeenCalled();
     expect(Payment.findOneAndUpdate).not.toHaveBeenCalled();
-    expect(PaymentCrossReference.findOne).not.toHaveBeenCalled();
     expect(PaymentCrossReference.findOneAndUpdate).not.toHaveBeenCalled();
-    expect(mockPaymentXRefSave).not.toHaveBeenCalled();
     expect(pi.completePayment).not.toHaveBeenCalled();
+    expect(pi.getIncompleteServerPayments).toHaveBeenCalled();
     expect(result).toBeNull();
   });
 
@@ -424,25 +381,26 @@ describe('createA2UPayment function', () => {
       exec: jest.fn().mockResolvedValueOnce(null),
     } as any);
 
-    const mockPaymentXRefSave = jest.fn().mockResolvedValue(null);
-    (PaymentCrossReference as unknown as jest.Mock).mockImplementation(() => ({ save: mockPaymentXRefSave }));
-    
     const result = await createA2UPayment(mockA2UPaymentData);
 
     expect(Seller.findById).toHaveBeenCalledWith(mockA2UPaymentData.sellerId);
     expect(pi.createPayment).toHaveBeenCalledWith({
       amount: 0.99,
       memo: 'A2U payment',
-      metadata: { direction: 'A2U' },
+      metadata: { 
+        direction: 'A2U',
+        orderId: mockA2UPaymentData.orderId,
+        sellerId: mockA2UPaymentData.sellerId,
+        buyerId: mockA2UPaymentData.buyerId   
+      },
       uid: mockSeller.seller_id,
     });
     expect(mockPaymentSave).not.toHaveBeenCalled();
     expect(pi.submitPayment).not.toHaveBeenCalled();
     expect(Payment.findOneAndUpdate).not.toHaveBeenCalled();
-    expect(PaymentCrossReference.findOne).not.toHaveBeenCalled();
     expect(PaymentCrossReference.findOneAndUpdate).not.toHaveBeenCalled();
-    expect(mockPaymentXRefSave).not.toHaveBeenCalled();
     expect(pi.completePayment).not.toHaveBeenCalled();
+    expect(pi.getIncompleteServerPayments).toHaveBeenCalled();
     expect(result).toBeNull();
   });
 
@@ -456,25 +414,26 @@ describe('createA2UPayment function', () => {
     const mockPaymentSave = jest.fn().mockResolvedValue(null);
     (Payment as unknown as jest.Mock).mockImplementation(() => ({ save: mockPaymentSave }));
 
-    const mockPaymentXRefSave = jest.fn().mockResolvedValue(null);
-    (PaymentCrossReference as unknown as jest.Mock).mockImplementation(() => ({ save: mockPaymentXRefSave }));
-    
     const result = await createA2UPayment(mockA2UPaymentData);
 
     expect(Seller.findById).toHaveBeenCalledWith(mockA2UPaymentData.sellerId);
     expect(pi.createPayment).toHaveBeenCalledWith({
       amount: 0.99,
       memo: 'A2U payment',
-      metadata: { direction: 'A2U' },
+      metadata: { 
+        direction: 'A2U',
+        orderId: mockA2UPaymentData.orderId,
+        sellerId: mockA2UPaymentData.sellerId,
+        buyerId: mockA2UPaymentData.buyerId   
+      },
       uid: mockSeller.seller_id,
     });
     expect(mockPaymentSave).toHaveBeenCalled();
     expect(pi.submitPayment).not.toHaveBeenCalled();
     expect(Payment.findOneAndUpdate).not.toHaveBeenCalled();
-    expect(PaymentCrossReference.findOne).not.toHaveBeenCalled();
     expect(PaymentCrossReference.findOneAndUpdate).not.toHaveBeenCalled();
-    expect(mockPaymentXRefSave).not.toHaveBeenCalled();
     expect(pi.completePayment).not.toHaveBeenCalled();
+    expect(pi.getIncompleteServerPayments).toHaveBeenCalled();
     expect(result).toBeNull();
   });
 
@@ -490,25 +449,26 @@ describe('createA2UPayment function', () => {
     const mockPaymentSave = jest.fn().mockResolvedValue(mockUpdatedPayment);
     (Payment as unknown as jest.Mock).mockImplementation(() => ({ save: mockPaymentSave }));
 
-    const mockPaymentXRefSave = jest.fn().mockResolvedValue(null);
-    (PaymentCrossReference as unknown as jest.Mock).mockImplementation(() => ({ save: mockPaymentXRefSave }));
-    
     const result = await createA2UPayment(mockA2UPaymentData);
 
     expect(Seller.findById).toHaveBeenCalledWith(mockA2UPaymentData.sellerId);
     expect(pi.createPayment).toHaveBeenCalledWith({
       amount: 0.99,
       memo: 'A2U payment',
-      metadata: { direction: 'A2U' },
+      metadata: { 
+        direction: 'A2U',
+        orderId: mockA2UPaymentData.orderId,
+        sellerId: mockA2UPaymentData.sellerId,
+        buyerId: mockA2UPaymentData.buyerId   
+      },
       uid: mockSeller.seller_id,
     });
     expect(mockPaymentSave).toHaveBeenCalled();
     expect(pi.submitPayment).toHaveBeenCalledWith(mockPiPaymentId);
     expect(Payment.findOneAndUpdate).not.toHaveBeenCalled();
-    expect(PaymentCrossReference.findOne).not.toHaveBeenCalled();
     expect(PaymentCrossReference.findOneAndUpdate).not.toHaveBeenCalled();
-    expect(mockPaymentXRefSave).not.toHaveBeenCalled();
     expect(pi.completePayment).not.toHaveBeenCalled();
+    expect(pi.getIncompleteServerPayments).toHaveBeenCalled();
     expect(result).toBeNull();
   });
 
@@ -526,29 +486,30 @@ describe('createA2UPayment function', () => {
       exec: jest.fn().mockResolvedValueOnce(null),
     } as any);
 
-    const mockPaymentXRefSave = jest.fn().mockResolvedValue(null);
-    (PaymentCrossReference as unknown as jest.Mock).mockImplementation(() => ({ save: mockPaymentXRefSave }));
-    
     const result = await createA2UPayment(mockA2UPaymentData);
 
     expect(Seller.findById).toHaveBeenCalledWith(mockA2UPaymentData.sellerId);
     expect(pi.createPayment).toHaveBeenCalledWith({
       amount: 0.99,
       memo: 'A2U payment',
-      metadata: { direction: 'A2U' },
+      metadata: { 
+        direction: 'A2U',
+        orderId: mockA2UPaymentData.orderId,
+        sellerId: mockA2UPaymentData.sellerId,
+        buyerId: mockA2UPaymentData.buyerId   
+      },
       uid: mockSeller.seller_id,
     });
     expect(mockPaymentSave).toHaveBeenCalled();
     expect(pi.submitPayment).toHaveBeenCalledWith(mockPiPaymentId);
     expect(Payment.findOneAndUpdate).toHaveBeenCalled();
-    expect(PaymentCrossReference.findOne).not.toHaveBeenCalled();
     expect(PaymentCrossReference.findOneAndUpdate).not.toHaveBeenCalled();
-    expect(mockPaymentXRefSave).not.toHaveBeenCalled();
     expect(pi.completePayment).not.toHaveBeenCalled();
+    expect(pi.getIncompleteServerPayments).toHaveBeenCalled();
     expect(result).toBeNull();
   });
 
-  it('should fail gracefully and return null if creating/ updating payment cross reference fails', async () => {
+  it('should fail gracefully and return null if updating payment cross reference fails', async () => {
     (Seller.findById as jest.Mock).mockReturnValue({
       select: jest.fn().mockReturnValue({
         exec: jest.fn().mockResolvedValue(mockSeller),
@@ -562,33 +523,32 @@ describe('createA2UPayment function', () => {
       exec: jest.fn().mockResolvedValueOnce(mockUpdatedPayment),
     } as any);
 
-    (PaymentCrossReference.findOne as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockResolvedValue(mockExistingRef),
-    });
-
     (PaymentCrossReference.findOneAndUpdate as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockResolvedValue(null),
+      lean: jest.fn(() => ({
+        exec: jest.fn().mockResolvedValue(null)
+      }))
     });
 
-    const mockPaymentXRefSave = jest.fn().mockResolvedValue(null);
-    (PaymentCrossReference as unknown as jest.Mock).mockImplementation(() => ({ save: mockPaymentXRefSave }));
-    
     const result = await createA2UPayment(mockA2UPaymentData);
 
     expect(Seller.findById).toHaveBeenCalledWith(mockA2UPaymentData.sellerId);
     expect(pi.createPayment).toHaveBeenCalledWith({
       amount: 0.99,
       memo: 'A2U payment',
-      metadata: { direction: 'A2U' },
+      metadata: { 
+        direction: 'A2U',
+        orderId: mockA2UPaymentData.orderId,
+        sellerId: mockA2UPaymentData.sellerId,
+        buyerId: mockA2UPaymentData.buyerId   
+      },
       uid: mockSeller.seller_id,
     });
     expect(mockPaymentSave).toHaveBeenCalled();
     expect(pi.submitPayment).toHaveBeenCalledWith(mockPiPaymentId);
     expect(Payment.findOneAndUpdate).toHaveBeenCalled();
-    expect(PaymentCrossReference.findOne).toHaveBeenCalled();
     expect(PaymentCrossReference.findOneAndUpdate).toHaveBeenCalled();
-    expect(mockPaymentXRefSave).not.toHaveBeenCalled();
     expect(pi.completePayment).not.toHaveBeenCalled();
+    expect(pi.getIncompleteServerPayments).toHaveBeenCalled();
     expect(result).toBeNull();
   });
 
@@ -608,33 +568,32 @@ describe('createA2UPayment function', () => {
       exec: jest.fn().mockResolvedValueOnce(mockUpdatedPayment),
     } as any);
 
-    (PaymentCrossReference.findOne as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockResolvedValue(mockExistingRef),
-    });
-
     (PaymentCrossReference.findOneAndUpdate as jest.Mock).mockReturnValue({
-      exec: jest.fn().mockResolvedValue(mockUpdatedRef),
+      lean: jest.fn(() => ({
+        exec: jest.fn().mockResolvedValue(mockUpdatedRef)
+      }))
     });
 
-    const mockPaymentXRefSave = jest.fn().mockResolvedValue(mockUpdatedPayment);
-    (PaymentCrossReference as unknown as jest.Mock).mockImplementation(() => ({ save: mockPaymentXRefSave }));
-    
     const result = await createA2UPayment(mockA2UPaymentData);
 
     expect(Seller.findById).toHaveBeenCalledWith(mockA2UPaymentData.sellerId);
     expect(pi.createPayment).toHaveBeenCalledWith({
       amount: 0.99,
       memo: 'A2U payment',
-      metadata: { direction: 'A2U' },
+      metadata: { 
+        direction: 'A2U',
+        orderId: mockA2UPaymentData.orderId,
+        sellerId: mockA2UPaymentData.sellerId,
+        buyerId: mockA2UPaymentData.buyerId   
+      },
       uid: mockSeller.seller_id,
     });
     expect(mockPaymentSave).toHaveBeenCalled();
     expect(pi.submitPayment).toHaveBeenCalledWith(mockPiPaymentId);
     expect(Payment.findOneAndUpdate).toHaveBeenCalled();
-    expect(PaymentCrossReference.findOne).toHaveBeenCalled();
     expect(PaymentCrossReference.findOneAndUpdate).toHaveBeenCalled();
-    expect(mockPaymentXRefSave).not.toHaveBeenCalled();
     expect(pi.completePayment).toHaveBeenCalledWith(mockPiPaymentId, mockTxid);
+    expect(pi.getIncompleteServerPayments).toHaveBeenCalled();
     expect(result).toBeNull();
   });
 });
