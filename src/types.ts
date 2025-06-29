@@ -12,10 +12,12 @@ import { U2UPaymentStatus } from "./models/enums/u2uPaymentStatus";
 import { RestrictedArea } from "./models/enums/restrictedArea";
 import { MembershipClassType } from "./models/enums/membershipClassType";
 
+
 // ========================
 // USER MODELS
 // ========================
 export interface IUser extends Document {
+  _id: Types.ObjectId;
 	pi_uid: string;
 	pi_username: string;
 	user_name: string;
