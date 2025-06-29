@@ -12,6 +12,29 @@ import {
   A2UPaymentDataType,
 } from "../types";
 import logger from "../config/loggingConfig";
+import { IUser } from "../types";
+import { PaymentDataType } from "../types";
+
+export const createU2APayment = async (
+  user: IUser,
+  paymentData: PaymentDataType
+) => {
+  try {
+    const createdPayment = await Payment.create({
+      user_id: user._id.toString(),
+      amount: paymentData.amount,
+      payment_type: paymentData.metadata.payment_type,
+      metadata: paymentData.metadata, // typo fix: was `metaData`
+      paid: false,
+      cancelled: false,
+    });
+
+    return createdPayment;
+  } catch (error: any) {
+    logger.error("Failed to create U2A payment", { error });
+    return null;
+  }
+};
 
 export const createPayment = async (paymentData: NewPayment): Promise<IPayment> => {
   try {    
@@ -24,6 +47,7 @@ export const createPayment = async (paymentData: NewPayment): Promise<IPayment> 
       memo: paymentData.memo,
       payment_type: paymentData.paymentType,
       cancelled: false,
+      metadata:paymentData.metadata || {},
     });
 
     return await payment.save();
