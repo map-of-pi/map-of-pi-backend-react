@@ -93,12 +93,12 @@ export const updatePaymentCrossReference = async (
     ).lean().exec();
 
     if (!updatedRef) {
-      logger.error(`Failed to update Payment xRef for orderID ${orderId}`);
-      throw new Error('Failed to update Payment xRef');
+      logger.error(`No Payment xRef found to update for orderID ${ orderId }`);
+      throw new Error('No Payment xRef found to update');
     }
     return updatedRef;
   } catch (error: any) {
-    logger.error(`Failed to create/ update Payment xRef for orderID ${ orderId }: ${ error }`);
+    logger.error(`Failed to update Payment xRef for orderID ${ orderId }: ${ error }`);
     throw error;
   }
 };
@@ -128,7 +128,12 @@ export const createA2UPayment = async (a2uPaymentData: A2UPaymentDataType): Prom
     const a2uData = {
       amount: newAmount,
       memo: a2uPaymentData.memo,
-      metadata: { direction: "A2U", orderId: a2uPaymentData.orderId, sellerId: a2uPaymentData.sellerId, buyerId: a2uPaymentData.buyerId },
+      metadata: { 
+        direction: "A2U", 
+        orderId: a2uPaymentData.orderId, 
+        sellerId: a2uPaymentData.sellerId, 
+        buyerId: a2uPaymentData.buyerId 
+      },
       uid: existingSeller?.seller_id as string,
     };
 
@@ -180,7 +185,7 @@ export const createA2UPayment = async (a2uPaymentData: A2UPaymentDataType): Prom
       throw new Error('Failed to update Payment xRef with A2U payment data');
     }
 
-    logger.info('updated Payment xRef record', u2uRef);
+    logger.info('Updated Payment xRef record', u2uRef);
 
     /* Step 8: Mark the payment as complete in the Pi blockchain (final confirmation) */
     const completedPiPayment = await pi.completePayment(paymentId, txid);
@@ -208,7 +213,7 @@ export const createA2UPayment = async (a2uPaymentData: A2UPaymentDataType): Prom
 
     // Handle cancellation of the payment if it was created but not completed
     const {incomplete_server_payments} = await getIncompleteServerPayments();
-    logger.info("found incomplete server payments", incomplete_server_payments);
+    logger.info("Found incomplete server payments", incomplete_server_payments);
     if (incomplete_server_payments && incomplete_server_payments.length > 0) {
       await completeServerPayment(incomplete_server_payments);
     }
@@ -218,13 +223,13 @@ export const createA2UPayment = async (a2uPaymentData: A2UPaymentDataType): Prom
 
 export const getIncompleteServerPayments = async (): Promise<any> => {
   try {
-    const serverpayments = await pi.getIncompleteServerPayments();
-    if (!serverpayments || serverpayments.length === 0) { 
+    const serverPayments = await pi.getIncompleteServerPayments();
+    if (!serverPayments || serverPayments.length === 0) { 
       logger.info('No incomplete Pi payments found on the server');
       return [];
     }
-    logger.info(`Found ${ serverpayments.length } incomplete Pi payments on the server`, serverpayments);
-    return serverpayments;
+    logger.info(`Found ${ serverPayments.length } incomplete Pi payments on the server`, serverPayments);
+    return serverPayments;
   } catch (error: any) {
     logger.error(`Failed to fetch incomplete Pi payments from server: ${ error.message }`);
     throw error;
@@ -243,7 +248,7 @@ export const completeServerPayment = async (serverPayments: PaymentDTO[]): Promi
     const metadata = payment.metadata as { orderId: string; sellerId: string; buyerId: string };
 
     if (!piPaymentId) {
-      logger.error('Missing Pi payment ID');
+      logger.error(`Missing Pi payment ID for payment: ${JSON.stringify(payment)}`);
       continue;
     }
 
@@ -296,7 +301,6 @@ export const completeServerPayment = async (serverPayments: PaymentDTO[]): Promi
     }
   }
 };
-
 
 export const getPayment = async (piPaymentId: string): Promise<IPayment | null> => {
   try {

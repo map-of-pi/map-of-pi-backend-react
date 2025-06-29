@@ -244,6 +244,7 @@ export interface A2UPaymentDataType {
 };
 
 export type PaymentDataType = {
+  identifier: string;
   amount: string;
   memo: string;
   metadata: {

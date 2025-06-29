@@ -6,6 +6,11 @@ import { OrderStatusType } from '../models/enums/orderStatusType';
 import { PaymentType } from "../models/enums/paymentType";
 import { U2UPaymentStatus } from '../models/enums/u2uPaymentStatus';
 import { 
+  cancelOrder, 
+  createOrder, 
+  updatePaidOrder 
+} from '../services/order.service';
+import { 
   getPayment, 
   createPayment, 
   completePayment, 
@@ -13,14 +18,8 @@ import {
   createA2UPayment,
   cancelPayment
 } from '../services/payment.service';
-import { 
-  cancelOrder, 
-  createOrder, 
-  updatePaidOrder 
-} from '../services/order.service';
 import { IUser, NewOrder, PaymentDataType, PaymentDTO, PaymentInfo } from '../types';
 import logger from '../config/loggingConfig';
-import { onIncompletePaymentFound } from '../controllers/paymentController';
 
 function buildPaymentData(
   piPaymentId: string,
@@ -114,7 +113,6 @@ export const processIncompletePayment = async (payment: PaymentInfo) => {
     const paymentId = payment.identifier;
     const txid = payment.transaction?.txid;
     const txURL = payment.transaction?._link;
-    // logger.info("Incomplete payment data: ", payment);
 
     // Retrieve the original (incomplete) payment record by its identifier
     const incompletePayment = await getPayment(paymentId);
@@ -181,7 +179,7 @@ export const processPaymentApproval = async (
 
       return {
         success: false,
-        message: `Payment already exists with id ${ paymentId }`,
+        message: `Payment already exists with ID ${ paymentId }`,
       };
     }
 
@@ -240,13 +238,13 @@ export const processPaymentCompletion = async (paymentId: string, txid: string) 
       // Notify Pi Platform of successful completion
       const completedPiPayment = await platformAPIClient.post(`/v2/payments/${ paymentId }/complete`, { txid });
       
-      if (completedPiPayment.status!==200) {
-        throw new Error("failed to mark U2A payment completed on Pi blockchain");
+      if (completedPiPayment.status !== 200) {
+        throw new Error("Failed to mark U2A payment completed on Pi blockchain");
       }
 
       logger.info("Payment marked completed on Pi blockchain", completedPiPayment.status);
 
-      const payentMemo = completedPiPayment.data.memo as string
+      const paymentMemo = completedPiPayment.data.memo as string;
 
       // Start A2U (App-to-User) payment to the seller
       await createA2UPayment({
@@ -255,7 +253,7 @@ export const processPaymentCompletion = async (paymentId: string, txid: string) 
         buyerId: order.buyer_id.toString(),
         paymentType: PaymentType.BuyerCheckout,
         orderId: order._id as string,
-        memo: payentMemo
+        memo: paymentMemo
       });
 
     } else if (completedPayment?.payment_type === PaymentType.Membership) {
@@ -343,7 +341,6 @@ export const processPaymentError = async (paymentDTO: PaymentDTO) => {
         success: true,
         message: `Payment Error with ID ${paymentId} handled and completed successfully`,
       };
-
     } else {
       logger.warn("No transaction data found for existing payment");
       await processPaymentCancellation(paymentId);
@@ -365,4 +362,4 @@ export const processPaymentError = async (paymentDTO: PaymentDTO) => {
     }
     throw(error);
   }
-}
+};
