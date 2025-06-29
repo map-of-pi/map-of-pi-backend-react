@@ -11,9 +11,11 @@ const paymentSchema = new Schema<IPayment>(
     },
     pi_payment_id: {
       type: String,
-      required: true,
       unique: true,
-      default: null
+      sparse: true
+     // In U2A (User-to-App) payments, we create the payment intent first before interacting with the Pi SDK.
+     // The pi_payment_id is returned by the SDK after the user approves the payment,
+     // so we initially leave it blank and update it later once we receive the ID.
     },
     txid: {
       type: String,
