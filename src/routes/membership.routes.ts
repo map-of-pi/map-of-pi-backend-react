@@ -1,6 +1,5 @@
 import express from "express";
 import { verifyToken } from "../middlewares/verifyToken";
-import * as membershipLegacyController from "../controllers/membershipLegacy.controller";
 import * as membershipController from "../controllers/membershipController"
 
 const membershipRoutes = express.Router();
