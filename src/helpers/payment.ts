@@ -345,7 +345,7 @@ export const processPaymentError = async (paymentDTO: PaymentDTO) => {
       logger.warn("No transaction data found for existing payment");
       await processPaymentCancellation(paymentId);
       return {
-        success: false,
+        success: true,
         message: `Payment Error with ID ${paymentId} cancelled successfully`,
       };
     }
