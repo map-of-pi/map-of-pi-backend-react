@@ -1,9 +1,16 @@
-import { onIncompletePaymentFound, onPaymentApproval, onPaymentCancellation, onPaymentCompletion } from '../../src/controllers/paymentController';
+import { 
+  onIncompletePaymentFound, 
+  onPaymentApproval, 
+  onPaymentCancellation, 
+  onPaymentCompletion, 
+  onPaymentError 
+} from '../../src/controllers/paymentController';
 import { 
   processIncompletePayment, 
   processPaymentApproval, 
   processPaymentCancellation, 
-  processPaymentCompletion
+  processPaymentCompletion,
+  processPaymentError
 } from '../../src/helpers/payment';
 
 jest.mock('../../src/helpers/payment');
@@ -171,9 +178,9 @@ describe('paymentController', () => {
       };
 
       (processPaymentCancellation as jest.Mock).mockResolvedValue(mockProcessedResult);
-
+  
       await onPaymentCancellation(req, res);
-
+  
       expect(processPaymentCancellation).toHaveBeenCalledWith(mockPaymentId);
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(mockProcessedResult);
@@ -186,6 +193,66 @@ describe('paymentController', () => {
       await onPaymentCancellation(req, res);
   
       expect(processPaymentCancellation).toHaveBeenCalledWith(mockPaymentId);
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({ 
+        success: false,
+        message: mockError.message 
+      });
+    });
+  });
+
+  describe('onPaymentError function', () => {
+    beforeEach(() => {
+      res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      };
+    });
+
+    it('should return [400] if paymentDTO is missing', async () => {
+      req = {
+        body: { error: 'Mock Error' }
+      };
+      
+      await onPaymentError(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: `No Payment data provided for the error: Mock Error`,
+      });
+    });
+
+    it('should return [200] and errored payment response on success', async () => {
+      const mockErroredPayment = { success: true, message: 'Handled error' };
+      (processPaymentError as jest.Mock).mockResolvedValue(mockErroredPayment);
+
+      req = {
+        body: {
+          paymentDTO: { user_uid: 'User_UID_1' }, 
+          error: 'Mock Error' }
+      };
+  
+      await onPaymentError(req, res);
+  
+      expect(processPaymentError).toHaveBeenCalledWith(req.body.paymentDTO);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(mockErroredPayment);
+    });
+
+    it('should return [500] if payment error processor throws error', async () => {
+      const mockError = new Error('An error occurred while erroring Pi payment; please try again later');
+      (processPaymentError as jest.Mock).mockRejectedValue(mockError);
+
+      req = {
+        body: {
+          paymentDTO: { user_uid: 'User_UID_1' }, 
+          error: 'Mock Error' }
+      };
+  
+      await onPaymentError(req, res);
+  
+      expect(processPaymentError).toHaveBeenCalledWith(req.body.paymentDTO);
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({ 
         success: false,

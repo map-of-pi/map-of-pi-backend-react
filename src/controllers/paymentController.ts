@@ -4,7 +4,8 @@ import {
   processIncompletePayment, 
   processPaymentApproval, 
   processPaymentCancellation, 
-  processPaymentCompletion
+  processPaymentCompletion,
+  processPaymentError
 } from "../helpers/payment";
 import { IUser } from "../types";
 
@@ -63,4 +64,28 @@ export const onPaymentCancellation = async (req: Request, res: Response) => {
       message: 'An error occurred while cancelling Pi payment; please try again later',
     });
   }
+};
+
+export const onPaymentError = async (req: Request, res: Response) => {
+  const { paymentDTO, error } = req.body;
+
+  logger.error(`Received payment error callback from Pi:`, error);
+  
+  if (!paymentDTO) {
+    return res.status(400).json({
+      success: true,
+      message: `No Payment data provided for the error: ${ error }`
+    })
+  }
+
+  try {
+    const erroredPayment = await processPaymentError(paymentDTO);
+    return res.status(200).json(erroredPayment);
+  } catch (error_) {
+    logger.error(`Failed to process payment error`, error_);
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred while erroring Pi payment; please try again later' 
+    });
+  } 
 };
