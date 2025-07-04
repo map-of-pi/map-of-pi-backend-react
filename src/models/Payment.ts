@@ -17,8 +17,7 @@ const paymentSchema = new Schema<IPayment>(
     },
     txid: {
       type: String,
-      required: false,
-      default: null
+      required: false
     },
     amount: {
       type: Types.Decimal128,
