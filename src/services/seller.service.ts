@@ -78,8 +78,19 @@ export const getAllSellers = async (
 ): Promise<ISellerWithSettings[]> => {
   try {
     const maxNumSellers = 50;
-    let userSettings: any = userId ? await getUserSettingsById(userId) : {};
-    const searchFilters = userSettings.search_filters || {};
+    let userSettings: any = userId ? await getUserSettingsById(userId) ?? {} : {};
+    
+    const defaultSearchFilters = {
+      include_active_sellers: true,
+      include_inactive_sellers: false,
+      include_test_sellers: false,
+      include_trust_level_100: true,
+      include_trust_level_80: true,
+      include_trust_level_50: true,
+      include_trust_level_0: false,
+    };
+
+    const searchFilters = userSettings.search_filters ?? defaultSearchFilters;
 
     // Construct base filter criteria
     const baseCriteria: Record<string, any> = {};
@@ -152,7 +163,7 @@ export const getAllSellers = async (
     const sellersWithSettings = await resolveSellerSettings(sellers, trustLevelFilters);
     return sellersWithSettings;
   } catch (error: any) {
-    logger.error(`Failed to get all sellers: ${ error.message }`);
+    logger.error(`Failed to get all sellers: ${ error }`);
     throw error;
   }
 };
@@ -178,7 +189,7 @@ export const getSingleSellerById = async (seller_id: string): Promise<ISeller | 
       sellerItems: items as ISellerItem[] || null
     } as any;
   } catch (error: any) {
-    logger.error(`Failed to get single seller for sellerID ${ seller_id }: ${ error.message }`);
+    logger.error(`Failed to get single seller for sellerID ${ seller_id }: ${ error }`);
     throw error;
   }
 };
@@ -228,7 +239,7 @@ export const registerOrUpdateSeller = async (authUser: IUser, formData: any): Pr
       return savedSeller as ISeller;
     }
   } catch (error: any) {
-    logger.error(`Failed to register or update seller: ${ error.message }`);
+    logger.error(`Failed to register or update seller: ${ error }`);
     throw error;
   }
 };
@@ -239,7 +250,7 @@ export const deleteSeller = async (seller_id: string | undefined): Promise<ISell
     const deletedSeller = await Seller.findOneAndDelete({ seller_id }).exec();
     return deletedSeller ? deletedSeller as ISeller : null;
   } catch (error: any) {
-    logger.error(`Failed to delete seller for sellerID ${ seller_id }: ${ error.message }`);
+    logger.error(`Failed to delete seller for sellerID ${ seller_id }: ${ error }`);
     throw error;
   }
 };
@@ -259,7 +270,7 @@ export const getAllSellerItems = async (
     logger.info('fetched item list successfully');
     return existingItems as ISellerItem[];
   } catch (error: any) {
-    logger.error(`Failed to get seller items for sellerID ${ seller_id }: ${ error.message }`);
+    logger.error(`Failed to get seller items for sellerID ${ seller_id }: ${ error }`);
     throw error;
   }
 };
@@ -319,7 +330,7 @@ export const addOrUpdateSellerItem = async (
       return newItem;
     }
   } catch (error: any) {
-    logger.error(`Failed to add or update seller item for sellerID ${ seller.seller_id}: ${ error.message }`);
+    logger.error(`Failed to add or update seller item for sellerID ${ seller.seller_id}: ${ error }`);
     throw error;
   }
 };
@@ -330,7 +341,7 @@ export const deleteSellerItem = async (id: string): Promise<ISellerItem | null> 
     const deletedSellerItem = await SellerItem.findByIdAndDelete(id).exec();
     return deletedSellerItem ? deletedSellerItem as ISellerItem : null;
   } catch (error: any) {
-    logger.error(`Failed to delete seller item for itemID ${ id }: ${ error.message}`);
+    logger.error(`Failed to delete seller item for itemID ${ id }: ${ error}`);
     throw error;
   }
 };
@@ -347,7 +358,7 @@ export const getSellersWithinSanctionedRegion = async (region: ISanctionedRegion
     logger.info(`Found ${sellers.length} seller(s) within the sanctioned region: ${region.location}`);
     return sellers;
   } catch (error: any) {
-    logger.error(`Failed to get sellers within sanctioned region ${ region }: ${ error.message }`);
+    logger.error(`Failed to get sellers within sanctioned region ${ region }: ${ error }`);
     throw error;  
   }
 };
