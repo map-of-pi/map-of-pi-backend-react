@@ -32,7 +32,7 @@ export const onPaymentApproval = async (req: Request, res: Response) => {
     const approvedPayment = await processPaymentApproval(paymentId, currentUser);
     return res.status(200).json(approvedPayment);
   } catch (error) {
-    logger.error(`Failed to approve Pi payment for paymentID ${ paymentId }:`, error);
+    logger.error(`Failed to approve Pi payment for piPaymentID ${ paymentId }:`, error);
     return res.status(500).json({
       success: false, 
       message: 'An error occurred while approving Pi payment; please try again later' 

@@ -48,7 +48,7 @@ export const gasSaver = async (): Promise<{ xRef: string[]; sellerPiUid: string;
     })
     .populate<{ order_id: {_id:String, total_amount:string, seller_id: {seller_id:string, gas_saver:boolean}} }>({
       path: 'order_id',
-      select: 'total_amount seller_id',
+      select: '_id total_amount seller_id',
       populate: {
         path: 'seller_id',
         model: 'Seller', // ensure this matches your actual Seller model name

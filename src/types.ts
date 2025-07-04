@@ -10,6 +10,7 @@ import { OrderItemStatusType } from "./models/enums/orderItemStatusType";
 import { PaymentType } from "./models/enums/paymentType";
 import { U2UPaymentStatus } from "./models/enums/u2uPaymentStatus";
 import { RestrictedArea } from "./models/enums/restrictedArea";
+import { PaymentDirection } from "./models/enums/paymentDirection";
 
 // ========================
 // USER MODELS
@@ -184,9 +185,10 @@ export type OrderPaymentMetadataType = {
 export interface IA2UJob extends Document {
   sellerPiUid: string;
   amount: number;
-  orders: string[];
+  xRef_ids: string[];
   memo: string,
   status: 'pending' | 'processing' | 'completed' | 'failed';
+  last_a2u_date: Date,
   attempts: number;
   last_error?: string;
   createdAt: Date;
@@ -199,6 +201,7 @@ export interface IPayment extends Document {
   memo: string;
   pi_payment_id: string;
   txid?: string;
+  direction: PaymentDirection;
   payment_type: PaymentType;
   cancelled: boolean;
   createdAt: Date;
@@ -250,7 +253,7 @@ export interface U2URefDataType {
 };
 
 export interface A2UPaymentDataType {
-  sellerId: string,
+  sellerPiUid: string,
   amount: string,
   xRefIds: string[],
   memo: string

@@ -22,7 +22,7 @@ import {
 } from '../services/order.service';
 import { IUser, NewOrder, PaymentDataType, PaymentDTO, PaymentInfo } from '../types';
 import logger from '../config/loggingConfig';
-import { drainQueue } from '../utils/queues/queue';
+import { enqueuePayment } from '../utils/queues/queue';
 
 function buildPaymentData(
   piPaymentId: string,
@@ -254,7 +254,7 @@ export const processPaymentCompletion = async (paymentId: string, txid: string) 
         u2aCompletedAt: new Date(),
         a2uPaymentId: null,
       };
-      await createPaymentCrossReference(u2uRefData);
+      const xRef = await createPaymentCrossReference(u2uRefData);
       logger.info("U2U cross-reference created", u2uRefData);      
 
       // Notify Pi Platform of successful completion
@@ -266,7 +266,7 @@ export const processPaymentCompletion = async (paymentId: string, txid: string) 
 
       logger.info("Payment marked completed on Pi blockchain", completedPiPayment.status);
 
-      await drainQueue();
+      await enqueuePayment(xRef?._id.toString(), order?.seller_id.toString(), order.total_amount.toString(), completedPayment.memo);
 
       // Start A2U (App-to-User) payment to the seller
       // await createA2UPayment({

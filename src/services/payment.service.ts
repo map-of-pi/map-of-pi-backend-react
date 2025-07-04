@@ -243,14 +243,14 @@ export const createA2UPayment = async (a2uPaymentData: A2UPaymentDataType): Prom
     const a2uData = {
       amount: parseFloat(a2uPaymentData.amount),
       memo: a2uPaymentData.memo,
-      metadata: { direction: "A2U", sellerId: a2uPaymentData.sellerId },
-      uid: a2uPaymentData.sellerId as string,
+      metadata: { direction: "A2U", sellerId: a2uPaymentData.sellerPiUid },
+      uid: a2uPaymentData.sellerPiUid as string,
     };
 
     const paymentId = await pi.createPayment(a2uData);
     logger.debug('Payment ID: ', { paymentId });
     if (!paymentId) {
-      logger.error(`Failed to create A2U Pi payment for UID ${ a2uPaymentData.sellerId }`);
+      logger.error(`Failed to create A2U Pi payment for UID ${ a2uPaymentData.sellerPiUid }`);
       throw new Error('Failed to create A2U Pi payment');
     }
 
@@ -267,12 +267,13 @@ export const createA2UPayment = async (a2uPaymentData: A2UPaymentDataType): Prom
 
       const xRef = await PaymentCrossReference.findById(refId)
       .populate<{u2a_payment_id: {memo:string}}>({path:'u2a_payment_id', model: 'Payment', select: 'memo'})
+      .populate<{order_id: {seller_id:string}}>({path:'order_id', model: 'Order', select: 'seller_id'})
       .lean()
       .exec();
 
       const completeda2uPayment = await Payment.create({
         pi_payment_id: paymentId,
-        user_id: a2uPaymentData.sellerId,
+        user_id: xRef?.order_id.seller_id,
         amount: a2uPaymentData.amount,
         memo: xRef?.u2a_payment_id.memo as string,
         txid: txid,
