@@ -74,6 +74,7 @@ export interface ISeller extends Document {
 	fulfillment_description?: string;
 	pre_restriction_seller_type?: SellerType | null;
 	isPreRestricted: boolean;
+    isRestricted: boolean;
 };
 
 // Combined interface representing a seller with selected user settings
@@ -298,6 +299,21 @@ export interface ISanctionedRegion extends Document {
 		coordinates: [[[number, number]]];
 	};
 };
+
+export interface ISanctionedGeoBoundary extends Document {
+    type: "Feature";
+    geometry: {
+        type: "Polygon";
+        coordinates: [[[number, number]]];
+    };
+    properties: {
+        shapeName: string;
+        shapeISO: string;
+        shapeID: string;
+        shapeGroup: string;
+        shapeType: string;
+    };
+}
 
 export type SanctionedSeller = Pick<ISeller, 'seller_id' | 'name' | 'address' | 'sell_map_center'> & {
 	sanctioned_location: string,
