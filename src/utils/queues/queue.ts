@@ -3,7 +3,7 @@ import logger from "../../config/loggingConfig";
 import A2UPaymentQueue from "../../models/A2UPaymentQueue";
 import Seller from "../../models/Seller";
 
-  const GAS_FEE = 0.01;
+const GAS_FEE = 0.01;
 
 const batchSellerRevenue = async (
   xRefId: string,

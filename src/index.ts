@@ -6,7 +6,6 @@ import { connectDB } from "./config/dbConnection";
 import app from "./utils/app";
 import { env } from "./utils/env";
 import logger from "./config/loggingConfig";
-// import dropCollection from "./cron/utils/dropTable";
 
 dotenv.config();
 
@@ -26,8 +25,6 @@ const startServer = async () => {
         });
       });
     }
-
-    // dropCollection("payments");
 
     logger.info("Server setup initiated.");
   } catch (error) {
