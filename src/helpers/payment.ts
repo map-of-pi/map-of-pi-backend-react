@@ -244,6 +244,11 @@ export const processPaymentCompletion = async (paymentId: string, txid: string) 
     if (completedPayment?.payment_type === PaymentType.BuyerCheckout) {
       // Update the associated order's status to paid
       const order = await updatePaidOrder(completedPayment._id as string);
+
+      if (!order) {
+        logger.error("Failed to update order to paid status");
+        throw new Error("Failed to update order to paid status");
+      }
       logger.info("Order record updated to paid");
 
       // Save cross-reference for U2U payment tracking
@@ -256,6 +261,11 @@ export const processPaymentCompletion = async (paymentId: string, txid: string) 
       };
       const xRef = await createPaymentCrossReference(u2uRefData);
       logger.info("U2U cross-reference created", u2uRefData); 
+
+      if (!xRef) {
+        logger.error("Failed to create U2U cross-reference");
+        throw new Error("Failed to create U2U cross-reference");
+      }
       
       // Enqueue the payment for further processing (e.g., A2U payment)
       await enqueuePayment(xRef?._id.toString(), order?.seller_id.toString(), order.total_amount.toString(), completedPayment.memo);
