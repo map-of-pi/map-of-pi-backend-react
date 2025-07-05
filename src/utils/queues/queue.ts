@@ -26,7 +26,7 @@ const batchSellerRevenue = async (
     }
 
     const updatedQueue = await A2UPaymentQueue.findOneAndUpdate(
-      { sellerPiUid },
+      { sellerPiUid, status:"batching", last_a2u_date: null },
       {
         $inc: { amount: parseFloat(amount) },
         $push: { xRef_ids: xRefId },
