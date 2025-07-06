@@ -1,4 +1,4 @@
-import { runSanctionBot } from "../../../src/cron/jobs/sanctionBot.job";
+import runSanctionSellerBot from "../../../src/cron/jobs/sanctionSellerBot.job";
 import { 
   getAllSanctionedRegions
 } from "../../../src/services/admin/report.service";
@@ -44,7 +44,7 @@ jest.mock("../../../src/cron/utils/sanctionUtils", () => {
   };
 });
 
-describe("runSanctionBot function", () => {
+describe("runSanctionSellerBot function", () => {
   const sanctionedRegions: ISanctionedRegion[] = [
     { 
       location: RestrictedArea.CUBA,
@@ -133,7 +133,7 @@ describe("runSanctionBot function", () => {
     
     mockedGetAllSanctionedRegions.mockResolvedValue([]);
 
-    await runSanctionBot();
+    await runSanctionSellerBot();
 
     expect(mockedSeller.updateMany).toHaveBeenCalledWith({}, { isPreRestricted: false });
     expect(mockedGetAllSanctionedRegions).toHaveBeenCalled();
@@ -242,7 +242,7 @@ describe("runSanctionBot function", () => {
     mockedCreateBulkPreRestrictionOperation.mockResolvedValue(expectedBulkPreRestrictionOps);
     mockedProcessSellersGeocoding.mockResolvedValue(expectedSanctionedSellerStatuses);
 
-    await runSanctionBot();
+    await runSanctionSellerBot();
 
     expect(mockedGetAllSanctionedRegions).toHaveBeenCalled();
     expect(mockedCreateGeoQueries).toHaveBeenCalledWith(sanctionedRegions);

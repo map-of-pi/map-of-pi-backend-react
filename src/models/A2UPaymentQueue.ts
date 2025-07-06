@@ -1,7 +1,17 @@
 import mongoose, { Schema } from "mongoose";
-import { IA2UJob } from "../types";
+import { A2UPaymentQueue } from "../types";
 
-const A2UPaymentQueueSchema = new Schema<IA2UJob>(
+export const A2U_STATUS = {
+  PENDING: "pending",
+  PROCESSING: "processing",
+  COMPLETED: "completed",
+  FAILED: "failed",
+  BATCHING: "batching",
+};
+
+export type A2UStatus = typeof A2U_STATUS[keyof typeof A2U_STATUS];
+
+const A2UPaymentQueueSchema = new Schema<A2UPaymentQueue>(
   {
     sellerPiUid: { type: String, required: true },
     amount: { type: Number, required: true },
@@ -9,8 +19,8 @@ const A2UPaymentQueueSchema = new Schema<IA2UJob>(
     memo: { type: String, require: true },
     status: {
       type: String,
-      enum: ['pending', 'processing', 'completed', 'failed', 'batching'],
-      default: 'pending',
+      enum: Object.values(A2U_STATUS),
+      default: A2U_STATUS.PENDING,
     },
     last_a2u_date: { type: Date, default: null },
     attempts: { type: Number, default: 0 },
@@ -19,5 +29,6 @@ const A2UPaymentQueueSchema = new Schema<IA2UJob>(
   { timestamps: true }
 );
 
-const A2UPaymentQueue = mongoose.model<IA2UJob>('A2UPaymentQueue', A2UPaymentQueueSchema);
+const A2UPaymentQueue = mongoose.model<A2UPaymentQueue>('A2UPaymentQueue', A2UPaymentQueueSchema);
+
 export default A2UPaymentQueue;

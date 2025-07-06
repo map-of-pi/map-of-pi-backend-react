@@ -1,4 +1,5 @@
 import { Document, Types } from "mongoose";
+import { A2UStatus } from "./models/A2UPaymentQueue";
 import { DeviceLocationType } from "./models/enums/deviceLocationType";
 import { RatingScale } from "./models/enums/ratingScale";
 import { SellerType } from "./models/enums/sellerType";
@@ -180,20 +181,6 @@ export type OrderPaymentMetadataType = {
 // ========================
 // PAYMENT MODELS
 // ========================
-
-
-export interface IA2UJob extends Document {
-  sellerPiUid: string;
-  amount: number;
-  xRef_ids: string[];
-  memo: string,
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  last_a2u_date: Date,
-  attempts: number;
-  last_error?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
 export interface IPayment extends Document {
   user_id: Types.ObjectId;
   amount: Types.Decimal128;
@@ -288,6 +275,19 @@ export interface IPaymentCrossReference {
   error_message: string;
   u2a_completed_at: Date;
   a2u_completed_at: Date;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export interface A2UPaymentQueue extends Document {
+  sellerPiUid: string;
+  amount: number;
+  xRef_ids: string[];
+  memo: string,
+  status: A2UStatus,
+  last_a2u_date: Date,
+  attempts: number;
+  last_error?: string;
   createdAt: Date;
   updatedAt: Date;
 };
