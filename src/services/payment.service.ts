@@ -14,12 +14,27 @@ import {
 import logger from "../config/loggingConfig";
 import { IUser } from "../types";
 import { PaymentDataType } from "../types";
+import { PaymentType } from "../models/enums/paymentType";
 
 export const createU2APayment = async (
   user: IUser,
   paymentData: PaymentDataType
 ) => {
   try {
+    if (paymentData.metadata.payment_type === PaymentType.Membership) {
+      const existingPending = await Payment.findOne({
+        user_id: user._id,
+        payment_type: PaymentType.Membership,
+        paid: false,
+        cancelled: false,
+      });
+
+      if (existingPending) {
+        logger.warn(`Existing pending membership payment found for user ${user._id}`);
+        return existingPending; // return it instead of creating a duplicate
+      }
+    }
+
     const createdPayment = await Payment.create({
       user_id: user._id.toString(),
       amount: paymentData.amount,
