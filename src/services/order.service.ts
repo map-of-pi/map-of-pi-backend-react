@@ -8,6 +8,8 @@ import { OrderStatusType } from "../models/enums/orderStatusType";
 import { OrderItemStatusType } from "../models/enums/orderItemStatusType";
 import { IOrder, NewOrder, PickedItems } from "../types";
 import logger from "../config/loggingConfig";
+import { StockLevelType } from "../models/enums/stockLevelType";
+import { StockValidationError, getRollbackStockLevel, getUpdatedStockLevel } from "../helpers/updateStockLevel";
 
 export const createOrder = async (
   orderData: NewOrder,
@@ -18,7 +20,6 @@ export const createOrder = async (
   try {
     session.startTransaction();
 
-    /* Step 1: Create a new Order record */
     const order = new Order({
       buyer_id: orderData.buyerId,
       seller_id: orderData.sellerId,
@@ -29,62 +30,71 @@ export const createOrder = async (
       is_fulfilled: false,
       fulfillment_method: orderData.fulfillmentMethod,
       seller_fulfillment_description: orderData.sellerFulfillmentDescription,
-      buyer_fulfillment_description: orderData.buyerFulfillmentDescription, 
+      buyer_fulfillment_description: orderData.buyerFulfillmentDescription,
     });
     const newOrder = await order.save({ session });
+    if (!newOrder) throw new Error('Failed to create order');
 
-    if (!newOrder) {
-      logger.error('Failed to create order; save returned null');
-      throw new Error('Failed to create order');
-    }
-    logger.debug('Order created successfully', { orderId: newOrder._id });
-
-    /* Step 2: Fetch all SellerItem documents associated with the order */
     const sellerItemIds = orderItems.map((item) => item.itemId);
-    const sellerItems = await SellerItem.find({ _id: { $in: sellerItemIds } }).lean();
+    const sellerItems = await SellerItem.find({ _id: { $in: sellerItemIds } }).session(session);
+    const sellerItemMap = new Map(sellerItems.map((doc) => [doc._id.toString(), doc]));
 
-    // Build a lookup map for seller items
-    const sellerItemLookup = sellerItems.reduce((acc, sellerItem) => {
-      acc[sellerItem._id.toString()] = sellerItem;
-      return acc;
-    }, {} as Record<string, any>);
+    const bulkOrderItems = [];
+    const bulkSellerItemUpdates = [];
 
-    /* Step 3: Build OrderItem documents for bulk insertion */
-    const bulkOrderItems = orderItems.map((item) => {
-      const sellerItem = sellerItemLookup[item.itemId];
+    for (const item of orderItems) {
+      const sellerItem = sellerItemMap.get(item.itemId);
       if (!sellerItem) {
-        logger.error(`Failed to find seller item for ID: ${ item.itemId }`);
-        throw new Error('Failed to find associated seller item');
+        logger.error(`Seller item not found for ID: ${item.itemId}`);
+        throw new Error('Seller item not found');
       }
 
-      return {
+      // Validate and get new stock level
+      const newStockLevel = getUpdatedStockLevel(sellerItem.stock_level, item.quantity, item.itemId);
+      if (newStockLevel !== null) {
+        bulkSellerItemUpdates.push({
+          updateOne: {
+            filter: { _id: sellerItem._id },
+            update: { $set: { stock_level: newStockLevel } },
+          },
+        });
+      }
+
+      const subtotal = item.quantity * parseFloat(sellerItem.price.toString());
+      bulkOrderItems.push({
         order_id: newOrder._id,
-        seller_item_id: sellerItem._id, // Store only the ObjectId
+        seller_item_id: sellerItem._id,
         quantity: item.quantity,
-        subtotal: item.quantity * parseFloat(sellerItem.price.toString()),
+        subtotal,
         status: OrderItemStatusType.Pending,
-      };
-    });
+      });
+    }
 
-    /* Step 4: Insert order items in bulk */
     await OrderItem.insertMany(bulkOrderItems, { session });
-    logger.debug('Order items inserted successfully', { count: bulkOrderItems.length });
 
-    /* Step 5: Commit the transaction */
+    if (bulkSellerItemUpdates.length > 0) {
+      await SellerItem.bulkWrite(bulkSellerItemUpdates, { session });
+    }
+
     await session.commitTransaction();
+    logger.info('Order and stock levels created/updated successfully', { orderId: newOrder._id });
 
-    logger.info('Order and associated items created successfully', { orderId: newOrder._id });
     return newOrder;
   } catch (error: any) {
-    /* Step 6: Roll back transaction on failure */
     await session.abortTransaction();
 
-    logger.error(`Failed to create order: ${ error }`);
+    if (error instanceof StockValidationError) {
+      logger.warn(`Stock validation failed: ${error.message}`, { itemId: error.itemId });
+    } else {
+      logger.error(`Failed to create order and update stock: ${error}`);
+    }
+
     throw error;
   } finally {
     session.endSession();
   }
 };
+
 
 export const updatePaidOrder = async (paymentId: string): Promise<IOrder> => {
   try {
@@ -266,28 +276,131 @@ export const updateOrderItemStatus = async (
     logger.error(`Failed to update order item status for orderItemID ${ itemId }: ${ error }`);
     throw error;
   }
-};
+}
 
 export const cancelOrder = async (paymentId: string) => {
+  const session = await mongoose.startSession();
+
   try {
+    session.startTransaction();
+
+    // Step 1: Cancel the order
     const cancelledOrder = await Order.findOneAndUpdate(
-      { payment_id: paymentId }, 
-      { 
+      { payment_id: paymentId },
+      {
         is_paid: false,
-        status: OrderStatusType.Cancelled
+        status: OrderStatusType.Cancelled,
       },
-      { new: true } 
-    ).exec();
+      { new: true, session }
+    );
 
     if (!cancelledOrder) {
-      logger.error(`Failed to cancel order for paymentID ${ paymentId }`);
-      throw new Error("Failed to cancel order");
-    } 
+      logger.error(`Failed to cancel order for paymentID ${paymentId}`);
+      throw new Error('Failed to cancel order');
+    }
 
-    logger.info(`Order with paymentID ${ paymentId } successfully cancelled.`);
+    // Step 2: Get order items
+    const orderItems = await OrderItem.find({
+      order_id: cancelledOrder._id,
+      status: OrderItemStatusType.Pending,
+    }).session(session);
+
+    if (orderItems.length === 0) {
+      logger.warn(`No pending order items found for order ${cancelledOrder._id}`);
+    }
+
+    // Step 3: Get related seller items
+    const sellerItemIds = orderItems.map((item) => item.seller_item_id);
+    const sellerItems = await SellerItem.find({ _id: { $in: sellerItemIds } }).session(session);
+
+    const sellerItemMap = new Map(sellerItems.map((item) => [item._id.toString(), item]));
+
+    for (const item of orderItems) {
+      const sellerItem = sellerItemMap.get(item.seller_item_id.toString());
+      if (!sellerItem) continue;
+
+      const restoredLevel = getRollbackStockLevel(sellerItem.stock_level, item.quantity);
+      if (restoredLevel !== null) {
+        sellerItem.stock_level = restoredLevel;
+        await sellerItem.save({ session });
+      }
+    }
+
+    await session.commitTransaction();
+    logger.info(`Order with paymentID ${paymentId} successfully cancelled and stock levels restored.`);
     return cancelledOrder;
-  } catch (error:any) {
-    logger.error(`Failed to cancel order for paymentID ${ paymentId }: ${ error }`);
+  } catch (error: any) {
+    await session.abortTransaction();
+    logger.error(`Failed to cancel order for paymentID ${paymentId}: ${error.message}`);
+    throw error;
+  } finally {
+    session.endSession();
+  }
+};
+
+
+export const updateStockLevel = async (orderItems: PickedItems[], session:any) => {
+  // const session = await mongoose.startSession();
+
+  try {
+    // session.startTransaction();
+
+    for (const item of orderItems) {
+      const sellerItem = await SellerItem.findById(item.itemId).session(session);
+      if (!sellerItem) {
+        const message = `Seller item not found for ID: ${item.itemId}`;
+        logger.error(message);
+        throw new Error(message);
+      }
+
+      const { stock_level } = sellerItem;
+      const { quantity, itemId } = item;
+
+      const throwStockError = (message: string) => {
+        logger.error(`${message} (Item ID: ${itemId})`);
+        throw new Error(message);
+      };
+
+      switch (stock_level) {
+        case StockLevelType.AVAILABLE_1:
+          if (quantity > 1) throwStockError('Cannot order more than 1 item for stock level "1 available"');
+          sellerItem.stock_level = StockLevelType.SOLD;
+          break;
+
+        case StockLevelType.AVAILABLE_2:
+          if (quantity > 2) throwStockError('Cannot order more than 2 items for stock level "2 available"');
+          sellerItem.stock_level = quantity === 2 ? StockLevelType.SOLD : StockLevelType.AVAILABLE_1;
+          break;
+
+        case StockLevelType.AVAILABLE_3:
+          if (quantity > 3) throwStockError('Cannot order more than 3 items for stock level "3 available"');
+          sellerItem.stock_level =
+            quantity === 3
+              ? StockLevelType.SOLD
+              : quantity === 2
+              ? StockLevelType.AVAILABLE_1
+              : StockLevelType.AVAILABLE_2;
+          break;
+
+        case StockLevelType.MANY_AVAILABLE:
+        case StockLevelType.MADE_TO_ORDER:
+        case StockLevelType.ONGOING_SERVICE:
+          // No update needed for these
+          break;
+
+        default:
+          logger.warn(`Unhandled stock level for item ID: ${itemId}`);
+          break;
+      }
+
+      await sellerItem.save({ session });
+    }
+
+    // await session.commitTransaction();
+    logger.info('Stock levels updated successfully');
+  } catch (error: any) {
+    await session.abortTransaction();
+    logger.error(`Failed to update stock levels: ${error.message}`);
     throw error;
   }
 };
