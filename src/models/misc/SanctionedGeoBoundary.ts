@@ -1,6 +1,5 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, {Schema} from "mongoose";
 import {ISanctionedGeoBoundary} from "../../types";
-
 
 
 const sanctionedGeoBoundarySchema = new Schema<ISanctionedGeoBoundary>(
