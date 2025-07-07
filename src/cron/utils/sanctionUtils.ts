@@ -3,6 +3,8 @@ import { SellerType } from "../../models/enums/sellerType";
 import { ISanctionedRegion, ISeller, SanctionedSellerStatus } from "../../types";
 import { processSellerGeocoding } from "../../services/admin/report.service";
 import logger from "../../config/loggingConfig";
+import SanctionedGeoBoundary from "../../models/misc/SanctionedGeoBoundary";
+import * as turf from '@turf/turf';
 
 interface GeoQuery {
   sell_map_center: {
@@ -85,3 +87,98 @@ export async function processUnsanctionedSellers(outOfZone: SanctionedSellerStat
   );
   logger.info(`Restored ${outOfZone.length} sellers.`);
 }
+
+export async function findAndRestrictSanctionedSellers() {
+  // Step 1: Fetch sanctioned regions
+  const boundaries = await SanctionedGeoBoundary.find({}, { geometry: 1 }).lean();
+
+  // Step 2: Convert to valid Turf polygons
+  const turfPolygons = parseToValidTurfPolygons(boundaries);
+
+  if (turfPolygons.length === 0) {
+    console.warn('⚠️ No valid polygons found. Aborting restriction check.');
+    return [];
+  }
+
+  // Step 3: Compute bounding box of all polygons
+  const featureCollection = turf.featureCollection(turfPolygons);
+  const [minX, minY, maxX, maxY] = turf.bbox(featureCollection);
+
+  // Step 4: Prefilter sellers within the bbox
+  const boundingBoxFilteredSellers = await Seller.find({
+    sell_map_center: {
+      $geoWithin: {
+        $box: [
+          [minX, minY],
+          [maxX, maxY]
+        ]
+      }
+    }
+  }).lean();
+
+  // Step 5: Turf-level precision check
+  const sanctionedSellerIds = boundingBoxFilteredSellers
+    .filter(seller => {
+      const point = turf.point(seller.sell_map_center.coordinates);
+      return turfPolygons.some(polygon => turf.booleanPointInPolygon(point, polygon));
+    })
+    .map(seller => seller._id.toString());
+
+  // Step 6: Update sellers
+  if (sanctionedSellerIds.length > 0) {
+    await Seller.updateMany(
+      { _id: { $in: sanctionedSellerIds } },
+      { $set: { isRestricted: true } }
+    );
+  }
+
+  console.info('✅ Sanction check complete. Restricted seller count:', sanctionedSellerIds.length);
+  return sanctionedSellerIds;
+}
+
+
+
+export function parseToValidTurfPolygons(boundaries: any[]) {
+  const turfPolygons: any[] = [];
+
+  function closeRingIfNeeded(ring: number[][]): number[][] {
+    const first = ring[0];
+    const last = ring[ring.length - 1];
+    if (first[0] !== last[0] || first[1] !== last[1]) {
+      return [...ring, first];
+    }
+    return ring;
+  }
+
+  for (const boundary of boundaries) {
+    const geometry = boundary.geometry;
+    const type = geometry.type;
+
+    try {
+      if (type === 'Polygon') {
+        const rings = geometry.coordinates.map(closeRingIfNeeded);
+        if (rings[0].length >= 4) {
+          turfPolygons.push(turf.polygon(rings));
+        } else {
+          console.warn('Skipping Polygon: too few coordinates');
+        }
+      } else if (type === 'MultiPolygon') {
+        for (const coords of geometry.coordinates) {
+          const rings = coords.map(closeRingIfNeeded);
+          if (rings[0].length >= 4) {
+            turfPolygons.push(turf.polygon(rings));
+          } else {
+            console.warn('Skipping MultiPolygon part: too few coordinates');
+          }
+        }
+      } else {
+        console.warn('Skipping unknown geometry type:', type);
+      }
+    } catch (err: any) {
+      console.warn(`Failed to parse polygon: ${err.message}`, boundary._id?.toString());
+    }
+  }
+
+  return turfPolygons;
+}
+
