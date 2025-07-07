@@ -97,12 +97,7 @@ sellerSchema.index({'name': 'text', 'description': 'text'});
 sellerSchema.index({'sell_map_center.coordinates': '2dsphere'});
 sellerSchema.index({'sell_map_center': '2dsphere', 'updatedAt': -1});
 
-sellerSchema.pre("save", function(next) {
-  if (this.isModified('isRestricted') && this.isRestricted) {
-    this.lastSanctionUpdateAt = new Date();
-  }
-  next();
-});
+
 
 // Creating the Seller model from the schema
 const Seller = mongoose.model<ISeller>("Seller", sellerSchema);
