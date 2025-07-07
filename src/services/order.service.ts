@@ -8,7 +8,6 @@ import { OrderStatusType } from "../models/enums/orderStatusType";
 import { OrderItemStatusType } from "../models/enums/orderItemStatusType";
 import { IOrder, NewOrder, PickedItems } from "../types";
 import logger from "../config/loggingConfig";
-import { StockLevelType } from "../models/enums/stockLevelType";
 import { StockValidationError, getRollbackStockLevel, getUpdatedStockLevel } from "../helpers/updateStockLevel";
 
 export const createOrder = async (
@@ -335,72 +334,5 @@ export const cancelOrder = async (paymentId: string) => {
     throw error;
   } finally {
     session.endSession();
-  }
-};
-
-
-export const updateStockLevel = async (orderItems: PickedItems[], session:any) => {
-  // const session = await mongoose.startSession();
-
-  try {
-    // session.startTransaction();
-
-    for (const item of orderItems) {
-      const sellerItem = await SellerItem.findById(item.itemId).session(session);
-      if (!sellerItem) {
-        const message = `Seller item not found for ID: ${item.itemId}`;
-        logger.error(message);
-        throw new Error(message);
-      }
-
-      const { stock_level } = sellerItem;
-      const { quantity, itemId } = item;
-
-      const throwStockError = (message: string) => {
-        logger.error(`${message} (Item ID: ${itemId})`);
-        throw new Error(message);
-      };
-
-      switch (stock_level) {
-        case StockLevelType.AVAILABLE_1:
-          if (quantity > 1) throwStockError('Cannot order more than 1 item for stock level "1 available"');
-          sellerItem.stock_level = StockLevelType.SOLD;
-          break;
-
-        case StockLevelType.AVAILABLE_2:
-          if (quantity > 2) throwStockError('Cannot order more than 2 items for stock level "2 available"');
-          sellerItem.stock_level = quantity === 2 ? StockLevelType.SOLD : StockLevelType.AVAILABLE_1;
-          break;
-
-        case StockLevelType.AVAILABLE_3:
-          if (quantity > 3) throwStockError('Cannot order more than 3 items for stock level "3 available"');
-          sellerItem.stock_level =
-            quantity === 3
-              ? StockLevelType.SOLD
-              : quantity === 2
-              ? StockLevelType.AVAILABLE_1
-              : StockLevelType.AVAILABLE_2;
-          break;
-
-        case StockLevelType.MANY_AVAILABLE:
-        case StockLevelType.MADE_TO_ORDER:
-        case StockLevelType.ONGOING_SERVICE:
-          // No update needed for these
-          break;
-
-        default:
-          logger.warn(`Unhandled stock level for item ID: ${itemId}`);
-          break;
-      }
-
-      await sellerItem.save({ session });
-    }
-
-    // await session.commitTransaction();
-    logger.info('Stock levels updated successfully');
-  } catch (error: any) {
-    await session.abortTransaction();
-    logger.error(`Failed to update stock levels: ${error.message}`);
-    throw error;
   }
 };
