@@ -128,7 +128,7 @@ export async function findAndRestrictSanctionedSellers() {
   if (sanctionedSellerIds.length > 0) {
     await Seller.updateMany(
       { _id: { $in: sanctionedSellerIds } },
-      { $set: { isRestricted: true } }
+      { $set: { isRestricted: true, lastSanctionUpdateAt: new Date() } }
     );
   }
 
