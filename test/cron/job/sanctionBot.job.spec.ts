@@ -1,4 +1,4 @@
-import { runSanctionBot } from "../../../src/cron/jobs/sanctionBot.job";
+import { runSanctionBot } from "../../../src/cron/jobs/sanctionBot";
 import { 
   getAllSanctionedRegions
 } from "../../../src/services/admin/report.service";

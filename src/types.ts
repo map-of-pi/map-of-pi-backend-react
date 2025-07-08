@@ -1,46 +1,46 @@
-import { Document, Types } from "mongoose";
-import { DeviceLocationType } from "./models/enums/deviceLocationType";
-import { RatingScale } from "./models/enums/ratingScale";
-import { SellerType } from "./models/enums/sellerType";
-import { FulfillmentType } from "./models/enums/fulfillmentType";
-import { StockLevelType } from "./models/enums/stockLevelType";
-import { TrustMeterScale } from "./models/enums/trustMeterScale";
-import { OrderStatusType } from "./models/enums/orderStatusType";
-import { OrderItemStatusType } from "./models/enums/orderItemStatusType";
-import { PaymentType } from "./models/enums/paymentType";
-import { U2UPaymentStatus } from "./models/enums/u2uPaymentStatus";
-import { RestrictedArea } from "./models/enums/restrictedArea";
+import {Document, Types} from "mongoose";
+import {DeviceLocationType} from "./models/enums/deviceLocationType";
+import {RatingScale} from "./models/enums/ratingScale";
+import {SellerType} from "./models/enums/sellerType";
+import {FulfillmentType} from "./models/enums/fulfillmentType";
+import {StockLevelType} from "./models/enums/stockLevelType";
+import {TrustMeterScale} from "./models/enums/trustMeterScale";
+import {OrderStatusType} from "./models/enums/orderStatusType";
+import {OrderItemStatusType} from "./models/enums/orderItemStatusType";
+import {PaymentType} from "./models/enums/paymentType";
+import {U2UPaymentStatus} from "./models/enums/u2uPaymentStatus";
+import {RestrictedArea} from "./models/enums/restrictedArea";
 
 // ========================
 // USER MODELS
 // ========================
 export interface IUser extends Document {
-	pi_uid: string;
-	pi_username: string;
-	user_name: string;
+  pi_uid: string;
+  pi_username: string;
+  user_name: string;
 };
 
 export interface IUserSettings extends Document {
-	user_settings_id: string;
-	user_name: string;
-	email?: string | null;
-	phone_number?: string | null;
-	image?: string;
-	findme: DeviceLocationType;
-	trust_meter_rating: TrustMeterScale;
-	search_map_center?: {
-		type: 'Point';
-		coordinates: [number, number];
-	};
-	search_filters?: {
-		include_active_sellers: Boolean;
-		include_inactive_sellers: Boolean;
-		include_test_sellers: Boolean;
-		include_trust_level_100: Boolean;
-		include_trust_level_80: Boolean;
-		include_trust_level_50: Boolean;
-		include_trust_level_0: Boolean;
-	};
+  user_settings_id: string;
+  user_name: string;
+  email?: string | null;
+  phone_number?: string | null;
+  image?: string;
+  findme: DeviceLocationType;
+  trust_meter_rating: TrustMeterScale;
+  search_map_center?: {
+    type: 'Point';
+    coordinates: [number, number];
+  };
+  search_filters?: {
+    include_active_sellers: Boolean;
+    include_inactive_sellers: Boolean;
+    include_test_sellers: Boolean;
+    include_trust_level_100: Boolean;
+    include_trust_level_80: Boolean;
+    include_trust_level_50: Boolean;
+    include_trust_level_0: Boolean;
+  };
 };
 
 // Select specific fields from IUserSettings
@@ -50,75 +50,78 @@ export type PartialUserSettings = Pick<IUserSettings, 'user_name' | 'email' | 'p
 // MAP / GEOLOCATION TYPES
 // ========================
 export interface IMapCenter {
-	type: 'Point';
-	coordinates: [number, number];
+  type: 'Point';
+  coordinates: [number, number];
 };
 
 // ========================
 // SELLER MODELS
 // ========================
 export interface ISeller extends Document {
-	seller_id: string;
-	name: string;
-	seller_type: SellerType;
-	description: string;
-	image?: string;
-	address?: string;
-	average_rating: Types.Decimal128;
-	sell_map_center: {
-		type: 'Point';
-		coordinates: [number, number];
-	};
-	order_online_enabled_pref: boolean;
-	fulfillment_method: FulfillmentType;
-	fulfillment_description?: string;
-	pre_restriction_seller_type?: SellerType | null;
-	isPreRestricted: boolean;
-    isRestricted: boolean;
+  seller_id: string;
+  name: string;
+  seller_type: SellerType;
+  description: string;
+  image?: string;
+  address?: string;
+  average_rating: Types.Decimal128;
+  sell_map_center: {
+    type: 'Point';
+    coordinates: [number, number];
+  };
+  order_online_enabled_pref: boolean;
+  fulfillment_method: FulfillmentType;
+  fulfillment_description?: string;
+  pre_restriction_seller_type?: SellerType | null;
+  isPreRestricted: boolean;
+  isRestricted: boolean;
+  lastSanctionUpdateAt: Date;
 };
 
 // Combined interface representing a seller with selected user settings
-export interface ISellerWithSettings extends ISeller, PartialUserSettings {};
+export interface ISellerWithSettings extends ISeller, PartialUserSettings {
+};
 
 export interface ISellerItem extends Document {
-	_id: string;
-	seller_id: string;
-	name: string;
-	description: string;
-	price: Types.Decimal128;
-	stock_level: StockLevelType;
-	image?: string;
-	duration: number;
-	expired_by: Date;
-	createdAt: Date;
-	updatedAt: Date;
+  _id: string;
+  seller_id: string;
+  name: string;
+  description: string;
+  price: Types.Decimal128;
+  stock_level: StockLevelType;
+  image?: string;
+  duration: number;
+  expired_by: Date;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 // ========================
 // REVIEW / FEEDBACK MODELS
 // ========================
 export interface IReviewFeedback extends Document {
-	_id: string;
-	review_receiver_id: string;
-	review_giver_id: string;
-	reply_to_review_id: string | null;
-	rating: RatingScale;
-	comment?: string;
-	image?: string;
-	review_date: Date;
+  _id: string;
+  review_receiver_id: string;
+  review_giver_id: string;
+  reply_to_review_id: string | null;
+  rating: RatingScale;
+  comment?: string;
+  image?: string;
+  review_date: Date;
 };
 
 export interface CompleteFeedback {
-	givenReviews: IReviewFeedbackOutput[];
-	receivedReviews: IReviewFeedbackOutput[];
+  givenReviews: IReviewFeedbackOutput[];
+  receivedReviews: IReviewFeedbackOutput[];
 };
 
 export type PartialReview = {
-	giver: string;
-	receiver: string;
+  giver: string;
+  receiver: string;
 };
 
-export interface IReviewFeedbackOutput extends IReviewFeedback, PartialReview {}
+export interface IReviewFeedbackOutput extends IReviewFeedback, PartialReview {
+}
 
 // ========================
 // BUYER MODELS
@@ -156,9 +159,9 @@ export interface IOrderItem extends Document {
   updatedAt: Date;
 };
 
-export interface NewOrder {    
+export interface NewOrder {
   buyerId: string,
-  sellerId: string,        
+  sellerId: string,
   paymentId: string,
   totalAmount: string,
   status: OrderStatusType,
@@ -172,7 +175,7 @@ export type OrderPaymentMetadataType = {
   buyer: string,
   seller: string,
   fulfillment_method: FulfillmentType | undefined,
-  seller_fulfillment_description:string | undefined,
+  seller_fulfillment_description: string | undefined,
   buyer_fulfillment_description: string
 };
 
@@ -224,7 +227,7 @@ export interface PaymentDTO {
 export interface NewPayment {
   piPaymentId: string,
   userId: string,
-  memo:  string,
+  memo: string,
   amount: string,
   paymentType: PaymentType
 };
@@ -293,31 +296,31 @@ export interface INotification extends Document {
 // SANCTIONS / GEO-RESTRICTIONS
 // ========================
 export interface ISanctionedRegion extends Document {
-	location: RestrictedArea;
-	boundary: {
-		type: 'Polygon';
-		coordinates: [[[number, number]]];
-	};
+  location: RestrictedArea;
+  boundary: {
+    type: 'Polygon';
+    coordinates: [[[number, number]]];
+  };
 };
 
 export interface ISanctionedGeoBoundary extends Document {
-    type: "Feature";
-    geometry: {
-        type: "Polygon";
-        coordinates: [[[number, number]]];
-    };
-    properties: {
-        shapeName: string;
-        shapeISO: string;
-        shapeID: string;
-        shapeGroup: string;
-        shapeType: string;
-    };
+  type: "Feature";
+  geometry: {
+    type: "Polygon";
+    coordinates: [[[number, number]]];
+  };
+  properties: {
+    shapeName: string;
+    shapeISO: string;
+    shapeID: string;
+    shapeGroup: string;
+    shapeType: string;
+  };
 }
 
 export type SanctionedSeller = Pick<ISeller, 'seller_id' | 'name' | 'address' | 'sell_map_center'> & {
-	sanctioned_location: string,
-	pre_restriction_seller_type?: SellerType | null
+  sanctioned_location: string,
+  pre_restriction_seller_type?: SellerType | null
 };
 
 export type SanctionedSellerStatus = {
@@ -330,9 +333,9 @@ export type SanctionedSellerStatus = {
 // TOGGLES
 // ========================
 export interface IToggle extends Document {
-	name: string;
-	enabled: boolean;
-	description?: string;
-	createdAt: Date;
-	updatedAt: Date;
+  name: string;
+  enabled: boolean;
+  description?: string;
+  createdAt: Date;
+  updatedAt: Date;
 };
