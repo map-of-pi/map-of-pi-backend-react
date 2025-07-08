@@ -2,6 +2,7 @@ import mongoose, { Schema, SchemaTypes, Types } from "mongoose";
 
 import { IPayment } from "../types";
 import { PaymentType } from "./enums/paymentType";
+import { PaymentDirection } from "./enums/paymentDirection";
 
 const paymentSchema = new Schema<IPayment>(
   {
@@ -38,6 +39,12 @@ const paymentSchema = new Schema<IPayment>(
       type: String,
       required: false,
       default: ""
+    },
+    direction: {
+      type: String,
+      enum: Object.values(PaymentDirection).filter(value => typeof value === 'string'),
+      required: false,
+      default: PaymentDirection.U2A
     },
     payment_type: {
       type: String,
