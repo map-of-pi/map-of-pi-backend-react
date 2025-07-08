@@ -6,22 +6,32 @@ import SellerItem from "../models/SellerItem";
 import User from "../models/User";
 import { OrderStatusType } from "../models/enums/orderStatusType";
 import { OrderItemStatusType } from "../models/enums/orderItemStatusType";
-import { IOrder, NewOrder, PickedItems } from "../types";
+import { IOrder, IUser, NewOrder, PickedItems } from "../types";
 import logger from "../config/loggingConfig";
 
 export const createOrder = async (
   orderData: NewOrder,
-  orderItems: PickedItems[]
+  orderItems: PickedItems[],
+  authUser: IUser
 ): Promise<IOrder> => {
   const session = await mongoose.startSession();
 
   try {
     session.startTransaction();
 
+    // Look up the seller and buyer in the database
+    const seller = await Seller.findOne({ seller_id: orderData.sellerId });
+    const buyer = await User.findOne({ pi_uid: authUser?.pi_uid });
+
+    if (!buyer || !seller) {
+      logger.error("Seller or buyer not found", { sellerId: orderData.sellerId, buyerId: authUser?.pi_uid });
+      throw new Error("Seller or buyer not found");
+    }
+
     /* Step 1: Create a new Order record */
     const order = new Order({
-      buyer_id: orderData.buyerId,
-      seller_id: orderData.sellerId,
+      buyer_id: buyer._id,
+      seller_id: seller._id,
       payment_id: orderData.paymentId,
       total_amount: orderData.totalAmount,
       status: orderData.status,
@@ -107,6 +117,32 @@ export const updatePaidOrder = async (paymentId: string): Promise<IOrder> => {
 
   } catch (error: any) {
     logger.error(`Failed to update paid order for paymentID ${ paymentId }: ${ error }`);
+    throw error;
+  }  
+};
+
+// To be removed once payment service is fully integrated
+export const markAsPaidOrder = async (orderId: string): Promise<IOrder> => {
+  try {
+    const updatedOrder = await Order.findByIdAndUpdate(
+      orderId, 
+      { 
+        $set: {
+          is_paid: true,
+          status: OrderStatusType.Pending
+        }
+      },
+      { new: true }
+    ).exec();
+    
+    if (!updatedOrder) {
+      logger.error(`Failed to update paid order for order ID ${ orderId }`);
+      throw new Error('Failed to update paid order');
+    }
+    return updatedOrder;
+
+  } catch (error: any) {
+    logger.error(`Failed to update paid order for order ${ orderId }: ${ error }`);
     throw error;
   }  
 };
