@@ -277,6 +277,18 @@ export interface IPaymentCrossReference {
 };
 
 // ========================
+// NOTIFICATION
+// ========================
+export interface INotification extends Document {
+  _id: string;
+  pi_uid: string;
+  is_cleared: boolean;
+  reason: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+// ========================
 // SANCTIONS / GEO-RESTRICTIONS
 // ========================
 export interface ISanctionedRegion extends Document {
