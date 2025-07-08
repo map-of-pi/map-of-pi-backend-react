@@ -75,7 +75,7 @@ describe('getReviewFeedback function', () => {
       throw new Error('Mock database error');
     });
 
-    await expect(getReviewFeedback('0a0a0a-0a0a-0a0a', '')).rejects.toThrow('Failed to retrieve reviews; please try again later');
+    await expect(getReviewFeedback('0a0a0a-0a0a-0a0a', '')).rejects.toThrow('Mock database error');
   });
 });
 

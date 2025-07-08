@@ -29,6 +29,11 @@
       "pi_uid": "0m0m0m-0m0m-0m0m",
       "pi_username": "TestUser13",
       "user_name": "test-user-13"
+    },
+    {
+      "pi_uid": "0q0q0q-0q0q-0q0q",
+      "pi_username": "TestUser17",
+      "user_name": "test-user-17"
     }
   ],
   "userSettings": [
@@ -99,6 +104,94 @@
       "phone_number": "555-555-5555",
       "findme": "deviceGPS",
       "trust_meter_rating": 100
+    },
+    {
+      "user_settings_id": "0f0f0f-0f0f-0f0f",
+      "user_name": "Test Six",
+      "email": "test-six@test.com",
+      "phone_number": "666-666-6666",
+      "findme": "deviceGPS",
+      "trust_meter_rating": 50
+    },
+    {
+      "user_settings_id": "0g0g0g-0g0g-0g0g",
+      "user_name": "Test Seven",
+      "email": "test-seven@test.com",
+      "phone_number": "777-777-7777",
+      "findme": "deviceGPS",
+      "trust_meter_rating": 50
+    },
+    {
+      "user_settings_id": "0h0h0h-0h0h-0h0h",
+      "user_name": "Test Eight",
+      "email": "test-eight@test.com",
+      "phone_number": "888-888-8888",
+      "findme": "deviceGPS",
+      "trust_meter_rating": 50
+    },
+    {
+      "user_settings_id": "0i0i0i-0i0i-0i0i",
+      "user_name": "Test Nine",
+      "email": "test-nine@test.com",
+      "phone_number": "999-999-9999",
+      "findme": "deviceGPS",
+      "trust_meter_rating": 50
+    },
+    {
+      "user_settings_id": "0j0j0j-0j0j-0j0j",
+      "user_name": "Test Ten",
+      "email": "test-ten@test.com",
+      "phone_number": "101-101-1010",
+      "findme": "deviceGPS",
+      "trust_meter_rating": 50
+    },
+    {
+      "user_settings_id": "0k0k0k-0k0k-0k0k",
+      "user_name": "Test Eleven",
+      "email": "test-eleven@test.com",
+      "phone_number": "111-111-1111",
+      "findme": "deviceGPS",
+      "trust_meter_rating": 50
+    },
+    {
+      "user_settings_id": "0l0l0l-0l0l-0l0l",
+      "user_name": "Test Twelve",
+      "email": "test-twelve@test.com",
+      "phone_number": "121-121-1212",
+      "findme": "deviceGPS",
+      "trust_meter_rating": 50
+    },
+    {
+      "user_settings_id": "0m0m0m-0m0m-0m0m",
+      "user_name": "Test Thirteen",
+      "email": "test-thirteen@test.com",
+      "phone_number": "131-131-1313",
+      "findme": "deviceGPS",
+      "trust_meter_rating": 0
+    },
+    {
+      "user_settings_id": "0n0n0n-0n0n-0n0n",
+      "user_name": "Test Fourteen",
+      "email": "test-fourteen@test.com",
+      "phone_number": "141-141-1414",
+      "findme": "deviceGPS",
+      "trust_meter_rating": 0
+    },
+    {
+      "user_settings_id": "0o0o0o-0o0o-0o0o",
+      "user_name": "Test Fifteen",
+      "email": "test-fifteen@test.com",
+      "phone_number": "151-151-1515",
+      "findme": "deviceGPS",
+      "trust_meter_rating": 0
+    },
+    {
+      "user_settings_id": "0p0p0p-0p0p-0p0p",
+      "user_name": "Test Sixteen",
+      "email": "test-sixteen@test.com",
+      "phone_number": "161-161-1616",
+      "findme": "deviceGPS",
+      "trust_meter_rating": 0
     }
   ],
   "sellers": [
@@ -229,6 +322,50 @@
       "sell_map_center": {
         "type": "Point",
         "coordinates": [39.9930, 49.5582]
+      }
+    },
+    {
+      "seller_id": "0m0m0m-0m0m-0m0m",
+      "name": "Test Seller Sanctioned 13",
+      "description": "Test Seller Sanctioned 13 Description",
+      "address": "Sanctioned Region Russia West",
+      "seller_type": "testSeller",
+      "sell_map_center": {
+          "type": "Point",
+          "coordinates": [38.3174, 56.0084]
+      }
+    },
+    {
+      "seller_id": "0n0n0n-0n0n-0n0n",
+      "name": "Test Seller Sanctioned 14",
+      "description": "Test Seller Sanctioned 14 Description",
+      "address": "Sanctioned Region Russia Central",
+      "seller_type": "testSeller",
+      "sell_map_center": {
+          "type": "Point",
+          "coordinates": [87.9806, 61.6986]
+      }
+    },
+    {
+      "seller_id": "0o0o0o-0o0o-0o0o",
+      "name": "Test Seller Sanctioned 15",
+      "description": "Test Seller Sanctioned 15 Description",
+      "address": "Sanctioned Region Russia East",
+      "seller_type": "testSeller",
+      "sell_map_center": {
+          "type": "Point",
+          "coordinates": [-175.5260, 66.1756]
+      }
+    },
+    {
+      "seller_id": "0p0p0p-0p0p-0p0p",
+      "name": "Test Seller Sanctioned 16",
+      "description": "Test Seller Sanctioned 16 Description",
+      "address": "Sanctioned Region Russia Polar",
+      "seller_type": "testSeller",
+      "sell_map_center": {
+          "type": "Point",
+          "coordinates": [60.753873, 80.534107]
       }
     }
   ],
@@ -423,6 +560,49 @@
           [37.5, 50.3],
           [37.5, 47.0]
         ]]
+      }
+    },
+    {
+      "location": "Russia",
+      "boundary": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [[
+            [27.3, 77.0],
+            [27.3, 41.1],
+            [69.1, 41.1],
+            [69.1, 77.0],
+            [27.3, 77.0]
+          ]],
+          [[
+            [69.1, 77.8],
+            [69.1, 49.1],
+            [114.0, 49.1],
+            [114.0, 77.8],
+            [69.1, 77.8]
+          ]],
+          [[
+            [114.0, 77.2],
+            [114.0, 42.3],
+            [180, 42.3],
+            [180, 77.2],
+            [114.0, 77.2]
+          ]],
+          [[
+            [-180.0, 62.0],
+            [-170.0, 62.0],
+            [-170.0, 72.0],
+            [-180.0, 72.0],
+            [-180.0, 62.0]
+          ]],
+          [[
+            [44.8, 81.9],
+            [44.8, 77.9],
+            [107.9, 77.9],
+            [107.9, 81.9],
+            [44.8, 81.9]
+          ]]
+        ]
       }
     }
   ],

@@ -5,7 +5,8 @@ export enum RestrictedArea {
   SYRIA = "Syria",
   REPUBLIC_OF_CRIMEA = "Republic of Crimea",
   DONETSK_OBLAST = "Donetsk Oblast",
-  LUHANSK_OBLAST = "Luhansk Oblast"
+  LUHANSK_OBLAST = "Luhansk Oblast",
+  RUSSIA = "Russia"
 }
 
 export const RestrictedAreaBoundaries = {
@@ -79,5 +80,45 @@ export const RestrictedAreaBoundaries = {
       [37.7, 50.1],
       [37.7, 47.7],
     ]],
+  },
+  [RestrictedArea.RUSSIA]: {
+    type: "MultiPolygon", // Need multiple values because MongoDB gets confused with really large 2dsphere Polygons
+    coordinates: [
+      [[
+        [27.3, 77.0],
+        [27.3, 41.1],
+        [69.1, 41.1],
+        [69.1, 77.0],
+        [27.3, 77.0],
+      ]],
+      [[
+        [69.1, 77.8],
+        [69.1, 49.1],
+        [114.0, 49.1],
+        [114.0, 77.8],
+        [69.1, 77.8],
+      ]],
+      [[
+        [114.0, 77.2],
+        [114.0, 42.3],
+        [180, 42.3],
+        [180, 77.2],
+        [114.0, 77.2],
+      ]],
+      [[
+        [-180.0, 62.0],
+        [-170.0, 62.0],
+        [-170.0, 72.0],
+        [-180.0, 72.0],
+        [-180.0, 62.0],
+      ]],
+      [[
+        [44.8, 81.9],
+        [44.8, 77.9],
+        [107.9, 77.9],
+        [107.9, 81.9],
+        [44.8, 81.9],
+      ]]
+    ],
   },
 };

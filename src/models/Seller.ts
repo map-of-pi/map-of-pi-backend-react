@@ -64,19 +64,28 @@ const sellerSchema = new Schema<ISeller>(
       type: String,
       default: null,
       required: false
+    },
+    pre_restriction_seller_type: {
+      type: String,
+      enum: Object.values(SellerType).filter(value => typeof value === 'string'),
+      required: false,
+      default: null
+    },
+    isPreRestricted: {
+      type: Boolean,
+      default: false,
+      required: false
     }
   },
   { timestamps: true } // Adds timestamps to track creation and update times
 );
 
 // Creating a text index on the 'name' and 'description' fields
-sellerSchema.index({ name: "text", description: "text" });
+sellerSchema.index({ 'name': 'text', 'description': 'text' });
 
 // Creating a 2dsphere index for the sell_map_center field
 sellerSchema.index({ 'sell_map_center.coordinates': '2dsphere' });
-sellerSchema.index(
-  { 'updatedAt': -1, 'sell_map_center.coordinates': '2dsphere' }
-);
+sellerSchema.index({ 'sell_map_center': '2dsphere', 'updatedAt': -1 });
 
 // Creating the Seller model from the schema
 const Seller = mongoose.model<ISeller>("Seller", sellerSchema);

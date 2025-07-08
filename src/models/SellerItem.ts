@@ -46,6 +46,8 @@ const sellerItemSchema = new Schema<ISellerItem>(
   }
 );
 
+sellerItemSchema.index({ seller_id: 1 });
+
 // Creating the Seller model from the schema
 const SellerItem = mongoose.model<ISellerItem>("Seller-Item", sellerItemSchema);
 

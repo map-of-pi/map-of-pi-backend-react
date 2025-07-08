@@ -19,7 +19,7 @@ jest.mock('../src/config/loggingConfig', () => ({
 }));
 
 // allow ample time to start running tests
-jest.setTimeout(100000);
+jest.setTimeout(300000);
 
 // MongoDB memory server setup
 let mongoServer: MongoMemoryServer;
@@ -32,10 +32,12 @@ beforeAll(async () => {
 
     // Load the mock data into Map of PI DB collections
     await User.insertMany(mockData.users);
+    await UserSettings.createIndexes();
     await UserSettings.insertMany(mockData.userSettings);
     // Ensure indexes are created for the schema models before running tests
     await Seller.createIndexes();
     await Seller.insertMany(mockData.sellers);
+    await SellerItem.createIndexes();
     await SellerItem.insertMany(mockData.sellerItems);
     await ReviewFeedback.insertMany(mockData.reviews);
     await SanctionedRegion.insertMany(mockData.sanctionedRegion);

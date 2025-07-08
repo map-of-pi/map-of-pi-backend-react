@@ -3,6 +3,7 @@ import { Router } from "express";
 import * as sellerController from "../controllers/sellerController";
 import { isSellerFound } from "../middlewares/isSellerFound";
 import { verifyToken } from "../middlewares/verifyToken";
+import { isToggle } from "../middlewares/isToggle";
 import upload from "../utils/multer";
 
 /**
@@ -281,7 +282,7 @@ sellerRoutes.delete(
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '/api/docs/SellersItemSchema.yml#/components/schemas/GetSellerItemRs'
+*                $ref: '/api/docs/SellersItemSchema.yml#/components/schemas/GetSellerItemsRs'
  *       404:
  *         description: Seller not found
  *       400:
@@ -289,7 +290,11 @@ sellerRoutes.delete(
  *       500:
  *         description: Internal server error
  */
-sellerRoutes.get("/item/:seller_id", sellerController.getSellerItems);
+sellerRoutes.get(
+  "/item/:seller_id", 
+  isToggle("onlineShoppingFeature"), 
+  sellerController.getSellerItems
+);
 
 /**
  * @swagger
@@ -319,7 +324,8 @@ sellerRoutes.get("/item/:seller_id", sellerController.getSellerItems);
  *         description: Internal server error
  */
 sellerRoutes.put(
-  "/item/add", 
+  "/item/add",
+  isToggle("onlineShoppingFeature"),  
   verifyToken,
   isSellerFound,
   upload.single("image"),
@@ -358,6 +364,7 @@ sellerRoutes.put(
  */
 sellerRoutes.delete(
   "/item/delete/:item_id",
+  isToggle("onlineShoppingFeature"),
   verifyToken,
   isSellerFound,
   sellerController.deleteSellerItem
