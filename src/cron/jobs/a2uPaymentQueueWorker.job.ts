@@ -1,4 +1,5 @@
-import A2UPaymentQueue, { A2U_STATUS } from "../../models/A2UPaymentQueue";
+import A2UPaymentQueue from "../../models/A2UPaymentQueue";
+import { A2UPaymentStatus } from "../../models/enums/a2uPaymentStatus";
 import { createA2UPayment } from "../../services/payment.service";
 import logger from "../../config/loggingConfig";
 
@@ -12,18 +13,18 @@ async function claimNextJob() {
   return A2UPaymentQueue.findOneAndUpdate(
     {
       $or: [
-        { status: A2U_STATUS.PENDING },
-        { status: A2U_STATUS.FAILED },
+        { status: A2UPaymentStatus.Pending },
+        { status: A2UPaymentStatus.Failed },
         {
-          status: A2U_STATUS.BATCHING,
-          last_a2u_date: { $lte: threeDaysAgo },
+          status: A2UPaymentStatus.Batching,
+          last_a2u_payout_date: { $lte: threeDaysAgo },
         },
       ],
-      attempts: { $lt: MAX_ATTEMPT },
+      num_retries: { $lt: MAX_ATTEMPT },
     },
     {
-      status: A2U_STATUS.PROCESSING,
-      $inc: { attempts: 1 },
+      status: A2UPaymentStatus.Processing,
+      $inc: { num_retries: 1 },
       updatedAt: new Date(),
     },
     {
@@ -35,9 +36,9 @@ async function claimNextJob() {
 
 async function markJobSuccess(jobId: string) {
   await A2UPaymentQueue.findByIdAndUpdate(jobId, {
-    status: A2U_STATUS.COMPLETED,
+    status: A2UPaymentStatus.Completed,
     updatedAt: new Date(),
-    last_a2u_date: new Date(),
+    last_a2u_payout_date: new Date(),
     last_error: null,
   });
 }
@@ -45,7 +46,7 @@ async function markJobSuccess(jobId: string) {
 async function markJobFailure(jobId: string, attempts: number, error: any) {
   const willRetry = attempts < MAX_ATTEMPT;
   await A2UPaymentQueue.findByIdAndUpdate(jobId, {
-    status: willRetry ? A2U_STATUS.PENDING : A2U_STATUS.FAILED,
+    status: willRetry ? A2UPaymentStatus.Pending : A2UPaymentStatus.Failed,
     last_error: error.message,
     updatedAt: new Date(),
   });
@@ -63,7 +64,7 @@ async function runA2UPaymentQueueWorker(): Promise<void> {
     return;
   }
 
-  const { sellerPiUid, amount, xRef_ids, _id, attempts } = job;
+  const { payee_pi_uid: sellerPiUid, amount, xref_ids: xRef_ids, _id, num_retries: attempts } = job;
 
   logger.info(`[→] Attempt ${attempts}/${MAX_ATTEMPT} for ${sellerPiUid}`);
 

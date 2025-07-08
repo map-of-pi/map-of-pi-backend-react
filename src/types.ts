@@ -1,5 +1,4 @@
 import { Document, Types } from "mongoose";
-import { A2UStatus } from "./models/A2UPaymentQueue";
 import { DeviceLocationType } from "./models/enums/deviceLocationType";
 import { RatingScale } from "./models/enums/ratingScale";
 import { SellerType } from "./models/enums/sellerType";
@@ -12,6 +11,7 @@ import { PaymentType } from "./models/enums/paymentType";
 import { U2UPaymentStatus } from "./models/enums/u2uPaymentStatus";
 import { RestrictedArea } from "./models/enums/restrictedArea";
 import { PaymentDirection } from "./models/enums/paymentDirection";
+import { A2UPaymentStatus } from "./models/enums/a2uPaymentStatus";
 
 // ========================
 // USER MODELS
@@ -126,8 +126,8 @@ export interface IReviewFeedbackOutput extends IReviewFeedback, PartialReview {}
 // BUYER MODELS
 // ========================
 export interface PickedItems {
-  itemId: string,
-  quantity: number,
+  itemId: string;
+  quantity: number;
 };
 
 // ========================
@@ -159,23 +159,23 @@ export interface IOrderItem extends Document {
 };
 
 export interface NewOrder {    
-  buyerId: string,
-  sellerId: string,        
-  paymentId: string,
-  totalAmount: string,
-  status: OrderStatusType,
-  fulfillmentMethod: FulfillmentType,
-  sellerFulfillmentDescription: string,
-  buyerFulfillmentDescription: string,
+  buyerId: string;
+  sellerId: string;        
+  paymentId: string;
+  totalAmount: string;
+  status: OrderStatusType;
+  fulfillmentMethod: FulfillmentType;
+  sellerFulfillmentDescription: string;
+  buyerFulfillmentDescription: string;
 };
 
 export type OrderPaymentMetadataType = {
-  items: PickedItems[],
-  buyer: string,
-  seller: string,
-  fulfillment_method: FulfillmentType | undefined,
-  seller_fulfillment_description:string | undefined,
-  buyer_fulfillment_description: string
+  items: PickedItems[];
+  buyer: string;
+  seller: string;
+  fulfillment_method: FulfillmentType | undefined;
+  seller_fulfillment_description:string | undefined;
+  buyer_fulfillment_description: string;
 };
 
 // ========================
@@ -203,47 +203,47 @@ export interface PaymentInfo {
 };
 
 export interface PaymentDTO {
-  amount: number,
-  user_uid: string,
-  created_at: string,
-  identifier: string,
-  metadata: Object,
-  memo: string,
+  amount: number;
+  user_uid: string;
+  created_at: string;
+  identifier: string;
+  metadata: Object;
+  memo: string;
   status: {
-    developer_approved: boolean,
-    transaction_verified: boolean,
-    developer_completed: boolean,
-    cancelled: boolean,
-    user_cancelled: boolean,
-  },
-  to_address: string,
+    developer_approved: boolean;
+    transaction_verified: boolean;
+    developer_completed: boolean;
+    cancelled: boolean;
+    user_cancelled: boolean;
+  };
+  to_address: string;
   transaction: null | {
-    txid: string,
-    verified: boolean,
-    _link: string,
-  },
+    txid: string;
+    verified: boolean;
+    _link: string;
+  };
 };
 
 export interface NewPayment {
-  piPaymentId: string,
-  userId: string,
-  memo:  string,
-  amount: string,
-  paymentType: PaymentType
+  piPaymentId: string;
+  userId: string;
+  memo:  string;
+  amount: string;
+  paymentType: PaymentType;
 };
 
 export interface U2URefDataType {
-  u2aPaymentId?: string,
-  u2uStatus: U2UPaymentStatus,
-  orderId?: string,
-  a2uPaymentId: string | null,
+  u2aPaymentId?: string;
+  u2uStatus: U2UPaymentStatus;
+  orderId?: string;
+  a2uPaymentId: string | null;
 };
 
 export interface A2UPaymentDataType {
-  sellerPiUid: string,
-  amount: string,
-  xRefIds: string[],
-  memo: string
+  sellerPiUid: string;
+  amount: string;
+  xRefIds: string[];
+  memo: string;
 };
 
 export type PaymentDataType = {
@@ -251,14 +251,14 @@ export type PaymentDataType = {
   amount: string;
   memo: string;
   metadata: {
-    payment_type: PaymentType,
-    OrderPayment?: OrderPaymentMetadataType,
-    MembershipPayment?: MembershipPaymentMetadataType
+    payment_type: PaymentType;
+    OrderPayment?: OrderPaymentMetadataType;
+    MembershipPayment?: MembershipPaymentMetadataType;
   }
 };
 
 export type PaymentMetadataType = {
-  OrderPayment: OrderPaymentMetadataType,
+  OrderPayment: OrderPaymentMetadataType;
   MembershipPayment: MembershipPaymentMetadataType
 };
 
@@ -280,13 +280,13 @@ export interface IPaymentCrossReference {
 };
 
 export interface A2UPaymentQueue extends Document {
-  sellerPiUid: string;
+  payee_pi_uid: string;
+  xref_ids: string[];
   amount: number;
-  xRef_ids: string[];
-  memo: string,
-  status: A2UStatus,
-  last_a2u_date: Date,
-  attempts: number;
+  memo: string;
+  status: A2UPaymentStatus;
+  last_a2u_payout_date: Date;
+  num_retries: number;
   last_error?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -304,8 +304,8 @@ export interface ISanctionedRegion extends Document {
 };
 
 export type SanctionedSeller = Pick<ISeller, 'seller_id' | 'name' | 'address' | 'sell_map_center'> & {
-	sanctioned_location: string,
-	pre_restriction_seller_type?: SellerType | null
+	sanctioned_location: string;
+	pre_restriction_seller_type?: SellerType | null;
 };
 
 export type SanctionedSellerStatus = {

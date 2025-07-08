@@ -11,12 +11,12 @@ const batchSellerRevenue = async (
   amount: string,
 ): Promise<void> => {
   try {
-    const onQueuePayment = await A2UPaymentQueue.findOne({ sellerPiUid, status:"batching", last_a2u_date: null }).exec();
+    const onQueuePayment = await A2UPaymentQueue.findOne({ payee_pi_uid: sellerPiUid, status:"batching", last_a2u_payout_date: null }).exec();
     if (!onQueuePayment) {
       const newAmount = parseFloat(amount) - GAS_FEE;
       await A2UPaymentQueue.create({
-        xRef_ids: [xRefId],
-        sellerPiUid,
+        xref_ids: [xRefId],
+        payee_pi_uid: sellerPiUid,
         amount: newAmount.toFixed(4),
         status: "batching",
         memo: "Map of Pi Payment for Order",
@@ -26,10 +26,10 @@ const batchSellerRevenue = async (
     }
 
     const updatedQueue = await A2UPaymentQueue.findOneAndUpdate(
-      { sellerPiUid, status:"batching", last_a2u_date: null },
+      { payee_pi_uid: sellerPiUid, status:"batching", last_a2u_payout_date: null },
       {
         $inc: { amount: parseFloat(amount) },
-        $push: { xRef_ids: xRefId },
+        $push: { xref_ids: xRefId },
       },
       { new: true }
     ).exec();
@@ -65,8 +65,8 @@ export const enqueuePayment = async (
     }
     const newAmount = parseFloat(amount) - GAS_FEE;
     await A2UPaymentQueue.create({
-      xRef_ids: [xRefId],
-      sellerPiUid: seller?.seller_id,
+      xref_ids: [xRefId],
+      payee_pi_uid: seller?.seller_id,
       amount: newAmount.toFixed(4),
       status: "pending",
       memo: memo,

@@ -1,6 +1,9 @@
 import dotenv from "dotenv";
 
-import { scheduleCronJobs } from "./cron";
+import { 
+  scheduleA2UPaymentQueueJob, 
+  scheduleSanctionSellerJob 
+} from "./cron";
 import "./config/sentryConnection";
 import { connectDB } from "./config/dbConnection";
 import app from "./utils/app";
@@ -34,7 +37,9 @@ const startServer = async () => {
 
 // Start the server setup process
 startServer();
-// TODO: Remove cron job; Start the scheduled cron job(s)
-scheduleCronJobs();
+
+// Start cron jobs
+scheduleA2UPaymentQueueJob();
+// scheduleSanctionSellerJob();
 
 export default app;
