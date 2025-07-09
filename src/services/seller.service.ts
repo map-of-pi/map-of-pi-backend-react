@@ -215,7 +215,7 @@ export const registerOrUpdateSeller = async (authUser: IUser, formData: any): Pr
       order_online_enabled_pref: formData.order_online_enabled_pref || existingSeller?.order_online_enabled_pref || false,
       fulfillment_method: formData.fulfillment_method || existingSeller?.fulfillment_method || FulfillmentType.CollectionByBuyer,
       fulfillment_description: formData.fulfillment_description || existingSeller?.fulfillment_description || '',
-      gas_saver: formData.gas_saver || true
+      is_gas_saver: formData.gas_saver || true
     };
 
     // Update existing seller or create a new one

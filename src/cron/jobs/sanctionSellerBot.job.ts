@@ -19,7 +19,7 @@ async function runSanctionSellerBot(): Promise<void> {
   try {
     /* Step 1: Reset the 'isPreRestricted' field to 'false' for all sellers
        This clears any pre-existing restrictions before applying new ones. */
-    await Seller.updateMany({}, { isPreRestricted: false }).exec();
+    await Seller.updateMany({}, { is_prerestricted: false }).exec();
     logger.info('Reset [isPreRestricted] for all sellers.');
 
     /* Step 2: Get the list of all sanctioned regions */
@@ -43,7 +43,7 @@ async function runSanctionSellerBot(): Promise<void> {
 		}
 
     /* Step 5: Retrieve all sellers who are marked as pre-restricted */
-		const preRestrictedSellers = await Seller.find({isPreRestricted: true}).exec();
+		const preRestrictedSellers = await Seller.find({is_prerestricted: true}).exec();
 		logger.info(`${preRestrictedSellers.length} sellers are Pre-Restricted`);
 
 		/* Step 6: Process geocoding validation */
@@ -59,7 +59,7 @@ async function runSanctionSellerBot(): Promise<void> {
 		await processUnsanctionedSellers(outOfZone);
 
     /* Step 8: Clean up temp pre-restriction flags */
-		await Seller.updateMany({isPreRestricted: true}, {isPreRestricted: false}).exec();
+		await Seller.updateMany({is_prerestricted: true}, {is_prerestricted: false}).exec();
 		logger.info('Sanction Seller Bot job completed.');
 	} catch (error) {
 		logger.error('Error in Sanction Seller Bot job:', error);

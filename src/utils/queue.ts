@@ -1,7 +1,7 @@
-
-import logger from "../../config/loggingConfig";
-import A2UPaymentQueue from "../../models/A2UPaymentQueue";
-import Seller from "../../models/Seller";
+import A2UPaymentQueue from "../models/A2UPaymentQueue";
+import Seller from "../models/Seller";
+import { A2UPaymentStatus } from "../models/enums/a2uPaymentStatus";
+import logger from "../config/loggingConfig";
 
 const GAS_FEE = 0.01;
 
@@ -11,22 +11,26 @@ const batchSellerRevenue = async (
   amount: string,
 ): Promise<void> => {
   try {
-    const onQueuePayment = await A2UPaymentQueue.findOne({ payee_pi_uid: sellerPiUid, status:"batching", last_a2u_payout_date: null }).exec();
+    const onQueuePayment = await A2UPaymentQueue.findOne({ 
+      payee_pi_uid: sellerPiUid, 
+      status: A2UPaymentStatus.Batching, 
+      last_a2u_payout_date: null })
+    .exec();
     if (!onQueuePayment) {
       const newAmount = parseFloat(amount) - GAS_FEE;
       await A2UPaymentQueue.create({
         xref_ids: [xRefId],
         payee_pi_uid: sellerPiUid,
         amount: newAmount.toFixed(4),
-        status: "batching",
+        status: A2UPaymentStatus.Batching,
         memo: "Map of Pi Payment for Order",
       });
-      logger.info("new payment added to queue for seller with ID: ", sellerPiUid)
+      logger.info("new payment added to queue for seller with ID: ", sellerPiUid);
       return;
     }
 
     const updatedQueue = await A2UPaymentQueue.findOneAndUpdate(
-      { payee_pi_uid: sellerPiUid, status:"batching", last_a2u_payout_date: null },
+      { payee_pi_uid: sellerPiUid, status: A2UPaymentStatus.Batching, last_a2u_payout_date: null },
       {
         $inc: { amount: parseFloat(amount) },
         $push: { xref_ids: xRefId },
@@ -43,7 +47,7 @@ const batchSellerRevenue = async (
     return
 
   } catch (error:any) {
-    logger.error("failed to enque payment")
+    logger.error("Failed to enqueue payment");
   }
 
 }
@@ -59,7 +63,7 @@ export const enqueuePayment = async (
     const seller = await Seller.findById( sellerId ).lean().exec();
     
     // check and compute seller revenue for gas saver
-    if (seller?.gas_saver) {
+    if (seller?.is_gas_saver) {
       batchSellerRevenue(xRefId, seller.seller_id, amount);
       return
     }
@@ -74,7 +78,7 @@ export const enqueuePayment = async (
     logger.info("new payment added to queue for seller with ID: ", {sellerId})
     return;
 
-  }catch(error:any){
+  } catch(error:any) {
 
   }
 }

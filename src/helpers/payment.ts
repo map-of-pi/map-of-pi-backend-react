@@ -19,8 +19,8 @@ import {
   getxRefByOrderId
 } from '../services/payment.service';
 import { IUser, NewOrder, PaymentDataType, PaymentDTO, PaymentInfo } from '../types';
+import { enqueuePayment } from '../utils/queue';
 import logger from '../config/loggingConfig';
-import { enqueuePayment } from '../utils/queues/queue';
 
 function buildPaymentData(
   piPaymentId: string,

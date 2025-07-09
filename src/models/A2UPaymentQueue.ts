@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Types } from "mongoose";
 import { A2UPaymentStatus } from "./enums/a2uPaymentStatus";
 import { A2UPaymentQueue } from "../types";
 

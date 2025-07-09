@@ -71,12 +71,12 @@ const sellerSchema = new Schema<ISeller>(
       required: false,
       default: null
     },
-    isPreRestricted: {
+    is_prerestricted: {
       type: Boolean,
       default: false,
       required: false
     },
-    gas_saver: {
+    is_gas_saver: {
       type: Boolean,
       default: true,
       required: true

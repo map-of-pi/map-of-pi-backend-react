@@ -8,10 +8,10 @@ import { TrustMeterScale } from "./models/enums/trustMeterScale";
 import { OrderStatusType } from "./models/enums/orderStatusType";
 import { OrderItemStatusType } from "./models/enums/orderItemStatusType";
 import { PaymentType } from "./models/enums/paymentType";
-import { U2UPaymentStatus } from "./models/enums/u2uPaymentStatus";
-import { RestrictedArea } from "./models/enums/restrictedArea";
-import { PaymentDirection } from "./models/enums/paymentDirection";
 import { A2UPaymentStatus } from "./models/enums/a2uPaymentStatus";
+import { U2UPaymentStatus } from "./models/enums/u2uPaymentStatus";
+import { PaymentDirection } from "./models/enums/paymentDirection";
+import { RestrictedArea } from "./models/enums/restrictedArea";
 
 // ========================
 // USER MODELS
@@ -75,8 +75,8 @@ export interface ISeller extends Document {
 	fulfillment_method: FulfillmentType;
 	fulfillment_description?: string;
 	pre_restriction_seller_type?: SellerType | null;
-	isPreRestricted: boolean;
-  gas_saver: boolean;
+	is_prerestricted: boolean;
+  is_gas_saver: boolean;
 };
 
 // Combined interface representing a seller with selected user settings
