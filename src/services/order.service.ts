@@ -45,7 +45,7 @@ export const createOrder = async (
       const sellerItem = sellerItemMap.get(item.itemId);
       if (!sellerItem) {
         logger.error(`Seller item not found for ID: ${item.itemId}`);
-        throw new Error('Seller item not found');
+        throw new Error('Failed to find associated seller item');
       }
 
       // Validate and get new stock level
@@ -93,7 +93,6 @@ export const createOrder = async (
     session.endSession();
   }
 };
-
 
 export const updatePaidOrder = async (paymentId: string): Promise<IOrder> => {
   try {
