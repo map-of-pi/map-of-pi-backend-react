@@ -1,5 +1,6 @@
-import { getUpdatedStockLevel, StockValidationError } from "../../src/helpers/order";
+import { getUpdatedStockLevel } from "../../src/helpers/order";
 import { StockLevelType } from "../../src/models/enums/stockLevelType";
+import { StockValidationError } from "../../src/errors/StockValidationError";
 
 describe('getUpdatedStockLevel function', () => {
   const itemId = 'itemId_TEST'

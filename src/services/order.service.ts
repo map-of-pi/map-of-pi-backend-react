@@ -1,4 +1,9 @@
 import mongoose from "mongoose";
+import { 
+  getRollbackStockLevel, 
+  getUpdatedStockLevel 
+} from "../helpers/order";
+import { StockValidationError } from "../errors/StockValidationError";
 import Order from "../models/Order";
 import OrderItem from "../models/OrderItem";
 import Seller from "../models/Seller";
@@ -8,7 +13,6 @@ import { OrderStatusType } from "../models/enums/orderStatusType";
 import { OrderItemStatusType } from "../models/enums/orderItemStatusType";
 import { IOrder, NewOrder, PickedItems } from "../types";
 import logger from "../config/loggingConfig";
-import { StockValidationError, getRollbackStockLevel, getUpdatedStockLevel } from "../helpers/order";
 
 export const createOrder = async (
   orderData: NewOrder,
@@ -19,6 +23,7 @@ export const createOrder = async (
   try {
     session.startTransaction();
 
+    /* Step 1: Create a new Order record */
     const order = new Order({
       buyer_id: orderData.buyerId,
       seller_id: orderData.sellerId,
@@ -34,6 +39,7 @@ export const createOrder = async (
     const newOrder = await order.save({ session });
     if (!newOrder) throw new Error('Failed to create order');
 
+    /* Step 2: Fetch all SellerItem documents associated with the order */
     const sellerItemIds = orderItems.map((item) => item.itemId);
     const sellerItems = await SellerItem.find({ _id: { $in: sellerItemIds } }).session(session);
     const sellerItemMap = new Map(sellerItems.map((doc) => [doc._id.toString(), doc]));
@@ -41,6 +47,7 @@ export const createOrder = async (
     const bulkOrderItems = [];
     const bulkSellerItemUpdates = [];
 
+    /* Step 3: Build OrderItem documents for bulk insertion */
     for (const item of orderItems) {
       const sellerItem = sellerItemMap.get(item.itemId);
       if (!sellerItem) {
@@ -69,12 +76,14 @@ export const createOrder = async (
       });
     }
 
+    /* Step 4: Insert order items in bulk */
     await OrderItem.insertMany(bulkOrderItems, { session });
 
     if (bulkSellerItemUpdates.length > 0) {
       await SellerItem.bulkWrite(bulkSellerItemUpdates, { session });
     }
 
+    /* Step 5: Commit the transaction */
     await session.commitTransaction();
     logger.info('Order and stock levels created/updated successfully', { orderId: newOrder._id });
 
@@ -282,7 +291,7 @@ export const cancelOrder = async (paymentId: string) => {
   try {
     session.startTransaction();
 
-    // Step 1: Cancel the order
+    /* Step 1: Cancel the order */
     const cancelledOrder = await Order.findOneAndUpdate(
       { payment_id: paymentId },
       {
@@ -297,7 +306,7 @@ export const cancelOrder = async (paymentId: string) => {
       throw new Error('Failed to cancel order');
     }
 
-    // Step 2: Get order items
+    /* Step 2: Get order items */
     const orderItems = await OrderItem.find({
       order_id: cancelledOrder._id,
       status: OrderItemStatusType.Pending,
@@ -307,7 +316,7 @@ export const cancelOrder = async (paymentId: string) => {
       logger.warn(`No pending order items found for order ${cancelledOrder._id}`);
     }
 
-    // Step 3: Get related seller items
+    /* Step 3: Get related seller items */
     const sellerItemIds = orderItems.map((item) => item.seller_item_id);
     const sellerItems = await SellerItem.find({ _id: { $in: sellerItemIds } }).session(session);
 
