@@ -1,5 +1,5 @@
 import mongoose, { Types } from "mongoose";
-import { getUpdatedStockLevel } from "../../src/helpers/updateStockLevel";
+import { getUpdatedStockLevel } from "../../src/helpers/order";
 import Order from "../../src/models/Order";
 import OrderItem from "../../src/models/OrderItem";
 import Seller from "../../src/models/Seller";
@@ -19,7 +19,7 @@ import {
   updatePaidOrder
 } from '../../src/services/order.service';
 
-jest.mock('../../src/helpers/updateStockLevel');
+jest.mock('../../src/helpers/order');
 jest.mock('../../src/models/Order');
 jest.mock('../../src/models/OrderItem');
 jest.mock('../../src/models/Seller');

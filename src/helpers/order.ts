@@ -1,4 +1,3 @@
-
 import { StockLevelType } from "../models/enums/stockLevelType";
 
 export class StockValidationError extends Error {
@@ -13,22 +12,31 @@ export function getUpdatedStockLevel(
   quantity: number,
   itemId: string
 ): StockLevelType | null {
+  // Helper to throw error for exceeding max quantity
+  const throwIfOver = (max: number) => {
+    if (quantity > max) {
+      throw new StockValidationError(
+        `Cannot order more than ${max} item${max > 1 ? 's' : ''} for "${max} available"`,
+        itemId
+      );
+    }
+  };
+
   switch (currentLevel) {
     case StockLevelType.AVAILABLE_1:
-      if (quantity > 1) throw new StockValidationError('Cannot order more than 1 item for "1 available"', itemId);
+      throwIfOver(1);
       return StockLevelType.SOLD;
 
     case StockLevelType.AVAILABLE_2:
-      if (quantity > 2) throw new StockValidationError('Cannot order more than 2 items for "2 available"', itemId);
+      throwIfOver(2);
       return quantity === 2 ? StockLevelType.SOLD : StockLevelType.AVAILABLE_1;
 
     case StockLevelType.AVAILABLE_3:
-      if (quantity > 3) throw new StockValidationError('Cannot order more than 3 items for "3 available"', itemId);
-      return quantity === 3
-        ? StockLevelType.SOLD
-        : quantity === 2
-        ? StockLevelType.AVAILABLE_1
-        : StockLevelType.AVAILABLE_2;
+      throwIfOver(3);
+      // Map quantity to resulting stock level explicitly
+      if (quantity === 3) return StockLevelType.SOLD;
+      if (quantity === 2) return StockLevelType.AVAILABLE_1;
+      return StockLevelType.AVAILABLE_2;
 
     case StockLevelType.MANY_AVAILABLE:
     case StockLevelType.MADE_TO_ORDER:
@@ -44,21 +52,25 @@ export function getRollbackStockLevel(
   currentStock: StockLevelType,
   quantity: number
 ): StockLevelType | null {
+  // Helper to map quantity to stock level for rollback from SOLD
+  const soldRollbackMap: Record<number, StockLevelType> = {
+    1: StockLevelType.AVAILABLE_1,
+    2: StockLevelType.AVAILABLE_2,
+    3: StockLevelType.AVAILABLE_3,
+  };
+
   switch (currentStock) {
     case StockLevelType.SOLD:
-      if (quantity === 1) return StockLevelType.AVAILABLE_1;
-      if (quantity === 2) return StockLevelType.AVAILABLE_2;
-      if (quantity === 3) return StockLevelType.AVAILABLE_3;
-      break;
+      return soldRollbackMap[quantity] ?? null;
 
     case StockLevelType.AVAILABLE_1:
       if (quantity === 1) return StockLevelType.AVAILABLE_2;
-      else if (quantity === 2) return StockLevelType.AVAILABLE_3;
-      break;
+      if (quantity === 2) return StockLevelType.AVAILABLE_3;
+      return null;
 
     case StockLevelType.AVAILABLE_2:
       if (quantity === 1) return StockLevelType.AVAILABLE_3;
-      break;
+      return null;
 
     // For non-limited stock types, we assume no rollback is needed
     case StockLevelType.MANY_AVAILABLE:
@@ -69,6 +81,4 @@ export function getRollbackStockLevel(
     default:
       return null;
   }
-
-  return null;
 }

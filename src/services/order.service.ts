@@ -8,7 +8,7 @@ import { OrderStatusType } from "../models/enums/orderStatusType";
 import { OrderItemStatusType } from "../models/enums/orderItemStatusType";
 import { IOrder, NewOrder, PickedItems } from "../types";
 import logger from "../config/loggingConfig";
-import { StockValidationError, getRollbackStockLevel, getUpdatedStockLevel } from "../helpers/updateStockLevel";
+import { StockValidationError, getRollbackStockLevel, getUpdatedStockLevel } from "../helpers/order";
 
 export const createOrder = async (
   orderData: NewOrder,
