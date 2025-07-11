@@ -319,18 +319,27 @@ export const cancelOrder = async (paymentId: string) => {
     /* Step 3: Get related seller items */
     const sellerItemIds = orderItems.map((item) => item.seller_item_id);
     const sellerItems = await SellerItem.find({ _id: { $in: sellerItemIds } }).session(session);
-
     const sellerItemMap = new Map(sellerItems.map((item) => [item._id.toString(), item]));
 
+    const bulkSellerItemUpdates = []; 
+    
     for (const item of orderItems) {
       const sellerItem = sellerItemMap.get(item.seller_item_id.toString());
       if (!sellerItem) continue;
 
       const restoredLevel = getRollbackStockLevel(sellerItem.stock_level, item.quantity);
       if (restoredLevel !== null) {
-        sellerItem.stock_level = restoredLevel;
-        await sellerItem.save({ session });
+        bulkSellerItemUpdates.push({
+          updateOne: {
+            filter: { _id: sellerItem._id },
+            update: { $set: { stock_level: restoredLevel } },
+          },
+        });
       }
+    }
+
+    if (bulkSellerItemUpdates.length > 0) {
+      await SellerItem.bulkWrite(bulkSellerItemUpdates, { session });
     }
 
     await session.commitTransaction();
