@@ -2,6 +2,7 @@ import Seller from "../../models/Seller";
 import logger from "../../config/loggingConfig";
 import SanctionedGeoBoundary from "../../models/misc/SanctionedGeoBoundary";
 import * as turf from '@turf/turf';
+import {addNotification} from "../../services/notification.service";
 
 
 async function getSanctionedGeoBoundaries() {
@@ -76,17 +77,14 @@ export async function findAndRestrictSanctionedSellers() {
     const isNowRestricted = turfPolygons.some(polygon => turf.booleanPointInPolygon(point, polygon));
     const wasRestricted = seller.isRestricted;
 
-    if (wasRestricted && isNowRestricted) {
-      // Case #1: true → true → No action
-      continue;
-    } else if (wasRestricted && !isNowRestricted) {
+    if (wasRestricted && !isNowRestricted) {
       // Case #2: true → false → Update to unrestricted
       updates.push(
         Seller.updateOne({ _id: seller._id }, {
           $set: { isRestricted: false, lastSanctionUpdateAt: now }
         })
       );
-      // sendNotification(seller._id, "The area containing your Sell Centre is no longer sanctioned by Pi Network, so your map marker will now be displayed in searches");
+      await addNotification(seller.seller_id, "The area containing your Sell Centre is no longer sanctioned by Pi Network, so your map marker will now be displayed in searches");
     } else if (!wasRestricted && isNowRestricted) {
       // Case #3: false → true → Update to restricted
       updates.push(
@@ -94,7 +92,7 @@ export async function findAndRestrictSanctionedSellers() {
           $set: { isRestricted: true, lastSanctionUpdateAt: now }
         })
       );
-      // sendNotification(seller._id, "The area containing your Sell Centre is sanctioned by Pi Network, so your map marker will now not be displayed in searches");
+      await addNotification(seller.seller_id, "The area containing your Sell Centre is sanctioned by Pi Network, so your map marker will now not be displayed in searches");
     }
     // Case #4: false → false → No action
   }
