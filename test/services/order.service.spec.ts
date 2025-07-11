@@ -1,4 +1,5 @@
 import mongoose, { Types } from "mongoose";
+import { getUpdatedStockLevel } from "../../src/helpers/order";
 import Order from "../../src/models/Order";
 import OrderItem from "../../src/models/OrderItem";
 import Seller from "../../src/models/Seller";
@@ -18,6 +19,7 @@ import {
   updatePaidOrder
 } from '../../src/services/order.service';
 
+jest.mock('../../src/helpers/order');
 jest.mock('../../src/models/Order');
 jest.mock('../../src/models/OrderItem');
 jest.mock('../../src/models/Seller');
@@ -64,11 +66,11 @@ describe('createOrder function', () => {
     const mockSave = jest.fn().mockResolvedValue(mockSavedOrder);
     (Order as unknown as jest.Mock).mockImplementation(() => ({ save: mockSave }));
 
-    // Mock SellerItem.find().lean()
+    // Mock SellerItem.find().session()
     (SellerItem.find as jest.Mock).mockReturnValueOnce({
-      lean: jest.fn().mockResolvedValue([
-        { _id: 'item1_TEST', price: 10 },
-        { _id: 'item2_TEST', price: 80 },
+      session: jest.fn().mockResolvedValue([
+        { _id: 'item1_TEST', price: 10, stock_level: 10 },
+        { _id: 'item2_TEST', price: 80, stock_level: 5 },
       ]),
     } as any);
 
@@ -142,8 +144,8 @@ describe('createOrder function', () => {
   
     // Return only one item even though two were expected
     (SellerItem.find as jest.Mock).mockReturnValueOnce({
-      lean: jest.fn().mockResolvedValue([
-        { _id: 'item1_TEST', price: 10 },
+      session: jest.fn().mockResolvedValue([
+        { _id: 'item1_TEST', price: 10, stock_level: 10 },
         // item2_TEST is missing
       ]),
     } as any);
@@ -166,9 +168,9 @@ describe('createOrder function', () => {
     (Order as unknown as jest.Mock).mockImplementation(() => ({ save: mockSave }));
   
     (SellerItem.find as jest.Mock).mockReturnValueOnce({
-      lean: jest.fn().mockResolvedValue([
-        { _id: 'item1_TEST', price: 10 },
-        { _id: 'item2_TEST', price: 80 },
+      session: jest.fn().mockResolvedValue([
+        { _id: 'item1_TEST', price: 10, stock_level: 10 },
+        { _id: 'item2_TEST', price: 80, stock_level: 5 },
       ]),
     } as any);
   
