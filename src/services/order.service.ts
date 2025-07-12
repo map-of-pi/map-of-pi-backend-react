@@ -1,4 +1,9 @@
 import mongoose from "mongoose";
+import { 
+  getRollbackStockLevel, 
+  getUpdatedStockLevel 
+} from "../helpers/order";
+import { StockValidationError } from "../errors/StockValidationError";
 import Order from "../models/Order";
 import OrderItem from "../models/OrderItem";
 import Seller from "../models/Seller";
@@ -39,57 +44,69 @@ export const createOrder = async (
       is_fulfilled: false,
       fulfillment_method: orderData.fulfillmentMethod,
       seller_fulfillment_description: orderData.sellerFulfillmentDescription,
-      buyer_fulfillment_description: orderData.buyerFulfillmentDescription, 
+      buyer_fulfillment_description: orderData.buyerFulfillmentDescription,
     });
     const newOrder = await order.save({ session });
-
-    if (!newOrder) {
-      logger.error('Failed to create order; save returned null');
-      throw new Error('Failed to create order');
-    }
-    logger.debug('Order created successfully', { orderId: newOrder._id });
+    if (!newOrder) throw new Error('Failed to create order');
 
     /* Step 2: Fetch all SellerItem documents associated with the order */
     const sellerItemIds = orderItems.map((item) => item.itemId);
-    const sellerItems = await SellerItem.find({ _id: { $in: sellerItemIds } }).lean();
+    const sellerItems = await SellerItem.find({ _id: { $in: sellerItemIds } }).session(session);
+    const sellerItemMap = new Map(sellerItems.map((doc) => [doc._id.toString(), doc]));
 
-    // Build a lookup map for seller items
-    const sellerItemLookup = sellerItems.reduce((acc, sellerItem) => {
-      acc[sellerItem._id.toString()] = sellerItem;
-      return acc;
-    }, {} as Record<string, any>);
+    const bulkOrderItems = [];
+    const bulkSellerItemUpdates = [];
 
     /* Step 3: Build OrderItem documents for bulk insertion */
-    const bulkOrderItems = orderItems.map((item) => {
-      const sellerItem = sellerItemLookup[item.itemId];
+    for (const item of orderItems) {
+      const sellerItem = sellerItemMap.get(item.itemId);
       if (!sellerItem) {
-        logger.error(`Failed to find seller item for ID: ${ item.itemId }`);
+        logger.error(`Seller item not found for ID: ${item.itemId}`);
         throw new Error('Failed to find associated seller item');
       }
 
-      return {
+      // Validate and get new stock level
+      const newStockLevel = getUpdatedStockLevel(sellerItem.stock_level, item.quantity, item.itemId);
+      if (newStockLevel !== null) {
+        bulkSellerItemUpdates.push({
+          updateOne: {
+            filter: { _id: sellerItem._id },
+            update: { $set: { stock_level: newStockLevel } },
+          },
+        });
+      }
+
+      const subtotal = item.quantity * parseFloat(sellerItem.price.toString());
+      bulkOrderItems.push({
         order_id: newOrder._id,
-        seller_item_id: sellerItem._id, // Store only the ObjectId
+        seller_item_id: sellerItem._id,
         quantity: item.quantity,
-        subtotal: item.quantity * parseFloat(sellerItem.price.toString()),
+        subtotal,
         status: OrderItemStatusType.Pending,
-      };
-    });
+      });
+    }
 
     /* Step 4: Insert order items in bulk */
     await OrderItem.insertMany(bulkOrderItems, { session });
-    logger.debug('Order items inserted successfully', { count: bulkOrderItems.length });
+
+    if (bulkSellerItemUpdates.length > 0) {
+      await SellerItem.bulkWrite(bulkSellerItemUpdates, { session });
+    }
 
     /* Step 5: Commit the transaction */
     await session.commitTransaction();
+    logger.info('Order and stock levels created/updated successfully', { orderId: newOrder._id });
 
-    logger.info('Order and associated items created successfully', { orderId: newOrder._id });
     return newOrder;
   } catch (error: any) {
-    /* Step 6: Roll back transaction on failure */
     await session.abortTransaction();
 
-    logger.error(`Failed to create order: ${ error }`);
+    if (error instanceof StockValidationError) {
+      logger.warn(`Stock validation failed: ${error.message}`, { itemId: error.itemId });
+    } else {
+      logger.error(`Failed to create order and update stock: ${error}`);
+    }
+
     throw error;
   } finally {
     session.endSession();
@@ -302,28 +319,73 @@ export const updateOrderItemStatus = async (
     logger.error(`Failed to update order item status for orderItemID ${ itemId }: ${ error }`);
     throw error;
   }
-};
+}
 
 export const cancelOrder = async (paymentId: string) => {
+  const session = await mongoose.startSession();
+
   try {
+    session.startTransaction();
+
+    /* Step 1: Cancel the order */
     const cancelledOrder = await Order.findOneAndUpdate(
-      { payment_id: paymentId }, 
-      { 
+      { payment_id: paymentId },
+      {
         is_paid: false,
-        status: OrderStatusType.Cancelled
+        status: OrderStatusType.Cancelled,
       },
-      { new: true } 
-    ).exec();
+      { new: true, session }
+    );
 
     if (!cancelledOrder) {
-      logger.error(`Failed to cancel order for paymentID ${ paymentId }`);
-      throw new Error("Failed to cancel order");
-    } 
+      logger.error(`Failed to cancel order for paymentID ${paymentId}`);
+      throw new Error('Failed to cancel order');
+    }
 
-    logger.info(`Order with paymentID ${ paymentId } successfully cancelled.`);
+    /* Step 2: Get order items */
+    const orderItems = await OrderItem.find({
+      order_id: cancelledOrder._id,
+      status: OrderItemStatusType.Pending,
+    }).session(session);
+
+    if (orderItems.length === 0) {
+      logger.warn(`No pending order items found for order ${cancelledOrder._id}`);
+    }
+
+    /* Step 3: Get related seller items */
+    const sellerItemIds = orderItems.map((item) => item.seller_item_id);
+    const sellerItems = await SellerItem.find({ _id: { $in: sellerItemIds } }).session(session);
+    const sellerItemMap = new Map(sellerItems.map((item) => [item._id.toString(), item]));
+
+    const bulkSellerItemUpdates = []; 
+    
+    for (const item of orderItems) {
+      const sellerItem = sellerItemMap.get(item.seller_item_id.toString());
+      if (!sellerItem) continue;
+
+      const restoredLevel = getRollbackStockLevel(sellerItem.stock_level, item.quantity);
+      if (restoredLevel !== null) {
+        bulkSellerItemUpdates.push({
+          updateOne: {
+            filter: { _id: sellerItem._id },
+            update: { $set: { stock_level: restoredLevel } },
+          },
+        });
+      }
+    }
+
+    if (bulkSellerItemUpdates.length > 0) {
+      await SellerItem.bulkWrite(bulkSellerItemUpdates, { session });
+    }
+
+    await session.commitTransaction();
+    logger.info(`Order with paymentID ${paymentId} successfully cancelled and stock levels restored.`);
     return cancelledOrder;
-  } catch (error:any) {
-    logger.error(`Failed to cancel order for paymentID ${ paymentId }: ${ error }`);
+  } catch (error: any) {
+    await session.abortTransaction();
+    logger.error(`Failed to cancel order for paymentID ${paymentId}: ${error.message}`);
     throw error;
+  } finally {
+    session.endSession();
   }
 };
