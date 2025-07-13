@@ -138,7 +138,7 @@ export const updatePaidOrder = async (paymentId: string): Promise<IOrder> => {
   }  
 };
 
-// To be removed once payment service is fully integrated
+// TODO: To be removed once payment service is fully integrated
 export const markAsPaidOrder = async (orderId: string): Promise<IOrder> => {
   try {
     const updatedOrder = await Order.findByIdAndUpdate(
