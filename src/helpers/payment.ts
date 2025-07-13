@@ -96,13 +96,13 @@ const checkoutProcess = async (
 
   // Construct order data object
   const orderData = buildOrderData(
-    buyer._id as string,
-    seller._id as string,
+    authUser.pi_uid as string,
+    OrderPayment.seller as string,
     newPayment._id as string,
     currentPayment
   )
   // Create a new order along with its items
-  const newOrder = await createOrder(orderData as NewOrder, OrderPayment.items);
+  const newOrder = await createOrder(orderData as NewOrder, OrderPayment.items, authUser);
 
   logger.info('order created successfully', { orderId: newOrder._id });
   return newOrder;
