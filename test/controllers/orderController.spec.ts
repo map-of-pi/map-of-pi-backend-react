@@ -20,6 +20,7 @@ jest.mock('../../src/services/order.service', () => ({
   getOrderItems: jest.fn(),
   updateOrderStatus: jest.fn(),
   updateOrderItemStatus: jest.fn(),
+  markAsPaidOrder: jest.fn()
 }));
 
 describe('orderController', () => {
@@ -152,14 +153,16 @@ describe('orderController', () => {
 
   describe('createOrder function', () => {
     const mockOrderId = '24f5a0f2a86d1f9f3b7e4e82';
+    const mockUser = { pi_uid: '0a0a0a-0a0a-0a0a' };
+    const mockOrderData = { payment_id: '0d367ba3a2e8438086c3ab7c0b7890c0' };
 
     beforeEach(() => {
       req = { 
         body: {
-          orderId: mockOrderId,
-          pi_username: 'testuser',
+          orderData: mockOrderData,
           orderItems: [{ itemId: 'item-1' }],
-        }      
+        },
+        currentUser: mockUser      
       };
       res = {
         status: jest.fn().mockReturnThis(),
@@ -167,24 +170,51 @@ describe('orderController', () => {
       };
     });
 
-    it('should return [201] and created/ updated order on success', async () => {
-      const mockOrder = { id: mockOrderId, status: OrderStatusType.Initialized };
+    it('should return [200] and created/ updated order on success', async () => {
+      const mockOrder = { _id: mockOrderId, status: OrderStatusType.Initialized };
+      const mockPaidOrder = { ...mockOrder, status: OrderStatusType.Pending };
       (orderService.createOrder as jest.Mock).mockResolvedValue(mockOrder);
+      (orderService.markAsPaidOrder as jest.Mock).mockResolvedValue(mockPaidOrder);
   
       await createOrder(req, res);
   
-      expect(orderService.createOrder).toHaveBeenCalledWith(req.body.orderData, req.body.orderItems);
-      expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith(mockOrder);
+      expect(orderService.createOrder).toHaveBeenCalledWith(
+        { ...mockOrderData, paymentId: null },
+        req.body.orderItems,
+        req.currentUser 
+      );
+      expect(orderService.markAsPaidOrder).toHaveBeenCalledWith(mockOrderId);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(mockPaidOrder);
     });
 
-    it('should return [500] if order service throws error', async () => {
+    it('should return [400] if createOrder service returns null', async () => {
+      (orderService.createOrder as jest.Mock).mockResolvedValue(null);
+  
+      await createOrder(req, res);
+  
+      expect(orderService.createOrder).toHaveBeenCalledWith(
+        { ...mockOrderData, paymentId: null },
+        req.body.orderItems,
+        req.currentUser 
+      );
+      expect(orderService.markAsPaidOrder).not.toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({ message: 'Invalid order data' });
+    });
+
+    it('should return [500] if createOrder service throws error', async () => {
       const mockError = new Error('An error occurred while creating order; please try again later');
       (orderService.createOrder as jest.Mock).mockRejectedValue(mockError);
   
       await createOrder(req, res);
   
-      expect(orderService.createOrder).toHaveBeenCalledWith(req.body.orderData, req.body.orderItems);
+      expect(orderService.createOrder).toHaveBeenCalledWith(
+        { ...mockOrderData, paymentId: null },
+        req.body.orderItems,
+        req.currentUser
+      );
+      expect(orderService.markAsPaidOrder).not.toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({ message: mockError.message });
     });

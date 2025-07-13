@@ -48,20 +48,21 @@ export const getSingleOrder = async (req: Request, res: Response) => {
   }
 };
 
-// To be removed once payment service is fully integrated
+// TODO: To be removed once payment service is fully integrated
 export const createOrder = async (req: Request, res: Response) => {
   const buyer = req.currentUser as IUser;
   const { orderData, orderItems } = req.body;
   try {
-    orderData.paymentId = null; // Set paymentId to null initially
-    const order = await orderService.createOrder(orderData, orderItems, buyer);
+    // Ensure no payment ID is attached
+    const sanitizedOrderData = { ...orderData, paymentId: null };
+    const order = await orderService.createOrder(sanitizedOrderData, orderItems, buyer);
     if (!order) {
-      logger.error(`Failed to create order with provided data: ${JSON.stringify(orderData)}`);
+      logger.error(`Failed to create order with provided data: ${JSON.stringify(sanitizedOrderData)}`);
       return res.status(400).json({ message: "Invalid order data" });
     }
-    const orderId = order._id as string;
-    const paidOrder = await orderService.markAsPaidOrder(orderId);
 
+    // Mark the order as paid (temporary behavior)
+    const paidOrder = await orderService.markAsPaidOrder(order._id as string);
     return res.status(200).json(paidOrder);
   } catch (error) {
     logger.error(`Failed to create order:`, error);
