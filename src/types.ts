@@ -10,6 +10,7 @@ import { OrderItemStatusType } from "./models/enums/orderItemStatusType";
 import { PaymentType } from "./models/enums/paymentType";
 import { U2UPaymentStatus } from "./models/enums/u2uPaymentStatus";
 import { RestrictedArea } from "./models/enums/restrictedArea";
+import { MembershipClassType } from "./models/enums/membershipClassType";
 
 // ========================
 // USER MODELS
@@ -320,3 +321,15 @@ export interface IToggle extends Document {
 	createdAt: Date;
 	updatedAt: Date;
 };
+
+// ========================
+// MEMBERSHIP
+// ========================
+export interface IMembership extends Document {
+  user_id: Types.ObjectId;
+  pi_uid: string;
+  membership_class: MembershipClassType;
+  mappi_balance: number;
+  membership_expiration: Date | null;
+  mappi_used_to_date: number;
+}
