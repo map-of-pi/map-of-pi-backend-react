@@ -1,5 +1,5 @@
 import { IMembership, PaymentDataType, IUser } from "../types";
-import Membership from "../models/membership";
+import Membership from "../models/Membership";
 import { MembershipClassType, tierRank } from "../models/enums/membershipClassType";
 // import { TransactionType } from "../models/enums/transactionType";
 // import { createTransactionRecord } from "./transaction.service";

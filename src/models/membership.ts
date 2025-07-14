@@ -1,23 +1,26 @@
 import mongoose from "mongoose";
 import { MembershipClassType } from "./enums/membershipClassType";
+import { IMembership } from "../types";
 
-const membershipSchema = new mongoose.Schema(
+const membershipSchema = new mongoose.Schema<IMembership>(
   {
     user_id: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId, 
       ref: 'User',
       required: true,
+      unique: true
     },
     pi_uid: {
       type: String,
       required: true,
       unique: true,
+      ref: 'User',
     },
     membership_class: {
       type: String,
       required: true,
       default: MembershipClassType.CASUAL,
-      enum: Object.values(MembershipClassType),
+      enum: Object.values(MembershipClassType)
     },
     mappi_balance: {
       type: Number,
@@ -31,12 +34,12 @@ const membershipSchema = new mongoose.Schema(
     membership_expiration: {
       type: Date,
       required: false,
-      default: null,
+      default: null
     },
     mappi_used_to_date: {
       type: Number,
       required: true,
-      default: 0,
+      default: 0
     },
   },
   { timestamps: true }
@@ -45,4 +48,6 @@ const membershipSchema = new mongoose.Schema(
 // Index
 membershipSchema.index({ user_id: 1 });
 
-export default mongoose.model('Membership', membershipSchema);
+const Membership = mongoose.model<IMembership>('Membership', membershipSchema);
+
+export default Membership;
