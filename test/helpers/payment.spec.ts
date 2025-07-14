@@ -21,8 +21,8 @@ import {
   cancelPayment,
   completePayment, 
   createA2UPayment, 
-  createOrUpdatePaymentCrossReference, 
   createPayment, 
+  createPaymentCrossReference, 
   getPayment 
 } from "../../src/services/payment.service";
 import { IUser, PaymentDataType } from "../../src/types";
@@ -273,6 +273,7 @@ describe('processPaymentApproval function', () => {
   };
 
   const currentPayment: PaymentDataType = {
+    identifier: mockPayment._id,
     amount: mockPayment.amount,
     memo: mockPayment.memo,
     metadata: {
@@ -285,7 +286,7 @@ describe('processPaymentApproval function', () => {
         buyer_fulfillment_description: 'Will pickup tomorrow',
         items: [{ itemId: 'mockItemId1_TEST', quantity: 2 }],
       },
-    },
+    }
   };
 
   it('should process and approve a new BuyerCheckout payment successfully', async () => {
@@ -315,7 +316,7 @@ describe('processPaymentApproval function', () => {
       paymentType: PaymentType.BuyerCheckout
     });
     expect(createOrder).toHaveBeenCalledWith({
-      buyerId: mockBuyer._id,
+      buyerId: mockUser.pi_uid,
       sellerId: mockSeller._id,
       paymentId: mockPayment._id,
       totalAmount: mockPayment.amount,
@@ -324,7 +325,8 @@ describe('processPaymentApproval function', () => {
       sellerFulfillmentDescription: currentPayment.metadata.OrderPayment?.seller_fulfillment_description,
       buyerFulfillmentDescription: currentPayment.metadata.OrderPayment?.buyer_fulfillment_description,
     },
-      currentPayment.metadata.OrderPayment?.items
+      currentPayment.metadata.OrderPayment?.items,
+      mockUser
     );
     expect(platformAPIClient.post).toHaveBeenCalledWith(`/v2/payments/${ mockPiPaymentId }/approve`);
     expect(result).toEqual({
@@ -350,7 +352,7 @@ describe('processPaymentApproval function', () => {
 
     expect(result).toEqual({
       success: false,
-      message: `Payment with ID ${ mockPiPaymentId } already exists`,
+      message: `Payment already exists with ID ${ mockPiPaymentId }`,
     });
   });
 
@@ -380,6 +382,13 @@ describe('processPaymentApproval function', () => {
       success: true,
       message: `Payment approved with id ${ mockPiPaymentId }`,
     });
+  });
+
+  it('should throw error if processing payment approval fails', async () => {
+    const mockError = new Error('Pi Platform API timeout');
+    (platformAPIClient.get as jest.Mock).mockRejectedValue(mockError);
+  
+    await expect(processPaymentApproval(mockPiPaymentId, mockUser)).rejects.toThrow('Pi Platform API timeout');
   });
 });
 
@@ -414,8 +423,11 @@ describe('processPaymentCompletion function', () => {
     (platformAPIClient.get as jest.Mock).mockResolvedValue({ data: {} });
     (completePayment as jest.Mock).mockResolvedValue(mockCompletedPayment);
     (updatePaidOrder as jest.Mock).mockResolvedValue(mockOrder);
-    (createOrUpdatePaymentCrossReference as jest.Mock).mockResolvedValue({});
-    (platformAPIClient.post as jest.Mock).mockResolvedValue({ data: {} });
+    (createPaymentCrossReference as jest.Mock).mockResolvedValue({});
+    (platformAPIClient.post as jest.Mock).mockResolvedValue({ 
+      status: 200,
+      data: { memo: 'Test payment memo' } 
+    });
     (createA2UPayment as jest.Mock).mockResolvedValue({});
 
     const result = await processPaymentCompletion(mockPiPaymentId, mockTxId);
@@ -423,7 +435,7 @@ describe('processPaymentCompletion function', () => {
     expect(platformAPIClient.get).toHaveBeenCalledWith(`/v2/payments/${ mockPiPaymentId }`);
     expect(completePayment).toHaveBeenCalledWith(mockPiPaymentId, mockTxId);
     expect(updatePaidOrder).toHaveBeenCalledWith(mockCompletedPayment._id);
-    expect(createOrUpdatePaymentCrossReference).toHaveBeenCalledWith(
+    expect(createPaymentCrossReference).toHaveBeenCalledWith(
       mockOrder._id, 
       {
         u2aPaymentId: mockCompletedPayment._id,
@@ -433,11 +445,12 @@ describe('processPaymentCompletion function', () => {
     );
     expect(platformAPIClient.post).toHaveBeenCalledWith(`/v2/payments/${ mockPiPaymentId }/complete`, { txid: mockTxId });
     expect(createA2UPayment).toHaveBeenCalledWith({
+      orderId: mockOrder._id,
       sellerId: mockOrder.seller_id,
-      amount: mockOrder.total_amount,
       buyerId: mockOrder.buyer_id,
+      amount: mockOrder.total_amount,
       paymentType: PaymentType.BuyerCheckout,
-      orderId: mockOrder._id
+      memo: 'Test payment memo'
     });
     expect(result).toEqual({
       success: true,
@@ -455,7 +468,7 @@ describe('processPaymentCompletion function', () => {
     expect(platformAPIClient.get).toHaveBeenCalledWith(`/v2/payments/${ mockPiPaymentId }`);
     expect(completePayment).not.toHaveBeenCalled();
     expect(updatePaidOrder).not.toHaveBeenCalled();
-    expect(createOrUpdatePaymentCrossReference).not.toHaveBeenCalled();
+    expect(createPaymentCrossReference).not.toHaveBeenCalled();
     expect(platformAPIClient.post).not.toHaveBeenCalled();
     expect(createA2UPayment).not.toHaveBeenCalled();
   });
@@ -464,7 +477,7 @@ describe('processPaymentCompletion function', () => {
     (platformAPIClient.get as jest.Mock).mockResolvedValue({ data: {} });
     (completePayment as jest.Mock).mockResolvedValue(mockCompletedPayment);
     (updatePaidOrder as jest.Mock).mockResolvedValue(mockOrder);
-    (createOrUpdatePaymentCrossReference as jest.Mock).mockResolvedValue({});
+    (createPaymentCrossReference as jest.Mock).mockResolvedValue({});
     (platformAPIClient.post as jest.Mock).mockRejectedValue(new Error('Pi Platform API timeout'));
 
     await expect(processPaymentCompletion(mockPiPaymentId, mockTxId))
@@ -474,7 +487,7 @@ describe('processPaymentCompletion function', () => {
     expect(platformAPIClient.get).toHaveBeenCalledWith(`/v2/payments/${ mockPiPaymentId }`);
     expect(completePayment).toHaveBeenCalledWith(mockPiPaymentId, mockTxId);
     expect(updatePaidOrder).toHaveBeenCalledWith(mockCompletedPayment._id);
-    expect(createOrUpdatePaymentCrossReference).toHaveBeenCalledWith(
+    expect(createPaymentCrossReference).toHaveBeenCalledWith(
       mockOrder._id, 
       {
         u2aPaymentId: mockCompletedPayment._id,
@@ -498,33 +511,9 @@ describe('processPaymentCompletion function', () => {
     expect(platformAPIClient.get).toHaveBeenCalledWith(`/v2/payments/${ mockPiPaymentId }`);
     expect(completePayment).toHaveBeenCalledWith(mockPiPaymentId, mockTxId);
     expect(updatePaidOrder).not.toHaveBeenCalled();
-    expect(createOrUpdatePaymentCrossReference).not.toHaveBeenCalled();
+    expect(createPaymentCrossReference).not.toHaveBeenCalled();
     expect(createA2UPayment).not.toHaveBeenCalled();
     expect(platformAPIClient.post).toHaveBeenCalledWith(`/v2/payments/${ mockPiPaymentId }/complete`, { txid: mockTxId });
-  });
-
-  it('should throw error if the total amount for the order is missing for BuyerCheckout', async () => {    
-    (platformAPIClient.get as jest.Mock).mockResolvedValue({ data: {} });
-    (completePayment as jest.Mock).mockResolvedValue(mockCompletedPayment);
-    (updatePaidOrder as jest.Mock).mockResolvedValue({ ...mockOrder, total_amount: undefined });
-
-    await expect(processPaymentCompletion(mockPiPaymentId, mockTxId))
-    .rejects
-    .toThrow("Order total_amount is undefined");
-
-    expect(platformAPIClient.get).toHaveBeenCalledWith(`/v2/payments/${ mockPiPaymentId }`);
-    expect(completePayment).toHaveBeenCalledWith(mockPiPaymentId, mockTxId);
-    expect(updatePaidOrder).toHaveBeenCalledWith(mockCompletedPayment._id);
-    expect(createOrUpdatePaymentCrossReference).toHaveBeenCalledWith(
-      mockOrder._id, 
-      {
-        u2aPaymentId: mockCompletedPayment._id,
-        u2uStatus: U2UPaymentStatus.U2ACompleted,
-        a2uPaymentId: null
-      }
-    );
-    expect(platformAPIClient.post).toHaveBeenCalledWith(`/v2/payments/${ mockPiPaymentId }/complete`, { txid: mockTxId });
-    expect(createA2UPayment).not.toHaveBeenCalled();
   });
 
   it('should process Membership payment and not create A2U payment', async () => {
@@ -536,7 +525,7 @@ describe('processPaymentCompletion function', () => {
     expect(platformAPIClient.get).toHaveBeenCalledWith(`/v2/payments/${ mockPiPaymentId }`);
     expect(completePayment).toHaveBeenCalledWith(mockPiPaymentId, mockTxId);
     expect(updatePaidOrder).not.toHaveBeenCalled();
-    expect(createOrUpdatePaymentCrossReference).not.toHaveBeenCalled();
+    expect(createPaymentCrossReference).not.toHaveBeenCalled();
     expect(createA2UPayment).not.toHaveBeenCalled();
     expect(platformAPIClient.post).toHaveBeenCalledWith(`/v2/payments/${ mockPiPaymentId }/complete`, { txid: mockTxId });
     expect(result).toEqual({

@@ -10,7 +10,7 @@ export const getUserSettingsById = async (user_settings_id: string): Promise<IUs
     const userSettings = await UserSettings.findOne({ user_settings_id }).exec();
     return userSettings;
   } catch (error: any) {
-    logger.error(`Failed to retrieve user settings for userSettingsID ${ user_settings_id }: ${ error.message}`);
+    logger.error(`Failed to retrieve user settings for userSettingsID ${ user_settings_id }: ${ error}`);
     throw error;
   }
 };
@@ -84,7 +84,7 @@ export const addOrUpdateUserSettings = async (
       return savedUserSettings as IUserSettings;
     }
   } catch (error: any) {
-    logger.error(`Failed to add or update user settings: ${ error.message }`);
+    logger.error(`Failed to add or update user settings: ${ error }`);
     throw error;
   }
 };
@@ -95,7 +95,7 @@ export const deleteUserSettings = async (user_settings_id: string): Promise<IUse
     const deletedUserSettings = await UserSettings.findOneAndDelete({ user_settings_id: user_settings_id }).exec();
     return deletedUserSettings ? deletedUserSettings as IUserSettings : null;
   } catch (error: any) {
-    logger.error(`Failed to delete user settings for userSettingsID ${ user_settings_id }: ${ error.message}`);
+    logger.error(`Failed to delete user settings for userSettingsID ${ user_settings_id }: ${ error}`);
     throw error;
   }
 };

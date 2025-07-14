@@ -169,7 +169,7 @@ orderRoutes.get("/:order_id", verifyToken, orderController.getSingleOrder);
  *       401:
  *         description: Unauthorized
  *       400:
- *         description: Bad request
+ *         description: Bad request | Invalid order data
  *       500:
  *         description: Internal server error
  */  

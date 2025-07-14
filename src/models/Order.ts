@@ -8,7 +8,7 @@ const orderSchema = new Schema<IOrder>(
   {
     payment_id: {
       type: SchemaTypes.ObjectId,
-      required: true,
+      required: false, // To change to true once payment integration is complete
       default: null,
       ref: "Payment",
     },
