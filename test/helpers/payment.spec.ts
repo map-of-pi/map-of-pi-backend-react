@@ -316,7 +316,7 @@ describe('processPaymentApproval function', () => {
       paymentType: PaymentType.BuyerCheckout
     });
     expect(createOrder).toHaveBeenCalledWith({
-      buyerId: mockBuyer._id,
+      buyerId: mockUser.pi_uid,
       sellerId: mockSeller._id,
       paymentId: mockPayment._id,
       totalAmount: mockPayment.amount,
@@ -325,7 +325,8 @@ describe('processPaymentApproval function', () => {
       sellerFulfillmentDescription: currentPayment.metadata.OrderPayment?.seller_fulfillment_description,
       buyerFulfillmentDescription: currentPayment.metadata.OrderPayment?.buyer_fulfillment_description,
     },
-      currentPayment.metadata.OrderPayment?.items
+      currentPayment.metadata.OrderPayment?.items,
+      mockUser
     );
     expect(platformAPIClient.post).toHaveBeenCalledWith(`/v2/payments/${ mockPiPaymentId }/approve`);
     expect(result).toEqual({
