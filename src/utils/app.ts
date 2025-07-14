@@ -20,6 +20,7 @@ import reportRoutes from "../routes/report.routes";
 import notificationRoutes from "../routes/notification.routes";
 import restrictionRoutes from "../routes/restriction.routes";
 import toggleRoutes from "../routes/toggle.routes";
+import membershipRoutes from "../routes/membership.routes";
 
 dotenv.config();
 
@@ -53,6 +54,7 @@ app.use("/api/v1/reports", reportRoutes);
 app.use("/api/v1/notifications", notificationRoutes);
 app.use("/api/v1/restrictions", restrictionRoutes);
 app.use("/api/v1/toggles", toggleRoutes);
+app.use("api/v1/membership", membershipRoutes);
 
 app.use("/", homeRoutes);
 
