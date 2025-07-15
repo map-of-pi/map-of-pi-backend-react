@@ -1,4 +1,4 @@
-import pi from "../../src/config/platformAPIclient";
+import { piNetwork } from "../../src/config/platformAPIclient";
 import Payment from "../../src/models/Payment";
 import PaymentCrossReference from "../../src/models/PaymentCrossReference";
 import Seller from "../../src/models/Seller";
@@ -283,10 +283,10 @@ describe('createA2UPayment function', () => {
 
   beforeEach(() => {
     // Mock Pi SDK
-    (pi.createPayment as jest.Mock).mockResolvedValue(mockPiPaymentId);
-    (pi.submitPayment as jest.Mock).mockResolvedValue(mockTxid);
-    (pi.completePayment as jest.Mock).mockResolvedValue(mockCompletedPiPayment);
-    (pi.getIncompleteServerPayments as jest.Mock).mockResolvedValue(mockServerPayments);
+    (piNetwork.createPayment as jest.Mock).mockResolvedValue(mockPiPaymentId);
+    (piNetwork.submitPayment as jest.Mock).mockResolvedValue(mockTxid);
+    (piNetwork.completePayment as jest.Mock).mockResolvedValue(mockCompletedPiPayment);
+    (piNetwork.getIncompleteServerPayments as jest.Mock).mockResolvedValue(mockServerPayments);
   });
 
   it('should successfully process and return completed A2U payment', async () => {    
@@ -316,7 +316,7 @@ describe('createA2UPayment function', () => {
     const result = await createA2UPayment(mockA2UPaymentData);
 
     expect(Seller.findById).toHaveBeenCalledWith(mockA2UPaymentData.sellerId);
-    expect(pi.createPayment).toHaveBeenCalledWith({
+    expect(piNetwork.createPayment).toHaveBeenCalledWith({
       amount: 0.99,
       memo: 'A2U payment',
       metadata: { 
@@ -328,11 +328,11 @@ describe('createA2UPayment function', () => {
       uid: mockSeller.seller_id,
     });
     expect(mockPaymentSave).toHaveBeenCalled();
-    expect(pi.submitPayment).toHaveBeenCalledWith(mockPiPaymentId);
+    expect(piNetwork.submitPayment).toHaveBeenCalledWith(mockPiPaymentId);
     expect(Payment.findOneAndUpdate).toHaveBeenCalled();
     expect(PaymentCrossReference.findOneAndUpdate).toHaveBeenCalled();
-    expect(pi.completePayment).toHaveBeenCalledWith(mockPiPaymentId, mockTxid);
-    expect(pi.getIncompleteServerPayments).not.toHaveBeenCalled();
+    expect(piNetwork.completePayment).toHaveBeenCalledWith(mockPiPaymentId, mockTxid);
+    expect(piNetwork.getIncompleteServerPayments).not.toHaveBeenCalled();
     expect(result).toEqual(mockUpdatedPayment);
   });
 
@@ -355,13 +355,13 @@ describe('createA2UPayment function', () => {
     const result = await createA2UPayment(mockA2UPaymentData);
 
     expect(Seller.findById).toHaveBeenCalledWith(mockA2UPaymentData.sellerId);
-    expect(pi.createPayment).not.toHaveBeenCalled();
+    expect(piNetwork.createPayment).not.toHaveBeenCalled();
     expect(mockPaymentSave).not.toHaveBeenCalled();
-    expect(pi.submitPayment).not.toHaveBeenCalled();
+    expect(piNetwork.submitPayment).not.toHaveBeenCalled();
     expect(Payment.findOneAndUpdate).not.toHaveBeenCalled();
     expect(PaymentCrossReference.findOneAndUpdate).not.toHaveBeenCalled();
-    expect(pi.completePayment).not.toHaveBeenCalled();
-    expect(pi.getIncompleteServerPayments).toHaveBeenCalled();
+    expect(piNetwork.completePayment).not.toHaveBeenCalled();
+    expect(piNetwork.getIncompleteServerPayments).toHaveBeenCalled();
     expect(result).toBeNull();
   });
 
@@ -372,7 +372,7 @@ describe('createA2UPayment function', () => {
       }),
     });
 
-    (pi.createPayment as jest.Mock).mockRejectedValue(new Error('Mock Pi SDK error'));
+    (piNetwork.createPayment as jest.Mock).mockRejectedValue(new Error('Mock Pi SDK error'));
 
     const mockPaymentSave = jest.fn().mockResolvedValue(null);
     (Payment as unknown as jest.Mock).mockImplementation(() => ({ save: mockPaymentSave }));
@@ -384,7 +384,7 @@ describe('createA2UPayment function', () => {
     const result = await createA2UPayment(mockA2UPaymentData);
 
     expect(Seller.findById).toHaveBeenCalledWith(mockA2UPaymentData.sellerId);
-    expect(pi.createPayment).toHaveBeenCalledWith({
+    expect(piNetwork.createPayment).toHaveBeenCalledWith({
       amount: 0.99,
       memo: 'A2U payment',
       metadata: { 
@@ -396,11 +396,11 @@ describe('createA2UPayment function', () => {
       uid: mockSeller.seller_id,
     });
     expect(mockPaymentSave).not.toHaveBeenCalled();
-    expect(pi.submitPayment).not.toHaveBeenCalled();
+    expect(piNetwork.submitPayment).not.toHaveBeenCalled();
     expect(Payment.findOneAndUpdate).not.toHaveBeenCalled();
     expect(PaymentCrossReference.findOneAndUpdate).not.toHaveBeenCalled();
-    expect(pi.completePayment).not.toHaveBeenCalled();
-    expect(pi.getIncompleteServerPayments).toHaveBeenCalled();
+    expect(piNetwork.completePayment).not.toHaveBeenCalled();
+    expect(piNetwork.getIncompleteServerPayments).toHaveBeenCalled();
     expect(result).toBeNull();
   });
 
@@ -417,7 +417,7 @@ describe('createA2UPayment function', () => {
     const result = await createA2UPayment(mockA2UPaymentData);
 
     expect(Seller.findById).toHaveBeenCalledWith(mockA2UPaymentData.sellerId);
-    expect(pi.createPayment).toHaveBeenCalledWith({
+    expect(piNetwork.createPayment).toHaveBeenCalledWith({
       amount: 0.99,
       memo: 'A2U payment',
       metadata: { 
@@ -429,11 +429,11 @@ describe('createA2UPayment function', () => {
       uid: mockSeller.seller_id,
     });
     expect(mockPaymentSave).toHaveBeenCalled();
-    expect(pi.submitPayment).not.toHaveBeenCalled();
+    expect(piNetwork.submitPayment).not.toHaveBeenCalled();
     expect(Payment.findOneAndUpdate).not.toHaveBeenCalled();
     expect(PaymentCrossReference.findOneAndUpdate).not.toHaveBeenCalled();
-    expect(pi.completePayment).not.toHaveBeenCalled();
-    expect(pi.getIncompleteServerPayments).toHaveBeenCalled();
+    expect(piNetwork.completePayment).not.toHaveBeenCalled();
+    expect(piNetwork.getIncompleteServerPayments).toHaveBeenCalled();
     expect(result).toBeNull();
   });
 
@@ -444,7 +444,7 @@ describe('createA2UPayment function', () => {
       }),
     });
 
-    (pi.submitPayment as jest.Mock).mockRejectedValue(new Error('Mock Pi SDK error'));
+    (piNetwork.submitPayment as jest.Mock).mockRejectedValue(new Error('Mock Pi SDK error'));
 
     const mockPaymentSave = jest.fn().mockResolvedValue(mockUpdatedPayment);
     (Payment as unknown as jest.Mock).mockImplementation(() => ({ save: mockPaymentSave }));
@@ -452,7 +452,7 @@ describe('createA2UPayment function', () => {
     const result = await createA2UPayment(mockA2UPaymentData);
 
     expect(Seller.findById).toHaveBeenCalledWith(mockA2UPaymentData.sellerId);
-    expect(pi.createPayment).toHaveBeenCalledWith({
+    expect(piNetwork.createPayment).toHaveBeenCalledWith({
       amount: 0.99,
       memo: 'A2U payment',
       metadata: { 
@@ -464,11 +464,11 @@ describe('createA2UPayment function', () => {
       uid: mockSeller.seller_id,
     });
     expect(mockPaymentSave).toHaveBeenCalled();
-    expect(pi.submitPayment).toHaveBeenCalledWith(mockPiPaymentId);
+    expect(piNetwork.submitPayment).toHaveBeenCalledWith(mockPiPaymentId);
     expect(Payment.findOneAndUpdate).not.toHaveBeenCalled();
     expect(PaymentCrossReference.findOneAndUpdate).not.toHaveBeenCalled();
-    expect(pi.completePayment).not.toHaveBeenCalled();
-    expect(pi.getIncompleteServerPayments).toHaveBeenCalled();
+    expect(piNetwork.completePayment).not.toHaveBeenCalled();
+    expect(piNetwork.getIncompleteServerPayments).toHaveBeenCalled();
     expect(result).toBeNull();
   });
 
@@ -489,7 +489,7 @@ describe('createA2UPayment function', () => {
     const result = await createA2UPayment(mockA2UPaymentData);
 
     expect(Seller.findById).toHaveBeenCalledWith(mockA2UPaymentData.sellerId);
-    expect(pi.createPayment).toHaveBeenCalledWith({
+    expect(piNetwork.createPayment).toHaveBeenCalledWith({
       amount: 0.99,
       memo: 'A2U payment',
       metadata: { 
@@ -501,11 +501,11 @@ describe('createA2UPayment function', () => {
       uid: mockSeller.seller_id,
     });
     expect(mockPaymentSave).toHaveBeenCalled();
-    expect(pi.submitPayment).toHaveBeenCalledWith(mockPiPaymentId);
+    expect(piNetwork.submitPayment).toHaveBeenCalledWith(mockPiPaymentId);
     expect(Payment.findOneAndUpdate).toHaveBeenCalled();
     expect(PaymentCrossReference.findOneAndUpdate).not.toHaveBeenCalled();
-    expect(pi.completePayment).not.toHaveBeenCalled();
-    expect(pi.getIncompleteServerPayments).toHaveBeenCalled();
+    expect(piNetwork.completePayment).not.toHaveBeenCalled();
+    expect(piNetwork.getIncompleteServerPayments).toHaveBeenCalled();
     expect(result).toBeNull();
   });
 
@@ -532,7 +532,7 @@ describe('createA2UPayment function', () => {
     const result = await createA2UPayment(mockA2UPaymentData);
 
     expect(Seller.findById).toHaveBeenCalledWith(mockA2UPaymentData.sellerId);
-    expect(pi.createPayment).toHaveBeenCalledWith({
+    expect(piNetwork.createPayment).toHaveBeenCalledWith({
       amount: 0.99,
       memo: 'A2U payment',
       metadata: { 
@@ -544,11 +544,11 @@ describe('createA2UPayment function', () => {
       uid: mockSeller.seller_id,
     });
     expect(mockPaymentSave).toHaveBeenCalled();
-    expect(pi.submitPayment).toHaveBeenCalledWith(mockPiPaymentId);
+    expect(piNetwork.submitPayment).toHaveBeenCalledWith(mockPiPaymentId);
     expect(Payment.findOneAndUpdate).toHaveBeenCalled();
     expect(PaymentCrossReference.findOneAndUpdate).toHaveBeenCalled();
-    expect(pi.completePayment).not.toHaveBeenCalled();
-    expect(pi.getIncompleteServerPayments).toHaveBeenCalled();
+    expect(piNetwork.completePayment).not.toHaveBeenCalled();
+    expect(piNetwork.getIncompleteServerPayments).toHaveBeenCalled();
     expect(result).toBeNull();
   });
 
@@ -559,7 +559,7 @@ describe('createA2UPayment function', () => {
       }),
     });
 
-    (pi.completePayment as jest.Mock).mockRejectedValue(new Error('Mock Pi SDK error'));
+    (piNetwork.completePayment as jest.Mock).mockRejectedValue(new Error('Mock Pi SDK error'));
 
     const mockPaymentSave = jest.fn().mockResolvedValue(mockUpdatedPayment);
     (Payment as unknown as jest.Mock).mockImplementation(() => ({ save: mockPaymentSave }));
@@ -577,7 +577,7 @@ describe('createA2UPayment function', () => {
     const result = await createA2UPayment(mockA2UPaymentData);
 
     expect(Seller.findById).toHaveBeenCalledWith(mockA2UPaymentData.sellerId);
-    expect(pi.createPayment).toHaveBeenCalledWith({
+    expect(piNetwork.createPayment).toHaveBeenCalledWith({
       amount: 0.99,
       memo: 'A2U payment',
       metadata: { 
@@ -589,11 +589,11 @@ describe('createA2UPayment function', () => {
       uid: mockSeller.seller_id,
     });
     expect(mockPaymentSave).toHaveBeenCalled();
-    expect(pi.submitPayment).toHaveBeenCalledWith(mockPiPaymentId);
+    expect(piNetwork.submitPayment).toHaveBeenCalledWith(mockPiPaymentId);
     expect(Payment.findOneAndUpdate).toHaveBeenCalled();
     expect(PaymentCrossReference.findOneAndUpdate).toHaveBeenCalled();
-    expect(pi.completePayment).toHaveBeenCalledWith(mockPiPaymentId, mockTxid);
-    expect(pi.getIncompleteServerPayments).toHaveBeenCalled();
+    expect(piNetwork.completePayment).toHaveBeenCalledWith(mockPiPaymentId, mockTxid);
+    expect(piNetwork.getIncompleteServerPayments).toHaveBeenCalled();
     expect(result).toBeNull();
   });
 });
