@@ -7,9 +7,11 @@ import {
   onPaymentError
 } from "../controllers/paymentController";
 import { verifyToken } from "../middlewares/verifyToken";
+import { onPaymentInitiation } from "../controllers/paymentController";
 
 const paymentsRouter = Router();
 
+paymentsRouter.post("/initiate", verifyToken, onPaymentInitiation);
 paymentsRouter.post("/incomplete", onIncompletePaymentFound);
 paymentsRouter.post("/complete", onPaymentCompletion);
 paymentsRouter.post("/approve", verifyToken, onPaymentApproval);

@@ -20,6 +20,8 @@ import reportRoutes from "../routes/report.routes";
 import notificationRoutes from "../routes/notification.routes";
 import restrictionRoutes from "../routes/restriction.routes";
 import toggleRoutes from "../routes/toggle.routes";
+import membershipRoutes from "../routes/membership.routes";
+
 
 dotenv.config();
 
@@ -44,6 +46,7 @@ app.use("/api/docs", docRouter);
 app.use("/api/v1", appRouter);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/user-preferences", userPreferencesRoutes);
+app.use("/api/v1/memberships", membershipRoutes);
 app.use("/api/v1/sellers", sellerRoutes);
 app.use("/api/v1/orders", orderRoutes);
 app.use('/api/v1/payments', paymentsRouter);
