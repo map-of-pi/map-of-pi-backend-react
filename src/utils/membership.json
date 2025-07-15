@@ -2,6 +2,7 @@
   "TIER1": {
     "CLASS": "Single",
     "LABEL": "Single mappi",
+    "MAPPI_ALLOWANCE": 10,
     "COST": 0.2,
     "DURATION": 2,
     "RANK": 1
@@ -9,6 +10,7 @@
   "TIER2": {
     "CLASS": "White",
     "LABEL": "White membership",
+    "MAPPI_ALLOWANCE": 20,
     "COST": 1,
     "DURATION": 3,
     "RANK": 2
@@ -16,6 +18,7 @@
   "TIER3": {
     "CLASS": "Green",
     "LABEL": "Green membership",
+    "MAPPI_ALLOWANCE": 50,
     "COST": 1.5,
     "DURATION": 4,
     "RANK": 3
@@ -23,6 +26,7 @@
   "TIER4": {
     "CLASS": "Gold",
     "LABEL": "Gold membership",
+    "MAPPI_ALLOWANCE": 100,
     "COST": 5,
     "DURATION": 10,
     "RANK": 4
@@ -30,6 +34,7 @@
   "TIER5": {
     "CLASS": "Double Gold",
     "LABEL": "Double gold membership",
+    "MAPPI_ALLOWANCE": 200,
     "COST": 10,
     "DURATION": 20,
     "RANK": 5
@@ -37,6 +42,7 @@
   "TIER6": {
     "CLASS": "Triple Gold",
     "LABEL": "Triple gold membership",
+    "MAPPI_ALLOWANCE": 300,
     "COST": 20,
     "DURATION": 50,
     "RANK": 6

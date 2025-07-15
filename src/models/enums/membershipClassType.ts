@@ -1,8 +1,9 @@
 import membershipData from '../../utils/membership.json';
 
-export interface MembershipTier {
+export interface MembershipTierType {
   CLASS: string;
   LABEL: string;
+  MAPPI_ALLOWANCE: number; // in mappi
   COST: number;
   DURATION: number; // in weeks
   RANK: number; // 1-6, where 1 is the lowest tier and 6 is the highest
@@ -25,6 +26,6 @@ export enum MembershipTierEnum {
   TIER6 = 'TIER6',
 }
 
-export type MembershipTiersMap = Record<MembershipTierKey, MembershipTier>;
+export type MembershipTiersMap = Record<MembershipTierKey, MembershipTierType>;
 
 export const membershipTiers: MembershipTiersMap = membershipData
