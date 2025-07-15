@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { MembershipClassType } from "./enums/membershipClassType";
+import { MembershipTierEnum, MembershipTierKey } from "./enums/membershipClassType";
 import { IMembership } from "../types";
 
 const membershipSchema = new mongoose.Schema<IMembership>(
@@ -19,8 +19,8 @@ const membershipSchema = new mongoose.Schema<IMembership>(
     membership_class: {
       type: String,
       required: true,
-      default: MembershipClassType.CASUAL,
-      enum: Object.values(MembershipClassType)
+      default: MembershipTierEnum.TIER1,
+      enum: Object.values(MembershipTierEnum)
     },
     mappi_balance: {
       type: Number,

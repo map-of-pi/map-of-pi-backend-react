@@ -1,18 +1,30 @@
-export enum MembershipClassType {
-  CASUAL = "Casual",
-  MEMBER = "Member",
-  GREEN = "Green",
-  GOLD = "Gold",
-  DOUBLE_GOLD = "Double Gold",
-  TRIPLE_GOLD = "Triple Gold",
+import membershipData from '../../utils/membership.json';
+
+export interface MembershipTier {
+  CLASS: string;
+  LABEL: string;
+  COST: number;
+  DURATION: number; // in weeks
+  RANK: number; // 1-6, where 1 is the lowest tier and 6 is the highest
 }
 
-// Used for rank-based comparisons (upgrade/downgrade/etc)
-export const tierRank: Record<MembershipClassType, number> = {
-  [MembershipClassType.CASUAL]: 0,
-  [MembershipClassType.MEMBER]: 1,
-  [MembershipClassType.GREEN]: 2,
-  [MembershipClassType.GOLD]: 3,
-  [MembershipClassType.DOUBLE_GOLD]: 4,
-  [MembershipClassType.TRIPLE_GOLD]: 5,
-};
+export type MembershipTierKey =
+  | 'TIER1'
+  | 'TIER2'
+  | 'TIER3'
+  | 'TIER4'
+  | 'TIER5'
+  | 'TIER6';
+
+export enum MembershipTierEnum {
+  TIER1 = 'TIER1',
+  TIER2 = 'TIER2',
+  TIER3 = 'TIER3',
+  TIER4 = 'TIER4',
+  TIER5 = 'TIER5',
+  TIER6 = 'TIER6',
+}
+
+export type MembershipTiersMap = Record<MembershipTierKey, MembershipTier>;
+
+export const membershipTiers: MembershipTiersMap = membershipData
