@@ -1,6 +1,7 @@
 import logger from "../config/loggingConfig";
+import membershipTiers from "../utils/membership.json"
 
-const MembershipSubscription = async () => {
+export const MembershipSubscription = async () => {
   try {
     // Simulate fetching membership subscription data from an API or database
     const subscriptionData = {
@@ -27,4 +28,14 @@ const MembershipSubscription = async () => {
   }
 }
 
-export default MembershipSubscription
+
+export function getMembershipClassName(membershipClass: string): string {
+  const tierKey = membershipClass as keyof typeof membershipTiers;
+  const tierData = membershipTiers[tierKey];
+
+  if (!tierData) {
+    throw new Error(`Invalid membership_class "${membershipClass}"`);
+  }
+
+  return tierData.CLASS;
+}

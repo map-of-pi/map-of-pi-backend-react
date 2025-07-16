@@ -1,31 +1,48 @@
-import membershipData from '../../utils/membership.json';
-
-export interface MembershipTierType {
-  CLASS: string;
-  LABEL: string;
-  MAPPI_ALLOWANCE: number; // in mappi
-  COST: number;
-  DURATION: number; // in weeks
-  RANK: number; // 1-6, where 1 is the lowest tier and 6 is the highest
+export enum MembershipClassType {
+  CASUAL = "Casual",
+  SINGLE = "Single",
+  WHITE = "White",
+  GREEN = "Green",
+  GOLD = "Gold",
+  DOUBLE_GOLD = "Double_Gold",
+  TRIPLE_GOLD = "Triple_Gold",
 }
 
-export type MembershipTierKey =
-  | 'TIER1'
-  | 'TIER2'
-  | 'TIER3'
-  | 'TIER4'
-  | 'TIER5'
-  | 'TIER6';
-
-export enum MembershipTierEnum {
-  TIER1 = 'TIER1',
-  TIER2 = 'TIER2',
-  TIER3 = 'TIER3',
-  TIER4 = 'TIER4',
-  TIER5 = 'TIER5',
-  TIER6 = 'TIER6',
+export const membershipTiers = {
+  Single: {
+    MAPPI_ALLOWANCE: 10,
+    COST: 0.2,
+    DURATION: 2,
+    RANK: 1
+  },
+  White: {
+    MAPPI_ALLOWANCE: 20,
+    COST: 1,
+    DURATION: 3,
+    RANK: 2
+  },
+  Green: {
+    MAPPI_ALLOWANCE: 50,
+    COST: 1.5,
+    DURATION: 4,
+    RANK: 3
+  },
+  Gold: {
+    MAPPI_ALLOWANCE: 100,
+    COST: 5,
+    DURATION: 10,
+    RANK: 4
+  },
+  Double_Gold: {
+    MAPPI_ALLOWANCE: 200,
+    COST: 10,
+    DURATION: 20,
+    RANK: 5
+  },
+  Triple_Gold: {
+    MAPPI_ALLOWANCE: 300,
+    COST: 20,
+    DURATION: 50,
+    RANK: 6
+  }
 }
-
-export type MembershipTiersMap = Record<MembershipTierKey, MembershipTierType>;
-
-export const membershipTiers: MembershipTiersMap = membershipData

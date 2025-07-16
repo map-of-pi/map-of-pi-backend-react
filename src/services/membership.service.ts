@@ -1,8 +1,9 @@
 import { IMembership, PaymentDataType, IUser } from "../types";
 import Membership from "../models/Membership";
-import { MembershipTierEnum, membershipTiers } from "../models/enums/membershipClassType";
+import { membershipTiers, MembershipClassType } from "../models/enums/membershipClassType";
 import logger from "../config/loggingConfig";
 import User from "../models/User";
+import { getMembershipClassName } from "../helpers/membership"
 
 const isExpired = (date?: Date) => !date || date < new Date();
 
@@ -35,14 +36,14 @@ export const getUserMembership = async (
       const user = await User.findOne({ pi_uid:authUser.pi_uid });
       membership = await Membership.create({
         user_id: user?._id,
-        membership_class: MembershipTierEnum.TIER1,
+        membership_class: MembershipClassType.SINGLE,
         mappi_balance: 0,
         mappi_used_to_date: 0,
         membership_expiration: null,
       })
     }
-
     return membership;
+    
   } catch (error) {
     logger.error(`Failed to retrieve membership for membership ID: ${authUser.pi_uid}:`, error);
     throw new Error("Failed to get membership; please try again later");
