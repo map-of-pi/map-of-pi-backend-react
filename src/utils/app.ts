@@ -54,7 +54,7 @@ app.use("/api/v1/reports", reportRoutes);
 app.use("/api/v1/notifications", notificationRoutes);
 app.use("/api/v1/restrictions", restrictionRoutes);
 app.use("/api/v1/toggles", toggleRoutes);
-app.use("api/v1/membership", membershipRoutes);
+app.use("/api/v1/user-membership", membershipRoutes);
 
 app.use("/", homeRoutes);
 
