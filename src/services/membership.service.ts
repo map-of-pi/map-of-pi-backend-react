@@ -33,9 +33,24 @@ export const buildMembershipList = async (): Promise<MembershipOption[]> => {
     });
 };
 
-export const getUserMembership= async (authUser: IUser) => {
+export const getUserMembership= async (authUser: IUser): Promise<IMembership> => {
   const membership = await Membership.findOne({ pi_uid: authUser.pi_uid }).lean();
-  return membership || null;
+  const user = await User.findOne({ pi_uid:authUser.pi_uid }).lean();
+  
+  if (!membership) {
+    const newMembership = await new Membership({
+      user_id: user?._id,
+      pi_uid: authUser.pi_uid,
+      membership_class: MembershipClassType.CASUAL,
+      membership_expiration:  null,
+      mappi_balance: 0,
+      mappi_used_to_date: 0,
+    }).save()
+
+    return newMembership.toObject()
+  }
+
+  return membership;
 };
 
 export const getSingleMembershipById = async (membership_id: string) => {
