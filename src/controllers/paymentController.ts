@@ -11,8 +11,10 @@ import { IUser } from "../types";
 
 export const onIncompletePaymentFound = async (req: Request, res: Response) => {
  const { payment } = req.body;
+ const currentUser = req.currentUser as IUser;
+
   try {
-    const processedPayment = await processIncompletePayment(payment);
+    const processedPayment = await processIncompletePayment(payment, currentUser);
     return res.status(200).json(processedPayment);
   } catch (error) {
     logger.error(`Failed to process incomplete payment for paymentID ${ payment.identifier }:`, error);
@@ -40,8 +42,9 @@ export const onPaymentApproval = async (req: Request, res: Response) => {
 
 export const onPaymentCompletion = async (req: Request, res: Response) => {
   const { paymentId, txid } = req.body;
+  const currentUser = req.currentUser as IUser;
   try {
-    const completedPayment = await processPaymentCompletion(paymentId, txid);
+    const completedPayment = await processPaymentCompletion(paymentId, txid, currentUser);
     return res.status(200).json(completedPayment);
   } catch (error) {
     logger.error(`Failed to complete Pi payment for paymentID ${ paymentId } | txID ${ txid }:`, error);
@@ -68,6 +71,7 @@ export const onPaymentCancellation = async (req: Request, res: Response) => {
 
 export const onPaymentError = async (req: Request, res: Response) => {
   const { paymentDTO, error } = req.body;
+  const currentUser = req.currentUser as IUser;
 
   logger.error(`Received payment error callback from Pi:`, error);
   
@@ -79,7 +83,7 @@ export const onPaymentError = async (req: Request, res: Response) => {
   }
 
   try {
-    const erroredPayment = await processPaymentError(paymentDTO);
+    const erroredPayment = await processPaymentError(paymentDTO, currentUser);
     return res.status(200).json(erroredPayment);
   } catch (error_) {
     logger.error(`Failed to process payment error`, error_);

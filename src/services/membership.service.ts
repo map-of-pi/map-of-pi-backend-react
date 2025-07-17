@@ -1,231 +1,132 @@
 import { IMembership, PaymentDataType, IUser } from "../types";
-import Membership from "../models/Membership";
-import { membershipTiers, MembershipClassType } from "../models/enums/membershipClassType";
+import Membership from "../models/Membership"
+import { MembershipClassType, membershipTiers } from "../models/enums/membershipClassType";
 import logger from "../config/loggingConfig";
 import User from "../models/User";
-import { getMembershipClassName } from "../helpers/membership"
+import {
+  isExpired,
+  isSameCategory,
+  getTierByClass,
+  getTierRank
+} from "../helpers/membership";
 
-const isExpired = (date?: Date) => !date || date < new Date();
+export interface MembershipOption {
+  value: MembershipClassType;
+  cost: number;
+  duration: number | null; // in weeks
+  mappi_allowance: number;
+}
 
-// const isOnlineClass = (tier: MembershipClassType): boolean => {
-//   return [
-//     MembershipClassType.GOLD,
-//     MembershipClassType.DOUBLE_GOLD,
-//     MembershipClassType.TRIPLE_GOLD,
-//     MembershipClassType.GREEN,
-//   ].includes(tier);
-// };
-
-// const isInstoreClass = (tier: MembershipClassType): boolean => {
-//   return tier === MembershipClassType.MEMBER;
-// };
-
-// const isSameCategory = (a: MembershipClassType, b: MembershipClassType): boolean => {
-//   return (isOnlineClass(a) && isOnlineClass(b)) || (isInstoreClass(a) && isInstoreClass(b));
-// };
-
-// Fetch a single membership by pioneer ID
-export const getUserMembership = async (
-  authUser: IUser
-): Promise<IMembership> => {
-  try {
-    let membership = await Membership.findOne({pi_uid: authUser.pi_uid}).exec();
-
-    if (!membership) {
-      logger.warn(`creating new membership for pioneer: ${authUser.pi_username}`);
-      const user = await User.findOne({ pi_uid:authUser.pi_uid });
-      membership = await Membership.create({
-        user_id: user?._id,
-        membership_class: MembershipClassType.SINGLE,
-        mappi_balance: 0,
-        mappi_used_to_date: 0,
-        membership_expiration: null,
-      })
-    }
-    return membership;
-    
-  } catch (error) {
-    logger.error(`Failed to retrieve membership for membership ID: ${authUser.pi_uid}:`, error);
-    throw new Error("Failed to get membership; please try again later");
-  }
+export const buildMembershipList = async (): Promise<MembershipOption[]> => {
+  return Object.values(membershipTiers)
+    .filter(tier => tier.CLASS !== MembershipClassType.CASUAL) // Exclude default
+    .map((tier) => ({
+      value: tier.CLASS as MembershipClassType,
+      cost: tier.COST,
+      duration: tier.DURATION ?? null,
+      mappi_allowance: tier.MAPPI_ALLOWANCE ?? 0,
+    }))
+    .sort((a, b) => {
+      const rankA = Object.values(membershipTiers).find(t => t.CLASS === a.value)?.RANK ?? 0;
+      const rankB = Object.values(membershipTiers).find(t => t.CLASS === b.value)?.RANK ?? 0;
+      return rankA - rankB;
+    });
 };
 
-// export const updateOrRenewMembershipAfterPayment = async (
-//   currentPayment: PaymentDataType
-// ) => {
-//   const metadata = currentPayment.metadata?.MembershipPayment;
+export const getUserMembership= async (authUser: IUser) => {
+  const membership = await Membership.findOne({ pi_uid: authUser.pi_uid }).lean();
+  return membership || null;
+};
 
-//   if (!metadata) {
-//     throw new Error("MembershipPayment metadata is missing");
-//   }
+export const getSingleMembershipById = async (membership_id: string) => {
+  const membership = await Membership.findById(membership_id).lean();
+  return membership || null;
+};
 
-//   const { pi_uid, membership_class, membership_duration, mappi_allowance } = metadata;
+export const updateOrRenewMembershipAfterPayment = async (paymentData: PaymentDataType, authUser: IUser) => {
+  const metadata = paymentData.metadata?.MembershipPayment;
 
-//   if (!pi_uid || !membership_class || !membership_duration || mappi_allowance === undefined) {
-//     throw new Error("Missing required metadata fields for membership update");
-//   }
+  if (!metadata || !metadata.membership_class)
+    throw new Error('Missing membership metadata');
 
-//   logger.info(`Processing membership update for pi_uid: ${pi_uid}, tier: ${membership_class}, duration: ${membership_duration}`);
+  const user = await User.findOne({ pi_uid: authUser.pi_uid });
+  if (!user) throw new Error(`User not found with pi_uid: ${authUser.pi_uid}`);
 
-//   const user = await User.findOne({ pi_uid });
+  return await updateOrRenewMembership(authUser, metadata.membership_class);
+};
 
-//   if (!user) {
-//     throw new Error(`User not found with pi_uid: ${pi_uid}`);
-//   }
+export const updateOrRenewMembership = async (authUser: IUser, membership_class: MembershipClassType): Promise<IMembership> => {
+  const user = await User.findOne({ pi_uid:authUser.pi_uid }).lean();
+  const today = new Date();
 
-//   const updatedMembership = await updateOrRenewMembership({
-//     user,
-//     membership_class,
-//     membership_duration,
-//     mappi_allowance,
-//   });
+  const tier = getTierByClass(membership_class);
+  const durationMs = (tier?.DURATION ?? 0) * 7 * 24 * 60 * 60 * 1000;
 
-//   return updatedMembership;
-// };
+  if (!tier) throw new Error(`Invalid membership class: ${membership_class}`);
 
-// export const updateOrRenewMembership = async ({
-//   user,
-//   membership_class,
-//   membership_duration,
-//   mappi_allowance,
-// }: {
-//   user: IUser;
-//   membership_class: MembershipClassType;
-//   membership_duration: number;
-//   mappi_allowance: number;
-// }): Promise<IMembership> => {
-//   const { _id: user_id, pi_uid } = user;
-//   const today = new Date();
-//   const durationMs = membership_duration * 7 * 24 * 60 * 60 * 1000;
+  const membership_duration = tier.DURATION;
+  const mappi_allowance = tier.MAPPI_ALLOWANCE;
 
-//   const existing = await Membership.findOne({ user_id }).exec();
+  const existing = await Membership.findOne({ user_id: user?._id });
 
-//   const maxAllowedDuration = maxMembershipDurations[membership_class];
-//   const requiredMappi = requiredMappiAllowances[membership_class];
+  if (!existing) {
+    return await new Membership({
+      user_id: user?._id,
+      pi_uid: user?.pi_uid,
+      membership_class,
+      membership_expiration: membership_duration ? new Date(today.getTime() + durationMs) : null,
+      mappi_balance: mappi_allowance,
+      mappi_used_to_date: 0,
+    }).save();
+  }
 
-//   if (maxAllowedDuration === undefined || requiredMappi === undefined) {
-//     throw new Error(`Invalid membership class: ${membership_class}`);
-//   }
+  const currentRank = getTierRank(existing.membership_class);
+  const newRank = tier.RANK;
+  const expired = isExpired(existing.membership_expiration ?? undefined);
 
-//   if (membership_duration > maxAllowedDuration) {
-//     throw new Error(`${membership_class} cannot exceed ${maxAllowedDuration} weeks`);
-//   }
+  if (!isSameCategory(existing.membership_class, membership_class)) {
+    Object.assign(existing, {
+      membership_class,
+      membership_expiration: membership_duration ? new Date(today.getTime() + durationMs) : null,
+      mappi_balance: mappi_allowance + existing.mappi_balance,
+      // mappi_used_to_date: 0,
+    });
+    return await existing.save();
+  }
 
-//   if (!existing) {
-//     // Fresh membership
-//     const newMembership = new Membership({
-//       user_id,
-//       pi_uid,
-//       membership_class,
-//       membership_expiration: new Date(today.getTime() + durationMs),
-//       mappi_balance: mappi_allowance,
-//       mappi_used_to_date: 0,
-//     });
+  if (newRank === currentRank && !expired) {
+    existing.membership_expiration = new Date((existing.membership_expiration?.getTime() ?? today.getTime()) + durationMs);
+    existing.mappi_balance = mappi_allowance + existing.mappi_balance;
+    // existing.mappi_used_to_date = 0;
+    return await existing.save();
+  }
 
-//     const saved = await newMembership.save();
-//     logger.info(`Created new membership for ${pi_uid}`);
-//     return saved as unknown as IMembership;
-//   }
+  if (newRank === currentRank && expired) {
+    Object.assign(existing, {
+      membership_expiration: new Date(today.getTime() + durationMs),
+      mappi_balance: mappi_allowance,
+      // mappi_used_to_date: 0,
+    });
+    return await existing.save();
+  }
 
-//   // Category restriction check
-//   if (!isSameCategory(existing.membership_class, membership_class)) {
-//     // Reset everything when switching categories (e.g., online → white or white → online)
-//     existing.membership_class = membership_class;
-//     existing.membership_expiration = new Date(today.getTime() + durationMs);
-//     existing.mappi_balance = requiredMappi; // zero for White
-//     existing.mappi_used_to_date = 0;
-  
-//     const updated = await existing.save();
-//     logger.info(`Switched category from ${existing.membership_class} to ${membership_class} for ${pi_uid}`);
-//     return updated.toObject() as unknown as IMembership;
-//   }  
+  if (newRank > currentRank || newRank < currentRank) {
+    Object.assign(existing, {
+      membership_class,
+      membership_expiration: new Date(today.getTime() + durationMs),
+      mappi_balance: mappi_allowance + existing.mappi_balance,
+      // mappi_used_to_date: 0,
+    });
+    return await existing.save();
+  }
 
-//     const currentTier = tierRank[existing.membership_class];
-//     const incomingTier = tierRank[membership_class];
-//     const expired = isExpired(existing.membership_expiration ?? undefined);
+  throw new Error('Unhandled membership transition');
+};
 
-//     // Same Tier + Active → Extend expiration
-//     if (incomingTier === currentTier && !expired) {
-//     existing.membership_expiration = new Date(
-//       (existing.membership_expiration?.getTime() ?? today.getTime()) + durationMs
-//     );
-//     existing.mappi_balance = requiredMappi; // RESET mappi
-//     existing.mappi_used_to_date = 0;
+export const updateMappiBalance = async (membership_id: string, amount: number) => {
+  const membership = await Membership.findById(membership_id);
+  if (!membership) throw new Error('Membership not found');
 
-//     const updated = await existing.save();
-//     logger.info(`Renewed (active) membership for ${pi_uid} with fresh mappi`);
-//     return updated.toObject() as unknown as IMembership;
-//   }
-
-//   // Same Tier + Expired → Renew
-//   if (incomingTier === currentTier && expired) {
-//     existing.membership_expiration = new Date(today.getTime() + durationMs);
-//     existing.mappi_balance = requiredMappi;
-//     existing.mappi_used_to_date = 0;
-
-//     const updated = await existing.save();
-//     logger.info(`Renewed expired membership for ${pi_uid}`);
-//     return updated.toObject() as unknown as IMembership;
-//   }
-
-//   // Upgrade to a higher tier
-//   if (incomingTier > currentTier) {
-//     existing.membership_class = membership_class;
-//     existing.membership_expiration = new Date(today.getTime() + durationMs);
-
-//     existing.mappi_balance = requiredMappi; // overwrite, no stacking
-//     existing.mappi_used_to_date = 0;
-
-//     const updated = await existing.save();
-//     logger.info(`Upgraded membership for ${pi_uid}`);
-//     return updated.toObject() as unknown as IMembership;
-//   }
-
-//   if (mappi_allowance !== requiredMappi) {
-//     throw new Error(`${membership_class} requires exactly ${requiredMappi} mappi`);
-//   }
-  
-//   // Downgrade to a lower tier
-//   if (incomingTier < currentTier) {
-//     existing.membership_class = membership_class;
-//     existing.membership_expiration = new Date(today.getTime() + durationMs);
-//     existing.mappi_balance = requiredMappi; // reset to new tier's cap
-//     existing.mappi_used_to_date = 0;
-
-//   const updated = await existing.save();
-//   logger.info(`Downgraded membership for ${pi_uid}`);
-//   return updated.toObject() as unknown as IMembership;
-//   }
-
-//   // Fallback
-//   logger.error(`Unhandled membership transition for ${pi_uid}`);
-//   throw new Error("Unhandled membership transition");
-// };
-
-// // Update Mappi Balance associated with the membership
-// export const updateMappiBalance = async (
-//   membership_id: string,
-//   // transaction_type: TransactionType,
-//   amount: number
-// ): Promise<IMembership> => {
-//   try {
-//     const membership = await Membership.findById(membership_id).exec();
-//     if (!membership) {
-//       throw new Error(`Membership not found for membership ID: ${membership_id}`);
-//     }
-
-//     // const adjustment =
-//     //   transaction_type === TransactionType.MAPPI_DEPOSIT ? amount :
-//     //   transaction_type === TransactionType.MAPPI_WITHDRAWAL ? -amount : 0;
-
-//     // membership.mappi_balance += adjustment;
-
-//     const updatedMembership = await membership.save();
-
-//     logger.info(`Mappi balance updated for membership ID: ${membership_id}`);
-//     return updatedMembership.toObject() as unknown as IMembership;
-//   } catch (error) {
-//     logger.error(`Failed to update Mappi balance for membership ID: ${membership_id}`, error);
-//     throw new Error("Failed to update Mappi balance; please try again later");
-//   }
-// };
+  membership.mappi_balance += amount;
+  return await membership.save();
+};

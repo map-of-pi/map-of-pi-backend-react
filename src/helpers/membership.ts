@@ -1,5 +1,5 @@
 import logger from "../config/loggingConfig";
-import membershipTiers from "../utils/membership.json"
+import { MembershipClassType, membershipTiers } from '../models/enums/membershipClassType';
 
 export const MembershipSubscription = async () => {
   try {
@@ -28,14 +28,26 @@ export const MembershipSubscription = async () => {
   }
 }
 
+export const isExpired = (date?: Date): boolean => !date || date < new Date();
 
-export function getMembershipClassName(membershipClass: string): string {
-  const tierKey = membershipClass as keyof typeof membershipTiers;
-  const tierData = membershipTiers[tierKey];
+export const isOnlineClass = (tier: MembershipClassType): boolean =>
+  [
+    MembershipClassType.GOLD,
+    MembershipClassType.DOUBLE_GOLD,
+    MembershipClassType.TRIPLE_GOLD,
+    MembershipClassType.GREEN,
+  ].includes(tier);
 
-  if (!tierData) {
-    throw new Error(`Invalid membership_class "${membershipClass}"`);
-  }
+export const isInstoreClass = (tier: MembershipClassType): boolean =>
+  tier === MembershipClassType.SINGLE || tier === MembershipClassType.WHITE;
 
-  return tierData.CLASS;
-}
+export const isSameCategory = (a: MembershipClassType, b: MembershipClassType): boolean =>
+  (isOnlineClass(a) && isOnlineClass(b)) || (isInstoreClass(a) && isInstoreClass(b));
+
+export const getTierByClass = (tierClass: MembershipClassType) => {
+  return Object.values(membershipTiers).find((tier) => tier.CLASS === tierClass);
+};
+
+export const getTierRank = (tierClass: MembershipClassType): number => {
+  return getTierByClass(tierClass)?.RANK ?? -1;
+};
