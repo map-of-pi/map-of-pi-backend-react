@@ -1,9 +1,10 @@
 import User from "../models/User";
 import Seller from "../models/Seller";
 import UserSettings from "../models/UserSettings";
-import { ISeller, IUser, IUserSettings } from "../types";
+import { IMembership, ISeller, IUser, IUserSettings } from "../types";
 import { getLocationByIP } from "./userSettings.service";
 import logger from "../config/loggingConfig";
+import { getUserMembership } from "./membership.service";
 
 const getCoordinatesWithRetry = async (
   retries: number = 3,
@@ -23,19 +24,17 @@ const getCoordinatesWithRetry = async (
   return null;
 };
 
-export const authenticate = async (currentUser: IUser): Promise<IUser> => {
+export const authenticate = async (currentUser: IUser): Promise<{user:IUser, membership_class:string}> => {
   try {
-    const user = await User.findOne({
+    let user = await User.findOne({
       pi_uid: currentUser.pi_uid,
       pi_username: currentUser.pi_username
     }).setOptions({
       readPreference: 'primary'
     }).exec();
 
-    if (user) {
-      return user;
-    } else {
-      const newUser = await User.create({
+    if (!user) {
+      user = await User.create({
         pi_uid: currentUser.pi_uid,
         pi_username: currentUser.pi_username,
         user_name: currentUser.user_name
@@ -51,10 +50,15 @@ export const authenticate = async (currentUser: IUser): Promise<IUser> => {
         await UserSettings.create({
           user_settings_id: currentUser.pi_uid,
           user_name: currentUser.user_name,
-        })
-      
-      return newUser;
+        })  
     }
+
+    const userMembership = await getUserMembership(user);
+
+    return {
+      user: user,
+      membership_class: userMembership.membership_class
+    };
   } catch (error: any) {
     logger.error(`Failed to authenticate user: ${ error }`);
     throw error;
