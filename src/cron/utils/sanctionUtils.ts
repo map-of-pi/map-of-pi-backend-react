@@ -3,8 +3,6 @@ import {SellerType} from "../../models/enums/sellerType";
 import {ISanctionedRegion, ISeller, SanctionedSellerStatus} from "../../types";
 import {processSellerGeocoding} from "../../services/admin/report.service";
 import logger from "../../config/loggingConfig";
-import SanctionedGeoBoundary from "../../models/misc/SanctionedGeoBoundary";
-import * as turf from '@turf/turf';
 
 interface GeoQuery {
   sell_map_center: {
