@@ -20,6 +20,9 @@ import {
 } from '../services/payment.service';
 import { IUser, NewOrder, PaymentDataType, PaymentDTO, PaymentInfo } from '../types';
 import logger from '../config/loggingConfig';
+import { updateOrRenewMembership } from "../services/membership.service";
+import { MembershipClassType } from "../models/enums/membershipClassType"
+import { json } from 'body-parser';
 
 function buildPaymentData(
   piPaymentId: string,
@@ -31,7 +34,7 @@ function buildPaymentData(
     userId: buyerId,
     memo: payment.memo,
     amount: payment.amount,
-    paymentType: PaymentType.BuyerCheckout
+    paymentType: payment.metadata.payment_type
   };
 }
 
@@ -108,7 +111,7 @@ const checkoutProcess = async (
   return newOrder;
 }
 
-export const processIncompletePayment = async (payment: PaymentInfo) => {
+export const processIncompletePayment = async (payment: PaymentInfo, currentUser: IUser) => {
   try {
     const paymentId = payment.identifier;
     const txid = payment.transaction?.txid;
@@ -139,6 +142,8 @@ export const processIncompletePayment = async (payment: PaymentInfo) => {
     if (updatedPayment?.payment_type === PaymentType.BuyerCheckout) {
       await updatePaidOrder(updatedPayment._id as string);
       logger.warn("Old order found and updated");
+    } else if (updatedPayment.payment_type === PaymentType.Membership){
+      await updateOrRenewMembership(currentUser, updatedPayment.memo as MembershipClassType);
     }
 
     // Notify the Pi Platform that the payment is complete
@@ -172,11 +177,13 @@ export const processPaymentApproval = async (
     const res = await platformAPIClient.get(`/v2/payments/${ paymentId }`);
     const currentPayment: PaymentDataType = res.data;
 
+    logger.warn("checking pi payment data: ", res.data)
+
     // Check if a payment record with this ID already exists in the database
     const oldPayment = await getPayment(res.data.identifier);
     if (oldPayment) {
       logger.info("Payment record already exists: ", oldPayment._id);
-
+      await processPaymentError(res.data, currentUser);
       return {
         success: false,
         message: `Payment already exists with ID ${ paymentId }`,
@@ -188,6 +195,10 @@ export const processPaymentApproval = async (
       const newOrder = await checkoutProcess(paymentId, currentUser, currentPayment);
       logger.info("Order created successfully: ", newOrder._id);
     } else if (currentPayment?.metadata.payment_type === PaymentType.Membership) {
+      // Create a new payment record
+      const paymentData = buildPaymentData(paymentId, currentUser.pi_uid, currentPayment );
+      const newPayment = await createPayment(paymentData);
+
       logger.info("Membership subscription processed successfully");
     }
 
@@ -213,14 +224,16 @@ export const processPaymentApproval = async (
   }
 };
 
-export const processPaymentCompletion = async (paymentId: string, txid: string) => {
+export const processPaymentCompletion = async (paymentId: string, txid: string, currentUser: IUser) => {
   try {
     // Confirm the payment exists via Pi platform API
-    await platformAPIClient.get(`/v2/payments/${ paymentId }`);
+    const res = await platformAPIClient.get(`/v2/payments/${ paymentId }`);
+    const currentPayment: PaymentDataType = res.data;
 
     // Mark the payment as completed
     const completedPayment = await completePayment(paymentId, txid);
     logger.info("Payment record marked as completed");
+
     if (completedPayment?.payment_type === PaymentType.BuyerCheckout) {
       // Update the associated order's status to paid
       const order = await updatePaidOrder(completedPayment._id as string);
@@ -257,9 +270,18 @@ export const processPaymentCompletion = async (paymentId: string, txid: string) 
       });
 
     } else if (completedPayment?.payment_type === PaymentType.Membership) {
+
+      const membership_class = currentPayment.metadata.MembershipPayment?.membership_class as MembershipClassType
+      const membership = await updateOrRenewMembership(currentUser, membership_class);
+
       // Notify Pi platform for membership payment completion
       await platformAPIClient.post(`/v2/payments/${ paymentId }/complete`, { txid });
       logger.info("Membership subscription completed");
+      return {
+        success: true,
+        message: `Payment completed with id ${ paymentId }`,
+        membership: membership
+      };
     }
 
     return {
@@ -322,7 +344,7 @@ export const processPaymentCancellation = async (paymentId: string) => {
   }
 };
 
-export const processPaymentError = async (paymentDTO: PaymentDTO) => {
+export const processPaymentError = async (paymentDTO: PaymentDTO, currentUser: IUser) => {
   try {
     // handle existing payment
     const transaction = paymentDTO.transaction;
@@ -336,7 +358,7 @@ export const processPaymentError = async (paymentDTO: PaymentDTO) => {
           _link: transaction._link,
         }
       };
-      await processIncompletePayment(PaymentData);
+      await processIncompletePayment(PaymentData, currentUser);
       return {
         success: true,
         message: `Payment Error with ID ${paymentId} handled and completed successfully`,
