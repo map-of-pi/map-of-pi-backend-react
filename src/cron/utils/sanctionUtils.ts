@@ -1,7 +1,7 @@
 import Seller from "../../models/Seller";
-import { SellerType } from "../../models/enums/sellerType";
-import { ISanctionedRegion, ISeller, SanctionedSellerStatus } from "../../types";
-import { processSellerGeocoding } from "../../services/admin/report.service";
+import {SellerType} from "../../models/enums/sellerType";
+import {ISanctionedRegion, ISeller, SanctionedSellerStatus} from "../../types";
+import {processSellerGeocoding} from "../../services/admin/report.service";
 import logger from "../../config/loggingConfig";
 
 interface GeoQuery {
@@ -25,7 +25,7 @@ export async function getSellersToEvaluate(geoQueries: GeoQuery[]) {
 }
 
 export async function processSellersGeocoding(
-  flaggedSellers: ISeller[], 
+  flaggedSellers: ISeller[],
   sanctionedRegions: ISanctionedRegion[]
 ): Promise<SanctionedSellerStatus[]> {
 	return await Promise.all(
@@ -49,7 +49,7 @@ export async function processSellersGeocoding(
 
 export async function processSanctionedSellers(inZone: SanctionedSellerStatus[]) {
 	if (!inZone.length) return;
-  
+
   await Seller.bulkWrite(
     inZone.map(r => ({
       updateOne: {
@@ -85,3 +85,7 @@ export async function processUnsanctionedSellers(outOfZone: SanctionedSellerStat
   );
   logger.info(`Restored ${outOfZone.length} sellers.`);
 }
+
+
+
+
