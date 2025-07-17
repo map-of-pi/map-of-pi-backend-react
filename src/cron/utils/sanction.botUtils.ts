@@ -3,6 +3,7 @@ import logger from "../../config/loggingConfig";
 import SanctionedGeoBoundary from "../../models/misc/SanctionedGeoBoundary";
 import * as turf from '@turf/turf';
 import {addNotification} from "../../services/notification.service";
+import {getCachedSanctionedBoundaries} from "./sanction.cache";
 
 
 async function getSanctionedGeoBoundaries() {
@@ -49,7 +50,7 @@ export function parseToValidTurfPolygons(boundaries: any[]) {
 }
 
 export async function findAndRestrictSanctionedSellers() {
-  const boundaries = await getSanctionedGeoBoundaries();
+  const boundaries = await getCachedSanctionedBoundaries(getSanctionedGeoBoundaries);
   const turfPolygons = parseToValidTurfPolygons(boundaries);
 
   if (turfPolygons.length === 0) {
