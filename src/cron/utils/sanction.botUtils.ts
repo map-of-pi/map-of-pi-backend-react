@@ -7,13 +7,13 @@ import {getCachedSanctionedBoundaries} from "./sanction.cache";
 
 
 async function getSanctionedGeoBoundaries() {
-  return SanctionedGeoBoundary.find({}, { geometry: 1 }).lean();
+  return SanctionedGeoBoundary.find({}, {geometry: 1}).lean();
 }
 
 function computeBoundingBox(turfPolygons: any[]) {
   const featureCollection = turf.featureCollection(turfPolygons);
   const [minX, minY, maxX, maxY] = turf.bbox(featureCollection);
-  return { minX, minY, maxX, maxY };
+  return {minX, minY, maxX, maxY};
 }
 
 export function parseToValidTurfPolygons(boundaries: any[]) {
@@ -26,7 +26,7 @@ export function parseToValidTurfPolygons(boundaries: any[]) {
   }
 
   for (const boundary of boundaries) {
-    const { geometry } = boundary;
+    const {geometry} = boundary;
     try {
       if (geometry.type === 'Polygon') {
         const rings = geometry.coordinates.map(closeRingIfNeeded);
@@ -58,16 +58,22 @@ export async function findAndRestrictSanctionedSellers() {
     return;
   }
 
-  const { minX, minY, maxX, maxY } = computeBoundingBox(turfPolygons);
+  const {minX, minY, maxX, maxY} = computeBoundingBox(turfPolygons);
   const sellers = await Seller.find({
-    sell_map_center: {
-      $geoWithin: {
-        $box: [
-          [minX, minY],
-          [maxX, maxY],
-        ]
+    $or: [{
+      sell_map_center: {
+        $geoWithin: {
+          $box: [
+            [minX, minY],
+            [maxX, maxY],
+          ]
+        }
       }
-    }
+    },
+      {
+        isRestricted: true,
+      }
+    ]
   }).lean();
 
   const now = new Date();
@@ -81,16 +87,24 @@ export async function findAndRestrictSanctionedSellers() {
     if (wasRestricted && !isNowRestricted) {
       // Case #2: true → false → Update to unrestricted
       updates.push(
-        Seller.updateOne({ _id: seller._id }, {
-          $set: { isRestricted: false, lastSanctionUpdateAt: now }
+        Seller.updateOne({_id: seller._id}, {
+          $set: {
+            isRestricted: false,
+            lastSanctionUpdateAt: now,
+            seller_type: "testSeller"
+          }
         })
       );
       await addNotification(seller.seller_id, "The area containing your Sell Centre is no longer sanctioned by Pi Network, so your map marker will now be displayed in searches");
     } else if (!wasRestricted && isNowRestricted) {
       // Case #3: false → true → Update to restricted
       updates.push(
-        Seller.updateOne({ _id: seller._id }, {
-          $set: { isRestricted: true, lastSanctionUpdateAt: now }
+        Seller.updateOne({_id: seller._id}, {
+          $set: {
+            isRestricted: true,
+            lastSanctionUpdateAt: now,
+            seller_type: "restrictedSeller"
+          }
         })
       );
       await addNotification(seller.seller_id, "The area containing your Sell Centre is sanctioned by Pi Network, so your map marker will now not be displayed in searches");
