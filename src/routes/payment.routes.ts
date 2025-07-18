@@ -10,10 +10,10 @@ import { verifyToken } from "../middlewares/verifyToken";
 
 const paymentsRouter = Router();
 
-paymentsRouter.post("/incomplete", verifyToken, onIncompletePaymentFound);
-paymentsRouter.post("/complete", verifyToken, onPaymentCompletion);
-paymentsRouter.post("/approve", verifyToken, onPaymentApproval);
+paymentsRouter.post("/incomplete", onIncompletePaymentFound);
+paymentsRouter.post("/complete", onPaymentCompletion);
+paymentsRouter.post("/approve", onPaymentApproval);
 paymentsRouter.post("/cancelled-payment", onPaymentCancellation);
-paymentsRouter.post("/error", verifyToken, onPaymentError);
+paymentsRouter.post("/error", onPaymentError);
 
 export default paymentsRouter;

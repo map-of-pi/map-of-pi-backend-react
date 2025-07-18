@@ -11,10 +11,9 @@ import { IUser } from "../types";
 
 export const onIncompletePaymentFound = async (req: Request, res: Response) => {
  const { payment } = req.body;
- const currentUser = req.currentUser as IUser;
 
   try {
-    const processedPayment = await processIncompletePayment(payment, currentUser);
+    const processedPayment = await processIncompletePayment(payment);
     return res.status(200).json(processedPayment);
   } catch (error) {
     logger.error(`Failed to process incomplete payment for paymentID ${ payment.identifier }:`, error);
@@ -26,10 +25,9 @@ export const onIncompletePaymentFound = async (req: Request, res: Response) => {
 };
 
 export const onPaymentApproval = async (req: Request, res: Response) => {
-  const currentUser = req.currentUser as IUser;
   const { paymentId } = req.body;
   try {
-    const approvedPayment = await processPaymentApproval(paymentId, currentUser);
+    const approvedPayment = await processPaymentApproval(paymentId);
     return res.status(200).json(approvedPayment);
   } catch (error) {
     logger.error(`Failed to approve Pi payment for paymentID ${ paymentId }:`, error);
@@ -42,9 +40,8 @@ export const onPaymentApproval = async (req: Request, res: Response) => {
 
 export const onPaymentCompletion = async (req: Request, res: Response) => {
   const { paymentId, txid } = req.body;
-  const currentUser = req.currentUser as IUser;
   try {
-    const completedPayment = await processPaymentCompletion(paymentId, txid, currentUser);
+    const completedPayment = await processPaymentCompletion(paymentId, txid);
     return res.status(200).json(completedPayment);
   } catch (error) {
     logger.error(`Failed to complete Pi payment for paymentID ${ paymentId } | txID ${ txid }:`, error);
@@ -71,8 +68,6 @@ export const onPaymentCancellation = async (req: Request, res: Response) => {
 
 export const onPaymentError = async (req: Request, res: Response) => {
   const { paymentDTO, error } = req.body;
-  const currentUser = req.currentUser as IUser;
-
   logger.error(`Received payment error callback from Pi:`, error);
   
   if (!paymentDTO) {
@@ -83,7 +78,7 @@ export const onPaymentError = async (req: Request, res: Response) => {
   }
 
   try {
-    const erroredPayment = await processPaymentError(paymentDTO, currentUser);
+    const erroredPayment = await processPaymentError(paymentDTO);
     return res.status(200).json(erroredPayment);
   } catch (error_) {
     logger.error(`Failed to process payment error`, error_);

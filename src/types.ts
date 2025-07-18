@@ -248,6 +248,7 @@ export type PaymentDataType = {
   identifier: string;
   amount: string;
   memo: string;
+  user_uid: string
   metadata: {
     payment_type: PaymentType,
     OrderPayment?: OrderPaymentMetadataType,

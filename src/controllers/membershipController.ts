@@ -68,7 +68,7 @@ export const updateOrRenewMembership = async (req: Request, res: Response) => {
 
     if (!authUser) return res.status(401).json({ error: "Unauthorized - user not authenticated "});
 
-    const updated = await membershipService.updateOrRenewMembership(authUser, membership_class);
+    const updated = await membershipService.updateOrRenewMembership(authUser.pi_uid, membership_class);
 
     return res.status(200).json(updated);
   } catch (error: any) {

@@ -58,20 +58,8 @@ export const getSingleMembershipById = async (membership_id: string) => {
   return membership || null;
 };
 
-export const updateOrRenewMembershipAfterPayment = async (paymentData: PaymentDataType, authUser: IUser) => {
-  const metadata = paymentData.metadata?.MembershipPayment;
-
-  if (!metadata || !metadata.membership_class)
-    throw new Error('Missing membership metadata');
-
-  const user = await User.findOne({ pi_uid: authUser.pi_uid });
-  if (!user) throw new Error(`User not found with pi_uid: ${authUser.pi_uid}`);
-
-  return await updateOrRenewMembership(authUser, metadata.membership_class);
-};
-
-export const updateOrRenewMembership = async (authUser: IUser, membership_class: MembershipClassType): Promise<IMembership> => {
-  const user = await User.findOne({ pi_uid:authUser.pi_uid }).lean();
+export const updateOrRenewMembership = async (piUid: string, membership_class: MembershipClassType): Promise<IMembership> => {
+  const user = await User.findOne({ pi_uid: piUid }).lean();
   const today = new Date();
 
   const tier = getTierByClass(membership_class);
