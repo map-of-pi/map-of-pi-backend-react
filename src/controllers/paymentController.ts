@@ -11,6 +11,7 @@ import { IUser } from "../types";
 
 export const onIncompletePaymentFound = async (req: Request, res: Response) => {
  const { payment } = req.body;
+
   try {
     const processedPayment = await processIncompletePayment(payment);
     return res.status(200).json(processedPayment);
@@ -24,10 +25,9 @@ export const onIncompletePaymentFound = async (req: Request, res: Response) => {
 };
 
 export const onPaymentApproval = async (req: Request, res: Response) => {
-  const currentUser = req.currentUser as IUser;
   const { paymentId } = req.body;
   try {
-    const approvedPayment = await processPaymentApproval(paymentId, currentUser);
+    const approvedPayment = await processPaymentApproval(paymentId);
     return res.status(200).json(approvedPayment);
   } catch (error) {
     logger.error(`Failed to approve Pi payment for paymentID ${ paymentId }:`, error);
@@ -68,7 +68,6 @@ export const onPaymentCancellation = async (req: Request, res: Response) => {
 
 export const onPaymentError = async (req: Request, res: Response) => {
   const { paymentDTO, error } = req.body;
-
   logger.error(`Received payment error callback from Pi:`, error);
   
   if (!paymentDTO) {

@@ -55,7 +55,7 @@ export const createOrder = async (req: Request, res: Response) => {
   try {
     // Ensure no payment ID is attached
     const sanitizedOrderData = { ...orderData, paymentId: null };
-    const order = await orderService.createOrder(sanitizedOrderData, orderItems, buyer);
+    const order = await orderService.createOrder(sanitizedOrderData, orderItems, buyer.pi_uid);
     if (!order) {
       logger.error(`Failed to create order with provided data: ${JSON.stringify(sanitizedOrderData)}`);
       return res.status(400).json({ message: "Invalid order data" });

@@ -1,6 +1,7 @@
 import axios from "axios";
 import pi from "../config/platformAPIclient";
 import Payment from "../models/Payment";
+import User from "../models/User";
 import PaymentCrossReference from "../models/PaymentCrossReference";
 import Seller from "../models/Seller";
 import { U2UPaymentStatus } from "../models/enums/u2uPaymentStatus";
@@ -16,10 +17,12 @@ import logger from "../config/loggingConfig";
 
 export const createPayment = async (paymentData: NewPayment): Promise<IPayment> => {
   try {    
+
+    const user = await User.findOne({pi_uid:paymentData.userId}).exec()
     // Create new payment
     const payment = new Payment({
       pi_payment_id: paymentData.piPaymentId,
-      user_id: paymentData.userId,
+      user_id: user?._id,
       amount: paymentData.amount,
       paid: false,
       memo: paymentData.memo,
