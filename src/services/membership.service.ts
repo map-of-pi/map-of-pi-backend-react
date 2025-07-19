@@ -1,5 +1,5 @@
 import { IMembership, PaymentDataType, IUser } from "../types";
-import Membership from "../models/Membership"
+import Membership from "../models/Membership_"
 import { MembershipClassType, membershipTiers } from "../models/enums/membershipClassType";
 import logger from "../config/loggingConfig";
 import User from "../models/User";

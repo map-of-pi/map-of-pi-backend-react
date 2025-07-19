@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 
-import Membership from "../models/Membership";
+import Membership from "../models/Membership_";
 import { IMembership } from "../types";
 
 import logger from '../config/loggingConfig';
