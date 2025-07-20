@@ -18,7 +18,7 @@ import logger from "../config/loggingConfig";
 export const createPayment = async (paymentData: NewPayment): Promise<IPayment> => {
   try {    
 
-    const user = await User.findOne({pi_uid:paymentData.userId}).exec()
+    const user = await User.findOne({pi_uid: paymentData.userId}).exec()
     // Create new payment
     const payment = new Payment({
       pi_payment_id: paymentData.piPaymentId,

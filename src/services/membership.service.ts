@@ -1,14 +1,14 @@
-import { IMembership, PaymentDataType, IUser } from "../types";
-import Membership from "../models/Membership"
-import { MembershipClassType, membershipTiers } from "../models/enums/membershipClassType";
-import logger from "../config/loggingConfig";
-import User from "../models/User";
 import {
   isExpired,
   isSameCategory,
   getTierByClass,
   getTierRank
 } from "../helpers/membership";
+import Membership from "../models/Membership_";
+import User from "../models/User";
+import { MembershipClassType, membershipTiers } from "../models/enums/membershipClassType";
+import { IMembership, IUser } from "../types";
+import logger from "../config/loggingConfig";
 
 export interface MembershipOption {
   value: MembershipClassType;

@@ -10,8 +10,10 @@ import Seller from "../../src/models/Seller";
 import User from "../../src/models/User";
 import { FulfillmentType } from "../../src/models/enums/fulfillmentType";
 import { OrderStatusType } from "../../src/models/enums/orderStatusType";
+import { MembershipClassType } from "../../src/models/enums/membershipClassType";
 import { PaymentType } from "../../src/models/enums/paymentType";
 import { U2UPaymentStatus } from "../../src/models/enums/u2uPaymentStatus";
+import { updateOrRenewMembership } from "../../src/services/membership.service";
 import { 
   cancelOrder,
   createOrder, 
@@ -36,12 +38,54 @@ jest.mock('../../src/config/platformAPIclient', () => ({
 }));
 jest.mock('../../src/models/Seller');
 jest.mock('../../src/models/User');
+jest.mock('../../src/services/membership.service');
 jest.mock('../../src/services/payment.service');
 jest.mock('../../src/services/order.service');
 
 describe('processIncompletePayment function', () => {
-  const mockBuyerId = 'buyer1_idTEST';
-  const mockSellerId = 'seller1_idTEST';
+  const mockBuyer = { _id: 'buyer1_idTEST', pi_uid: 'buyer1_TEST' };
+  const mockSeller = { _id: 'seller1_idTEST', seller_id: 'seller1_TEST' };
+  const mockPiPaymentId = 'payment1_TEST';
+  const mockTxid = 'txid1_TEST';
+
+  const mockUser: IUser = {
+    pi_uid: 'pi_uidTEST',
+    pi_username: 'pi_usernameTEST',
+    user_name: 'pi_userTEST'
+  } as IUser;
+
+  const mockPayment = {
+    _id: mockPiPaymentId,
+    txid: mockTxid,
+    paid: false,
+    user_id: 'userId1_TEST',
+    amount: '100',
+    memo: 'Test Memo',
+    payment_type: PaymentType.BuyerCheckout,
+    cancelled: false,
+    createdAt: expect.any(Date)
+  };
+
+  const currentPayment: PaymentDataType = {
+    user_id: mockUser.pi_uid,
+    identifier: mockPayment._id,
+    amount: mockPayment.amount,
+    memo: mockPayment.memo,
+    metadata: {
+      payment_type: PaymentType.BuyerCheckout,
+      OrderPayment: {
+        seller: mockSeller._id,
+        buyer: mockBuyer._id,
+        fulfillment_method: FulfillmentType.CollectionByBuyer,
+        seller_fulfillment_description: 'Pickup from store',
+        buyer_fulfillment_description: 'Will pickup tomorrow',
+        items: [{ itemId: 'mockItemId1_TEST', quantity: 2 }],
+      },
+      MembershipPayment: {
+        membership_class: MembershipClassType.CASUAL
+      }
+    }
+  };
 
   const mockPaymentInfo = {
     identifier: 'paymentInfo1_TEST',
@@ -53,7 +97,7 @@ describe('processIncompletePayment function', () => {
 
   const mockIncompletePayment = {
     pi_payment_id: mockPaymentInfo.identifier,
-    user_id: mockBuyerId,
+    user_id: mockBuyer.pi_uid,
     amount: '10',
     paid: false,
     memo: 'Test payment memo',
@@ -72,7 +116,7 @@ describe('processIncompletePayment function', () => {
     (completePayment as jest.Mock).mockResolvedValue({
       _id: 'payment_idTEST',
       pi_payment_id: mockPaymentInfo.identifier,
-      user_id: mockBuyerId,
+      user_id: mockBuyer.pi_uid,
       amount: '10',
       paid: true,
       memo: 'Test payment memo',
@@ -81,8 +125,8 @@ describe('processIncompletePayment function', () => {
     });
 
     (updatePaidOrder as jest.Mock).mockResolvedValue({
-      buyer_id: mockBuyerId,
-      seller_id: mockSellerId,
+      buyer_id: mockBuyer._id,
+      seller_id: mockSeller._id,
       payment_id: mockPaymentInfo.identifier,
       total_amount: '10',
       status: OrderStatusType.Pending,
@@ -163,7 +207,7 @@ describe('processIncompletePayment function', () => {
     expect(platformAPIClient.post).not.toHaveBeenCalled();
   });
 
-  it('should not update paid order if the payment type is not BuyerCheckout', async () => {
+  it('should update or renew membership if the payment type is Membership', async () => {
     (getPayment as jest.Mock).mockResolvedValue(mockIncompletePayment);
 
     (axios.create as jest.Mock).mockReturnValue({
@@ -172,13 +216,17 @@ describe('processIncompletePayment function', () => {
 
     (completePayment as jest.Mock).mockResolvedValue({
       pi_payment_id: mockPaymentInfo.identifier,
-      user_id: mockBuyerId,
+      user_id: mockBuyer.pi_uid,
       amount: '10',
       paid: true,
       memo: 'Test payment memo',
       payment_type: PaymentType.Membership,
       cancelled: false
     });
+
+    (platformAPIClient.get as jest.Mock).mockResolvedValue({ data: currentPayment });
+
+    (updateOrRenewMembership as jest.Mock).mockResolvedValue({});
 
     (platformAPIClient.post as jest.Mock).mockResolvedValue({ data: {} });
 
@@ -187,6 +235,10 @@ describe('processIncompletePayment function', () => {
     expect(getPayment).toHaveBeenCalledWith(mockPaymentInfo.identifier);
     expect(axios.create).toHaveBeenCalled();
     expect(completePayment).toHaveBeenCalledWith(mockPaymentInfo.identifier, mockPaymentInfo.transaction.txid);
+    expect(updateOrRenewMembership).toHaveBeenCalledWith(
+      currentPayment.user_id, 
+      currentPayment.metadata.MembershipPayment?.membership_class
+    );
     expect(updatePaidOrder).not.toHaveBeenCalled();
     expect(platformAPIClient.post).toHaveBeenCalledWith(
       `/v2/payments/${ mockPaymentInfo.identifier }/complete`,
@@ -209,7 +261,7 @@ describe('processIncompletePayment function', () => {
     (completePayment as jest.Mock).mockResolvedValue({
       _id: 'payment_idTEST',
       pi_payment_id: mockPaymentInfo.identifier,
-      user_id: mockBuyerId,
+      user_id: mockBuyer.pi_uid,
       amount: '10',
       paid: true,
       memo: 'Test payment memo',
@@ -218,8 +270,8 @@ describe('processIncompletePayment function', () => {
     });
 
     (updatePaidOrder as jest.Mock).mockResolvedValue({
-      buyer_id: mockBuyerId,
-      seller_id: mockSellerId,
+      buyer_id: mockBuyer._id,
+      seller_id: mockSeller._id,
       payment_id: mockPaymentInfo.identifier,
       total_amount: '10',
       status: OrderStatusType.Pending,
@@ -255,7 +307,7 @@ describe('processPaymentApproval function', () => {
   const mockSeller = { _id: 'seller1_idTEST', seller_id: 'seller1_TEST' };
 
   const mockUser: IUser = {
-    pi_uid: 'pi_uidTEST',
+    pi_uid: mockBuyer.pi_uid,
     pi_username: 'pi_usernameTEST',
     user_name: 'pi_userTEST'
   } as IUser;
@@ -273,6 +325,7 @@ describe('processPaymentApproval function', () => {
   };
 
   const currentPayment: PaymentDataType = {
+    user_id: mockUser.pi_uid,
     identifier: mockPayment._id,
     amount: mockPayment.amount,
     memo: mockPayment.memo,
@@ -296,13 +349,13 @@ describe('processPaymentApproval function', () => {
 
     // Mock functions in checkoutProcess
     (Seller.findOne as jest.Mock).mockResolvedValue(mockSeller);
-    (User.findOne as jest.Mock).mockResolvedValue(mockBuyer);
+    (User.findOne as jest.Mock).mockResolvedValue(mockUser);
     (createPayment as jest.Mock).mockResolvedValue(mockPayment);
     (createOrder as jest.Mock).mockResolvedValue(mockOrder);
 
     (platformAPIClient.post as jest.Mock).mockResolvedValue({ data: {} });
 
-    const result = await processPaymentApproval(mockPiPaymentId, mockUser);
+    const result = await processPaymentApproval(mockPiPaymentId);
 
     expect(platformAPIClient.get).toHaveBeenCalledWith(`/v2/payments/${ mockPiPaymentId }`);
     expect(getPayment).toHaveBeenCalledWith(mockPiPaymentId);
@@ -310,14 +363,14 @@ describe('processPaymentApproval function', () => {
     expect(User.findOne).toHaveBeenCalledWith({ pi_uid: mockUser.pi_uid });
     expect(createPayment).toHaveBeenCalledWith({
       piPaymentId: mockPiPaymentId,
-      userId: mockBuyer._id,
+      userId: mockBuyer.pi_uid,
       memo: mockPayment.memo,
       amount: mockPayment.amount,
       paymentType: PaymentType.BuyerCheckout
     });
     expect(createOrder).toHaveBeenCalledWith({
-      buyerId: mockUser.pi_uid,
-      sellerId: mockSeller._id,
+      buyerId: currentPayment.user_id,
+      sellerId: currentPayment.metadata.OrderPayment?.seller,
       paymentId: mockPayment._id,
       totalAmount: mockPayment.amount,
       status: OrderStatusType.Initialized,
@@ -326,7 +379,7 @@ describe('processPaymentApproval function', () => {
       buyerFulfillmentDescription: currentPayment.metadata.OrderPayment?.buyer_fulfillment_description,
     },
       currentPayment.metadata.OrderPayment?.items,
-      mockUser
+      currentPayment.user_id
     );
     expect(platformAPIClient.post).toHaveBeenCalledWith(`/v2/payments/${ mockPiPaymentId }/approve`);
     expect(result).toEqual({
@@ -340,7 +393,7 @@ describe('processPaymentApproval function', () => {
     // Mock existing payment
     (getPayment as jest.Mock).mockResolvedValue(mockPayment);
 
-    const result = await processPaymentApproval(mockPiPaymentId, mockUser);
+    const result = await processPaymentApproval(mockPiPaymentId);
 
     expect(platformAPIClient.get).toHaveBeenCalledWith(`/v2/payments/${ mockPiPaymentId }`);
     expect(getPayment).toHaveBeenCalledWith(mockPiPaymentId);
@@ -356,7 +409,7 @@ describe('processPaymentApproval function', () => {
     });
   });
 
-  it('should skip checkout process if payment type is Membership', async () => {
+  it('should process and approve a new Membership payment successfully', async () => {
     const currentPayment_Membership: PaymentDataType = {
       ...currentPayment,
       metadata: {
@@ -368,7 +421,7 @@ describe('processPaymentApproval function', () => {
     (getPayment as jest.Mock).mockResolvedValue(null);
     (platformAPIClient.post as jest.Mock).mockResolvedValue({ data: {} });
 
-    const result = await processPaymentApproval(mockPiPaymentId, mockUser);
+    const result = await processPaymentApproval(mockPiPaymentId);
 
     expect(platformAPIClient.get).toHaveBeenCalledWith(`/v2/payments/${ mockPiPaymentId }`);
     expect(getPayment).toHaveBeenCalledWith(mockPiPaymentId);
@@ -388,7 +441,7 @@ describe('processPaymentApproval function', () => {
     const mockError = new Error('Pi Platform API timeout');
     (platformAPIClient.get as jest.Mock).mockRejectedValue(mockError);
   
-    await expect(processPaymentApproval(mockPiPaymentId, mockUser)).rejects.toThrow('Pi Platform API timeout');
+    await expect(processPaymentApproval(mockPiPaymentId)).rejects.toThrow('Pi Platform API timeout');
   });
 });
 
