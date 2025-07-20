@@ -4,7 +4,7 @@ import {
   getTierByClass,
   getTierRank
 } from "../helpers/membership";
-import Membership from "../models/Membership_";
+import Membership from "../models/Membership";
 import User from "../models/User";
 import { MembershipClassType, membershipTiers } from "../models/enums/membershipClassType";
 import { IMembership, IUser } from "../types";
