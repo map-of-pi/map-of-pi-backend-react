@@ -9,6 +9,7 @@ import OrderItem from "../models/OrderItem";
 import Seller from "../models/Seller";
 import SellerItem from "../models/SellerItem";
 import User from "../models/User";
+import Notification from "../models/Notification";
 import { OrderStatusType } from "../models/enums/orderStatusType";
 import { OrderItemStatusType } from "../models/enums/orderItemStatusType";
 import { IOrder, IUser, NewOrder, PickedItems } from "../types";
@@ -96,6 +97,14 @@ export const createOrder = async (
     /* Step 5: Commit the transaction */
     await session.commitTransaction();
     logger.info('Order and stock levels created/updated successfully', { orderId: newOrder._id });
+
+    /* Step 6: add new order notification to seller */
+    const notificationMessage = `You have new order from: ${buyer.pi_username}`; 
+    await Notification.create({
+      pi_uid: seller.seller_id,
+      reason: notificationMessage,
+      is_cleared: false
+    });
 
     return newOrder;
   } catch (error: any) {
