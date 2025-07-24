@@ -10,6 +10,7 @@ import { OrderItemStatusType } from "./models/enums/orderItemStatusType";
 import { PaymentType } from "./models/enums/paymentType";
 import { U2UPaymentStatus } from "./models/enums/u2uPaymentStatus";
 import { RestrictedArea } from "./models/enums/restrictedArea";
+import { PaymentDirection } from "./models/enums/paymentDirection";
 
 // ========================
 // USER MODELS
@@ -74,6 +75,7 @@ export interface ISeller extends Document {
 	fulfillment_description?: string;
 	pre_restriction_seller_type?: SellerType | null;
 	isPreRestricted: boolean;
+  gas_saver: boolean;
 };
 
 // Combined interface representing a seller with selected user settings
@@ -178,6 +180,20 @@ export type OrderPaymentMetadataType = {
 // ========================
 // PAYMENT MODELS
 // ========================
+
+
+export interface IA2UJob extends Document {
+  sellerPiUid: string;
+  amount: number;
+  xRef_ids: string[];
+  memo: string,
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  last_a2u_date: Date,
+  attempts: number;
+  last_error?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
 export interface IPayment extends Document {
   user_id: Types.ObjectId;
   amount: Types.Decimal128;
@@ -185,6 +201,7 @@ export interface IPayment extends Document {
   memo: string;
   pi_payment_id: string;
   txid?: string;
+  direction: PaymentDirection;
   payment_type: PaymentType;
   cancelled: boolean;
   createdAt: Date;
@@ -231,15 +248,14 @@ export interface NewPayment {
 export interface U2URefDataType {
   u2aPaymentId?: string,
   u2uStatus: U2UPaymentStatus,
+  orderId?: string,
   a2uPaymentId: string | null,
 };
 
 export interface A2UPaymentDataType {
-  sellerId: string,
+  sellerPiUid: string,
   amount: string,
-  buyerId: string,
-  paymentType: PaymentType,
-  orderId: string,
+  xRefIds: string[],
   memo: string
 };
 

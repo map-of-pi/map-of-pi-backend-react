@@ -26,8 +26,6 @@ const startServer = async () => {
       });
     }
 
-
-
     logger.info("Server setup initiated.");
   } catch (error) {
     logger.error('Server failed to initialize:', error);
@@ -37,6 +35,6 @@ const startServer = async () => {
 // Start the server setup process
 startServer();
 // TODO: Remove cron job; Start the scheduled cron job(s)
-// scheduleCronJobs();
+scheduleCronJobs();
 
 export default app;
