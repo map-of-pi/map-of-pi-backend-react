@@ -21,12 +21,17 @@ export const createNotification = async (req: Request, res: Response) => {
 };
 
 export const getNotifications = async (req: Request, res: Response) => {
-  const { pi_uid } = req.params;
+  const authUser = req.currentUser;
+
+  if (!authUser) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
   const skip = req.query.skip ? Number(req.query.skip) : 0;
   const limit = req.query.limit ? Number(req.query.limit) : 20;
 
   try {
-    const notifications = await notificationService.getNotifications(pi_uid, skip, limit);
+    const notifications = await notificationService.getNotifications(authUser.pi_uid, skip, limit);
     return res.status(200).json(notifications);
   } catch (error) {
     logger.error('Failed to get notifications', error);
