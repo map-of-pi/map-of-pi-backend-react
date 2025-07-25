@@ -103,6 +103,39 @@ notificationRoutes.post("/", verifyToken, notificationController.createNotificat
 
 /**
  * @swagger
+ * /api/v1/notifications/count:
+ *   get:
+ *     tags:
+ *       - Notification
+ *     summary: Get the count of notifications filtered by status (cleared or uncleared)
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [cleared, uncleared]
+ *         required: false
+ *         description: Filter notifications by status
+ *     responses:
+ *       200:
+ *         description: Successful response with notification count
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 count:
+ *                   type: integer
+ *                   example: 5
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+notificationRoutes.get("/count", verifyToken, notificationController.getNotificationsCount);
+
+/**
+ * @swagger
  * /api/v1/notifications/update/{notification_id}:
  *   put:
  *     tags:
