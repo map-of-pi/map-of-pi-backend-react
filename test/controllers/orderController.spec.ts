@@ -162,7 +162,9 @@ describe('orderController', () => {
           orderData: mockOrderData,
           orderItems: [{ itemId: 'item-1' }],
         },
-        currentUser: mockUser      
+        currentUser: {
+          pi_uid: '0a0a0a-0a0a-0a0a'
+        }    
       };
       res = {
         status: jest.fn().mockReturnThis(),
@@ -181,7 +183,7 @@ describe('orderController', () => {
       expect(orderService.createOrder).toHaveBeenCalledWith(
         { ...mockOrderData, paymentId: null },
         req.body.orderItems,
-        req.currentUser 
+        req.currentUser.pi_uid
       );
       expect(orderService.markAsPaidOrder).toHaveBeenCalledWith(mockOrderId);
       expect(res.status).toHaveBeenCalledWith(200);
@@ -196,7 +198,7 @@ describe('orderController', () => {
       expect(orderService.createOrder).toHaveBeenCalledWith(
         { ...mockOrderData, paymentId: null },
         req.body.orderItems,
-        req.currentUser 
+        req.currentUser.pi_uid 
       );
       expect(orderService.markAsPaidOrder).not.toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(400);
@@ -212,7 +214,7 @@ describe('orderController', () => {
       expect(orderService.createOrder).toHaveBeenCalledWith(
         { ...mockOrderData, paymentId: null },
         req.body.orderItems,
-        req.currentUser
+        req.currentUser.pi_uid
       );
       expect(orderService.markAsPaidOrder).not.toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(500);

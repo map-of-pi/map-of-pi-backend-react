@@ -9,7 +9,7 @@ import { OrderStatusType } from "../../src/models/enums/orderStatusType";
 import { OrderItemStatusType } from "../../src/models/enums/orderItemStatusType";
 import { StockLevelType } from "../../src/models/enums/stockLevelType";
 import { getUpdatedStockLevel } from "../../src/helpers/order";
-import { IUser, NewOrder, PickedItems } from "../../src/types";
+import { NewOrder, PickedItems } from "../../src/types";
 import { 
   createOrder,
   deleteOrderById,
@@ -40,7 +40,7 @@ describe('createOrder function', () => {
     jest.spyOn(mongoose, 'startSession').mockResolvedValue(mockSession as any);
   });
 
-  const mockUser = { pi_uid: '0a0a0a-0a0a-0a0a' } as IUser;
+  const mockUser = { pi_uid: '0a0a0a-0a0a-0a0a' };
   const mockSeller = { seller_id: 'sellerId_TEST' };
 
   const orderData: NewOrder = {
@@ -95,7 +95,7 @@ describe('createOrder function', () => {
       }
     ] as any); 
 
-    const result = await createOrder(orderData, orderItems, mockUser);
+    const result = await createOrder(orderData, orderItems, mockUser.pi_uid);
 
     expect(mongoose.startSession).toHaveBeenCalled();
     expect(mockSession.startTransaction).toHaveBeenCalled();
@@ -129,7 +129,7 @@ describe('createOrder function', () => {
     };
 
     (Seller.findOne as jest.Mock).mockResolvedValue(mockSeller);
-    (User.findOne as jest.Mock).mockResolvedValue(mockUser);
+    (User.findOne as jest.Mock).mockResolvedValue({ pi_uid: mockUser.pi_uid });
     // Mock Order.save()
     const mockSave = jest.fn().mockResolvedValue(mockSavedOrder);
     (Order as unknown as jest.Mock).mockImplementation(() => ({ save: mockSave }));
@@ -156,7 +156,7 @@ describe('createOrder function', () => {
       }
     ] as any); 
 
-    const result = await createOrder(orderData, orderItems, mockUser);
+    const result = await createOrder(orderData, orderItems, mockUser.pi_uid);
 
     expect(mongoose.startSession).toHaveBeenCalled();
     expect(mockSession.startTransaction).toHaveBeenCalled();
@@ -184,7 +184,7 @@ describe('createOrder function', () => {
     (Seller.findOne as jest.Mock).mockResolvedValue(mockSeller);
     (User.findOne as jest.Mock).mockResolvedValue(null);
 
-    await expect(createOrder(orderData, orderItems, mockUser)).rejects.toThrow('Seller or buyer not found');
+    await expect(createOrder(orderData, orderItems, mockUser.pi_uid)).rejects.toThrow('Seller or buyer not found');
   
     expect(Seller.findOne).toHaveBeenCalledWith({ seller_id: orderData.sellerId });
     expect(User.findOne).toHaveBeenCalledWith({ pi_uid: mockUser.pi_uid });
@@ -196,7 +196,7 @@ describe('createOrder function', () => {
     (Seller.findOne as jest.Mock).mockResolvedValue(null);
     (User.findOne as jest.Mock).mockResolvedValue(mockUser);
 
-    await expect(createOrder(orderData, orderItems, mockUser)).rejects.toThrow('Seller or buyer not found');
+    await expect(createOrder(orderData, orderItems, mockUser.pi_uid)).rejects.toThrow('Seller or buyer not found');
   
     expect(Seller.findOne).toHaveBeenCalledWith({ seller_id: orderData.sellerId });
     expect(User.findOne).toHaveBeenCalledWith({ pi_uid: mockUser.pi_uid });
@@ -211,7 +211,7 @@ describe('createOrder function', () => {
     const mockSave = jest.fn().mockResolvedValue(null);
     (Order as unknown as jest.Mock).mockImplementation(() => ({ save: mockSave }));
   
-    await expect(createOrder(orderData, orderItems, mockUser)).rejects.toThrow('Failed to create order');
+    await expect(createOrder(orderData, orderItems, mockUser.pi_uid)).rejects.toThrow('Failed to create order');
   
     expect(Seller.findOne).toHaveBeenCalledWith({ seller_id: orderData.sellerId });
     expect(User.findOne).toHaveBeenCalledWith({ pi_uid: mockUser.pi_uid });
@@ -240,7 +240,7 @@ describe('createOrder function', () => {
       ]),
     } as any);
   
-    await expect(createOrder(orderData, orderItems, mockUser)).rejects.toThrow('Failed to find associated seller item');
+    await expect(createOrder(orderData, orderItems, mockUser.pi_uid)).rejects.toThrow('Failed to find associated seller item');
   
     expect(Seller.findOne).toHaveBeenCalledWith({ seller_id: orderData.sellerId });
     expect(User.findOne).toHaveBeenCalledWith({ pi_uid: mockUser.pi_uid });
@@ -270,7 +270,7 @@ describe('createOrder function', () => {
   
     (OrderItem.insertMany as jest.Mock).mockRejectedValue(new Error('Mock database error'));
   
-    await expect(createOrder(orderData, orderItems, mockUser)).rejects.toThrow('Mock database error');
+    await expect(createOrder(orderData, orderItems, mockUser.pi_uid)).rejects.toThrow('Mock database error');
     
     expect(Seller.findOne).toHaveBeenCalledWith({ seller_id: orderData.sellerId });
     expect(User.findOne).toHaveBeenCalledWith({ pi_uid: mockUser.pi_uid });

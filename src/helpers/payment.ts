@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { platformAPIClient } from '../config/platformAPIclient';
+import logger from '../config/loggingConfig';
 import Seller from '../models/Seller';
 import User from '../models/User';
+import { MembershipClassType } from "../models/enums/membershipClassType";
 import { OrderStatusType } from '../models/enums/orderStatusType';
 import { PaymentType } from "../models/enums/paymentType";
 import { U2UPaymentStatus } from '../models/enums/u2uPaymentStatus';
@@ -18,20 +20,19 @@ import {
   createA2UPayment,
   cancelPayment
 } from '../services/payment.service';
-import { IUser, NewOrder, PaymentDataType, PaymentDTO, PaymentInfo } from '../types';
-import logger from '../config/loggingConfig';
+import { updateOrRenewMembership } from "../services/membership.service";
+import { NewOrder, PaymentDataType, PaymentDTO, PaymentInfo } from '../types';
 
 function buildPaymentData(
   piPaymentId: string,
-  buyerId: string,
   payment: PaymentDataType
 ) {
   return {
     piPaymentId,
-    userId: buyerId,
+    userId: payment.user_id,
     memo: payment.memo,
     amount: payment.amount,
-    paymentType: PaymentType.BuyerCheckout
+    paymentType: payment.metadata.payment_type
   };
 }
 
@@ -57,7 +58,6 @@ function buildOrderData(
 
 const checkoutProcess = async (
   piPaymentId: string, 
-  authUser: IUser, 
   currentPayment: PaymentDataType
 ) => {
 
@@ -71,15 +71,15 @@ const checkoutProcess = async (
 
   // Look up the seller and buyer in the database
   const seller = await Seller.findOne({ seller_id: OrderPayment.seller });
-  const buyer = await User.findOne({ pi_uid: authUser?.pi_uid });
+  const buyer = await User.findOne({ pi_uid: currentPayment.user_id });
 
   if (!buyer || !seller) {
-    logger.error("Seller or buyer not found", { sellerId: OrderPayment.seller, buyerId: authUser?.pi_uid });
+    logger.error("Seller or buyer not found", { sellerId: OrderPayment.seller, buyerId: currentPayment.user_id });
     throw new Error("Seller or buyer not found");
   }
 
   // Construct payment data object for recording the transaction
-  const paymentData = buildPaymentData(piPaymentId, buyer._id as string, currentPayment);
+  const paymentData = buildPaymentData(piPaymentId, currentPayment);
   // Create a new payment record
   const newPayment = await createPayment(paymentData)
   // Validate payment record creation succeeded
@@ -96,13 +96,13 @@ const checkoutProcess = async (
 
   // Construct order data object
   const orderData = buildOrderData(
-    authUser.pi_uid as string,
+    currentPayment.user_id as string,
     OrderPayment.seller as string,
     newPayment._id as string,
     currentPayment
   )
   // Create a new order along with its items
-  const newOrder = await createOrder(orderData as NewOrder, OrderPayment.items, authUser);
+  const newOrder = await createOrder(orderData as NewOrder, OrderPayment.items, currentPayment.user_id);
 
   logger.info('order created successfully', { orderId: newOrder._id });
   return newOrder;
@@ -139,6 +139,14 @@ export const processIncompletePayment = async (payment: PaymentInfo) => {
     if (updatedPayment?.payment_type === PaymentType.BuyerCheckout) {
       await updatePaidOrder(updatedPayment._id as string);
       logger.warn("Old order found and updated");
+
+    } else if (updatedPayment.payment_type === PaymentType.Membership) {
+      // Fetch payment details from the Pi platform using the payment ID
+      const res = await platformAPIClient.get(`/v2/payments/${ paymentId }`);
+
+      const currentPayment: PaymentDataType = res.data;
+      const membership_class = currentPayment.metadata.MembershipPayment?.membership_class as MembershipClassType
+      await updateOrRenewMembership(currentPayment.user_id, membership_class);
     }
 
     // Notify the Pi Platform that the payment is complete
@@ -165,7 +173,6 @@ export const processIncompletePayment = async (payment: PaymentInfo) => {
 
 export const processPaymentApproval = async (
   paymentId: string,
-  currentUser: IUser
 ): Promise<{ success: boolean; message: string }> => {
   try {
     // Fetch payment details from the Pi platform using the payment ID
@@ -176,7 +183,7 @@ export const processPaymentApproval = async (
     const oldPayment = await getPayment(res.data.identifier);
     if (oldPayment) {
       logger.info("Payment record already exists: ", oldPayment._id);
-
+      await processPaymentError(res.data);
       return {
         success: false,
         message: `Payment already exists with ID ${ paymentId }`,
@@ -185,10 +192,12 @@ export const processPaymentApproval = async (
 
     // Handle logic based on the payment type
     if (currentPayment?.metadata.payment_type === PaymentType.BuyerCheckout) {
-      const newOrder = await checkoutProcess(paymentId, currentUser, currentPayment);
+      const newOrder = await checkoutProcess(paymentId, currentPayment);
       logger.info("Order created successfully: ", newOrder._id);
     } else if (currentPayment?.metadata.payment_type === PaymentType.Membership) {
-      logger.info("Membership subscription processed successfully");
+      // Create a new payment record
+      const paymentData = buildPaymentData(paymentId, currentPayment );
+      await createPayment(paymentData);
     }
 
     // Approve the payment on the Pi platform
@@ -216,11 +225,13 @@ export const processPaymentApproval = async (
 export const processPaymentCompletion = async (paymentId: string, txid: string) => {
   try {
     // Confirm the payment exists via Pi platform API
-    await platformAPIClient.get(`/v2/payments/${ paymentId }`);
+    const res = await platformAPIClient.get(`/v2/payments/${ paymentId }`);
+    const currentPayment: PaymentDataType = res.data;
 
     // Mark the payment as completed
     const completedPayment = await completePayment(paymentId, txid);
     logger.info("Payment record marked as completed");
+
     if (completedPayment?.payment_type === PaymentType.BuyerCheckout) {
       // Update the associated order's status to paid
       const order = await updatePaidOrder(completedPayment._id as string);
@@ -257,9 +268,18 @@ export const processPaymentCompletion = async (paymentId: string, txid: string) 
       });
 
     } else if (completedPayment?.payment_type === PaymentType.Membership) {
+
+      const membership_class = currentPayment.metadata.MembershipPayment?.membership_class as MembershipClassType
+      const membership = await updateOrRenewMembership(currentPayment.user_id, membership_class);
+
       // Notify Pi platform for membership payment completion
       await platformAPIClient.post(`/v2/payments/${ paymentId }/complete`, { txid });
       logger.info("Membership subscription completed");
+      return {
+        success: true,
+        message: `Payment completed with id ${ paymentId }`,
+        membership: membership
+      };
     }
 
     return {

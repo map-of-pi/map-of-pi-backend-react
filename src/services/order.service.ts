@@ -17,7 +17,7 @@ import logger from "../config/loggingConfig";
 export const createOrder = async (
   orderData: NewOrder,
   orderItems: PickedItems[],
-  authUser: IUser
+  piUid: string
 ): Promise<IOrder> => {
   const session = await mongoose.startSession();
 
@@ -26,10 +26,10 @@ export const createOrder = async (
 
     // Look up the seller and buyer in the database
     const seller = await Seller.findOne({ seller_id: orderData.sellerId });
-    const buyer = await User.findOne({ pi_uid: authUser?.pi_uid });
+    const buyer = await User.findOne({ pi_uid: piUid });
 
     if (!buyer || !seller) {
-      logger.error("Seller or buyer not found", { sellerId: orderData.sellerId, buyerId: authUser?.pi_uid });
+      logger.error("Seller or buyer not found", { sellerId: orderData.sellerId, buyerId: piUid });
       throw new Error("Seller or buyer not found");
     }
 
