@@ -34,6 +34,29 @@ export const getNotifications = async (req: Request, res: Response) => {
   }
 };
 
+export const getNotificationsCount = async (req: Request, res: Response) => {
+  try {
+    const authUser = req.currentUser;
+
+    if (!authUser) {
+        logger.warn('No authenticated user found when trying to get notification count.');
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const status = req.query.status as 'cleared'| 'uncleared' | undefined;
+
+      const count = await notificationService.countNotifications({
+        pi_uid: authUser.pi_uid,
+        status,
+      });
+
+      return res.status(200).json({ count });
+    } catch (error) {
+      logger.error('Failed to count notifications', error);
+      return res.status(500).json({ message: 'An error occurred while counting notifications; please try again later' });
+    }
+};
+
 export const updateNotification = async (req: Request, res: Response) => {
   const { notification_id } = req.params;
   try {
