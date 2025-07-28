@@ -1,5 +1,5 @@
-import logger from "../config/loggingConfig";
 import { MembershipClassType, membershipTiers } from '../models/enums/membershipClassType';
+import logger from "../config/loggingConfig";
 
 export const MembershipSubscription = async () => {
   try {
@@ -30,19 +30,22 @@ export const MembershipSubscription = async () => {
 
 export const isExpired = (date?: Date): boolean => !date || date < new Date();
 
-export const isOnlineClass = (tier: MembershipClassType): boolean =>
+export const isOnlineShoppingClass = (tier: MembershipClassType): boolean =>
   [
+    MembershipClassType.GREEN,
     MembershipClassType.GOLD,
     MembershipClassType.DOUBLE_GOLD,
     MembershipClassType.TRIPLE_GOLD,
-    MembershipClassType.GREEN,
   ].includes(tier);
 
-export const isInstoreClass = (tier: MembershipClassType): boolean =>
-  tier === MembershipClassType.SINGLE || tier === MembershipClassType.WHITE;
+export const isOfflineShoppingClass = (tier: MembershipClassType): boolean =>
+  [
+    MembershipClassType.CASUAL,
+    MembershipClassType.WHITE,
+  ].includes(tier);
 
-export const isSameCategory = (a: MembershipClassType, b: MembershipClassType): boolean =>
-  (isOnlineClass(a) && isOnlineClass(b)) || (isInstoreClass(a) && isInstoreClass(b));
+export const isSameShoppingClassType = (a: MembershipClassType, b: MembershipClassType): boolean =>
+  (isOnlineShoppingClass(a) && isOnlineShoppingClass(b)) || (isOfflineShoppingClass(a) && isOfflineShoppingClass(b));
 
 export const getTierByClass = (tierClass: MembershipClassType) => {
   return Object.values(membershipTiers).find((tier) => tier.CLASS === tierClass);

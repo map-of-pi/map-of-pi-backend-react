@@ -1,6 +1,6 @@
 import {
   isExpired,
-  isSameCategory,
+  isSameShoppingClassType,
   getTierByClass,
   getTierRank
 } from "../helpers/membership";
@@ -87,7 +87,7 @@ export const updateOrRenewMembership = async (piUid: string, membership_class: M
   const newRank = tier.RANK;
   const expired = isExpired(existing.membership_expiration ?? undefined);
 
-  if (!isSameCategory(existing.membership_class, membership_class)) {
+  if (!isSameShoppingClassType(existing.membership_class, membership_class)) {
     Object.assign(existing, {
       membership_class,
       membership_expiration: membership_duration ? new Date(today.getTime() + durationMs) : null,
