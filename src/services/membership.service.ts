@@ -85,7 +85,7 @@ export const updateOrRenewMembership = async (piUid: string, membership_class: M
 
   const currentRank = getTierRank(existing.membership_class);
   const newRank = tier.RANK;
-  const expired = isExpired(existing.membership_expiration ?? undefined);
+  const expired = isExpired(existing.membership_expiry_date ?? undefined);
 
   if (!isSameShoppingClassType(existing.membership_class, membership_class)) {
     Object.assign(existing, {
@@ -98,7 +98,7 @@ export const updateOrRenewMembership = async (piUid: string, membership_class: M
   }
 
   if (newRank === currentRank && !expired) {
-    existing.membership_expiration = new Date((existing.membership_expiration?.getTime() ?? today.getTime()) + durationMs);
+    existing.membership_expiry_date = new Date((existing.membership_expiry_date?.getTime() ?? today.getTime()) + durationMs);
     existing.mappi_balance = mappi_allowance + existing.mappi_balance;
     // existing.mappi_used_to_date = 0;
     return await existing.save();

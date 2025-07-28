@@ -31,7 +31,7 @@ const membershipSchema = new mongoose.Schema<IMembership>(
         message: "mappi_balance must be a non-negative number.",
       },
     },
-    membership_expiration: {
+    membership_expiry_date: {
       type: Date,
       required: false,
       default: null

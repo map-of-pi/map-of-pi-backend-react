@@ -44,6 +44,18 @@ export interface IUserSettings extends Document {
 	};
 };
 
+// ========================
+// MEMBERSHIP MODELS
+// ========================
+export interface IMembership extends Document {
+  user_id: Types.ObjectId;
+  pi_uid: string;
+  membership_class: MembershipClassType;
+  mappi_balance: number;
+  membership_expiry_date: Date | null;
+  mappi_used_to_date: number;
+};
+
 // Select specific fields from IUserSettings
 export type PartialUserSettings = Pick<IUserSettings, 'user_name' | 'email' | 'phone_number' | 'findme' | 'trust_meter_rating'>;
 
@@ -322,15 +334,3 @@ export interface IToggle extends Document {
 	createdAt: Date;
 	updatedAt: Date;
 };
-
-// ========================
-// MEMBERSHIP
-// ========================
-export interface IMembership extends Document {
-  user_id: Types.ObjectId;
-  pi_uid: string;
-  membership_class: MembershipClassType;
-  mappi_balance: number;
-  membership_expiration: Date | null;
-  mappi_used_to_date: number;
-}
