@@ -2,9 +2,11 @@ import {
   isExpired,
   isOnlineShoppingClass,
   isOfflineShoppingClass,
-  isSameShoppingClassType
+  isSameShoppingClassType,
+  getTierByClass,
+  getTierRank
 } from  '../../src/helpers/membership';
-import { MembershipClassType } from '../../src/models/enums/membershipClassType';
+import { MembershipClassType, membershipTiers } from '../../src/models/enums/membershipClassType';
 
 describe('isExpired function ', () => {
   it('should return true if the date is undefined', () => {
@@ -118,5 +120,74 @@ describe('isSameShoppingClassType function', () => {
     expect(isSameShoppingClassType(MembershipClassType.GOLD, MembershipClassType.GOLD)).toBe(true);
     expect(isSameShoppingClassType(MembershipClassType.DOUBLE_GOLD, MembershipClassType.DOUBLE_GOLD)).toBe(true);
     expect(isSameShoppingClassType(MembershipClassType.TRIPLE_GOLD, MembershipClassType.TRIPLE_GOLD)).toBe(true);
+  });
+});
+
+describe('getTierByClass function', () => {
+  it('should return the correct tier object for CASUAL membership', () => {
+    const result = getTierByClass(MembershipClassType.CASUAL);
+    expect(result).toEqual(membershipTiers.tier0);
+  });
+
+  it('should return the correct tier object for WHITE membership', () => {
+    const result = getTierByClass(MembershipClassType.WHITE);
+    expect(result).toEqual(membershipTiers.tier1);
+  });
+
+  it('should return the correct tier object for GREEN membership', () => {
+    const result = getTierByClass(MembershipClassType.GREEN);
+    expect(result).toEqual(membershipTiers.tier2);
+  });
+
+  it('should return the correct tier object for GOLD membership', () => {
+    const result = getTierByClass(MembershipClassType.GOLD);
+    expect(result).toEqual(membershipTiers.tier3);
+  });
+
+  it('should return the correct tier object for DOUBLE GOLD membership', () => {
+    const result = getTierByClass(MembershipClassType.DOUBLE_GOLD);
+    expect(result).toEqual(membershipTiers.tier4);
+  });
+
+  it('should return the correct tier object for TRIPLE GOLD membership', () => {
+    const result = getTierByClass(MembershipClassType.TRIPLE_GOLD);
+    expect(result).toEqual(membershipTiers.tier5);
+  });
+
+  it('should return undefined for an invalid membership tier', () => {
+    const unknownClass = 'UNKNOWN' as MembershipClassType;
+    const result = getTierByClass(unknownClass);
+    expect(result).toBeUndefined();
+  });
+});
+
+describe('getTierRank function', () => {
+  it('should return the correct tier rank for CASUAL membership', () => {
+    expect(getTierRank(MembershipClassType.CASUAL)).toBe(0);
+  });
+
+  it('should return the correct tier rank for WHITE membership', () => {
+    expect(getTierRank(MembershipClassType.WHITE)).toBe(1);
+  });
+
+  it('should return the correct tier rank for GREEN membership', () => {
+    expect(getTierRank(MembershipClassType.GREEN)).toBe(2);
+  });
+
+  it('should return the correct tier rank for GOLD membership', () => {
+    expect(getTierRank(MembershipClassType.GOLD)).toBe(3);
+  });
+
+  it('should return the correct tier rank for DOUBLE GOLD membership', () => {
+    expect(getTierRank(MembershipClassType.DOUBLE_GOLD)).toBe(4);
+  });
+
+  it('should return the correct tier rank for TRIPLE GOLD membership', () => {
+    expect(getTierRank(MembershipClassType.TRIPLE_GOLD)).toBe(5);
+  });
+
+  it('should return -1 for an unknown membership class', () => {
+    const result = getTierRank('UNKNOWN' as MembershipClassType);
+    expect(result).toBe(-1);
   });
 });
