@@ -6,7 +6,6 @@ import {
   onPaymentCompletion,
   onPaymentError
 } from "../controllers/paymentController";
-import { verifyToken } from "../middlewares/verifyToken";
 
 const paymentsRouter = Router();
 
