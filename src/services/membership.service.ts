@@ -33,7 +33,7 @@ export const buildMembershipList = async (): Promise<MembershipOption[]> => {
     });
 };
 
-export const getUserMembership= async (authUser: IUser): Promise<IMembership> => {
+export const getUserMembership = async (authUser: IUser): Promise<IMembership> => {
   const membership = await Membership.findOne({ pi_uid: authUser.pi_uid }).lean();
   const user = await User.findOne({ pi_uid:authUser.pi_uid }).lean();
   
@@ -42,7 +42,7 @@ export const getUserMembership= async (authUser: IUser): Promise<IMembership> =>
       user_id: user?._id,
       pi_uid: authUser.pi_uid,
       membership_class: MembershipClassType.CASUAL,
-      membership_expiration:  null,
+      membership_expiry_date:  null,
       mappi_balance: 0,
       mappi_used_to_date: 0,
     }).save()
@@ -77,7 +77,7 @@ export const updateOrRenewMembership = async (piUid: string, membership_class: M
       user_id: user?._id,
       pi_uid: user?.pi_uid,
       membership_class,
-      membership_expiration: membership_duration ? new Date(today.getTime() + durationMs) : null,
+      membership_expiry_date: membership_duration ? new Date(today.getTime() + durationMs) : null,
       mappi_balance: mappi_allowance,
       mappi_used_to_date: 0,
     }).save();
@@ -90,7 +90,7 @@ export const updateOrRenewMembership = async (piUid: string, membership_class: M
   if (!isSameShoppingClassType(existing.membership_class, membership_class)) {
     Object.assign(existing, {
       membership_class,
-      membership_expiration: membership_duration ? new Date(today.getTime() + durationMs) : null,
+      membership_expiry_date: membership_duration ? new Date(today.getTime() + durationMs) : null,
       mappi_balance: mappi_allowance + existing.mappi_balance,
       // mappi_used_to_date: 0,
     });
@@ -106,7 +106,7 @@ export const updateOrRenewMembership = async (piUid: string, membership_class: M
 
   if (newRank === currentRank && expired) {
     Object.assign(existing, {
-      membership_expiration: new Date(today.getTime() + durationMs),
+      membership_expiry_date: new Date(today.getTime() + durationMs),
       mappi_balance: mappi_allowance,
       // mappi_used_to_date: 0,
     });
@@ -116,7 +116,7 @@ export const updateOrRenewMembership = async (piUid: string, membership_class: M
   if (newRank > currentRank || newRank < currentRank) {
     Object.assign(existing, {
       membership_class,
-      membership_expiration: new Date(today.getTime() + durationMs),
+      membership_expiry_date: new Date(today.getTime() + durationMs),
       mappi_balance: mappi_allowance + existing.mappi_balance,
       // mappi_used_to_date: 0,
     });
