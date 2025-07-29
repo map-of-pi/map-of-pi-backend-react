@@ -10,6 +10,7 @@ import { OrderItemStatusType } from "./models/enums/orderItemStatusType";
 import { PaymentType } from "./models/enums/paymentType";
 import { U2UPaymentStatus } from "./models/enums/u2uPaymentStatus";
 import { RestrictedArea } from "./models/enums/restrictedArea";
+import { MembershipClassType } from "./models/enums/membershipClassType";
 
 // ========================
 // USER MODELS
@@ -41,6 +42,18 @@ export interface IUserSettings extends Document {
 		include_trust_level_50: Boolean;
 		include_trust_level_0: Boolean;
 	};
+};
+
+// ========================
+// MEMBERSHIP MODELS
+// ========================
+export interface IMembership extends Document {
+  user_id: Types.ObjectId;
+  pi_uid: string;
+  membership_class: MembershipClassType;
+  mappi_balance: number;
+  membership_expiry_date: Date | null;
+  mappi_used_to_date: number;
 };
 
 // Select specific fields from IUserSettings
@@ -244,6 +257,7 @@ export interface A2UPaymentDataType {
 };
 
 export type PaymentDataType = {
+  user_id: string
   identifier: string;
   amount: string;
   memo: string;
@@ -260,7 +274,7 @@ export type PaymentMetadataType = {
 };
 
 type MembershipPaymentMetadataType = {
-  membership_id: string
+  membership_class: MembershipClassType
 };
 
 export interface IPaymentCrossReference {
