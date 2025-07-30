@@ -17,7 +17,7 @@ const resolveSellerSettings = async (
   sellers: ISeller[],
   trustLevelFilters?: number[]
 ): Promise<ISellerWithSettings[]> => {
-  
+
   if (!sellers.length) return [];
 
   const sellerIds = sellers.map(seller => seller.seller_id);
@@ -41,7 +41,7 @@ const resolveSellerSettings = async (
     if (trustLevelFilters && !trustLevelFilters.includes(trustMeterRating)) {
       return null; // Exclude this seller
     }
-    
+
     try {
       return {
         ...sellerObject,
@@ -53,8 +53,8 @@ const resolveSellerSettings = async (
         search_filters: userSettings?.search_filters ?? null,
       } as ISellerWithSettings;
     } catch (error) {
-      logger.error(`Failed to resolve settings for sellerID ${ seller.seller_id }:`, error);
-      
+      logger.error(`Failed to resolve settings for sellerID ${seller.seller_id}:`, error);
+
       // Return a fallback seller object with minimal information
       return {
         ...sellerObject,
@@ -79,7 +79,7 @@ export const getAllSellers = async (
   try {
     const maxNumSellers = 50;
     let userSettings: any = userId ? await getUserSettingsById(userId) ?? {} : {};
-    
+
     const defaultSearchFilters = {
       include_active_sellers: true,
       include_inactive_sellers: false,
@@ -94,7 +94,7 @@ export const getAllSellers = async (
 
     // Construct base filter criteria
     const baseCriteria: Record<string, any> = {};
-    
+
     // [Seller Type Filter]
     const sellerTypeFilters: SellerType[] = [];
     if (searchFilters.include_active_sellers) sellerTypeFilters.push(SellerType.Active);
@@ -102,7 +102,7 @@ export const getAllSellers = async (
     if (searchFilters.include_test_sellers) sellerTypeFilters.push(SellerType.Test);
 
     // include filtered seller types
-    if (sellerTypeFilters.length > 0) { 
+    if (sellerTypeFilters.length > 0) {
       baseCriteria.seller_type = { $in: sellerTypeFilters };
     }
 
@@ -120,31 +120,31 @@ export const getAllSellers = async (
     // [Search Query Filter]
     const searchCriteria = search_query
       ? {
-          $text: {
-            $search: search_query,
-            $caseSensitive: false,
-          },
-        }
+        $text: {
+          $search: search_query,
+          $caseSensitive: false,
+        },
+      }
       : {}; // default to empty object if search_query not provided
 
     // [Geo Filter]
     const locationCriteria = bounds
       ? {
-          sell_map_center: {
-            $geoWithin: {
-              $geometry: {
-                type: "Polygon",
-                coordinates: [[
-                  [bounds.sw_lng, bounds.sw_lat],
-                  [bounds.ne_lng, bounds.sw_lat],
-                  [bounds.ne_lng, bounds.ne_lat],
-                  [bounds.sw_lng, bounds.ne_lat],
-                  [bounds.sw_lng, bounds.sw_lat],
-                ]],
-              },
+        sell_map_center: {
+          $geoWithin: {
+            $geometry: {
+              type: "Polygon",
+              coordinates: [[
+                [bounds.sw_lng, bounds.sw_lat],
+                [bounds.ne_lng, bounds.sw_lat],
+                [bounds.ne_lng, bounds.ne_lat],
+                [bounds.sw_lng, bounds.ne_lat],
+                [bounds.sw_lng, bounds.sw_lat],
+              ]],
             },
           },
-        }
+        },
+      }
       : {};
 
     // [Final Aggregated Criteria]
@@ -155,15 +155,49 @@ export const getAllSellers = async (
     };
 
     const sellers = await Seller.find(aggregatedCriteria)
+    // .sort({ updatedAt: -1 })
+    // .limit(maxNumSellers)
+    // .exec();
+
+    const sellerIdsByName = sellers.map(s => s.seller_id)
+
+    // find seller by matching item
+    const allowSellers = await Seller.find({ ...baseCriteria, locationCriteria });
+    const allowSellerIds = allowSellers.map(s => s.seller_id)
+    let itemsMatchingQuery: string[] = [];
+
+
+    itemsMatchingQuery = search_query
+      ? await SellerItem.find({
+        // seller_id: { $in: allowSellerIds },
+        stock_level: { $ne: StockLevelType.SOLD },
+        $text: {
+          $search: search_query,
+          $caseSensitive: false,
+        }
+      }).distinct("seller_id")
+      : [];
+
+
+    const combineSellerIds = Array.from(new Set([...sellerIdsByName, ...itemsMatchingQuery]))
+
+    // find seller fetch from combined list
+
+    const finalSellerDocs = await Seller.find({
+      seller_id: { $in: combineSellerIds },
+      ...baseCriteria,
+      ...locationCriteria
+    })
       .sort({ updatedAt: -1 })
       .limit(maxNumSellers)
       .exec();
 
+
     // Fetch and merge the settings for each seller
-    const sellersWithSettings = await resolveSellerSettings(sellers, trustLevelFilters);
+    const sellersWithSettings = await resolveSellerSettings(finalSellerDocs, trustLevelFilters);
     return sellersWithSettings;
   } catch (error: any) {
-    logger.error(`Failed to get all sellers: ${ error }`);
+    logger.error(`Failed to get all sellers: ${error}`);
     throw error;
   }
 };
@@ -189,7 +223,7 @@ export const getSingleSellerById = async (seller_id: string): Promise<ISeller | 
       sellerItems: items as ISellerItem[] || null
     } as any;
   } catch (error: any) {
-    logger.error(`Failed to get single seller for sellerID ${ seller_id }: ${ error }`);
+    logger.error(`Failed to get single seller for sellerID ${seller_id}: ${error}`);
     throw error;
   }
 };
@@ -199,7 +233,7 @@ export const registerOrUpdateSeller = async (authUser: IUser, formData: any): Pr
     const existingSeller = await Seller.findOne({ seller_id: authUser.pi_uid }).exec();
 
     // Parse and validate sell_map_center from formData
-    const sellMapCenter = (formData.sell_map_center && formData.sell_map_center !== 'undefined') 
+    const sellMapCenter = (formData.sell_map_center && formData.sell_map_center !== 'undefined')
       ? JSON.parse(formData.sell_map_center)
       : existingSeller?.sell_map_center || { type: 'Point', coordinates: [0, 0] };
 
@@ -239,7 +273,7 @@ export const registerOrUpdateSeller = async (authUser: IUser, formData: any): Pr
       return savedSeller as ISeller;
     }
   } catch (error: any) {
-    logger.error(`Failed to register or update seller: ${ error }`);
+    logger.error(`Failed to register or update seller: ${error}`);
     throw error;
   }
 };
@@ -250,7 +284,7 @@ export const deleteSeller = async (seller_id: string | undefined): Promise<ISell
     const deletedSeller = await Seller.findOneAndDelete({ seller_id }).exec();
     return deletedSeller ? deletedSeller as ISeller : null;
   } catch (error: any) {
-    logger.error(`Failed to delete seller for sellerID ${ seller_id }: ${ error }`);
+    logger.error(`Failed to delete seller for sellerID ${seller_id}: ${error}`);
     throw error;
   }
 };
@@ -265,12 +299,12 @@ export const getAllSellerItems = async (
 
     if (!existingItems || existingItems.length == 0) {
       logger.warn('Item list is empty.');
-      return null;      
-    } 
+      return null;
+    }
     logger.info('fetched item list successfully');
     return existingItems as ISellerItem[];
   } catch (error: any) {
-    logger.error(`Failed to get seller items for sellerID ${ seller_id }: ${ error }`);
+    logger.error(`Failed to get seller items for sellerID ${seller_id}: ${error}`);
     throw error;
   }
 };
@@ -286,6 +320,8 @@ export const addOrUpdateSellerItem = async (
     const duration = Number(item.duration) || 1;
     const durationInMs = duration * 7 * 24 * 60 * 60 * 1000;
     const expiredBy = new Date(today.getTime() + durationInMs);
+
+    console.log(seller)
 
     // Ensure unique identifier is used for finding existing items
     const query = {
@@ -330,7 +366,7 @@ export const addOrUpdateSellerItem = async (
       return newItem;
     }
   } catch (error: any) {
-    logger.error(`Failed to add or update seller item for sellerID ${ seller.seller_id}: ${ error }`);
+    logger.error(`Failed to add or update seller item for sellerID ${seller.seller_id}: ${error}`);
     throw error;
   }
 };
@@ -341,7 +377,7 @@ export const deleteSellerItem = async (id: string): Promise<ISellerItem | null> 
     const deletedSellerItem = await SellerItem.findByIdAndDelete(id).exec();
     return deletedSellerItem ? deletedSellerItem as ISellerItem : null;
   } catch (error: any) {
-    logger.error(`Failed to delete seller item for itemID ${ id }: ${ error}`);
+    logger.error(`Failed to delete seller item for itemID ${id}: ${error}`);
     throw error;
   }
 };
@@ -358,7 +394,7 @@ export const getSellersWithinSanctionedRegion = async (region: ISanctionedRegion
     logger.info(`Found ${sellers.length} seller(s) within the sanctioned region: ${region.location}`);
     return sellers;
   } catch (error: any) {
-    logger.error(`Failed to get sellers within sanctioned region ${ region }: ${ error }`);
-    throw error;  
+    logger.error(`Failed to get sellers within sanctioned region ${region}: ${error}`);
+    throw error;
   }
 };
