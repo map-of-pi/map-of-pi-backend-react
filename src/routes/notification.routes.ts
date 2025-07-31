@@ -62,7 +62,7 @@ const notificationRoutes = Router();
  *       500:
  *         description: Internal server error
  */
-notificationRoutes.get("/:pi_uid", notificationController.getNotifications);
+notificationRoutes.get("/", verifyToken, notificationController.getNotifications);
 
 /**
  * @swagger
