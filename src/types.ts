@@ -316,7 +316,7 @@ export interface ISanctionedGeoBoundary extends Document {
     shapeGroup: string;
     shapeType: string;
   };
-}
+};
 
 export type SanctionedSeller = Pick<ISeller, 'seller_id' | 'name' | 'address' | 'sell_map_center'> & {
   sanctioned_location: string,
