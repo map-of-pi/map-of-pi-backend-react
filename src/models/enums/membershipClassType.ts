@@ -1,5 +1,5 @@
 export enum MembershipClassType {
-  WHITE = "white",
+  WHITE = "White",
   CASUAL = "Casual",
   MEMBER = "Member",
   GREEN = "Green",

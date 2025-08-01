@@ -27,11 +27,7 @@ const paymentRoutes = express.Router();
  *       500:
  *         description: Server error
  */
-paymentRoutes.post(
-  "/initiate",
-  verifyToken,
-  paymentController.initiatePayment
-);
+paymentRoutes.post("/initiate", verifyToken, paymentController.onPaymentInitiation);
 
 /**
  * @swagger
@@ -41,11 +37,7 @@ paymentRoutes.post(
  *       - Payments
  *     summary: Approve a pending payment
  */
-paymentRoutes.post(
-  "/approve",
-  verifyToken,
-  paymentController.approvePayment
-);
+paymentRoutes.post("/approve", verifyToken, paymentController.onPaymentApproval);
 
 /**
  * @swagger
@@ -55,11 +47,7 @@ paymentRoutes.post(
  *       - Payments
  *     summary: Complete an approved payment
  */
-paymentRoutes.post(
-  "/complete",
-  verifyToken,
-  paymentController.completePayment
-);
+paymentRoutes.post("/complete", verifyToken, paymentController.onPaymentCompletion);
 
 /**
  * @swagger
@@ -69,10 +57,6 @@ paymentRoutes.post(
  *       - Payments
  *     summary: Cancel a pending payment
  */
-paymentRoutes.post(
-  "/cancel",
-  verifyToken,
-  paymentController.cancelPayment
-);
+paymentRoutes.post("/cancel", verifyToken, paymentController.onPaymentCancellation);
 
 export default paymentRoutes;

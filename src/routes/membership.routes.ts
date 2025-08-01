@@ -1,6 +1,6 @@
 import express from "express";
 import { verifyToken } from "../middlewares/verifyToken";
-import * as membershipController from "../controllers/membershipController";
+import * as membershipController from "../controllers/membershipController"
 
 const membershipRoutes = express.Router();
 
@@ -20,7 +20,7 @@ const membershipRoutes = express.Router();
  *         description: The Pi UID of the membership to retrieve
  *     responses:
  *       200:
- *         description: Successful response
+ *         description: Membership retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -32,7 +32,10 @@ const membershipRoutes = express.Router();
  *       500:
  *         description: Internal server error
  */
-membershipRoutes.get("/:membership_id", membershipController.getSingleMembership);
+membershipRoutes.get(
+  "/:membership_id",
+  membershipController.getSingleMembership
+);
 
 /**
  * @swagger
@@ -40,7 +43,8 @@ membershipRoutes.get("/:membership_id", membershipController.getSingleMembership
  *   put:
  *     tags:
  *       - Membership
- *     summary: Register a new membership or update existing membership *
+ *     summary: Register or update membership (non-payment flow) Legacy
+ *     description: Legacy endpoint — production upgrades must go through Pi payment flow (U2A).
  *     requestBody:
  *       required: true
  *       content:
@@ -49,7 +53,7 @@ membershipRoutes.get("/:membership_id", membershipController.getSingleMembership
  *             $ref: '/api/docs/MembershipsSchema.yml#/components/schemas/ManageMembershipRq'
  *     responses:
  *       200:
- *         description: Successful response
+ *         description: Membership registered or updated
  *         content:
  *           application/json:
  *             schema:
@@ -64,7 +68,7 @@ membershipRoutes.get("/:membership_id", membershipController.getSingleMembership
 membershipRoutes.put(
   "/manage",
   verifyToken,
-  membershipController.manageMembership
+  membershipController.updateOrRenewMembership 
 );
 
 export default membershipRoutes;

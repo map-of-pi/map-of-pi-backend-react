@@ -37,10 +37,10 @@ export const reportSanctionedSellers = async (): Promise<SanctionedSeller[]> => 
     } else {
       logger.info('No sellers found in any sanctioned regions');
     }
-  } catch (error) {
+  } catch (error: any) {
     // Capture any errors and send to Sentry
-    logger.error('An error occurred while generating the Sanctioned Sellers Report:', error);
-    throw new Error('Failed to generate Sanctioned Sellers Report; please try again later.');
+    logger.error(`An error occurred while generating the Sanctioned Sellers Report: ${ error }`);
+    throw error;
   }
   return sanctionedSellers;
 };
@@ -55,9 +55,9 @@ export const getAllSanctionedRegions = async (): Promise<ISanctionedRegion[]> =>
     }
     logger.info(`Fetched ${regions.length} sanctioned regions`);
     return regions;
-  } catch (error) {
-    logger.error('Failed to fetch sanctioned regions:', error);
-    throw new Error('Failed to get sanctioned regions; please try again later');
+  } catch (error: any) {
+    logger.error(`Failed to fetch sanctioned regions: ${ error }`);
+    throw error;
   }
 };
 

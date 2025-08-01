@@ -1,48 +1,67 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, SchemaTypes, Types } from "mongoose";
+
 import { IPayment } from "../types";
-import { paymentType } from "./enums/paymentType";
+import { PaymentType } from "./enums/paymentType";
 
 const paymentSchema = new Schema<IPayment>(
   {
-    user: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
+    user_id: {
+      type: SchemaTypes.ObjectId,
       required: true,
     },
     pi_payment_id: {
       type: String,
-      required: true,
       unique: true,
+      sparse: true
+     // In U2A (User-to-App) payments, we create the payment intent first before interacting with the Pi SDK.
+     // The pi_payment_id is returned by the SDK after the user approves the payment,
+     // so we initially leave it blank and update it later once we receive the ID.
     },
     txid: {
       type: String,
-      default: null,
+      required: false
     },
     amount: {
-      type: Number,
+      type: Types.Decimal128,
       required: true,
+      default: 0.00
     },
     paid: {
       type: Boolean,
-      required: true,
       default: false,
+      required: true
     },
     cancelled: {
       type: Boolean,
       default: false,
+      required: true
     },
     memo: {
       type: String,
-      default: "",
+      required: false,
+      default: ""
     },
     payment_type: {
       type: String,
-      enum: Object.values(paymentType),
+      enum: Object.values(PaymentType).filter(value => typeof value === 'string'),
       required: true,
+      default: PaymentType.BuyerCheckout,
     },
-  },
-  { timestamps: true }
+     metadata: {
+      type: Schema.Types.Mixed,
+      required: false,
+      default: {},
+    },
+  }, { timestamps: true } // Adds timestamps to track creation and update times
 );
 
+// Creating a partial index to enforce uniqueness if txid is a string 
+paymentSchema.index({ txid: 1 }, {
+  unique: true,
+  partialFilterExpression: { txid: { $type: "string" } }
+});
+
+// Creating the Payment model from the schema
 const Payment = mongoose.model<IPayment>("Payment", paymentSchema);
+
 export default Payment;

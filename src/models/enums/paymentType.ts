@@ -1,4 +1,4 @@
-export enum paymentType {
-    MEMBERSHIP_UPGRADE = "Membership Upgrade",
-    BUYER_CHECKOUT = "Buyer Checkout",
+export enum PaymentType {
+  Membership = 'Membership', 
+  BuyerCheckout = 'Buyer Checkout'
 }

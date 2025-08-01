@@ -11,8 +11,8 @@ const sanctionedRegionSchema = new Schema<ISanctionedRegion>(
       required: true,
     },
     boundary: {
-      type: { type: String, enum: ["Polygon"], required: true },
-      coordinates: { type: [[[Number]]], required: true },
+      type: { type: String, enum: ["Polygon", "MultiPolygon"], required: true },
+      coordinates: { type: Array, required: true },
     }
   }
 );

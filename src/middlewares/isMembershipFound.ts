@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 
-import Membership from "../models/Membership";
+import Membership from "../models/membership";
 import { IMembership } from "../types";
 
 import logger from '../config/loggingConfig';
@@ -20,7 +20,7 @@ export const isMembershipFound = async (
 
   try {
     logger.info(`Checking if membership exists for user ID: ${membership_id}`);
-    const currentMembership: IMembership | null = await Membership.findOne({membership_id: membership_id});
+    const currentMembership: IMembership | null = await Membership.findOne({pi_uid: membership_id});
 
     if (currentMembership) {
       req.currentMembership = currentMembership;

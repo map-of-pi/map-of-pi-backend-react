@@ -13,16 +13,18 @@ import userRoutes from "../routes/user.routes";
 import userPreferencesRoutes from "../routes/userPreferences.routes";
 import membershipRoutes from "../routes/membership.routes";
 import sellerRoutes from "../routes/seller.routes";
+import orderRoutes from "../routes/order.routes";
+import paymentsRouter from "../routes/payment.routes";
 import reviewFeedbackRoutes from "../routes/reviewFeedback.routes";
 import mapCenterRoutes from "../routes/mapCenter.routes";
 import transactionRoutes from "../routes/transactionRecord.routes";
 import reportRoutes from "../routes/report.routes";
-import toggleRoutes from "../routes/toggle.routes";
+import notificationRoutes from "../routes/notification.routes";
 
 import paymentRoutes from "../routes/payment.routes";
 
 import restrictionRoutes from "../routes/restriction.routes";
-
+import toggleRoutes from "../routes/toggle.routes";
 
 dotenv.config();
 
@@ -47,18 +49,17 @@ app.use("/api/docs", docRouter);
 app.use("/api/v1", appRouter);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/user-preferences", userPreferencesRoutes);
+app.use("/api/v1/memberships", membershipRoutes);
 app.use("/api/v1/sellers", sellerRoutes);
+app.use("/api/v1/orders", orderRoutes);
+app.use('/api/v1/payments', paymentsRouter);
 app.use("/api/v1/review-feedback", reviewFeedbackRoutes);
 app.use("/api/v1/map-center", mapCenterRoutes);
 app.use("/api/v1/memberships", membershipRoutes);
 app.use("/api/v1/transactions", transactionRoutes);
 app.use("/api/v1/reports", reportRoutes);
 app.use("/api/v1/toggles", toggleRoutes);
-
-app.use("/api/v1/payments", paymentRoutes);
-
 app.use("/api/v1/restrictions", restrictionRoutes);
-
 
 app.use("/", homeRoutes);
 
