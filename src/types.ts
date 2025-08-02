@@ -8,7 +8,7 @@ import { StockLevelType } from "./models/enums/stockLevelType";
 import { TrustMeterScale } from "./models/enums/trustMeterScale";
 import { OrderStatusType } from "./models/enums/orderStatusType";
 import { OrderItemStatusType } from "./models/enums/orderItemStatusType";
-import { paymentType } from "./models/enums/paymentType";
+import { PaymentType } from "./models/enums/paymentType";
 import { U2UPaymentStatus } from "./models/enums/u2uPaymentStatus";
 import { TransactionType } from "./models/enums/transactionType";
 import { RestrictedArea } from "./models/enums/restrictedArea";
@@ -240,9 +240,9 @@ export interface NewPayment {
   userId: string,
   memo:  string,
   amount: string,
-  paymentType: paymentType
+  paymentType: PaymentType
   metadata?: {
-    payment_type: paymentType;
+    payment_type: PaymentType;
     OrderPayment?: OrderPaymentMetadataType;
     MembershipPayment?: MembershipPaymentMetadataType;
   };
@@ -258,7 +258,7 @@ export interface A2UPaymentDataType {
   sellerId: string,
   amount: string,
   buyerId: string,
-  paymentType: paymentType,
+  paymentType: PaymentType,
   orderId: string,
   memo: string
 };
@@ -268,7 +268,7 @@ export type PaymentDataType = {
   amount: string;
   memo: string;
   metadata: {
-    payment_type: paymentType,
+    payment_type: PaymentType,
     OrderPayment?: OrderPaymentMetadataType,
     MembershipPayment?: MembershipPaymentMetadataType
   }
