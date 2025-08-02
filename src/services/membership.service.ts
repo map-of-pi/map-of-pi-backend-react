@@ -7,7 +7,8 @@ import {
   isExpired,
   isSameCategory,
   getTierByClass,
-  getTierRank
+  getTierRank,
+  isSingleClass
 } from "../helpers/membership";
 
 export interface MembershipOption {
@@ -76,7 +77,7 @@ export const updateOrRenewMembership = async (piUid: string, membership_class: M
     return await new Membership({
       user_id: user?._id,
       pi_uid: user?.pi_uid,
-      membership_class,
+      membership_class: isSingleClass(membership_class) ? MembershipClassType.CASUAL : membership_class,
       membership_expiration: membership_duration ? new Date(today.getTime() + durationMs) : null,
       mappi_balance: mappi_allowance,
       mappi_used_to_date: 0,
@@ -89,10 +90,9 @@ export const updateOrRenewMembership = async (piUid: string, membership_class: M
 
   if (!isSameCategory(existing.membership_class, membership_class)) {
     Object.assign(existing, {
-      membership_class,
+      membership_class: isSingleClass(membership_class) ? existing.membership_class : membership_class,
       membership_expiration: membership_duration ? new Date(today.getTime() + durationMs) : null,
       mappi_balance: mappi_allowance + existing.mappi_balance,
-      // mappi_used_to_date: 0,
     });
     return await existing.save();
   }
@@ -100,7 +100,6 @@ export const updateOrRenewMembership = async (piUid: string, membership_class: M
   if (newRank === currentRank && !expired) {
     existing.membership_expiration = new Date((existing.membership_expiration?.getTime() ?? today.getTime()) + durationMs);
     existing.mappi_balance = mappi_allowance + existing.mappi_balance;
-    // existing.mappi_used_to_date = 0;
     return await existing.save();
   }
 
@@ -108,17 +107,15 @@ export const updateOrRenewMembership = async (piUid: string, membership_class: M
     Object.assign(existing, {
       membership_expiration: new Date(today.getTime() + durationMs),
       mappi_balance: mappi_allowance,
-      // mappi_used_to_date: 0,
     });
     return await existing.save();
   }
 
   if (newRank > currentRank || newRank < currentRank) {
     Object.assign(existing, {
-      membership_class,
+      membership_class: isSingleClass(membership_class) ? existing.membership_class : membership_class,
       membership_expiration: new Date(today.getTime() + durationMs),
       mappi_balance: mappi_allowance + existing.mappi_balance,
-      // mappi_used_to_date: 0,
     });
     return await existing.save();
   }

@@ -51,3 +51,6 @@ export const getTierByClass = (tierClass: MembershipClassType) => {
 export const getTierRank = (tierClass: MembershipClassType): number => {
   return getTierByClass(tierClass)?.RANK ?? -1;
 };
+
+export const isSingleClass = (tier: MembershipClassType): boolean =>
+  tier === MembershipClassType.SINGLE; 
