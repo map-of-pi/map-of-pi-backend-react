@@ -1,6 +1,7 @@
 import { Document, Types } from "mongoose";
 import { DeviceLocationType } from "./models/enums/deviceLocationType";
 import { RatingScale } from "./models/enums/ratingScale";
+import { MembershipClassType } from "./models/enums/membershipClassType";
 import { SellerType } from "./models/enums/sellerType";
 import { FulfillmentType } from "./models/enums/fulfillmentType";
 import { StockLevelType } from "./models/enums/stockLevelType";
@@ -9,12 +10,15 @@ import { OrderStatusType } from "./models/enums/orderStatusType";
 import { OrderItemStatusType } from "./models/enums/orderItemStatusType";
 import { PaymentType } from "./models/enums/paymentType";
 import { U2UPaymentStatus } from "./models/enums/u2uPaymentStatus";
+import { TransactionType } from "./models/enums/transactionType";
 import { RestrictedArea } from "./models/enums/restrictedArea";
+
 
 // ========================
 // USER MODELS
 // ========================
 export interface IUser extends Document {
+  _id: Types.ObjectId;
 	pi_uid: string;
 	pi_username: string;
 	user_name: string;
@@ -41,7 +45,7 @@ export interface IUserSettings extends Document {
 		include_trust_level_50: Boolean;
 		include_trust_level_0: Boolean;
 	};
-};
+}
 
 // Select specific fields from IUserSettings
 export type PartialUserSettings = Pick<IUserSettings, 'user_name' | 'email' | 'phone_number' | 'findme' | 'trust_meter_rating'>;
@@ -91,7 +95,17 @@ export interface ISellerItem extends Document {
 	expired_by: Date;
 	createdAt: Date;
 	updatedAt: Date;
-};
+}
+
+export interface ITransactionRecord extends Document {
+  transaction_id: string;
+  transaction_records: {
+    transaction_type: TransactionType;
+    date: Date; 
+    reason: string;
+    amount: number;
+  }[];
+}
 
 // ========================
 // REVIEW / FEEDBACK MODELS
@@ -188,6 +202,7 @@ export interface IPayment extends Document {
   payment_type: PaymentType;
   cancelled: boolean;
   createdAt: Date;
+  metadata: MembershipPaymentMetadataType;
 };
 
 export interface PaymentInfo {
@@ -226,6 +241,11 @@ export interface NewPayment {
   memo:  string,
   amount: string,
   paymentType: PaymentType
+  metadata?: {
+    payment_type: PaymentType;
+    OrderPayment?: OrderPaymentMetadataType;
+    MembershipPayment?: MembershipPaymentMetadataType;
+  };
 };
 
 export interface U2URefDataType {
@@ -259,8 +279,12 @@ export type PaymentMetadataType = {
   MembershipPayment: MembershipPaymentMetadataType
 };
 
-type MembershipPaymentMetadataType = {
-  membership_id: string
+export type MembershipPaymentMetadataType = {
+  pi_uid: string;
+  membership_class: MembershipClassType;
+  membership_duration: number;
+  mappi_allowance: number;
+  membership_id?: string;  
 };
 
 export interface IPaymentCrossReference {
@@ -320,3 +344,16 @@ export interface IToggle extends Document {
 	createdAt: Date;
 	updatedAt: Date;
 };
+
+// ========================
+// Memberships
+// ========================
+export interface IMembership extends Document {
+  user_id: Types.ObjectId;
+  pi_uid: string;
+  membership_class: MembershipClassType;
+  mappi_balance: number;
+  membership_expiration: Date | null;
+  mappi_used_to_date: number;
+}
+

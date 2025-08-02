@@ -7,10 +7,16 @@ import { IUser } from "../types";
 import logger from '../config/loggingConfig';
 
 export const authenticateUser = async (req: Request, res: Response) => {
+
   const auth = req.body;
+  if (!auth?.user) {
+    logger.error('Missing user in auth request body');
+    return res.status(400).json({ message: 'Invalid request' });
+  }
 
   try {
     const user = await userService.authenticate(auth.user);
+
     const token = jwtHelper.generateUserToken(user);
     const expiresDate = new Date(Date.now() + 1 * 24 * 60 * 60 * 1000); // 1 day
 
