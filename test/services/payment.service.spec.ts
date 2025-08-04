@@ -2,6 +2,7 @@ import pi from "../../src/config/platformAPIclient";
 import Payment from "../../src/models/Payment";
 import PaymentCrossReference from "../../src/models/PaymentCrossReference";
 import Seller from "../../src/models/Seller";
+import User from "../../src/models/User";
 import { PaymentType } from "../../src/models/enums/paymentType";
 import { U2UPaymentStatus } from "../../src/models/enums/u2uPaymentStatus";
 import { 
@@ -32,8 +33,11 @@ jest.mock('../../src/config/platformAPIclient', () => ({
 jest.mock('../../src/models/Payment');
 jest.mock('../../src/models/PaymentCrossReference');
 jest.mock('../../src/models/Seller');
+jest.mock('../../src/models/User');
 
 describe('createPayment function', () => {
+  const mockUser = { _id: 'mock_user_id' };
+
   const mockPaymentData: NewPayment = {
     piPaymentId: 'payment1_TEST',
     userId: 'userId1_TEST',
@@ -50,15 +54,20 @@ describe('createPayment function', () => {
       cancelled: false,
     };
 
+    (User.findOne as jest.Mock).mockReturnValue({
+      exec: jest.fn().mockResolvedValue(mockUser)
+    });
+
     // Mock Payment.save()
     const mockSave = jest.fn().mockResolvedValue(mockSavedPayment);
     (Payment as unknown as jest.Mock).mockImplementation(() => ({ save: mockSave }));
 
     const result = await createPayment(mockPaymentData);
 
+    expect(User.findOne).toHaveBeenCalledWith({ pi_uid: mockPaymentData.userId });
     expect(Payment).toHaveBeenCalledWith({
       pi_payment_id: mockPaymentData.piPaymentId,
-      user_id: mockPaymentData.userId,
+      user_id: mockUser._id,
       amount: mockPaymentData.amount,
       paid: false,
       memo: mockPaymentData.memo,
@@ -70,6 +79,10 @@ describe('createPayment function', () => {
 
   it('should throw an error if creating payment fails', async () => {
     const mockError = new Error('Mock database error');
+
+    (User.findOne as jest.Mock).mockReturnValue({
+      exec: jest.fn().mockResolvedValue(mockUser)
+    });
 
     (Payment as any).mockImplementation(() => ({
       save: jest.fn().mockRejectedValue(mockError),
@@ -232,6 +245,7 @@ describe('updatePaymentCrossReference function', () => {
 });
 
 describe('createA2UPayment function', () => {
+  const mockUser = { _id: 'mock_user_id' };
   const mockSeller = { seller_id: 'seller1_TEST' };
   const mockOrderId = 'order1_TEST';
   const mockPiPaymentId = 'piPaymentId1_TEST';
@@ -293,8 +307,13 @@ describe('createA2UPayment function', () => {
     // Mock Seller.findById()
     (Seller.findById as jest.Mock).mockReturnValue({
       select: jest.fn().mockReturnValue({
-        exec: jest.fn().mockResolvedValue(mockSeller),
+        exec: jest.fn().mockResolvedValue(mockSeller)
       }),
+    });
+
+    // Mock User.findOne()
+    (User.findOne as jest.Mock).mockReturnValue({
+      exec: jest.fn().mockResolvedValue(mockUser)
     });
 
     // Mock Payment.save()
@@ -327,6 +346,7 @@ describe('createA2UPayment function', () => {
       },
       uid: mockSeller.seller_id,
     });
+    expect(User.findOne).toHaveBeenCalledWith({ pi_uid: mockA2UPaymentData.buyerId });
     expect(mockPaymentSave).toHaveBeenCalled();
     expect(pi.submitPayment).toHaveBeenCalledWith(mockPiPaymentId);
     expect(Payment.findOneAndUpdate).toHaveBeenCalled();
@@ -356,6 +376,7 @@ describe('createA2UPayment function', () => {
 
     expect(Seller.findById).toHaveBeenCalledWith(mockA2UPaymentData.sellerId);
     expect(pi.createPayment).not.toHaveBeenCalled();
+    expect(User.findOne).not.toHaveBeenCalled();
     expect(mockPaymentSave).not.toHaveBeenCalled();
     expect(pi.submitPayment).not.toHaveBeenCalled();
     expect(Payment.findOneAndUpdate).not.toHaveBeenCalled();
@@ -395,6 +416,7 @@ describe('createA2UPayment function', () => {
       },
       uid: mockSeller.seller_id,
     });
+    expect(User.findOne).not.toHaveBeenCalled();
     expect(mockPaymentSave).not.toHaveBeenCalled();
     expect(pi.submitPayment).not.toHaveBeenCalled();
     expect(Payment.findOneAndUpdate).not.toHaveBeenCalled();
@@ -409,6 +431,10 @@ describe('createA2UPayment function', () => {
       select: jest.fn().mockReturnValue({
         exec: jest.fn().mockResolvedValue(mockSeller),
       }),
+    });
+
+    (User.findOne as jest.Mock).mockReturnValue({
+      exec: jest.fn().mockResolvedValue(mockUser)
     });
 
     const mockPaymentSave = jest.fn().mockResolvedValue(null);
@@ -428,6 +454,7 @@ describe('createA2UPayment function', () => {
       },
       uid: mockSeller.seller_id,
     });
+    expect(User.findOne).toHaveBeenCalledWith({ pi_uid: mockA2UPaymentData.buyerId });
     expect(mockPaymentSave).toHaveBeenCalled();
     expect(pi.submitPayment).not.toHaveBeenCalled();
     expect(Payment.findOneAndUpdate).not.toHaveBeenCalled();
@@ -446,6 +473,10 @@ describe('createA2UPayment function', () => {
 
     (pi.submitPayment as jest.Mock).mockRejectedValue(new Error('Mock Pi SDK error'));
 
+    (User.findOne as jest.Mock).mockReturnValue({
+      exec: jest.fn().mockResolvedValue(mockUser)
+    });
+    
     const mockPaymentSave = jest.fn().mockResolvedValue(mockUpdatedPayment);
     (Payment as unknown as jest.Mock).mockImplementation(() => ({ save: mockPaymentSave }));
 
@@ -463,6 +494,7 @@ describe('createA2UPayment function', () => {
       },
       uid: mockSeller.seller_id,
     });
+    expect(User.findOne).toHaveBeenCalledWith({ pi_uid: mockA2UPaymentData.buyerId });
     expect(mockPaymentSave).toHaveBeenCalled();
     expect(pi.submitPayment).toHaveBeenCalledWith(mockPiPaymentId);
     expect(Payment.findOneAndUpdate).not.toHaveBeenCalled();
@@ -477,6 +509,10 @@ describe('createA2UPayment function', () => {
       select: jest.fn().mockReturnValue({
         exec: jest.fn().mockResolvedValue(mockSeller),
       }),
+    });
+
+    (User.findOne as jest.Mock).mockReturnValue({
+      exec: jest.fn().mockResolvedValue(mockUser)
     });
 
     const mockPaymentSave = jest.fn().mockResolvedValue(mockUpdatedPayment);
@@ -500,6 +536,7 @@ describe('createA2UPayment function', () => {
       },
       uid: mockSeller.seller_id,
     });
+    expect(User.findOne).toHaveBeenCalledWith({ pi_uid: mockA2UPaymentData.buyerId });
     expect(mockPaymentSave).toHaveBeenCalled();
     expect(pi.submitPayment).toHaveBeenCalledWith(mockPiPaymentId);
     expect(Payment.findOneAndUpdate).toHaveBeenCalled();
@@ -514,6 +551,10 @@ describe('createA2UPayment function', () => {
       select: jest.fn().mockReturnValue({
         exec: jest.fn().mockResolvedValue(mockSeller),
       }),
+    });
+
+    (User.findOne as jest.Mock).mockReturnValue({
+      exec: jest.fn().mockResolvedValue(mockUser)
     });
 
     const mockPaymentSave = jest.fn().mockResolvedValue(mockUpdatedPayment);
@@ -543,6 +584,7 @@ describe('createA2UPayment function', () => {
       },
       uid: mockSeller.seller_id,
     });
+    expect(User.findOne).toHaveBeenCalledWith({ pi_uid: mockA2UPaymentData.buyerId });
     expect(mockPaymentSave).toHaveBeenCalled();
     expect(pi.submitPayment).toHaveBeenCalledWith(mockPiPaymentId);
     expect(Payment.findOneAndUpdate).toHaveBeenCalled();
@@ -557,6 +599,10 @@ describe('createA2UPayment function', () => {
       select: jest.fn().mockReturnValue({
         exec: jest.fn().mockResolvedValue(mockSeller),
       }),
+    });
+
+    (User.findOne as jest.Mock).mockReturnValue({
+      exec: jest.fn().mockResolvedValue(mockUser)
     });
 
     (pi.completePayment as jest.Mock).mockRejectedValue(new Error('Mock Pi SDK error'));
@@ -588,6 +634,7 @@ describe('createA2UPayment function', () => {
       },
       uid: mockSeller.seller_id,
     });
+    expect(User.findOne).toHaveBeenCalledWith({ pi_uid: mockA2UPaymentData.buyerId });
     expect(mockPaymentSave).toHaveBeenCalled();
     expect(pi.submitPayment).toHaveBeenCalledWith(mockPiPaymentId);
     expect(Payment.findOneAndUpdate).toHaveBeenCalled();

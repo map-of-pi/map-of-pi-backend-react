@@ -1,15 +1,15 @@
-import { IMembership, PaymentDataType, IUser } from "../types";
-import Membership from "../models/Membership"
-import { MembershipClassType, membershipTiers } from "../models/enums/membershipClassType";
-import logger from "../config/loggingConfig";
-import User from "../models/User";
 import {
   isExpired,
-  isSameCategory,
+  isSameShoppingClassType,
   getTierByClass,
   getTierRank,
   isSingleClass
 } from "../helpers/membership";
+import Membership from "../models/Membership";
+import User from "../models/User";
+import { MembershipClassType, membershipTiers } from "../models/enums/membershipClassType";
+import { IMembership, IUser } from "../types";
+import logger from "../config/loggingConfig";
 
 export interface MembershipOption {
   value: MembershipClassType;
@@ -34,7 +34,7 @@ export const buildMembershipList = async (): Promise<MembershipOption[]> => {
     });
 };
 
-export const getUserMembership= async (authUser: IUser): Promise<IMembership> => {
+export const getUserMembership = async (authUser: IUser): Promise<IMembership> => {
   const membership = await Membership.findOne({ pi_uid: authUser.pi_uid }).lean();
   const user = await User.findOne({ pi_uid:authUser.pi_uid }).lean();
   
@@ -43,7 +43,7 @@ export const getUserMembership= async (authUser: IUser): Promise<IMembership> =>
       user_id: user?._id,
       pi_uid: authUser.pi_uid,
       membership_class: MembershipClassType.CASUAL,
-      membership_expiration:  null,
+      membership_expiry_date:  null,
       mappi_balance: 0,
       mappi_used_to_date: 0,
     }).save()
@@ -86,9 +86,9 @@ export const updateOrRenewMembership = async (piUid: string, membership_class: M
 
   const currentRank = getTierRank(existing.membership_class);
   const newRank = tier.RANK;
-  const expired = isExpired(existing.membership_expiration ?? undefined);
+  const expired = isExpired(existing.membership_expiry_date ?? undefined);
 
-  if (!isSameCategory(existing.membership_class, membership_class)) {
+  if (!isSameShoppingClassType(existing.membership_class, membership_class)) {
     Object.assign(existing, {
       membership_class: isSingleClass(membership_class) ? existing.membership_class : membership_class,
       membership_expiration: membership_duration ? new Date(today.getTime() + durationMs) : null,
@@ -98,14 +98,14 @@ export const updateOrRenewMembership = async (piUid: string, membership_class: M
   }
 
   if (newRank === currentRank && !expired) {
-    existing.membership_expiration = new Date((existing.membership_expiration?.getTime() ?? today.getTime()) + durationMs);
+    existing.membership_expiry_date = new Date((existing.membership_expiry_date?.getTime() ?? today.getTime()) + durationMs);
     existing.mappi_balance = mappi_allowance + existing.mappi_balance;
     return await existing.save();
   }
 
   if (newRank === currentRank && expired) {
     Object.assign(existing, {
-      membership_expiration: new Date(today.getTime() + durationMs),
+      membership_expiry_date: new Date(today.getTime() + durationMs),
       mappi_balance: mappi_allowance,
     });
     return await existing.save();

@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { platformAPIClient } from '../config/platformAPIclient';
+import logger from '../config/loggingConfig';
 import Seller from '../models/Seller';
 import User from '../models/User';
+import { MembershipClassType } from "../models/enums/membershipClassType";
 import { OrderStatusType } from '../models/enums/orderStatusType';
 import { PaymentType } from "../models/enums/paymentType";
 import { U2UPaymentStatus } from '../models/enums/u2uPaymentStatus';
@@ -18,11 +20,8 @@ import {
   createA2UPayment,
   cancelPayment
 } from '../services/payment.service';
-import { IUser, NewOrder, PaymentDataType, PaymentDTO, PaymentInfo } from '../types';
-import logger from '../config/loggingConfig';
 import { updateOrRenewMembership } from "../services/membership.service";
-import { MembershipClassType } from "../models/enums/membershipClassType"
-import { json } from 'body-parser';
+import { NewOrder, PaymentDataType, PaymentDTO, PaymentInfo } from '../types';
 
 function buildPaymentData(
   piPaymentId: string,
@@ -30,7 +29,7 @@ function buildPaymentData(
 ) {
   return {
     piPaymentId,
-    userId: payment.user_uid,
+    userId: payment.user_id,
     memo: payment.memo,
     amount: payment.amount,
     paymentType: payment.metadata.payment_type
@@ -72,10 +71,10 @@ const checkoutProcess = async (
 
   // Look up the seller and buyer in the database
   const seller = await Seller.findOne({ seller_id: OrderPayment.seller });
-  const buyer = await User.findOne({ pi_uid: currentPayment.user_uid });
+  const buyer = await User.findOne({ pi_uid: currentPayment.user_id });
 
   if (!buyer || !seller) {
-    logger.error("Seller or buyer not found", { sellerId: OrderPayment.seller, buyerId: currentPayment.user_uid });
+    logger.error("Seller or buyer not found", { sellerId: OrderPayment.seller, buyerId: currentPayment.user_id });
     throw new Error("Seller or buyer not found");
   }
 
@@ -97,13 +96,13 @@ const checkoutProcess = async (
 
   // Construct order data object
   const orderData = buildOrderData(
-    currentPayment.user_uid as string,
+    currentPayment.user_id as string,
     OrderPayment.seller as string,
     newPayment._id as string,
     currentPayment
   )
   // Create a new order along with its items
-  const newOrder = await createOrder(orderData as NewOrder, OrderPayment.items, currentPayment.user_uid);
+  const newOrder = await createOrder(orderData as NewOrder, OrderPayment.items, currentPayment.user_id);
 
   logger.info('order created successfully', { orderId: newOrder._id });
   return newOrder;
@@ -147,7 +146,7 @@ export const processIncompletePayment = async (payment: PaymentInfo) => {
 
       const currentPayment: PaymentDataType = res.data;
       const membership_class = currentPayment.metadata.MembershipPayment?.membership_class as MembershipClassType
-      await updateOrRenewMembership(currentPayment.user_uid, membership_class);
+      await updateOrRenewMembership(currentPayment.user_id, membership_class);
     }
 
     // Notify the Pi Platform that the payment is complete
@@ -271,7 +270,7 @@ export const processPaymentCompletion = async (paymentId: string, txid: string) 
     } else if (completedPayment?.payment_type === PaymentType.Membership) {
 
       const membership_class = currentPayment.metadata.MembershipPayment?.membership_class as MembershipClassType
-      const membership = await updateOrRenewMembership(currentPayment.user_uid, membership_class);
+      const membership = await updateOrRenewMembership(currentPayment.user_id, membership_class);
 
       // Notify Pi platform for membership payment completion
       await platformAPIClient.post(`/v2/payments/${ paymentId }/complete`, { txid });

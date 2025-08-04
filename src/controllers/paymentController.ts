@@ -7,7 +7,6 @@ import {
   processPaymentCompletion,
   processPaymentError
 } from "../helpers/payment";
-import { IUser } from "../types";
 
 export const onIncompletePaymentFound = async (req: Request, res: Response) => {
  const { payment } = req.body;

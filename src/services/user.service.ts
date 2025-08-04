@@ -1,12 +1,14 @@
 import User from "../models/User";
-import Seller from "../models/Seller";
 import UserSettings from "../models/UserSettings";
-import { IMembership, ISeller, IUser, IUserSettings } from "../types";
+import Seller from "../models/Seller";
 import { getLocationByIP } from "./userSettings.service";
-import logger from "../config/loggingConfig";
 import { getUserMembership } from "./membership.service";
+import { ISeller, IUser, IUserSettings } from "../types";
+import logger from "../config/loggingConfig";
 
+/* Helper functions */
 const getCoordinatesWithRetry = async (
+  // Retries up to 3 times with 1s delay to get user's coordinates via IP
   retries: number = 3,
   delay: number = 1000 // Delay in milliseconds
 ): Promise<{ lat: number; lng: number } | null> => {
@@ -24,33 +26,51 @@ const getCoordinatesWithRetry = async (
   return null;
 };
 
-export const authenticate = async (currentUser: IUser): Promise<{user:IUser, membership_class:string}> => {
-  try {
-    let user = await User.findOne({
-      pi_uid: currentUser.pi_uid,
-      pi_username: currentUser.pi_username
-    }).setOptions({
-      readPreference: 'primary'
-    }).exec();
+const findOrCreateUser = async (currentUser: IUser): Promise<IUser> => {
+  const existingUser = await User.findOne({
+    pi_uid: currentUser.pi_uid,
+    pi_username: currentUser.pi_username
+  }).setOptions({ 
+    readPreference: 'primary' 
+  }).exec();
 
-    if (!user) {
-      user = await User.create({
-        pi_uid: currentUser.pi_uid,
-        pi_username: currentUser.pi_username,
-        user_name: currentUser.user_name
-      });
-      const IP_coordinates = await getCoordinatesWithRetry(3, 1000);
-      
-      IP_coordinates ? 
-        await UserSettings.create({
-          user_settings_id: currentUser.pi_uid,
-          user_name: currentUser.user_name,
-          search_map_center: { type: 'Point', coordinates: [IP_coordinates.lng, IP_coordinates.lat] }
-        }) : 
-        await UserSettings.create({
-          user_settings_id: currentUser.pi_uid,
-          user_name: currentUser.user_name,
-        })  
+  if (existingUser) return existingUser;
+
+  return User.create({
+    pi_uid: currentUser.pi_uid,
+    pi_username: currentUser.pi_username,
+    user_name: currentUser.user_name
+  });
+};
+
+const createUserSettings = async (currentUser: IUser): Promise<void> => {
+  const coordinates = await getCoordinatesWithRetry(3, 1000);
+
+  const settings: Partial<IUserSettings> = {
+    user_settings_id: currentUser.pi_uid,
+    user_name: currentUser.user_name,
+  };
+
+  if (coordinates) {
+    settings.search_map_center = {
+      type: 'Point',
+      coordinates: [coordinates.lng, coordinates.lat],
+    };
+  }
+
+  await UserSettings.create(settings);
+};
+
+export const authenticate = async (
+  currentUser: IUser
+): Promise<{ user: IUser, membership_class: string }> => {
+  try {
+    const user = await findOrCreateUser(currentUser);
+
+    // Optional: detect newly created user if needed
+    const userSettings = await UserSettings.findById(currentUser.pi_uid).lean().exec();
+    if (!userSettings) {
+      await createUserSettings(currentUser);
     }
 
     const userMembership = await getUserMembership(user);
