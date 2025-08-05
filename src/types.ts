@@ -9,7 +9,6 @@ import {OrderStatusType} from "./models/enums/orderStatusType";
 import {OrderItemStatusType} from "./models/enums/orderItemStatusType";
 import {PaymentType} from "./models/enums/paymentType";
 import {U2UPaymentStatus} from "./models/enums/u2uPaymentStatus";
-import {RestrictedArea} from "./models/enums/restrictedArea";
 
 // ========================
 // USER MODELS
@@ -72,8 +71,6 @@ export interface ISeller extends Document {
   order_online_enabled_pref: boolean;
   fulfillment_method: FulfillmentType;
   fulfillment_description?: string;
-  pre_restriction_seller_type?: SellerType | null;
-  isPreRestricted: boolean;
   isRestricted: boolean;
   lastSanctionUpdateAt: Date;
 };
@@ -295,14 +292,6 @@ export interface INotification extends Document {
 // ========================
 // SANCTIONS / GEO-RESTRICTIONS
 // ========================
-export interface ISanctionedRegion extends Document {
-  location: RestrictedArea;
-  boundary: {
-    type: 'Polygon';
-    coordinates: [[[number, number]]];
-  };
-};
-
 export interface ISanctionedGeoBoundary extends Document {
   type: "Feature";
   geometry: {
@@ -318,15 +307,12 @@ export interface ISanctionedGeoBoundary extends Document {
   };
 };
 
-export type SanctionedSeller = Pick<ISeller, 'seller_id' | 'name' | 'address' | 'sell_map_center'> & {
-  sanctioned_location: string,
-  pre_restriction_seller_type?: SellerType | null
-};
-
-export type SanctionedSellerStatus = {
+export type SanctionedUpdateResult = {
   seller_id: string;
-  pre_restriction_seller_type: SellerType | null;
-  isSanctionedRegion: boolean;
+  isChanged: boolean;
+  isRestricted: boolean;
+  isUpdateSuccess: boolean;
+  isNotificationSuccess: boolean;
 };
 
 // ========================

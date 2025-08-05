@@ -8,7 +8,7 @@ import { FulfillmentType } from "../models/enums/fulfillmentType";
 import { StockLevelType } from '../models/enums/stockLevelType';
 import { TrustMeterScale } from "../models/enums/trustMeterScale";
 import { getUserSettingsById } from "./userSettings.service";
-import { IUser, IUserSettings, ISeller, ISellerWithSettings, ISellerItem, ISanctionedRegion } from "../types";
+import { IUser, IUserSettings, ISeller, ISellerWithSettings, ISellerItem } from "../types";
 
 import logger from "../config/loggingConfig";
 
@@ -343,22 +343,5 @@ export const deleteSellerItem = async (id: string): Promise<ISellerItem | null> 
   } catch (error: any) {
     logger.error(`Failed to delete seller item for itemID ${ id }: ${ error}`);
     throw error;
-  }
-};
-
-export const getSellersWithinSanctionedRegion = async (region: ISanctionedRegion): Promise<ISeller[]> => {
-  try {
-    const sellers = await Seller.find({
-      sell_map_center: {
-        $geoWithin: {
-          $geometry: region.boundary
-        }
-      }
-    }).exec();
-    logger.info(`Found ${sellers.length} seller(s) within the sanctioned region: ${region.location}`);
-    return sellers;
-  } catch (error: any) {
-    logger.error(`Failed to get sellers within sanctioned region ${ region }: ${ error }`);
-    throw error;  
   }
 };
