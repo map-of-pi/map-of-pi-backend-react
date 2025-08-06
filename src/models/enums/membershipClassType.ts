@@ -1,6 +1,5 @@
 export enum MembershipClassType {
   CASUAL = "Casual",
-  SINGLE= "Single",
   WHITE = "White",
   GREEN = "Green",
   GOLD = "Gold",
@@ -11,13 +10,6 @@ export enum MembershipClassType {
 export const membershipTiers = {
   tier0: {
     CLASS: MembershipClassType.CASUAL,
-    MAPPI_ALLOWANCE: 0,
-    COST: 0,
-    DURATION: null,
-    RANK: 0
-  },
-  tier01: {
-    CLASS: MembershipClassType.SINGLE,
     MAPPI_ALLOWANCE: 0,
     COST: 0,
     DURATION: null,
