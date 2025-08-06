@@ -1,7 +1,4 @@
-import { 
-  getCachedSanctionedBoundaries, 
-  summarizeSanctionedResults 
-} from "../../src/helpers/sanction";
+import { summarizeSanctionedResults } from "../../src/helpers/sanction";
 import { SanctionedUpdateResult } from "../../src/types";
 
 describe('summarizeSanctionedResults function', () => {

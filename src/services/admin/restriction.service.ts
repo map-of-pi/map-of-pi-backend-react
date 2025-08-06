@@ -1,6 +1,6 @@
 import SanctionedGeoBoundary from "../../models/misc/SanctionedGeoBoundary";
 
-export const validateSellerLocation = async (longitude: number, latitude: number)  => {
+export const validateSellerLocation = async (longitude: number, latitude: number) => {
 	const sellCenter = {
 		type: 'Point' as const,
 		coordinates: [longitude, latitude],
