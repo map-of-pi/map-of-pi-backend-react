@@ -6,7 +6,7 @@ export const validateSellerLocation = async (longitude: number, latitude: number
 		coordinates: [longitude, latitude],
 	};
 
-	const isSanctionedLocation = await SanctionedGeoBoundary.findOne({
+	const sanctionedLocation = await SanctionedGeoBoundary.findOne({
 		geometry: {
 			$geoIntersects: {
 				$geometry: sellCenter
@@ -14,5 +14,5 @@ export const validateSellerLocation = async (longitude: number, latitude: number
 		}
 	}).exec();
 
-	return isSanctionedLocation;
+	return sanctionedLocation;
 };
