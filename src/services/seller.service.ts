@@ -93,7 +93,9 @@ export const getAllSellers = async (
     const searchFilters = userSettings.search_filters ?? defaultSearchFilters;
 
     // Construct base filter criteria
-    const baseCriteria: Record<string, any> = {};
+    const baseCriteria: Record<string, any> = {
+      isRestricted: { $ne: true } // Exclude restricted sellers
+    };
     
     // [Seller Type Filter]
     const sellerTypeFilters: SellerType[] = [];
