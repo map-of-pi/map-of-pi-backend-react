@@ -29,3 +29,20 @@ components:
           type: string
           format: date-time
           example: "2025-07-28T00:00:00.000Z"
+
+    MembershipTiers:
+      type: object
+      properties:
+        value:
+          $ref: '/api/docs/enum/MembershipClassType.yml#/components/schemas/MembershipClassType'
+        cost:
+          type: number
+          format: float
+          example: 0
+        duration:
+          type: integer
+          nullable: true
+          example: null
+        mappi_allowance:
+          type: integer
+          example: 0

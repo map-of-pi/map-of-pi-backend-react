@@ -44,6 +44,9 @@ export interface IUserSettings extends Document {
 	};
 };
 
+// Select specific fields from IUserSettings
+export type PartialUserSettings = Pick<IUserSettings, 'user_name' | 'email' | 'phone_number' | 'findme' | 'trust_meter_rating'>;
+
 // ========================
 // MEMBERSHIP MODELS
 // ========================
@@ -56,8 +59,12 @@ export interface IMembership extends Document {
   mappi_used_to_date: number;
 };
 
-// Select specific fields from IUserSettings
-export type PartialUserSettings = Pick<IUserSettings, 'user_name' | 'email' | 'phone_number' | 'findme' | 'trust_meter_rating'>;
+export interface MembershipOption {
+  value: MembershipClassType;
+  cost: number;
+  duration: number | null; // in weeks
+  mappi_allowance: number;
+}
 
 // ========================
 // MAP / GEOLOCATION TYPES

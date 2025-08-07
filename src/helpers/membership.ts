@@ -1,5 +1,4 @@
 import { MembershipClassType, membershipTiers } from '../models/enums/membershipClassType';
-import logger from "../config/loggingConfig";
 
 export const isExpired = (date?: Date): boolean => !date || date < new Date();
 

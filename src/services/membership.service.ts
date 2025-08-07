@@ -8,15 +8,9 @@ import {
 import Membership from "../models/Membership";
 import User from "../models/User";
 import { MembershipClassType, membershipTiers } from "../models/enums/membershipClassType";
-import { IMembership, IUser } from "../types";
-import logger from "../config/loggingConfig";
+import { IMembership, IUser, MembershipOption } from "../types";
 
-export interface MembershipOption {
-  value: MembershipClassType;
-  cost: number;
-  duration: number | null; // in weeks
-  mappi_allowance: number;
-}
+import logger from "../config/loggingConfig";
 
 export const buildMembershipList = async (): Promise<MembershipOption[]> => {
   return Object.values(membershipTiers)
