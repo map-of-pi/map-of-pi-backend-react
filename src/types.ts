@@ -1,16 +1,15 @@
-import { Document, Types } from "mongoose";
-import { DeviceLocationType } from "./models/enums/deviceLocationType";
-import { RatingScale } from "./models/enums/ratingScale";
-import { SellerType } from "./models/enums/sellerType";
-import { FulfillmentType } from "./models/enums/fulfillmentType";
-import { StockLevelType } from "./models/enums/stockLevelType";
-import { TrustMeterScale } from "./models/enums/trustMeterScale";
-import { OrderStatusType } from "./models/enums/orderStatusType";
-import { OrderItemStatusType } from "./models/enums/orderItemStatusType";
-import { PaymentType } from "./models/enums/paymentType";
-import { U2UPaymentStatus } from "./models/enums/u2uPaymentStatus";
-import { RestrictedArea } from "./models/enums/restrictedArea";
-import { MembershipClassType } from "./models/enums/membershipClassType";
+import {Document, Types} from "mongoose";
+import {DeviceLocationType} from "./models/enums/deviceLocationType";
+import {MembershipClassType} from "./models/enums/membershipClassType";
+import {RatingScale} from "./models/enums/ratingScale";
+import {SellerType} from "./models/enums/sellerType";
+import {FulfillmentType} from "./models/enums/fulfillmentType";
+import {StockLevelType} from "./models/enums/stockLevelType";
+import {TrustMeterScale} from "./models/enums/trustMeterScale";
+import {OrderStatusType} from "./models/enums/orderStatusType";
+import {OrderItemStatusType} from "./models/enums/orderItemStatusType";
+import {PaymentType} from "./models/enums/paymentType";
+import {U2UPaymentStatus} from "./models/enums/u2uPaymentStatus";
 
 // ========================
 // USER MODELS
@@ -44,6 +43,9 @@ export interface IUserSettings extends Document {
   };
 };
 
+// Select specific fields from IUserSettings
+export type PartialUserSettings = Pick<IUserSettings, 'user_name' | 'email' | 'phone_number' | 'findme' | 'trust_meter_rating'>;
+
 // ========================
 // MEMBERSHIP MODELS
 // ========================
@@ -56,8 +58,12 @@ export interface IMembership extends Document {
   mappi_used_to_date: number;
 };
 
-// Select specific fields from IUserSettings
-export type PartialUserSettings = Pick<IUserSettings, 'user_name' | 'email' | 'phone_number' | 'findme' | 'trust_meter_rating'>;
+export interface MembershipOption {
+  value: MembershipClassType;
+  cost: number;
+  duration: number | null; // in weeks
+  mappi_allowance: number;
+}
 
 // ========================
 // MAP / GEOLOCATION TYPES

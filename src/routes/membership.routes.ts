@@ -29,36 +29,46 @@ import * as membershipController from "../controllers/membershipController";
  *           type: string
  *           description: Membership expiration date
  *           format: date-time
+ * 
+ *     MembershipTiers:
+ *       type: object
+ *       properties:
+ *         value:
+ *           $ref: '/api/docs/enum/MembershipClassType.yml#/components/schemas/MembershipClassType'
+ *         cost:
+ *           type: number
+ *           description: Cost of the membership in Pi
+ *         duration:
+ *           type: integer
+ *           description: Duration of the membership in weeks; null if not applicable
+ *         mappi_allowance:
+ *           type: integer
+ *           description: Number of Mappi associated with this membership
  */
 const membershipRoutes = Router();
 
-// TODO - Is this needed or not?
-membershipRoutes.get("/membership-list", membershipController.fetchMembershipList);
-
 /**
  * @swagger
- * /api/v1/memberships/fetch:
+ * /api/v1/memberships/membership-list:
  *   get:
  *     tags:
  *       - Membership
- *     summary: Fetch the user's current membership record *
+ *     summary: Get the Membership tiers list
  *     responses:
  *       200:
  *         description: Successful response
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '/api/docs/MembershipsSchema.yml#/components/schemas/MembershipRs'
+ *               $ref: '/api/docs/MembershipsSchema.yml#/components/schemas/MembershipTiers'
  *       404:
- *         description: User membership not found
- *       401:
- *         description: Unauthorized
+ *         description: Membership list not found
  *       400:
  *         description: Bad request
  *       500:
  *         description: Internal server error
  */
-membershipRoutes.get("/", verifyToken, membershipController.fetchUserMembership);
+membershipRoutes.get("/membership-list", membershipController.getMembershipList);
 
 /**
  * @swagger
@@ -87,6 +97,31 @@ membershipRoutes.get("/", verifyToken, membershipController.fetchUserMembership)
  *         description: Internal server error
  */
 membershipRoutes.get("/:membership_id", membershipController.getSingleMembership);
+
+/**
+ * @swagger
+ * /api/v1/memberships/:
+ *   get:
+ *     tags:
+ *       - Membership
+ *     summary: Fetch the user's current membership record *
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '/api/docs/MembershipsSchema.yml#/components/schemas/MembershipRs'
+ *       404:
+ *         description: User membership not found
+ *       401:
+ *         description: Unauthorized
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
+membershipRoutes.get("/", verifyToken, membershipController.fetchUserMembership);
 
 /**
  * @swagger

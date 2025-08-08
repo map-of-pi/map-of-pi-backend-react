@@ -1,6 +1,6 @@
 import { resolve } from 'path/win32';
 import {
-  fetchMembershipList,
+  getMembershipList,
   fetchUserMembership,
   getSingleMembership,
   updateOrRenewMembership,
@@ -19,7 +19,7 @@ describe('membershipController', () => {
   let req: any;
   let res: any;
 
-  describe('fetchMembershipList function', () => {
+  describe('getMembershipList function', () => {
     const mockMembershipList = Object.values(membershipTiers).map((tier) => ({
       value: tier.CLASS,
       cost: tier.COST,
@@ -38,7 +38,7 @@ describe('membershipController', () => {
     it('should return [200] and membership list on success', async () => {
       (membershipService.buildMembershipList as jest.Mock).mockResolvedValue(mockMembershipList);
 
-      await fetchMembershipList(req, res);
+      await getMembershipList(req, res);
 
       expect(membershipService.buildMembershipList).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
@@ -48,7 +48,7 @@ describe('membershipController', () => {
     it('should return [404] if membership list is not found', async () => {
       (membershipService.buildMembershipList as jest.Mock).mockResolvedValue(null);
 
-      await fetchMembershipList(req, res);
+      await getMembershipList(req, res);
 
       expect(membershipService.buildMembershipList).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(404);
@@ -58,7 +58,7 @@ describe('membershipController', () => {
     it('should return [404] if membership list is empty', async () => {
       (membershipService.buildMembershipList as jest.Mock).mockResolvedValue([]);
 
-      await fetchMembershipList(req, res);
+      await getMembershipList(req, res);
 
       expect(membershipService.buildMembershipList).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(404);
@@ -69,12 +69,12 @@ describe('membershipController', () => {
       const mockError = new Error('Membership service layer error');
       (membershipService.buildMembershipList as jest.Mock).mockRejectedValue(mockError);
 
-      await fetchMembershipList(req, res);
+      await getMembershipList(req, res);
 
       expect(membershipService.buildMembershipList).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({ 
-        message: 'An error occurred while getting single membership list; please try again later' 
+        message: 'An error occurred while getting membership list; please try again later' 
       });
     });
   });
