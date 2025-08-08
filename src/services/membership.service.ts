@@ -7,7 +7,7 @@ import {
 } from "../helpers/membership";
 import Membership from "../models/Membership";
 import User from "../models/User";
-import { MembershipClassType, membershipTiers } from "../models/enums/membershipClassType";
+import { MembershipClassType, membershipTiers, SingleClassType } from "../models/enums/membershipClassType";
 import { IMembership, IUser } from "../types";
 import logger from "../config/loggingConfig";
 
@@ -77,7 +77,7 @@ export const updateOrRenewMembership = async (piUid: string, membership_class: M
     return await new Membership({
       user_id: user?._id,
       pi_uid: user?.pi_uid,
-      membership_class: isSingleClass(membership_class) ? MembershipClassType.CASUAL : membership_class,
+      membership_class,
       membership_expiration: membership_duration ? new Date(today.getTime() + durationMs) : null,
       mappi_balance: mappi_allowance,
       mappi_used_to_date: 0,
@@ -90,7 +90,7 @@ export const updateOrRenewMembership = async (piUid: string, membership_class: M
 
   if (!isSameShoppingClassType(existing.membership_class, membership_class)) {
     Object.assign(existing, {
-      membership_class: isSingleClass(membership_class) ? existing.membership_class : membership_class,
+      membership_class,
       membership_expiration: membership_duration ? new Date(today.getTime() + durationMs) : null,
       mappi_balance: mappi_allowance + existing.mappi_balance,
     });
@@ -113,7 +113,7 @@ export const updateOrRenewMembership = async (piUid: string, membership_class: M
 
   if (newRank > currentRank || newRank < currentRank) {
     Object.assign(existing, {
-      membership_class: isSingleClass(membership_class) ? existing.membership_class : membership_class,
+      membership_class,
       membership_expiration: new Date(today.getTime() + durationMs),
       mappi_balance: mappi_allowance + existing.mappi_balance,
     });
@@ -123,10 +123,22 @@ export const updateOrRenewMembership = async (piUid: string, membership_class: M
   throw new Error('Unhandled membership transition');
 };
 
-export const updateMappiBalance = async (membership_id: string, amount: number) => {
-  const membership = await Membership.findById(membership_id);
+export const updateMappiBalance = async (pi_uid: string, amount: number) => {
+  const membership = await Membership.findOne({pi_uid: pi_uid}).exec();
   if (!membership) throw new Error('Membership not found');
 
   membership.mappi_balance += amount;
   return await membership.save();
+};
+
+export const buySingleMappi = async (pi_uid: string) => {
+  const existing = await Membership.findOne({pi_uid: pi_uid}).exec();
+  if (!existing) throw new Error('Membership not found');
+
+  if (isExpired(existing.membership_expiry_date ?? undefined)) {
+    existing.mappi_balance = 1
+  };
+  
+  existing.mappi_balance += 1;
+  return await existing.save();
 };

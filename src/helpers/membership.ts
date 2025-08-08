@@ -1,4 +1,4 @@
-import { MembershipClassType, membershipTiers } from '../models/enums/membershipClassType';
+import { MembershipClassType, membershipTiers, SingleClassType } from '../models/enums/membershipClassType';
 import logger from "../config/loggingConfig";
 
 export const MembershipSubscription = async () => {
@@ -55,5 +55,5 @@ export const getTierRank = (tierClass: MembershipClassType): number => {
   return getTierByClass(tierClass)?.RANK ?? -1;
 };
 
-export const isSingleClass = (tier: MembershipClassType): boolean =>
-  tier === MembershipClassType.SINGLE; 
+export const isSingleClass = (tier: SingleClassType): boolean =>
+  tier === SingleClassType.SINGLE; 
