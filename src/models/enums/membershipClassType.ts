@@ -15,6 +15,8 @@ export const singleTier = {
   CLASS: SingleClassType.SINGLE,
   MAPPI_ALLOWANCE: 1,
   COST: 0.2,
+  DURATION: null,
+  RANK: 0
 }
 
 export const membershipTiers = {

@@ -7,7 +7,7 @@ import {
 } from "../helpers/membership";
 import Membership from "../models/Membership";
 import User from "../models/User";
-import { MembershipClassType, membershipTiers } from "../models/enums/membershipClassType";
+import { MembershipClassType, membershipTiers, SingleClassType } from "../models/enums/membershipClassType";
 import { IMembership, IUser, MembershipOption } from "../types";
 
 import logger from "../config/loggingConfig";
@@ -53,19 +53,42 @@ export const getSingleMembershipById = async (membership_id: string) => {
   return membership || null;
 };
 
-export const updateOrRenewMembership = async (piUid: string, membership_class: MembershipClassType): Promise<IMembership> => {
+export const updateOrRenewMembership = async (
+  piUid: string, 
+  membership_class: MembershipClassType | SingleClassType
+): Promise<IMembership> => {
   const user = await User.findOne({ pi_uid: piUid }).lean();
   const today = new Date();
-
-  const tier = getTierByClass(membership_class);
-  const durationMs = (tier?.DURATION ?? 0) * 7 * 24 * 60 * 60 * 1000;
-
-  if (!tier) throw new Error(`Invalid membership class: ${membership_class}`);
-
-  const membership_duration = tier.DURATION;
-  const mappi_allowance = tier.MAPPI_ALLOWANCE;
+  if (!user) throw new Error(`User with pi_uid ${piUid} not found`);
 
   const existing = await Membership.findOne({ user_id: user?._id });
+
+  // Handle Single Class case
+  if (membership_class === SingleClassType.SINGLE) {
+    if (!existing) {
+      // If user doesn't have a membership, create a base membership with 1 mappi
+      return await new Membership({
+        user_id: user._id,
+        pi_uid: user.pi_uid,
+        membership_class: MembershipClassType.CASUAL,
+        membership_expiry_date: null,
+        mappi_balance: 1,
+        mappi_used_to_date: 0,
+      }).save();
+    }
+
+    // If membership exists, just add 1 to mappi_balance
+    existing.mappi_balance += 1;
+    return await existing.save();
+  }
+
+  // MembershipClass flow (White, Green, etc.)
+  const tier = getTierByClass(membership_class as MembershipClassType);
+  if (!tier) throw new Error(`Invalid membership class: ${membership_class}`);
+  
+  const membership_duration = tier.DURATION;
+  const durationMs = (membership_duration ?? 0) * 7 * 24 * 60 * 60 * 1000;
+  const mappi_allowance = tier.MAPPI_ALLOWANCE;
 
   if (!existing) {
     return await new Membership({
@@ -85,8 +108,8 @@ export const updateOrRenewMembership = async (piUid: string, membership_class: M
   if (!isSameShoppingClassType(existing.membership_class, membership_class)) {
     Object.assign(existing, {
       membership_class,
-      membership_expiration: membership_duration ? new Date(today.getTime() + durationMs) : null,
-      mappi_balance: mappi_allowance + existing.mappi_balance,
+      membership_expiry_date: membership_duration ? new Date(today.getTime() + durationMs) : null,
+      mappi_balance: mappi_allowance,
     });
     return await existing.save();
   }
@@ -123,16 +146,4 @@ export const updateMappiBalance = async (pi_uid: string, amount: number) => {
 
   membership.mappi_balance += amount;
   return await membership.save();
-};
-
-export const buySingleMappi = async (pi_uid: string) => {
-  const existing = await Membership.findOne({pi_uid: pi_uid}).exec();
-  if (!existing) throw new Error('Membership not found');
-
-  if (isExpired(existing.membership_expiry_date ?? undefined)) {
-    existing.mappi_balance = 1
-  };
-  
-  existing.mappi_balance += 1;
-  return await existing.save();
 };
