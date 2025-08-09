@@ -10,6 +10,7 @@ import { OrderItemStatusType } from "./models/enums/orderItemStatusType";
 import { PaymentType } from "./models/enums/paymentType";
 import { U2UPaymentStatus } from "./models/enums/u2uPaymentStatus";
 import { RestrictedArea } from "./models/enums/restrictedArea";
+import { WatchAdsSessionStatus } from "./models/enums/watchAds";
 
 // ========================
 // USER MODELS
