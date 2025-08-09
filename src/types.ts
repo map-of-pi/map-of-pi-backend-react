@@ -328,6 +328,31 @@ export interface IWatchAdsSession extends Document {
   updatedAt: Date;
 }
 
+// ========================
+// AD CREDIT
+// ========================
+export interface IAdCredit extends Document {
+  userId: Types.ObjectId;
+  sessionId: Types.ObjectId;
+  segmentNo: number;
+  secs: number;
+  sdkImpressionId?: string;
+  creditedAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// ========================
+// WATCH ADS DAILY
+// ========================
+export interface IWatchAdsDaily extends Document {
+  userId: Types.ObjectId;
+  day: string;
+  earnedSecs: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export type SanctionedSeller = Pick<ISeller, 'seller_id' | 'name' | 'address' | 'sell_map_center'> & {
 	sanctioned_location: string,
 	pre_restriction_seller_type?: SellerType | null
