@@ -18,6 +18,8 @@ export interface IUser extends Document {
 	pi_uid: string;
 	pi_username: string;
 	user_name: string;
+  availableSecs?: number;
+  lifetimeEarnedSecs?: number;
 };
 
 export interface IUserSettings extends Document {
@@ -298,6 +300,18 @@ export interface ISanctionedRegion extends Document {
 		coordinates: [[[number, number]]];
 	};
 };
+
+// ========================
+// WATCH ADS
+// ========================
+
+export interface IWatchAdsBalance extends Document {
+  userId: Types.ObjectId;
+  availableSecs: number;
+  lifetimeEarnedSecs: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export type SanctionedSeller = Pick<ISeller, 'seller_id' | 'name' | 'address' | 'sell_map_center'> & {
 	sanctioned_location: string,
