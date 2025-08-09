@@ -300,9 +300,8 @@ export interface ISanctionedRegion extends Document {
 };
 
 // ========================
-// WATCH ADS
+// WATCH ADS BALANCE
 // ========================
-
 export interface IWatchAdsBalance extends Document {
   userId: Types.ObjectId;
   availableSecs: number;
@@ -311,14 +310,18 @@ export interface IWatchAdsBalance extends Document {
   updatedAt: Date;
 }
 
+// ========================
+// WATCH ADS SESSION
+// ========================
 export interface IWatchAdsSession extends Document {
   userId: Types.ObjectId;
-  status: 'active' | 'completed' | 'expired' | 'aborted';
+  status: WatchAdsSessionStatus;
   totalSegments: number;
   segmentSecs: number;
-  completedSegments: number[];
+  completedSegments: number;
   earnedSecs: number;
-  lastSegment: number;
+  startedAt: Date;
+  endedAt?: Date;
   expiresAt: Date;
   createdAt: Date;
   updatedAt: Date;
