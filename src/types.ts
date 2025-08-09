@@ -18,8 +18,6 @@ export interface IUser extends Document {
 	pi_uid: string;
 	pi_username: string;
 	user_name: string;
-  availableSecs?: number;
-  lifetimeEarnedSecs?: number;
 };
 
 export interface IUserSettings extends Document {
@@ -309,6 +307,19 @@ export interface IWatchAdsBalance extends Document {
   userId: Types.ObjectId;
   availableSecs: number;
   lifetimeEarnedSecs: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IWatchAdsSession extends Document {
+  userId: Types.ObjectId;
+  status: 'active' | 'completed' | 'expired' | 'aborted';
+  totalSegments: number;
+  segmentSecs: number;
+  completedSegments: number[];
+  earnedSecs: number;
+  lastSegment: number;
+  expiresAt: Date;
   createdAt: Date;
   updatedAt: Date;
 }
