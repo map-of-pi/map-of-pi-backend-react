@@ -68,7 +68,7 @@ export const authenticate = async (
     const user = await findOrCreateUser(currentUser);
 
     // Optional: detect newly created user if needed
-    const userSettings = await UserSettings.findById(currentUser.pi_uid).lean().exec();
+    const userSettings = await UserSettings.findOne({user_settings_id: currentUser.pi_uid}).lean().exec();
     if (!userSettings) {
       await createUserSettings(currentUser);
     }
