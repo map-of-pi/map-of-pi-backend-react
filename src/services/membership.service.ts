@@ -3,18 +3,26 @@ import {
   isSameShoppingClassType,
   getTierByClass,
   getTierRank,
-  isSingleClass
 } from "../helpers/membership";
 import Membership from "../models/Membership";
 import User from "../models/User";
-import { MembershipClassType, membershipTiers, SingleClassType } from "../models/enums/membershipClassType";
+import { MembershipClassType, membershipTiers, SingleClassType, singleTier } from "../models/enums/membershipClassType";
 import { IMembership, IUser, MembershipOption } from "../types";
 
 import logger from "../config/loggingConfig";
 
 export const buildMembershipList = async (): Promise<MembershipOption[]> => {
-  return Object.values(membershipTiers)
-    .filter(tier => tier.CLASS !== MembershipClassType.CASUAL) // Exclude default
+  // Single class at the top
+  const singleOption: MembershipOption = {
+    value: SingleClassType.SINGLE as unknown as MembershipClassType, // Casting so type fits MembershipOption
+    cost: singleTier.COST,
+    duration: singleTier.DURATION ?? null,
+    mappi_allowance: singleTier.MAPPI_ALLOWANCE ?? 0,
+  };
+
+  // Membership tiers except CASUAL
+  const membershipOptions = Object.values(membershipTiers)
+    .filter(tier => tier.CLASS !== MembershipClassType.CASUAL) 
     .map((tier) => ({
       value: tier.CLASS as MembershipClassType,
       cost: tier.COST,
@@ -26,6 +34,8 @@ export const buildMembershipList = async (): Promise<MembershipOption[]> => {
       const rankB = Object.values(membershipTiers).find(t => t.CLASS === b.value)?.RANK ?? 0;
       return rankA - rankB;
     });
+
+  return [singleOption, ...membershipOptions];
 };
 
 export const getUserMembership = async (authUser: IUser): Promise<IMembership> => {
