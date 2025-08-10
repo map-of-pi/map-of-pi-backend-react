@@ -65,3 +65,51 @@ export const addReview = async (req: Request, res: Response) => {
     return res.status(500).json({ message: 'An error occurred while adding review; please try again later' });
   }
 };
+
+export const updateReview = async (req: Request, res: Response) => {
+  try {
+    const authUser = req.currentUser;
+    const { reviewId } = req.params;
+    const { comment, rating } = req.body;
+
+    if (!authUser) {
+      logger.warn("No authenticated user found for updating review.");
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    // Fetch existing review
+    const existingReviewData = await reviewFeedbackService.getReviewFeedbackById(reviewId);
+    if (!existingReviewData || !existingReviewData.review) {
+      logger.warn(`Review with ID ${reviewId} not found for update.`);
+      return res.status(404).json({ message: "Review not found" });
+    }
+
+    const existingReview = existingReviewData.review;
+
+    // Ensure user owns this review
+    if (existingReview.review_giver_id !== authUser.pi_uid) {
+      logger.warn(`User ${authUser.pi_uid} attempted to update review ${reviewId} without permission.`);
+      return res.status(403).json({ message: "You do not have permission to update this review" });
+    }
+
+    // Handle image
+    let image = existingReview.image;
+    if (req.file) {
+      image = await uploadImage(authUser.pi_uid, req.file, 'review-feedback');
+    }
+
+    // Call service with correct arguments
+    const updatedReview = await reviewFeedbackService.updateReviewFeedback(
+      reviewId,
+      authUser,
+      { comment: comment ?? existingReview.comment, rating: rating ?? existingReview.rating },
+      image
+    );
+
+    logger.info(`Updated review ${reviewId} by user ${authUser.pi_uid}`);
+    return res.status(200).json({ updatedReview });
+  } catch (error) {
+    logger.error(`Failed to update review for userID ${req.currentUser?.pi_uid}:`, error);
+    return res.status(500).json({ message: 'An error occurred while updating review; please try again later' });
+  }
+};
