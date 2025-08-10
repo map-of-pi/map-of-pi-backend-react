@@ -195,3 +195,41 @@ export const addReviewFeedback = async (authUser: IUser, formData: any, image: s
     throw error;
   }
 };
+
+export const updateReviewFeedback = async (
+  reviewId: string,
+  authUser: IUser,
+  formData: any,
+  image?: string
+): Promise<IReviewFeedback | null> => {
+  try {
+    const review = await ReviewFeedback.findById(reviewId);
+
+    if (!review) {
+      logger.warn(`Review with ID ${reviewId} not found for update.`);
+      return null;
+    }
+
+    // Ensure the authenticated user is the review owner
+    if (review.review_giver_id !== authUser.pi_uid) {
+      logger.warn(`User ${authUser.pi_uid} attempted to edit review ${reviewId} without permission.`);
+      throw new Error("Forbidden");
+    }
+
+    // Update fields if provided
+    if (formData.rating !== undefined) review.rating = formData.rating;
+    if (formData.comment !== undefined) review.comment = formData.comment;
+    if (image !== undefined) review.image = image;
+
+    await review.save();
+
+    // Recalculate trust meter rating for the receiver
+    await computeRatings(review.review_receiver_id);
+
+    logger.info(`Review ${reviewId} updated successfully by user ${authUser.pi_uid}`);
+    return review as IReviewFeedback;
+  } catch (error: any) {
+    logger.error(`Failed to update review ${reviewId}: ${error}`);
+    throw error;
+  }
+};
