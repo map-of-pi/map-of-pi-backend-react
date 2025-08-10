@@ -37,43 +37,6 @@ import upload from "../utils/multer";
  *           description: Date when the review was given
  */
 const reviewFeedbackRoutes = Router();
-
-/**
- * @swagger
- * /api/v1/review-feedback/{review_receiver_id}:
- *   get:
- *     tags:
- *       - Review Feedback
- *     summary: Get all associated reviews for seller according to search criteria, or all reviews if no search criteria provided
- *     parameters:
- *       - name: review_receiver_id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *         description: The piUID of the review receiver to retrieve
- *       - name: searchQuery
- *         in: query
- *         required: false
- *         schema:
- *           type: string
- *         description: The Pi username to search
- *     responses:
- *       200:
- *         description: Successful response
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '/api/docs/ReviewFeedbackSchema.yml#/components/schemas/GetReviewsRs'
- *       400:
- *         description: Bad request
- *       500:
- *         description: Internal server error
- */
-reviewFeedbackRoutes.get("/:review_receiver_id", reviewFeedbackController.getReviews);
-
 /**
  * @swagger
  * /api/v1/review-feedback/single/{review_id}:
@@ -139,5 +102,80 @@ reviewFeedbackRoutes.post(
   upload.single("image"),
   reviewFeedbackController.addReview
 );
+
+/**
+ * @swagger
+ * /api/v1/review-feedback/update/{reviewId}:
+ *   put:
+ *     tags:
+ *       - Review Feedback
+ *     summary: Update an existing review
+ *     parameters:
+ *       - name: reviewId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the review to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             $ref: '/api/docs/ReviewFeedbackSchema.yml#/components/schemas/UpdateReviewRq'
+ *     responses:
+ *       200:
+ *         description: Successful update
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Review not found
+ *       500:
+ *         description: Internal server error
+ */
+reviewFeedbackRoutes.put(
+  "/update/:reviewId",
+  verifyToken,
+  upload.single("image"),
+  reviewFeedbackController.updateReview
+);
+/**
+ * @swagger
+ * /api/v1/review-feedback/{review_receiver_id}:
+ *   get:
+ *     tags:
+ *       - Review Feedback
+ *     summary: Get all associated reviews for seller according to search criteria, or all reviews if no search criteria provided
+ *     parameters:
+ *       - name: review_receiver_id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The piUID of the review receiver to retrieve
+ *       - name: searchQuery
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: The Pi username to search
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '/api/docs/ReviewFeedbackSchema.yml#/components/schemas/GetReviewsRs'
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
+reviewFeedbackRoutes.get("/:review_receiver_id", reviewFeedbackController.getReviews);
+
 
 export default reviewFeedbackRoutes;
