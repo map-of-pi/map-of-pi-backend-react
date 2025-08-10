@@ -1,6 +1,6 @@
 import {Document, Types} from "mongoose";
 import {DeviceLocationType} from "./models/enums/deviceLocationType";
-import {MembershipClassType} from "./models/enums/membershipClassType";
+import {MembershipClassType, SingleClassType} from "./models/enums/membershipClassType";
 import {RatingScale} from "./models/enums/ratingScale";
 import {SellerType} from "./models/enums/sellerType";
 import {FulfillmentType} from "./models/enums/fulfillmentType";
@@ -177,9 +177,10 @@ export interface IOrderItem extends Document {
 };
 
 export interface NewOrder {
-  buyerId: string,
-  sellerId: string,
-  paymentId: string,
+  orderItems: PickedItems[],
+  buyerPiUid: string,
+  sellerPiUid: string,
+  paymentId: string | null, // objectId of the Payment schema
   totalAmount: string,
   status: OrderStatusType,
   fulfillmentMethod: FulfillmentType,
@@ -211,6 +212,14 @@ export interface IPayment extends Document {
   createdAt: Date;
 };
 
+export interface U2AMetadata {
+  payment_type: PaymentType,
+  OrderPayment?: OrderPaymentMetadataType,
+  MembershipPayment?: MembershipPaymentMetadataType
+}
+
+export interface A2UMetadata { orderId: string; sellerId: string; buyerId: string }
+
 export interface PaymentInfo {
   identifier: string;
   transaction?: {
@@ -224,8 +233,8 @@ export interface PaymentDTO {
   user_uid: string,
   created_at: string,
   identifier: string,
-  metadata: Object,
   memo: string,
+  metadata: U2AMetadata | A2UMetadata,
   status: {
     developer_approved: boolean,
     transaction_verified: boolean,
@@ -243,37 +252,17 @@ export interface PaymentDTO {
 
 export interface NewPayment {
   piPaymentId: string,
-  userId: string,
+  buyerPiUid: string,
   memo: string,
-  amount: string,
+  amount: number,
   paymentType: PaymentType
 };
 
 export interface U2URefDataType {
+  orderId: string,
   u2aPaymentId?: string,
   u2uStatus: U2UPaymentStatus,
   a2uPaymentId: string | null,
-};
-
-export interface A2UPaymentDataType {
-  sellerId: string,
-  amount: string,
-  buyerId: string,
-  paymentType: PaymentType,
-  orderId: string,
-  memo: string
-};
-
-export type PaymentDataType = {
-  user_id: string
-  identifier: string;
-  amount: string;
-  memo: string;
-  metadata: {
-    payment_type: PaymentType,
-    OrderPayment?: OrderPaymentMetadataType,
-    MembershipPayment?: MembershipPaymentMetadataType
-  }
 };
 
 export type PaymentMetadataType = {
@@ -282,7 +271,7 @@ export type PaymentMetadataType = {
 };
 
 type MembershipPaymentMetadataType = {
-  membership_class: MembershipClassType
+  membership_class: MembershipClassType | SingleClassType
 };
 
 export interface IPaymentCrossReference {

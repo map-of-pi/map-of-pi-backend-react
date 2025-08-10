@@ -1,12 +1,8 @@
 import axios from 'axios';
 import { platformAPIClient } from '../config/platformAPIclient';
 import logger from '../config/loggingConfig';
-import Seller from '../models/Seller';
-import User from '../models/User';
-import { MembershipClassType } from "../models/enums/membershipClassType";
-import { OrderStatusType } from '../models/enums/orderStatusType';
+import { MembershipClassType, SingleClassType } from "../models/enums/membershipClassType";
 import { PaymentType } from "../models/enums/paymentType";
-import { U2UPaymentStatus } from '../models/enums/u2uPaymentStatus';
 import { 
   cancelOrder, 
   createOrder, 
@@ -16,106 +12,101 @@ import {
   getPayment, 
   createPayment, 
   completePayment, 
-  createPaymentCrossReference,
-  createA2UPayment,
   cancelPayment
 } from '../services/payment.service';
 import { updateOrRenewMembership } from "../services/membership.service";
-import { NewOrder, PaymentDataType, PaymentDTO, PaymentInfo } from '../types';
+import { PaymentDTO, PaymentInfo, U2AMetadata } from '../types';
+import { OrderStatusType } from '../models/enums/orderStatusType';
+import { FulfillmentType } from '../models/enums/fulfillmentType';
 
-function buildPaymentData(
-  piPaymentId: string,
-  payment: PaymentDataType
-) {
+const buildPaymentData = (currentPayment: PaymentDTO) => {
+  const paymentMetadata = currentPayment.metadata as U2AMetadata;
   return {
-    piPaymentId,
-    userId: payment.user_id,
-    memo: payment.memo,
-    amount: payment.amount,
-    paymentType: payment.metadata.payment_type
-  };
+    piPaymentId: currentPayment.identifier,
+    buyerPiUid: currentPayment.user_uid as string,
+    memo: currentPayment.memo,
+    amount: currentPayment.amount,
+    paymentType: paymentMetadata.payment_type
+  }
 }
 
-function buildOrderData(
-  buyerId: string,
-  sellerId: string,
-  paymentId: string,
-  payment: PaymentDataType
-) {
-  const orderMeta = payment.metadata.OrderPayment!; // safe due to earlier guard
-
-  return {
-    buyerId,
-    sellerId,
-    paymentId,
-    totalAmount: payment.amount,
-    status: OrderStatusType.Initialized,
-    fulfillmentMethod: orderMeta.fulfillment_method,
-    sellerFulfillmentDescription: orderMeta.seller_fulfillment_description,
-    buyerFulfillmentDescription: orderMeta.buyer_fulfillment_description,
-  };
-}
-
-const checkoutProcess = async (
-  piPaymentId: string, 
-  currentPayment: PaymentDataType
-) => {
-
-  // Extract OrderPayment metadata from the current payment
-  const { OrderPayment } = currentPayment.metadata;
-  // Validate presence of required OrderPayment metadata
-  if (!OrderPayment) {
-    logger.error("OrderPayment metadata is missing");
-    throw new Error("OrderPayment metadata is missing");
-  }
-
-  // Look up the seller and buyer in the database
-  const seller = await Seller.findOne({ seller_id: OrderPayment.seller });
-  const buyer = await User.findOne({ pi_uid: currentPayment.user_id });
-
-  if (!buyer || !seller) {
-    logger.error("Seller or buyer not found", { sellerId: OrderPayment.seller, buyerId: currentPayment.user_id });
-    throw new Error("Seller or buyer not found");
-  }
-
-  // Construct payment data object for recording the transaction
-  const paymentData = buildPaymentData(piPaymentId, currentPayment);
-  // Create a new payment record
-  const newPayment = await createPayment(paymentData)
-  // Validate payment record creation succeeded
-  if (!newPayment) {
-    logger.error("Unable to create payment record")
-    throw new Error("Unable to create payment record");
-  }
+const checkoutProcess = async (currentPayment: PaymentDTO, paymentId: string) => {
+  const paymentMetadata = currentPayment.metadata as U2AMetadata;
+  const OrderMetadata = paymentMetadata.OrderPayment;
 
   // Ensure order items are present
-  if (!OrderPayment.items) {
+  if (!OrderMetadata?.items) {
     logger.error("Order items not found in OrderPayment metadata");
     throw new Error("Order items not found in OrderPayment metadata");
   }
 
   // Construct order data object
-  const orderData = buildOrderData(
-    currentPayment.user_id as string,
-    OrderPayment.seller as string,
-    newPayment._id as string,
-    currentPayment
-  )
+  const newOrderData = {
+    orderItems: OrderMetadata.items,
+    buyerPiUid: OrderMetadata.buyer as string,
+    sellerPiUid: OrderMetadata.seller as string,
+    paymentId: paymentId, // objectId of the Payment schema
+    totalAmount: currentPayment.amount.toString(),
+    status: OrderStatusType.Initialized,
+    fulfillmentMethod: OrderMetadata.fulfillment_method as FulfillmentType,
+    sellerFulfillmentDescription: OrderMetadata.seller_fulfillment_description as string,
+    buyerFulfillmentDescription: OrderMetadata.buyer_fulfillment_description as string,
+  }
   // Create a new order along with its items
-  const newOrder = await createOrder(orderData as NewOrder, OrderPayment.items, currentPayment.user_id);
+  const newOrder = await createOrder(newOrderData);
 
   logger.info('order created successfully', { orderId: newOrder._id });
   return newOrder;
 }
 
+const completePiPayment = async (piPaymentId: string, txid:string) => {
+  const res = await platformAPIClient.get(`/v2/payments/${ piPaymentId }`);
+  const currentPayment: PaymentDTO = res.data;
+  const userPiUid = currentPayment.user_uid;
+
+  if (!txid) {
+    logger.warn("No transaction id");
+    throw new Error("No transaction id");
+  }
+  
+  // Mark the payment as completed
+  const completedPayment = await completePayment(piPaymentId, txid);
+  logger.info("Payment record marked as completed");
+
+  if (completedPayment?.payment_type === PaymentType.BuyerCheckout) {
+
+    // Update the associated order's status to paid
+    await updatePaidOrder(completedPayment._id as string);
+    logger.info("Order record updated to paid")
+
+  } else if (completedPayment?.payment_type === PaymentType.Membership) {
+
+    const paymentMetadata = currentPayment.metadata as U2AMetadata
+    const membershipClass = paymentMetadata.MembershipPayment?.membership_class as MembershipClassType | SingleClassType
+    await updateOrRenewMembership(userPiUid, membershipClass);
+    logger.info("membership subscription successfull")
+
+  }
+
+  // Notify Pi Platform of successful completion
+  const completedPiPayment = await platformAPIClient.post(`/v2/payments/${ piPaymentId }/complete`, { txid });      
+  if (completedPiPayment.status !== 200) {
+    logger.error("Failed to mark U2A payment completed on Pi blockchain")
+    throw new Error("Failed to mark U2A payment completed on Pi blockchain");
+  }
+
+  logger.info("Payment marked completed on Pi blockchain", completedPiPayment.status);
+  return completedPiPayment;
+}
+
 export const processIncompletePayment = async (payment: PaymentInfo) => {
   try {
-    const paymentId = payment.identifier;
+    const piPaymentId = payment.identifier;
     const txid = payment.transaction?.txid;
     const txURL = payment.transaction?._link;
 
     // Retrieve the original (incomplete) payment record by its identifier
-    const incompletePayment = await getPayment(paymentId);
+    const incompletePayment = await getPayment(piPaymentId);
     if (!incompletePayment) {
       logger.warn("No incomplete payment record found");
       throw new Error("Finding incomplete payment failed");
@@ -131,30 +122,11 @@ export const processIncompletePayment = async (payment: PaymentInfo) => {
       throw new Error("Unable to find payment on the Pi Blockchain");
     }
 
-    // Mark the payment as completed
-    const updatedPayment = await completePayment(paymentId, txid as string);
-    logger.warn("Old payment found and updated");
-
-    // If the completed payment was for a buyer checkout, update the associated order
-    if (updatedPayment?.payment_type === PaymentType.BuyerCheckout) {
-      await updatePaidOrder(updatedPayment._id as string);
-      logger.warn("Old order found and updated");
-
-    } else if (updatedPayment.payment_type === PaymentType.Membership) {
-      // Fetch payment details from the Pi platform using the payment ID
-      const res = await platformAPIClient.get(`/v2/payments/${ paymentId }`);
-
-      const currentPayment: PaymentDataType = res.data;
-      const membership_class = currentPayment.metadata.MembershipPayment?.membership_class as MembershipClassType
-      await updateOrRenewMembership(currentPayment.user_id, membership_class);
-    }
-
-    // Notify the Pi Platform that the payment is complete
-    await platformAPIClient.post(`/v2/payments/${ paymentId }/complete`, { txid });
+    await completePiPayment(piPaymentId, txid as string);
 
     return {
       success: true,
-      message: `Payment completed from incomplete payment with id ${ paymentId }`,
+      message: `Payment completed from incomplete payment with id ${ piPaymentId }`,
     };
   } catch (error: any) {
     if (error.response) {
@@ -177,36 +149,45 @@ export const processPaymentApproval = async (
   try {
     // Fetch payment details from the Pi platform using the payment ID
     const res = await platformAPIClient.get(`/v2/payments/${ paymentId }`);
-    const currentPayment: PaymentDataType = res.data;
+    const currentPayment: PaymentDTO = res.data;
+    const piPaymentID = currentPayment.identifier
+    const paymentMetadata = currentPayment.metadata as U2AMetadata
 
     // Check if a payment record with this ID already exists in the database
-    const oldPayment = await getPayment(res.data.identifier);
+    const oldPayment = await getPayment(piPaymentID);
     if (oldPayment) {
       logger.info("Payment record already exists: ", oldPayment._id);
       await processPaymentError(res.data);
       return {
         success: false,
-        message: `Payment already exists with ID ${ paymentId }`,
+        message: `Payment already exists with ID ${ piPaymentID }`,
       };
     }
 
+    // Create a new payment record
+    const newPaymentData = buildPaymentData(currentPayment);
+
+    const newPayment = await createPayment(newPaymentData)
+    // Validate payment record creation succeeded
+    if (!newPayment) {
+      logger.error("Unable to create payment record")
+      throw new Error("Unable to create payment record");
+    }
+
     // Handle logic based on the payment type
-    if (currentPayment?.metadata.payment_type === PaymentType.BuyerCheckout) {
-      const newOrder = await checkoutProcess(paymentId, currentPayment);
+    if (paymentMetadata.payment_type === PaymentType.BuyerCheckout) {
+      const newOrder = await checkoutProcess(currentPayment, newPayment._id as string);
       logger.info("Order created successfully: ", newOrder._id);
-    } else if (currentPayment?.metadata.payment_type === PaymentType.Membership) {
-      // Create a new payment record
-      const paymentData = buildPaymentData(paymentId, currentPayment );
-      await createPayment(paymentData);
     }
 
     // Approve the payment on the Pi platform
-    await platformAPIClient.post(`/v2/payments/${ paymentId }/approve`);
+    await platformAPIClient.post(`/v2/payments/${ piPaymentID }/approve`);
 
     return {
       success: true,
-      message: `Payment approved with id ${ paymentId }`,
+      message: `Payment approved with id ${ piPaymentID }`,
     };
+
   } catch (error: any) {
     if (error.response) {
       logger.error("platformAPIClient error", {
@@ -225,67 +206,13 @@ export const processPaymentApproval = async (
 export const processPaymentCompletion = async (paymentId: string, txid: string) => {
   try {
     // Confirm the payment exists via Pi platform API
-    const res = await platformAPIClient.get(`/v2/payments/${ paymentId }`);
-    const currentPayment: PaymentDataType = res.data;
-
-    // Mark the payment as completed
-    const completedPayment = await completePayment(paymentId, txid);
-    logger.info("Payment record marked as completed");
-
-    if (completedPayment?.payment_type === PaymentType.BuyerCheckout) {
-      // Update the associated order's status to paid
-      const order = await updatePaidOrder(completedPayment._id as string);
-      logger.info("Order record updated to paid");
-
-      // Save cross-reference for U2U payment tracking
-      const u2uRefData = {
-        u2aPaymentId: completedPayment._id as string,
-        u2uStatus: U2UPaymentStatus.U2ACompleted,
-        a2uPaymentId: null,
-      };
-      await createPaymentCrossReference(order._id as string, u2uRefData);
-      logger.info("U2U cross-reference created", u2uRefData);
-
-      // Notify Pi Platform of successful completion
-      const completedPiPayment = await platformAPIClient.post(`/v2/payments/${ paymentId }/complete`, { txid });
-      
-      if (completedPiPayment.status !== 200) {
-        throw new Error("Failed to mark U2A payment completed on Pi blockchain");
-      }
-
-      logger.info("Payment marked completed on Pi blockchain", completedPiPayment.status);
-
-      const paymentMemo = completedPiPayment.data.memo as string;
-
-      // Start A2U (App-to-User) payment to the seller
-      await createA2UPayment({
-        sellerId: order.seller_id.toString(),
-        amount: order.total_amount.toString(),
-        buyerId: order.buyer_id.toString(),
-        paymentType: PaymentType.BuyerCheckout,
-        orderId: order._id as string,
-        memo: paymentMemo
-      });
-
-    } else if (completedPayment?.payment_type === PaymentType.Membership) {
-
-      const membership_class = currentPayment.metadata.MembershipPayment?.membership_class as MembershipClassType
-      const membership = await updateOrRenewMembership(currentPayment.user_id, membership_class);
-
-      // Notify Pi platform for membership payment completion
-      await platformAPIClient.post(`/v2/payments/${ paymentId }/complete`, { txid });
-      logger.info("Membership subscription completed");
-      return {
-        success: true,
-        message: `Payment completed with id ${ paymentId }`,
-        membership: membership
-      };
-    }
+    await completePiPayment(paymentId, txid);
 
     return {
       success: true,
-      message: `Payment completed with id ${ paymentId }`,
+      message: `U2A Payment completed with id ${ paymentId }`,
     };
+
   } catch (error: any) {
     if (error.response) {
       logger.error("platformAPIClient error", {

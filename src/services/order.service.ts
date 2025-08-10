@@ -11,13 +11,11 @@ import SellerItem from "../models/SellerItem";
 import User from "../models/User";
 import { OrderStatusType } from "../models/enums/orderStatusType";
 import { OrderItemStatusType } from "../models/enums/orderItemStatusType";
-import { IOrder, IUser, NewOrder, PickedItems } from "../types";
+import { IOrder, NewOrder } from "../types";
 import logger from "../config/loggingConfig";
 
 export const createOrder = async (
   orderData: NewOrder,
-  orderItems: PickedItems[],
-  piUid: string
 ): Promise<IOrder> => {
   const session = await mongoose.startSession();
 
@@ -25,11 +23,11 @@ export const createOrder = async (
     session.startTransaction();
 
     // Look up the seller and buyer in the database
-    const seller = await Seller.findOne({ seller_id: orderData.sellerId });
-    const buyer = await User.findOne({ pi_uid: piUid });
+    const seller = await Seller.findOne({ seller_id: orderData.sellerPiUid }).exec();
+    const buyer = await User.findOne({ pi_uid: orderData.buyerPiUid }).exec();
 
     if (!buyer || !seller) {
-      logger.error("Seller or buyer not found", { sellerId: orderData.sellerId, buyerId: piUid });
+      logger.error("Seller or buyer not found", { sellerId: orderData.sellerPiUid, buyerId: orderData.buyerPiUid });
       throw new Error("Seller or buyer not found");
     }
 
@@ -50,7 +48,7 @@ export const createOrder = async (
     if (!newOrder) throw new Error('Failed to create order');
 
     /* Step 2: Fetch all SellerItem documents associated with the order */
-    const sellerItemIds = orderItems.map((item) => item.itemId);
+    const sellerItemIds = orderData.orderItems.map((item) => item.itemId);
     const sellerItems = await SellerItem.find({ _id: { $in: sellerItemIds } }).session(session);
     const sellerItemMap = new Map(sellerItems.map((doc) => [doc._id.toString(), doc]));
 
@@ -58,7 +56,7 @@ export const createOrder = async (
     const bulkSellerItemUpdates = [];
 
     /* Step 3: Build OrderItem documents for bulk insertion */
-    for (const item of orderItems) {
+    for (const item of orderData.orderItems) {
       const sellerItem = sellerItemMap.get(item.itemId);
       if (!sellerItem) {
         logger.error(`Seller item not found for ID: ${item.itemId}`);
