@@ -50,7 +50,7 @@ describe('authenticate function', () => {
         exec: jest.fn().mockResolvedValue(currentUser)
       })
     });
-    (UserSettings.findById as jest.Mock).mockReturnValue({
+    (UserSettings.findOne as jest.Mock).mockReturnValue({
       lean: jest.fn().mockReturnValue({
         exec: jest.fn().mockResolvedValue(currentUserSettings)
       })
@@ -77,7 +77,7 @@ describe('authenticate function', () => {
         exec: jest.fn().mockResolvedValue(currentUser)
       })
     });
-    (UserSettings.findById as jest.Mock).mockReturnValue({
+    (UserSettings.findOne as jest.Mock).mockReturnValue({
       lean: jest.fn().mockReturnValue({
         exec: jest.fn().mockResolvedValue(null)
       })
@@ -107,7 +107,7 @@ describe('authenticate function', () => {
       })
     });
     (User.create as jest.Mock).mockReturnValue(currentUser);
-    (UserSettings.findById as jest.Mock).mockReturnValue({
+    (UserSettings.findOne as jest.Mock).mockReturnValue({
       lean: jest.fn().mockReturnValue({
         exec: jest.fn().mockResolvedValue(null)
       })
@@ -142,7 +142,7 @@ describe('authenticate function', () => {
       })
     });
     (User.create as jest.Mock).mockReturnValue(currentUser);
-    (UserSettings.findById as jest.Mock).mockReturnValue({
+    (UserSettings.findOne as jest.Mock).mockReturnValue({
       lean: jest.fn().mockReturnValue({
         exec: jest.fn().mockResolvedValue(null)
       })
@@ -195,7 +195,7 @@ describe('authenticate function', () => {
       })
     });
 
-    (UserSettings.findById as jest.Mock).mockReturnValue({
+    (UserSettings.findOne as jest.Mock).mockReturnValue({
       lean: jest.fn().mockReturnValue({
         exec: jest.fn().mockResolvedValue(currentUserSettings)
       })

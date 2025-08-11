@@ -1,6 +1,6 @@
 import {Document, Types} from "mongoose";
 import {DeviceLocationType} from "./models/enums/deviceLocationType";
-import {MembershipClassType, SingleClassType} from "./models/enums/membershipClassType";
+import {MembershipClassType, CreditType} from "./models/enums/membershipClassType";
 import {RatingScale} from "./models/enums/ratingScale";
 import {SellerType} from "./models/enums/sellerType";
 import {FulfillmentType} from "./models/enums/fulfillmentType";
@@ -271,7 +271,7 @@ export type PaymentMetadataType = {
 };
 
 type MembershipPaymentMetadataType = {
-  membership_class: MembershipClassType | SingleClassType
+  membership_class: MembershipClassType | CreditType
 };
 
 export interface IPaymentCrossReference {

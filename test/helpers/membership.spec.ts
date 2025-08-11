@@ -4,9 +4,14 @@ import {
   isOfflineShoppingClass,
   isSameShoppingClassType,
   getTierByClass,
-  getTierRank
+  getTierRank,
+  isCreditType
 } from  '../../src/helpers/membership';
-import { MembershipClassType, membershipTiers } from '../../src/models/enums/membershipClassType';
+import { 
+  MembershipClassType, 
+  CreditType, 
+  membershipTiers 
+} from '../../src/models/enums/membershipClassType';
 
 describe('isExpired function ', () => {
   it('should return true if the date is undefined', () => {
@@ -85,6 +90,12 @@ describe('isOfflineShoppingClass function', () => {
 
   it('should return false for TRIPLE_GOLD membership tier', () => {
     expect(isOfflineShoppingClass(MembershipClassType.TRIPLE_GOLD)).toBe(false);
+  });
+});
+
+describe('isCreditType function', () => {
+  it('should return true for SINGLE credit type', () => {
+    expect(isCreditType(CreditType.SINGLE)).toBe(true);
   });
 });
 

@@ -7,16 +7,8 @@ export enum MembershipClassType {
   TRIPLE_GOLD = "Triple Gold"
 }
 
-export enum SingleClassType {
-  SINGLE = "Single",
-}
-
-export const singleTier = {
-  CLASS: SingleClassType.SINGLE,
-  MAPPI_ALLOWANCE: 1,
-  COST: 0.2,
-  DURATION: null,
-  RANK: 0
+export enum CreditType {
+  SINGLE = "Single"
 }
 
 export const membershipTiers = {
@@ -62,4 +54,12 @@ export const membershipTiers = {
     DURATION: 50,
     RANK: 5
   }
+}
+
+export const creditOptions = {
+  CLASS: CreditType.SINGLE,
+  MAPPI_ALLOWANCE: 1,
+  COST: 0.2,
+  DURATION: null,
+  RANK: 0
 }

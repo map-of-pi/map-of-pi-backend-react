@@ -6,18 +6,18 @@ import {
 } from "../helpers/membership";
 import Membership from "../models/Membership";
 import User from "../models/User";
-import { MembershipClassType, membershipTiers, SingleClassType, singleTier } from "../models/enums/membershipClassType";
+import { MembershipClassType, membershipTiers, CreditType, creditOptions } from "../models/enums/membershipClassType";
 import { IMembership, IUser, MembershipOption } from "../types";
 
 import logger from "../config/loggingConfig";
 
 export const buildMembershipList = async (): Promise<MembershipOption[]> => {
   // Single class at the top
-  const singleOption: MembershipOption = {
-    value: SingleClassType.SINGLE as unknown as MembershipClassType, // Casting so type fits MembershipOption
-    cost: singleTier.COST,
-    duration: singleTier.DURATION ?? null,
-    mappi_allowance: singleTier.MAPPI_ALLOWANCE ?? 0,
+  const purchaseOptions: MembershipOption = {
+    value: CreditType.SINGLE as unknown as MembershipClassType, // Casting so type fits MembershipOption
+    cost: creditOptions.COST,
+    duration: creditOptions.DURATION ?? null,
+    mappi_allowance: creditOptions.MAPPI_ALLOWANCE ?? 0,
   };
 
   // Membership tiers except CASUAL
@@ -35,7 +35,7 @@ export const buildMembershipList = async (): Promise<MembershipOption[]> => {
       return rankA - rankB;
     });
 
-  return [singleOption, ...membershipOptions];
+  return [purchaseOptions, ...membershipOptions];
 };
 
 export const getUserMembership = async (authUser: IUser): Promise<IMembership> => {
@@ -65,7 +65,7 @@ export const getSingleMembershipById = async (membership_id: string) => {
 
 export const updateOrRenewMembership = async (
   piUid: string, 
-  membership_class: MembershipClassType | SingleClassType
+  membership_class: MembershipClassType | CreditType
 ): Promise<IMembership> => {
   const user = await User.findOne({ pi_uid: piUid }).lean();
   const today = new Date();
@@ -74,7 +74,7 @@ export const updateOrRenewMembership = async (
   const existing = await Membership.findOne({ user_id: user?._id });
 
   // Handle Single Class case
-  if (membership_class === SingleClassType.SINGLE) {
+  if (membership_class === CreditType.SINGLE) {
     if (!existing) {
       // If user doesn't have a membership, create a base membership with 1 mappi
       return await new Membership({

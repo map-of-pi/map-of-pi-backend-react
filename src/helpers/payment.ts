@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { platformAPIClient } from '../config/platformAPIclient';
 import logger from '../config/loggingConfig';
-import { MembershipClassType, SingleClassType } from "../models/enums/membershipClassType";
+import { MembershipClassType, CreditType } from "../models/enums/membershipClassType";
 import { PaymentType } from "../models/enums/paymentType";
 import { 
   cancelOrder, 
@@ -82,7 +82,7 @@ const completePiPayment = async (piPaymentId: string, txid:string) => {
   } else if (completedPayment?.payment_type === PaymentType.Membership) {
 
     const paymentMetadata = currentPayment.metadata as U2AMetadata
-    const membershipClass = paymentMetadata.MembershipPayment?.membership_class as MembershipClassType | SingleClassType
+    const membershipClass = paymentMetadata.MembershipPayment?.membership_class as MembershipClassType | CreditType
     await updateOrRenewMembership(userPiUid, membershipClass);
     logger.info("membership subscription successfull")
 
