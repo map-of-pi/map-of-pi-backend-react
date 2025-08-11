@@ -131,6 +131,7 @@ export const completePayment = async (
   }
 };
 
+/* TODO: re-integrate with U2U payment implementation; potential refactor */
 export const completeServerPayment = async (): Promise<void> => {
   const {incomplete_server_payments} = await getIncompleteServerPayments();
   logger.info("Found incomplete server payments", incomplete_server_payments);

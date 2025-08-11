@@ -137,16 +137,7 @@ export type PartialReview = {
   receiver: string;
 };
 
-export interface IReviewFeedbackOutput extends IReviewFeedback, PartialReview {
-}
-
-// ========================
-// BUYER MODELS
-// ========================
-export interface PickedItems {
-  itemId: string;
-  quantity: number;
-};
+export interface IReviewFeedbackOutput extends IReviewFeedback, PartialReview {};
 
 // ========================
 // ORDER MODELS
@@ -176,22 +167,27 @@ export interface IOrderItem extends Document {
   updatedAt: Date;
 };
 
+export interface PickedItems {
+  itemId: string;
+  quantity: number;
+};
+
 export interface NewOrder {
-  orderItems: PickedItems[];
   buyerPiUid: string;
   sellerPiUid: string;
   paymentId: string | null; // objectId of the Payment schema
   totalAmount: string;
   status: OrderStatusType;
+  orderItems: PickedItems[];
   fulfillmentMethod: FulfillmentType;
   sellerFulfillmentDescription: string;
   buyerFulfillmentDescription: string;
 };
 
 export type OrderPaymentMetadataType = {
-  items: PickedItems[];
   buyer: string;
   seller: string;
+  items: PickedItems[];
   fulfillment_method: FulfillmentType | undefined;
   seller_fulfillment_description: string | undefined;
   buyer_fulfillment_description: string;
