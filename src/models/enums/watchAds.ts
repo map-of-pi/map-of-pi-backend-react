@@ -1,4 +1,3 @@
-// src/constants/watchAds.ts
 export const WATCH_ADS_SESSION_STATUS = {
   Running: 'running',
   Completed: 'completed',
