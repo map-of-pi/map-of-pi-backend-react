@@ -87,7 +87,16 @@ export const updateOrRenewMembership = async (
       }).save();
     }
 
-    // If membership exists, just add 1 to mappi_balance
+    // If membership exists, check if it's expired
+    const expired = isExpired(existing.membership_expiry_date ?? undefined);
+    
+    // If expired, reset to casual membership with 1 mappi
+    if (expired && existing.membership_class !== MembershipClassType.CASUAL) {      
+      existing.membership_class = MembershipClassType.CASUAL;
+      existing.membership_expiry_date = null;
+      existing.mappi_balance = 1;
+    }
+    // If not expired, just add 1 mappi to the existing balance
     existing.mappi_balance += 1;
     return await existing.save();
   }
