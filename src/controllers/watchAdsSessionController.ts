@@ -1,9 +1,9 @@
-import { Request, Response } from "express";
-import { WatchAdsSessionStatus } from "../models/enums/watchAds";
-import * as WatchAdsSessionService from "../services/watchAdsSession.service";
-import logger from "../config/loggingConfig";
+  import { Request, Response } from "express";
+  import { WatchAdsSessionStatus } from "../models/enums/watchAds";
+  import * as WatchAdsSessionService from "../services/watchAdsSession.service";
+  import logger from "../config/loggingConfig";
 
-// POST /api/v1/watch-ads/session
+  // POST /api/v1/watch-ads/session
 export const startWatchAdsSession = async (req: Request, res: Response) => {
   const authUser = req.currentUser;
   if (!authUser) {
@@ -18,7 +18,7 @@ export const startWatchAdsSession = async (req: Request, res: Response) => {
       return res.json(activeSession);
     }
 
-    // Step 2: Create a new session with default config
+    // Step 2: Create a new session
     const newSession = await WatchAdsSessionService.createSession(authUser._id, {
       status: WatchAdsSessionStatus.Running,
       totalSegments: 20,
@@ -27,25 +27,16 @@ export const startWatchAdsSession = async (req: Request, res: Response) => {
     });
 
     return res.status(201).json(newSession);
-  } catch (err) {
+
+  } catch (err: any) {
+    // Handle race condition where another request created it just now
+    if (err.code === 11000) { 
+      logger.warn(`Race detected: active WatchAdsSession already exists for user ${req.currentUser?._id}`);
+      const existingSession = await WatchAdsSessionService.findActiveSession(authUser._id);
+      if (existingSession) return res.json(existingSession);
+    }
+
     logger.error("Error starting watch-ads session", err);
-    return res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-// GET /api/v1/watch-ads/session
-export const getActiveWatchAdsSession = async (req: Request, res: Response) => {
-  const authUser = req.currentUser;
-  if (!authUser) {
-    logger.warn("No authenticated user found when trying to fetch watch-ads session.");
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-
-  try {
-    const activeSession = await WatchAdsSessionService.findActiveSession(authUser._id);
-    return res.json(activeSession || null);
-  } catch (err) {
-    logger.error("Error fetching watch-ads session", err);
     return res.status(500).json({ error: "Internal server error" });
   }
 };
