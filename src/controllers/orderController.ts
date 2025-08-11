@@ -54,7 +54,13 @@ export const createOrder = async (req: Request, res: Response) => {
   const { orderData, orderItems } = req.body;
   try {
     // Ensure no payment ID is attached
-    const sanitizedOrderData: NewOrder = { ...orderData, paymentId: null, orderItems: orderItems, buyerPiUid: buyer.pi_uid };
+    const sanitizedOrderData: NewOrder = { 
+      ...orderData, 
+      paymentId: null, 
+      orderItems, 
+      buyerPiUid: buyer.pi_uid 
+    };
+
     const order = await orderService.createOrder(sanitizedOrderData);
     if (!order) {
       logger.error(`Failed to create order with provided data: ${JSON.stringify(sanitizedOrderData)}`);

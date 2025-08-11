@@ -130,7 +130,7 @@ export const updatePaidOrder = async (paymentId: string): Promise<IOrder> => {
     }
     return updatedOrder;
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error(`Failed to update paid order for paymentID ${ paymentId }: ${ error }`);
     throw error;
   }  
@@ -151,13 +151,13 @@ export const markAsPaidOrder = async (orderId: string): Promise<IOrder> => {
     ).exec();
     
     if (!updatedOrder) {
-      logger.error(`Failed to update paid order for order ID ${ orderId }`);
-      throw new Error('Failed to update paid order');
+      logger.error(`Failed to mark as paid order for order ID ${ orderId }`);
+      throw new Error('Failed to mark as paid order');
     }
     return updatedOrder;
 
-  } catch (error: any) {
-    logger.error(`Failed to update paid order for order ${ orderId }: ${ error }`);
+  } catch (error) {
+    logger.error(`Failed to mark as paid order for order ${ orderId }: ${ error }`);
     throw error;
   }  
 };
@@ -176,7 +176,7 @@ export const getSellerOrdersById = async (piUid: string) => {
       .lean();
     return orders;
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error(`Failed to get seller orders for Pi UID ${ piUid }: ${ error }`);
     throw error;
   }
@@ -196,7 +196,7 @@ export const getBuyerOrdersById = async (piUid: string) => {
       .lean();
     return orders;
 
-  } catch (error: any) {
+  } catch (error) {
     logger.error(`Failed to get buyer orders for Pi UID ${ piUid }: ${ error }`);
     throw error;
   }
@@ -210,7 +210,7 @@ export const deleteOrderById = async (orderId: string) => {
       return null;
     }
     return deletedOrder;
-  } catch (error: any) {
+  } catch (error) {
     logger.error(`Failed to delete order for orderID ${ orderId }: ${ error }`);
     throw error;
   }
@@ -248,7 +248,7 @@ export const getOrderItems = async (orderId: string) => {
       orderItems: result, 
       pi_username: user?.pi_username || '',  
     };
-  } catch (error: any) {
+  } catch (error) {
     logger.error(`Failed to get order items for orderID ${ orderId }: ${ error }`);
     throw error;
   }
@@ -289,7 +289,7 @@ export const updateOrderStatus = async (
     }
 
     return updatedOrder;
-  } catch (error: any) {
+  } catch (error) {
     logger.error(`Failed to update order status for orderID ${ orderId }: ${ error }`);
     throw error;
   }  
@@ -313,7 +313,7 @@ export const updateOrderItemStatus = async (
 
     logger.info(`Order item ${ itemId } updated to status "${ itemStatus }"`);
     return updatedItem;
-  } catch (error: any) {
+  } catch (error) {
     logger.error(`Failed to update order item status for orderItemID ${ itemId }: ${ error }`);
     throw error;
   }
