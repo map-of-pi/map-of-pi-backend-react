@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { platformAPIClient } from '../config/platformAPIclient';
 import logger from '../config/loggingConfig';
+import { FulfillmentType } from '../models/enums/fulfillmentType';
 import { MembershipClassType, CreditType } from "../models/enums/membershipClassType";
+import { OrderStatusType } from '../models/enums/orderStatusType';
 import { PaymentType } from "../models/enums/paymentType";
 import { 
   cancelOrder, 
@@ -16,8 +18,6 @@ import {
 } from '../services/payment.service';
 import { updateOrRenewMembership } from "../services/membership.service";
 import { PaymentDTO, PaymentInfo, U2AMetadata } from '../types';
-import { OrderStatusType } from '../models/enums/orderStatusType';
-import { FulfillmentType } from '../models/enums/fulfillmentType';
 
 const buildPaymentData = (currentPayment: PaymentDTO) => {
   const paymentMetadata = currentPayment.metadata as U2AMetadata;

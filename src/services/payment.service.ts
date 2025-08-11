@@ -35,29 +35,6 @@ export const createPayment = async (paymentData: NewPayment): Promise<IPayment> 
   }
 };
 
-export const completePayment = async (
-  piPaymentId: string, 
-  txid: string
-): Promise<IPayment> => {
-  try {
-    const updatedPayment = await Payment.findOneAndUpdate(
-      { pi_payment_id: piPaymentId }, 
-      { $set: { txid, paid: true } }, 
-      { new: true }
-    ).exec();
-
-    if (!updatedPayment) {
-      logger.error(`Failed to update payment record for piPaymentID ${ piPaymentId }`);
-      throw new Error('Failed to update payment');
-    }
-    return updatedPayment;
-    
-  } catch (error: any) {
-    logger.error(`Failed to complete payment for piPaymentID ${ piPaymentId }: ${ error }`);
-    throw error;
-  }
-};
-
 export const createPaymentCrossReference = async (
   refData: U2URefDataType
 ): Promise<IPaymentCrossReference> => {
@@ -101,6 +78,21 @@ export const updatePaymentCrossReference = async (
   }
 };
 
+export const getPayment = async (piPaymentId: string): Promise<IPayment | null> => {
+  try {
+    const existingPayment = await Payment.findOne({ pi_payment_id: piPaymentId }).exec();
+    if (!existingPayment) {
+      logger.warn(`Failed to get payment; no record found for piPaymentID ${ piPaymentId }`);
+      return null;
+    }
+    return existingPayment;
+
+  } catch (error: any) {
+    logger.error(`Failed to get payment for piPaymentID ${ piPaymentId }: ${ error }`);
+    throw error;
+  }
+};
+
 export const getIncompleteServerPayments = async (): Promise<any> => {
   try {
     const serverPayments = await pi.getIncompleteServerPayments();
@@ -112,6 +104,29 @@ export const getIncompleteServerPayments = async (): Promise<any> => {
     return serverPayments;
   } catch (error: any) {
     logger.error(`Failed to fetch incomplete Pi payments from server: ${ error.message }`);
+    throw error;
+  }
+};
+
+export const completePayment = async (
+  piPaymentId: string, 
+  txid: string
+): Promise<IPayment> => {
+  try {
+    const updatedPayment = await Payment.findOneAndUpdate(
+      { pi_payment_id: piPaymentId }, 
+      { $set: { txid, paid: true } }, 
+      { new: true }
+    ).exec();
+
+    if (!updatedPayment) {
+      logger.error(`Failed to update payment record for piPaymentID ${ piPaymentId }`);
+      throw new Error('Failed to update payment');
+    }
+    return updatedPayment;
+    
+  } catch (error: any) {
+    logger.error(`Failed to complete payment for piPaymentID ${ piPaymentId }: ${ error }`);
     throw error;
   }
 };
@@ -181,21 +196,6 @@ export const completeServerPayment = async (): Promise<void> => {
         logger.error(`❌ Error completing server payment for Order ID ${metadata.orderId || 'unknown'}: ${error.message}`);
       }
     }
-  }
-};
-
-export const getPayment = async (piPaymentId: string): Promise<IPayment | null> => {
-  try {
-    const existingPayment = await Payment.findOne({ pi_payment_id: piPaymentId }).exec();
-    if (!existingPayment) {
-      logger.warn(`Failed to get payment; no record found for piPaymentID ${ piPaymentId }`);
-      return null;
-    }
-    return existingPayment;
-
-  } catch (error: any) {
-    logger.error(`Failed to get payment for piPaymentID ${ piPaymentId }: ${ error }`);
-    throw error;
   }
 };
 
