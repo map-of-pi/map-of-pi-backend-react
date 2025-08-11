@@ -144,8 +144,8 @@ export interface IReviewFeedbackOutput extends IReviewFeedback, PartialReview {
 // BUYER MODELS
 // ========================
 export interface PickedItems {
-  itemId: string,
-  quantity: number,
+  itemId: string;
+  quantity: number;
 };
 
 // ========================
@@ -177,24 +177,24 @@ export interface IOrderItem extends Document {
 };
 
 export interface NewOrder {
-  orderItems: PickedItems[],
-  buyerPiUid: string,
-  sellerPiUid: string,
-  paymentId: string | null, // objectId of the Payment schema
-  totalAmount: string,
-  status: OrderStatusType,
-  fulfillmentMethod: FulfillmentType,
-  sellerFulfillmentDescription: string,
-  buyerFulfillmentDescription: string,
+  orderItems: PickedItems[];
+  buyerPiUid: string;
+  sellerPiUid: string;
+  paymentId: string | null; // objectId of the Payment schema
+  totalAmount: string;
+  status: OrderStatusType;
+  fulfillmentMethod: FulfillmentType;
+  sellerFulfillmentDescription: string;
+  buyerFulfillmentDescription: string;
 };
 
 export type OrderPaymentMetadataType = {
-  items: PickedItems[],
-  buyer: string,
-  seller: string,
-  fulfillment_method: FulfillmentType | undefined,
-  seller_fulfillment_description: string | undefined,
-  buyer_fulfillment_description: string
+  items: PickedItems[];
+  buyer: string;
+  seller: string;
+  fulfillment_method: FulfillmentType | undefined;
+  seller_fulfillment_description: string | undefined;
+  buyer_fulfillment_description: string;
 };
 
 // ========================
@@ -213,12 +213,16 @@ export interface IPayment extends Document {
 };
 
 export interface U2AMetadata {
-  payment_type: PaymentType,
-  OrderPayment?: OrderPaymentMetadataType,
-  MembershipPayment?: MembershipPaymentMetadataType
+  payment_type: PaymentType;
+  OrderPayment?: OrderPaymentMetadataType;
+  MembershipPayment?: MembershipPaymentMetadataType;
 }
 
-export interface A2UMetadata { orderId: string; sellerId: string; buyerId: string }
+export interface A2UMetadata { 
+  orderId: string; 
+  sellerId: string; 
+  buyerId: string 
+};
 
 export interface PaymentInfo {
   identifier: string;
@@ -229,49 +233,49 @@ export interface PaymentInfo {
 };
 
 export interface PaymentDTO {
-  amount: number,
-  user_uid: string,
-  created_at: string,
-  identifier: string,
-  memo: string,
-  metadata: U2AMetadata | A2UMetadata,
+  amount: number;
+  user_uid: string;
+  created_at: string;
+  identifier: string;
+  memo: string;
+  metadata: U2AMetadata | A2UMetadata;
   status: {
-    developer_approved: boolean,
-    transaction_verified: boolean,
-    developer_completed: boolean,
-    cancelled: boolean,
-    user_cancelled: boolean,
+    developer_approved: boolean;
+    transaction_verified: boolean;
+    developer_completed: boolean;
+    cancelled: boolean;
+    user_cancelled: boolean;
   },
-  to_address: string,
+  to_address: string;
   transaction: null | {
-    txid: string,
-    verified: boolean,
-    _link: string,
+    txid: string;
+    verified: boolean;
+    _link: string;
   },
 };
 
 export interface NewPayment {
-  piPaymentId: string,
-  buyerPiUid: string,
-  memo: string,
-  amount: number,
-  paymentType: PaymentType
+  piPaymentId: string;
+  buyerPiUid: string;
+  memo: string;
+  amount: number;
+  paymentType: PaymentType;
 };
 
 export interface U2URefDataType {
-  orderId: string,
-  u2aPaymentId?: string,
-  u2uStatus: U2UPaymentStatus,
-  a2uPaymentId: string | null,
+  orderId: string;
+  u2aPaymentId?: string;
+  u2uStatus: U2UPaymentStatus;
+  a2uPaymentId: string | null;
 };
 
 export type PaymentMetadataType = {
-  OrderPayment: OrderPaymentMetadataType,
-  MembershipPayment: MembershipPaymentMetadataType
+  OrderPayment: OrderPaymentMetadataType;
+  MembershipPayment: MembershipPaymentMetadataType;
 };
 
 type MembershipPaymentMetadataType = {
-  membership_class: MembershipClassType | CreditType
+  membership_class: MembershipClassType | CreditType;
 };
 
 export interface IPaymentCrossReference {
