@@ -10,40 +10,72 @@ type CreateOpts = {
 };
 
 export async function findActiveSession(userId: Types.ObjectId) {
+  const now = new Date();
+  await WatchAdsSession.updateMany(
+    { userId, status: WATCH_ADS_SESSION_STATUS.Running, expiresAt: { $lte: now } },
+    { $set: { status: WATCH_ADS_SESSION_STATUS.Expired, endedAt: now } }
+  );
   return WatchAdsSession.findOne({
-    userId,
-    status: WATCH_ADS_SESSION_STATUS.Running,
+    userId, status: WATCH_ADS_SESSION_STATUS.Running, expiresAt: { $gt: now }
   }).lean();
 }
 
 export async function createSession(userId: Types.ObjectId, opts: CreateOpts = {}) {
-  const now = Date.now();
+  const nowMs = Date.now();
+  const now = new Date(nowMs);
+
   const {
     status = WATCH_ADS_SESSION_STATUS.Running,
     totalSegments = 20,
     segmentSecs = 30,
-    expiresAt = new Date(now + 24 * 60 * 60 * 1000),
+    expiresAt = new Date(
+      nowMs + totalSegments * segmentSecs * 1000 + 60 * 1000 // buffer 60s
+    ),
   } = opts;
 
-  try {
-    const doc = await WatchAdsSession.create({
-      userId,
-      status,
-      totalSegments,
-      segmentSecs,
-      completedSegments: 0,
-      earnedSecs: 0,
-      startedAt: new Date(now),
-      expiresAt,
-    });
-    return doc.toObject();
-  } catch (err: any) {
-    // Partial unique index (userId, status='running') can throw if a race occurs.
-    if (err?.code === 11000) {
-      // Return the existing active session instead of failing.
-      const existing = await findActiveSession(userId);
-      if (existing) return existing;
+  // 1. Expire any stale running sessions *before* we do anything else
+  await WatchAdsSession.updateMany(
+    { userId, status: WATCH_ADS_SESSION_STATUS.Running, expiresAt: { $lte: now } },
+    { $set: { status: WATCH_ADS_SESSION_STATUS.Expired, endedAt: now } }
+  );
+
+  let attempt = 0;
+  while (attempt < 3) {
+    try {
+      const doc = await WatchAdsSession.create({
+        userId,
+        status,
+        totalSegments,
+        segmentSecs,
+        completedSegments: 0,
+        earnedSecs: 0,
+        startedAt: now,
+        expiresAt,
+      });
+      return doc.toObject();
+    } catch (err: any) {
+      if (err?.code === 11000) {
+        // Another session got created in the meantime — return it if valid
+        const active = await WatchAdsSession.findOne({
+          userId,
+          status: WATCH_ADS_SESSION_STATUS.Running,
+          expiresAt: { $gt: new Date() },
+        }).lean();
+        if (active) return active;
+
+        // Otherwise, loop and try creating again
+        attempt++;
+        continue;
+      }
+      throw err;
     }
-    throw err;
   }
+
+  // If we hit here, repeated collisions — just return the active one if any
+  return WatchAdsSession.findOne({
+    userId,
+    status: WATCH_ADS_SESSION_STATUS.Running,
+    expiresAt: { $gt: new Date() },
+  }).lean();
 }
+
