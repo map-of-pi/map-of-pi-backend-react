@@ -7,8 +7,7 @@ const WatchAdsBalanceSchema = new Schema<IWatchAdsBalance>(
       type: Schema.Types.ObjectId, 
       ref: 'User', 
       required: true, 
-      unique: true, 
-      index: true 
+      unique: true,
     },
     availableSecs: { type: Number, default: 0, min: 0 },
     lifetimeEarnedSecs: { type: Number, default: 0, min: 0 }
