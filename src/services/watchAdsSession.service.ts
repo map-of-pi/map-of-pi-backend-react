@@ -33,6 +33,11 @@ export async function createSession(userId: Types.ObjectId, opts: CreateOpts = {
     ),
   } = opts;
 
+  // ✅ Validation
+  if (totalSegments <= 0 || segmentSecs <= 0) {
+    throw new Error("Invalid session parameters: totalSegments and segmentSecs must be greater than 0");
+  }
+
   // 1. Expire any stale running sessions *before* we do anything else
   await WatchAdsSession.updateMany(
     { userId, status: WATCH_ADS_SESSION_STATUS.Running, expiresAt: { $lte: now } },
