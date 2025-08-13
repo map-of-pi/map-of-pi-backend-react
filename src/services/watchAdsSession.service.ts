@@ -29,9 +29,14 @@ export async function createSession(userId: Types.ObjectId, opts: CreateOpts = {
     totalSegments = 20,
     segmentSecs = 30,
     expiresAt = new Date(
-      nowMs + totalSegments * segmentSecs * 1000 + 60 * 1000 // buffer 60s
+      nowMs + totalSegments * segmentSecs * 1000 +  * 1000 // buffer 60s
     ),
   } = opts;
+
+  // Validation
+  if (totalSegments <= 0 || segmentSecs <= 0) {
+    throw new Error("Invalid session parameters: totalSegments and segmentSecs must be greater than 0");
+  }
 
   // 1. Expire any stale running sessions *before* we do anything else
   await WatchAdsSession.updateMany(
