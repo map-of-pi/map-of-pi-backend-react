@@ -29,7 +29,7 @@ export async function createSession(userId: Types.ObjectId, opts: CreateOpts = {
     totalSegments = 20,
     segmentSecs = 30,
     expiresAt = new Date(
-      nowMs + totalSegments * segmentSecs * 1000 +  * 1000 // buffer 60s
+      nowMs + totalSegments * segmentSecs * 1000 + 10 * 60 * 1000 // buffer 10min
     ),
   } = opts;
 
