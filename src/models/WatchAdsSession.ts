@@ -8,7 +8,6 @@ const WatchAdsSessionSchema = new Schema<IWatchAdsSession>(
       type: Schema.Types.ObjectId, 
       ref: 'User', 
       required: true, 
-      index: true 
     },
     status: {
       type: String,
