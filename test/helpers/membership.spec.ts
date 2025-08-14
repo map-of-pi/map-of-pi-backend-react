@@ -5,11 +5,11 @@ import {
   isSameShoppingClassType,
   getTierByClass,
   getTierRank,
-  isCreditType
+  isMappiCreditType
 } from  '../../src/helpers/membership';
 import { 
   MembershipClassType, 
-  CreditType, 
+  MappiCreditType, 
   membershipTiers 
 } from '../../src/models/enums/membershipClassType';
 
@@ -93,9 +93,9 @@ describe('isOfflineShoppingClass function', () => {
   });
 });
 
-describe('isCreditType function', () => {
+describe('isMappiCreditType function', () => {
   it('should return true for SINGLE credit type', () => {
-    expect(isCreditType(CreditType.SINGLE)).toBe(true);
+    expect(isMappiCreditType(MappiCreditType.SINGLE)).toBe(true);
   });
 });
 

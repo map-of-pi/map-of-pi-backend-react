@@ -1,6 +1,6 @@
 import {Document, Types} from "mongoose";
 import {DeviceLocationType} from "./models/enums/deviceLocationType";
-import {MembershipClassType, CreditType} from "./models/enums/membershipClassType";
+import {MembershipClassType, MappiCreditType} from "./models/enums/membershipClassType";
 import {RatingScale} from "./models/enums/ratingScale";
 import {SellerType} from "./models/enums/sellerType";
 import {FulfillmentType} from "./models/enums/fulfillmentType";
@@ -198,10 +198,10 @@ export type OrderPaymentMetadataType = {
 // ========================
 export interface IPayment extends Document {
   user_id: Types.ObjectId;
+  pi_payment_id: string;
   amount: Types.Decimal128;
   paid: boolean;
   memo: string;
-  pi_payment_id: string;
   txid?: string;
   payment_type: PaymentType;
   cancelled: boolean;
@@ -271,7 +271,7 @@ export type PaymentMetadataType = {
 };
 
 type MembershipPaymentMetadataType = {
-  membership_class: MembershipClassType | CreditType;
+  membership_class: MembershipClassType | MappiCreditType;
 };
 
 export interface IPaymentCrossReference {

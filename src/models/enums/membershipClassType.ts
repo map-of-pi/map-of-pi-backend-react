@@ -7,7 +7,7 @@ export enum MembershipClassType {
   TRIPLE_GOLD = "Triple Gold"
 }
 
-export enum CreditType {
+export enum MappiCreditType {
   SINGLE = "Single"
 }
 
@@ -56,8 +56,8 @@ export const membershipTiers = {
   }
 }
 
-export const creditOptions = {
-  CLASS: CreditType.SINGLE,
+export const mappiCreditOptions = {
+  CLASS: MappiCreditType.SINGLE,
   MAPPI_ALLOWANCE: 1,
   COST: 0.2,
   DURATION: null,

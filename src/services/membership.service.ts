@@ -6,7 +6,12 @@ import {
 } from "../helpers/membership";
 import Membership from "../models/Membership";
 import User from "../models/User";
-import { MembershipClassType, membershipTiers, CreditType, creditOptions } from "../models/enums/membershipClassType";
+import { 
+  MembershipClassType, 
+  membershipTiers, 
+  MappiCreditType, 
+  mappiCreditOptions 
+} from "../models/enums/membershipClassType";
 import { IMembership, IUser, MembershipOption } from "../types";
 
 import logger from "../config/loggingConfig";
@@ -14,10 +19,10 @@ import logger from "../config/loggingConfig";
 export const buildMembershipList = async (): Promise<MembershipOption[]> => {
   // Single class at the top
   const purchaseOptions: MembershipOption = {
-    value: CreditType.SINGLE as unknown as MembershipClassType, // Casting so type fits MembershipOption
-    cost: creditOptions.COST,
-    duration: creditOptions.DURATION ?? null,
-    mappi_allowance: creditOptions.MAPPI_ALLOWANCE ?? 0,
+    value: MappiCreditType.SINGLE as unknown as MembershipClassType, // Casting so type fits MembershipOption
+    cost: mappiCreditOptions.COST,
+    duration: mappiCreditOptions.DURATION ?? null,
+    mappi_allowance: mappiCreditOptions.MAPPI_ALLOWANCE ?? 0,
   };
 
   // Membership tiers except CASUAL
@@ -65,7 +70,7 @@ export const getSingleMembershipById = async (membership_id: string) => {
 
 export const updateOrRenewMembership = async (
   piUid: string, 
-  membership_class: MembershipClassType | CreditType
+  membership_class: MembershipClassType | MappiCreditType
 ): Promise<IMembership> => {
   const user = await User.findOne({ pi_uid: piUid }).lean();
   const today = new Date();
@@ -74,7 +79,7 @@ export const updateOrRenewMembership = async (
   const existing = await Membership.findOne({ user_id: user?._id });
 
   // Handle Single Class case
-  if (membership_class === CreditType.SINGLE) {
+  if (membership_class === MappiCreditType.SINGLE) {
     if (!existing) {
       // If user doesn't have a membership, create a base membership with 1 mappi
       return await new Membership({

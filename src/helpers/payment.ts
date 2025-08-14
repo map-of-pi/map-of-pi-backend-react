@@ -2,7 +2,7 @@ import axios from 'axios';
 import { platformAPIClient } from '../config/platformAPIclient';
 import logger from '../config/loggingConfig';
 import { FulfillmentType } from '../models/enums/fulfillmentType';
-import { MembershipClassType, CreditType } from "../models/enums/membershipClassType";
+import { MembershipClassType, MappiCreditType } from "../models/enums/membershipClassType";
 import { OrderStatusType } from '../models/enums/orderStatusType';
 import { PaymentType } from "../models/enums/paymentType";
 import { 
@@ -42,11 +42,11 @@ const checkoutProcess = async (currentPayment: PaymentDTO, paymentId: string) =>
 
   // Construct order data object
   const newOrderData = {
-    orderItems: OrderMetadata.items,
     buyerPiUid: OrderMetadata.buyer as string,
     sellerPiUid: OrderMetadata.seller as string,
     paymentId: paymentId, // objectId of the Payment schema
     totalAmount: currentPayment.amount.toString(),
+    orderItems: OrderMetadata.items,
     status: OrderStatusType.Initialized,
     fulfillmentMethod: OrderMetadata.fulfillment_method as FulfillmentType,
     sellerFulfillmentDescription: OrderMetadata.seller_fulfillment_description as string,
@@ -65,8 +65,8 @@ const completePiPayment = async (piPaymentId: string, txid:string) => {
   const userPiUid = currentPayment.user_uid;
 
   if (!txid) {
-    logger.warn("No transaction id");
-    throw new Error("No transaction id");
+    logger.warn("No transaction ID");
+    throw new Error("No transaction ID");
   }
   
   // Mark the payment as completed
@@ -77,15 +77,14 @@ const completePiPayment = async (piPaymentId: string, txid:string) => {
 
     // Update the associated order's status to paid
     await updatePaidOrder(completedPayment._id as string);
-    logger.info("Order record updated to paid")
+    logger.info("Order record updated to paid");
 
   } else if (completedPayment?.payment_type === PaymentType.Membership) {
 
     const paymentMetadata = currentPayment.metadata as U2AMetadata
-    const membershipClass = paymentMetadata.MembershipPayment?.membership_class as MembershipClassType | CreditType
+    const membershipClass = paymentMetadata.MembershipPayment?.membership_class as MembershipClassType | MappiCreditType
     await updateOrRenewMembership(userPiUid, membershipClass);
-    logger.info("membership subscription successfull")
-
+    logger.info("Membership subscription successfully");
   }
 
   // Notify Pi Platform of successful completion

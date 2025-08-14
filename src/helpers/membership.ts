@@ -1,6 +1,6 @@
 import { 
   MembershipClassType, 
-  CreditType,
+  MappiCreditType,
   membershipTiers
 } from '../models/enums/membershipClassType';
 
@@ -20,9 +20,9 @@ export const isOfflineShoppingClass = (tier: MembershipClassType): boolean =>
     MembershipClassType.WHITE,
   ].includes(tier);
 
-export const isCreditType = (credit: CreditType): boolean =>
+export const isMappiCreditType = (credit: MappiCreditType): boolean =>
   [
-    CreditType.SINGLE 
+    MappiCreditType.SINGLE 
   ].includes(credit);
 
 export const isSameShoppingClassType = (a: MembershipClassType, b: MembershipClassType): boolean =>
