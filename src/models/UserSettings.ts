@@ -68,6 +68,9 @@ const userSettingsSchema = new Schema<IUserSettings>(
       required: true,
       default: {},
     },
+    },
+  {
+    timestamps:true
   }
 );
 

@@ -19,6 +19,8 @@ import mapCenterRoutes from "../routes/mapCenter.routes";
 import notificationRoutes from "../routes/notification.routes";
 import restrictionRoutes from "../routes/restriction.routes";
 import toggleRoutes from "../routes/toggle.routes";
+import adminRoutes from "../routes/admin.routes";
+import statisticRoutes from "../routes/statistics.routes";
 import cronRoutes from "../routes/cron.routes";
 
 dotenv.config();
@@ -30,7 +32,7 @@ app.use(express.json());
 app.use(requestLogger);
 
 app.use(cors({
-    origin: process.env.CORS_ORIGIN_URL,
+    origin: [`${process.env.CORS_ORIGIN_URL}`,`${process.env.ADMIN_URL}`],
     credentials: true
 }));
 app.use(cookieParser());
@@ -53,6 +55,10 @@ app.use("/api/v1/notifications", notificationRoutes);
 app.use("/api/v1/restrictions", restrictionRoutes);
 app.use("/api/v1/toggles", toggleRoutes);
 
+////
+
+app.use("/api/v1/admin",adminRoutes)
+app.use("/api/v1/statistics",statisticRoutes)
 app.use("/api/v1/cron", cronRoutes);
 
 app.use("/", homeRoutes);

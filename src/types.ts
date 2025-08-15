@@ -17,7 +17,9 @@ export interface IUser extends Document {
   pi_uid: string;
   pi_username: string;
   user_name: string;
-};
+  createdAt?: Date;
+  updatedAt?: Date;
+}
 
 export interface IUserSettings extends Document {
   user_settings_id: string;
@@ -73,6 +75,8 @@ export interface ISeller extends Document {
   fulfillment_description?: string;
   isRestricted: boolean;
   lastSanctionUpdateAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 };
 
 // Combined interface representing a seller with selected user settings
@@ -105,6 +109,8 @@ export interface IReviewFeedback extends Document {
   comment?: string;
   image?: string;
   review_date: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 };
 
 export interface CompleteFeedback {
@@ -305,6 +311,8 @@ export interface ISanctionedGeoBoundary extends Document {
     shapeGroup: string;
     shapeType: string;
   };
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type SanctionedUpdateResult = {
@@ -325,3 +333,16 @@ export interface IToggle extends Document {
   createdAt: Date;
   updatedAt: Date;
 };
+
+// ========================
+// ADMIN MODELS
+// ========================
+export interface IAdmin extends Document {
+  email: string;  
+  username: string;
+  password: string;       
+  role?: string;          
+  createdAt?: Date;      
+  updatedAt?: Date;    
+  isActive?: boolean;   
+}

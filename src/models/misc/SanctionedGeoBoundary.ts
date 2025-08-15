@@ -29,6 +29,7 @@ const sanctionedGeoBoundarySchema = new Schema<ISanctionedGeoBoundary>(
   },
   {
     collection: "sanctioned-geo-boundaries", // 👈 This ensures it uses the correct collection
+    timestamps: true
   }
 );
 
