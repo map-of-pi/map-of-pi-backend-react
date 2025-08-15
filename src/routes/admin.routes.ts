@@ -7,7 +7,6 @@ import { activateAdmin, deactivateAdmin, getAdminInfo, getAlladmins, loginAdmin,
 const adminRoutes = Router();
 
 adminRoutes.get("/me", getAdminInfo);
-adminRoutes.get("/", getAlladmins);
 adminRoutes.post("/register", registerAdmin);
 adminRoutes.post("/login", loginAdmin);
 adminRoutes.put("/deactivate/:id", deactivateAdmin);

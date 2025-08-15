@@ -2,8 +2,7 @@ import { Request, Response } from "express";
 import User from "../../models/User";
 import ReviewFeedback from "../../models/ReviewFeedback";
 import { RatingScale } from "../../models/enums/ratingScale";
-import { startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
-
+import { startOfMonth, endOfMonth, subDays, subMonths } from "date-fns";
 
 export const getTotalUser = async (req: Request, res: Response) => {
   try {
@@ -21,54 +20,49 @@ export const getTotalUser = async (req: Request, res: Response) => {
     const hasNextPage = page < totalPages;
     const hasPrevPage = page > 1;
 
-    const oneMonthAgo = new Date();
-    oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
-    const activeUsers = await User.find({ updatedAt: { $gte: oneMonthAgo } }).countDocuments();
+    const now = new Date();
+    
+    const sevenDaysAgo = subDays(now, 7);
+    const usersLast7Days = await User.find({ 
+      createdAt: { $gte: sevenDaysAgo, $lte: now } 
+    }).countDocuments();
+    
+    const fourteenDaysAgo = subDays(now, 14);
+    const usersPrevious7Days = await User.find({ 
+      createdAt: { $gte: fourteenDaysAgo, $lt: sevenDaysAgo } 
+    }).countDocuments();
+    
+    const sevenDayPercentageChange = usersPrevious7Days > 0 
+      ? ((usersLast7Days - usersPrevious7Days) / usersPrevious7Days) * 100 
+      : usersLast7Days > 0 ? 100 : 0;
 
-    const startOfCurrentMonth = startOfMonth(new Date());
-    const endOfCurrentMonth = endOfMonth(new Date());
-    const newUsers = await User.find({
+    const startOfCurrentMonth = startOfMonth(now);
+    const endOfCurrentMonth = endOfMonth(now);
+    const usersThisMonth = await User.find({
       createdAt: { $gte: startOfCurrentMonth, $lte: endOfCurrentMonth },
     }).countDocuments();
 
-    const startOfCurrentYear = startOfYear(new Date());
-    const endOfCurrentYear = endOfYear(new Date());
-    const userGrowth = [];
-    const userChangePercentage = []; 
+    const startOfLastMonth = startOfMonth(subMonths(now, 1));
+    const endOfLastMonth = endOfMonth(subMonths(now, 1));
+    const usersLastMonth = await User.find({
+      createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth },
+    }).countDocuments();
 
-    let previousMonthCount = 0; 
+    const monthOverMonthPercentageChange = usersLastMonth > 0 
+      ? ((usersThisMonth - usersLastMonth) / usersLastMonth) * 100 
+      : usersThisMonth > 0 ? 100 : 0;
 
-    for (let month = 0; month < 12; month++) {
-      const start = startOfMonth(new Date(new Date().setMonth(month, 1)));
-      const end = endOfMonth(start);
-
-      if (start >= startOfCurrentYear && start <= endOfCurrentYear) {
-        const count = await User.find({ createdAt: { $gte: start, $lte: end } }).countDocuments();
-
-        const percentageChange = previousMonthCount
-          ? ((count - previousMonthCount) / previousMonthCount) * 100
-          : 0;
-
-        userGrowth.push({
-          name: start.toLocaleString("default", { month: "short" }),
-          total: count,
-        });
-
-        userChangePercentage.push({
-          name: start.toLocaleString("default", { month: "short" }),
-          percentage: parseFloat(percentageChange.toFixed(2)), 
-        });
-
-        previousMonthCount = count;
-      }
-    }
+    const thirtyDaysAgo = subDays(now, 30);
+    const activeUsers = await User.find({ 
+      updatedAt: { $gte: thirtyDaysAgo } 
+    }).countDocuments();
 
     return res.status(200).json({
       totalUsers,
       activeUsers,
-      newUsers,
-      userGrowth,
-      userChangePercentage, 
+      usersLast7Days,
+      sevenDayPercentageChange: parseFloat(sevenDayPercentageChange.toFixed(2)),
+      monthOverMonthPercentageChange: parseFloat(monthOverMonthPercentageChange.toFixed(2)),
       users,
       pagination: {
         currentPage: page,

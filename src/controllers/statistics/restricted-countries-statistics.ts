@@ -1,10 +1,9 @@
 import { Request, Response } from "express";
-import SanctionedRegion from "../../models/misc/SanctionedRegion";
-
+import SanctionedGeoBoundary from "../../models/misc/SanctionedGeoBoundary";
 
 export const getRestrictedAreaStats = async (req: Request, res: Response) => {
     try {
-        const restrictedAreas = await SanctionedRegion.find()
+        const restrictedAreas = await SanctionedGeoBoundary.find()
         return res.status(200).json({
             restrictedAreas
         });
@@ -19,13 +18,20 @@ export const getRestrictedAreaStats = async (req: Request, res: Response) => {
 
 export const createSanctionedRegion = async (req: Request, res: Response) => {
     try {
-        const { location, boundary } = req.body;
+        const { geometry, properties } = req.body;
 
-        const newSanctionedRegion = await SanctionedRegion.create({
-            location,
-            boundary: {
+        const newSanctionedRegion = await SanctionedGeoBoundary.create({
+            type: "Feature",
+            geometry: {
                 type: "Polygon",
-                coordinates: boundary
+                coordinates: geometry.coordinates
+            },
+            properties: {
+                shapeName: properties.shapeName,
+                shapeISO: properties.shapeISO,
+                shapeID: properties.shapeID,
+                shapeGroup: properties.shapeGroup,
+                shapeType: properties.shapeType
             }
         });
 

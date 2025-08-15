@@ -5,12 +5,11 @@ import {
   registerOrUpdateSeller,
   getAllSellerItems, 
   addOrUpdateSellerItem,
-  deleteSellerItem,
-  getSellersWithinSanctionedRegion 
+  deleteSellerItem
 } from '../../src/services/seller.service';
 import User from '../../src/models/User';
-import { RestrictedArea, RestrictedAreaBoundaries } from '../../src/models/enums/restrictedArea';
-import { IUser, ISeller, ISellerItem, ISanctionedRegion } from '../../src/types';
+import UserSettings from '../../src/models/UserSettings';
+import { IUser, ISeller, ISellerItem } from '../../src/types';
 
 describe('getAllSellers function', () => {
   const mockBoundingBox = {
@@ -20,11 +19,22 @@ describe('getAllSellers function', () => {
     ne_lng: -73.8000
   };
 
-  it('should fetch all sellers when all parameters are empty', async () => {
+  it('should fetch all applicable sellers when all parameters are empty', async () => {
     const userData = await User.findOne({ pi_username: 'TestUser1' }) as IUser;
     const sellersData = await getAllSellers(undefined, undefined, userData.pi_uid);
 
     expect(sellersData).toHaveLength(await Seller.countDocuments());
+  });
+
+  it('should fetch all applicable sellers when all parameters are empty and userSettings does not exist', async () => {
+    const userData = await User.findOne({ pi_username: 'TestUser17' }) as IUser;
+    const userSettings = await UserSettings.findOne({ user_settings_id: userData.pi_uid });
+    expect(userSettings).toBeNull();
+
+    const sellersData = await getAllSellers(undefined, undefined, userData.pi_uid);
+
+    // filter out inactive + test sellers and sellers with trust level < 50.
+    expect(sellersData).toHaveLength(1);
   });
 
   it('should fetch all applicable filtered sellers when all parameters are empty', async () => {
@@ -89,6 +99,19 @@ describe('getAllSellers function', () => {
         },
       })
     ); // Ensure length matches expected sellers
+  });
+
+  it('should throw an error when an exception occurs', async () => { 
+    const userData = await User.findOne({ pi_username: 'TestUser13' }) as IUser;
+    
+    // Mock the Seller model to throw an error
+    jest.spyOn(Seller, 'find').mockImplementationOnce(() => {
+      throw new Error('Mock database error');
+    });
+
+    await expect(getAllSellers(undefined, undefined, userData.pi_uid)).rejects.toThrow(
+      'Mock database error'
+    );
   });
 });
 
@@ -195,7 +218,7 @@ describe('registerOrUpdateSeller function', () => {
     });
 
     await expect(registerOrUpdateSeller(userData, formData)).rejects.toThrow(
-      'Failed to register or update seller; please try again later'
+      'Mock database error'
     );
   });
 });
@@ -222,7 +245,7 @@ describe('getAllSellerItems function', () => {
     });
 
     await expect(getAllSellerItems('0b0b0b-0b0b-0b0b')).rejects.toThrow(
-      'Failed to get seller items; please try again later'
+      'Mock database error'
     );
   });
 });
@@ -364,7 +387,7 @@ describe('addOrUpdateSellerItem function', () => {
     });
 
     await expect(addOrUpdateSellerItem({ seller_id: "0b0b0b-0b0b-0b0b" } as ISeller, sellerItem)).rejects.toThrow(
-      'Failed to add or update seller item; please try again later'
+      'Mock database error'
     );
   });
 });
@@ -438,90 +461,11 @@ describe('deleteSellerItem function', () => {
 
     // Mock the SellerItem model to throw an error
     jest.spyOn(SellerItem, 'findByIdAndDelete').mockImplementationOnce(() => {
-      throw new Error('Unexpected exception occurred');
+      throw new Error('Mock database error');
     });
 
     await expect(deleteSellerItem(sellerItem._id)).rejects.toThrow(
-      'Failed to delete seller item; please try again later'
+      'Mock database error'
     );
-  });
-});
-
-describe('getSellersWithinSanctionedRegion function', () => {
-  it('should fetch all sellers within a sanctioned region in Cuba', async () => {
-    const sanctionedRegion = {
-      location: RestrictedArea.CUBA,
-      boundary: RestrictedAreaBoundaries[RestrictedArea.CUBA]
-    } as ISanctionedRegion;
-    
-    const sellersData = await getSellersWithinSanctionedRegion(sanctionedRegion);
-
-    expect(sellersData).toHaveLength(1);
-  });
-
-  it('should fetch all sellers within a sanctioned region in Iran', async () => {
-    const sanctionedRegion = {
-      location: RestrictedArea.IRAN,
-      boundary: RestrictedAreaBoundaries[RestrictedArea.IRAN]
-    } as ISanctionedRegion;
-    
-    const sellersData = await getSellersWithinSanctionedRegion(sanctionedRegion);
-
-    expect(sellersData).toHaveLength(1);
-  });
-
-  it('should fetch all sellers within a sanctioned region in North Korea', async () => {
-    const sanctionedRegion = {
-      location: RestrictedArea.NORTH_KOREA,
-      boundary: RestrictedAreaBoundaries[RestrictedArea.NORTH_KOREA]
-    } as ISanctionedRegion;
-    
-    const sellersData = await getSellersWithinSanctionedRegion(sanctionedRegion);
-
-    expect(sellersData).toHaveLength(1);
-  });
-
-  it('should fetch all sellers within a sanctioned region in Syria', async () => {
-    const sanctionedRegion = {
-      location: RestrictedArea.SYRIA,
-      boundary: RestrictedAreaBoundaries[RestrictedArea.SYRIA]
-    } as ISanctionedRegion;
-    
-    const sellersData = await getSellersWithinSanctionedRegion(sanctionedRegion);
-
-    expect(sellersData).toHaveLength(1);
-  });
-
-  it('should fetch all sellers within a sanctioned region in Republic of Crimea', async () => {
-    const sanctionedRegion = {
-      location: RestrictedArea.REPUBLIC_OF_CRIMEA,
-      boundary: RestrictedAreaBoundaries[RestrictedArea.REPUBLIC_OF_CRIMEA]
-    } as ISanctionedRegion;
-    
-    const sellersData = await getSellersWithinSanctionedRegion(sanctionedRegion);
-
-    expect(sellersData).toHaveLength(1);
-  });
-
-  it('should fetch all sellers within a sanctioned region in Donetsk Oblast', async () => {
-    const sanctionedRegion = {
-      location: RestrictedArea.DONETSK_OBLAST,
-      boundary: RestrictedAreaBoundaries[RestrictedArea.DONETSK_OBLAST]
-    } as ISanctionedRegion;
-    
-    const sellersData = await getSellersWithinSanctionedRegion(sanctionedRegion);
-
-    expect(sellersData).toHaveLength(1);
-  });
-
-  it('should fetch all sellers within a sanctioned region in Luhansk Oblast', async () => {
-    const sanctionedRegion = {
-      location: RestrictedArea.LUHANSK_OBLAST,
-      boundary: RestrictedAreaBoundaries[RestrictedArea.LUHANSK_OBLAST]
-    } as ISanctionedRegion;
-    
-    const sellersData = await getSellersWithinSanctionedRegion(sanctionedRegion);
-    // potential seller location overlap with boundaries between Donetsk Oblast and Luhansk Oblast.
-    expect(sellersData).toHaveLength(1);
   });
 });
