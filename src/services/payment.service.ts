@@ -136,7 +136,7 @@ export const cancelPayment = async (piPaymentId: string): Promise<IPayment | nul
     const cancelledPayment = await Payment.findOneAndUpdate(
       { pi_payment_id: piPaymentId }, 
       { $set: { cancelled: true, paid: false } }, 
-      { new:true }
+      { new: true }
     ).exec();
 
     if (!cancelledPayment) {
