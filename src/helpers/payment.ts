@@ -19,6 +19,22 @@ import {
 import { updateOrRenewMembership } from "../services/membership.service";
 import { PaymentDTO, PaymentInfo, U2AMetadata } from '../types';
 
+const logPlatformApiError = (error: any, context: string) => {
+  if (error.response) {
+    logger.error(`${context} - platformAPIClient error`, {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response.status,
+      data: error.response.data,
+    });
+  } else {
+    logger.error(`${context} - Unhandled error`, {
+      message: error.message,
+      stack: error.stack,
+    });
+  }
+};
+
 const buildPaymentData = (currentPayment: PaymentDTO) => {
   const paymentMetadata = currentPayment.metadata as U2AMetadata;
   return {
@@ -27,9 +43,12 @@ const buildPaymentData = (currentPayment: PaymentDTO) => {
     memo: currentPayment.memo,
     amount: currentPayment.amount,
     paymentType: paymentMetadata.payment_type
-  }
-}
+  };
+};
 
+/**
+ * Create an order from payment metadata
+ */
 const checkoutProcess = async (currentPayment: PaymentDTO, paymentId: string) => {
   const paymentMetadata = currentPayment.metadata as U2AMetadata;
   const OrderMetadata = paymentMetadata.OrderPayment;
@@ -59,6 +78,9 @@ const checkoutProcess = async (currentPayment: PaymentDTO, paymentId: string) =>
   return newOrder;
 }
 
+/**
+ * Complete a Pi payment (U2A) in both DB and blockchain
+ */
 const completePiPayment = async (piPaymentId: string, txid:string) => {
   const res = await platformAPIClient.get(`/v2/payments/${ piPaymentId }`);
   const currentPayment: PaymentDTO = res.data;
@@ -74,13 +96,10 @@ const completePiPayment = async (piPaymentId: string, txid:string) => {
   logger.info("Payment record marked as completed");
 
   if (completedPayment?.payment_type === PaymentType.BuyerCheckout) {
-
     // Update the associated order's status to paid
     await updatePaidOrder(completedPayment._id as string);
     logger.info("Order record updated to paid");
-
   } else if (completedPayment?.payment_type === PaymentType.Membership) {
-
     const paymentMetadata = currentPayment.metadata as U2AMetadata
     const membershipClass = paymentMetadata.MembershipPayment?.membership_class as MembershipClassType | MappiCreditType
     await updateOrRenewMembership(userPiUid, membershipClass);
@@ -98,6 +117,9 @@ const completePiPayment = async (piPaymentId: string, txid:string) => {
   return completedPiPayment;
 }
 
+/**
+ * Process incomplete payment
+ */
 export const processIncompletePayment = async (payment: PaymentInfo) => {
   try {
     const piPaymentId = payment.identifier;
@@ -128,20 +150,14 @@ export const processIncompletePayment = async (payment: PaymentInfo) => {
       message: `Payment completed from incomplete payment with id ${ piPaymentId }`,
     };
   } catch (error: any) {
-    if (error.response) {
-      logger.error("platformAPIClient error", {
-        url: error.config?.url,
-        method: error.config?.method,
-        status: error.response.status,
-        data: error.response.data,
-      });
-    } else {
-      logger.error("Unhandled error during incomplete payment processing", { message: error.message, stack: error.stack });
-    }
+    logPlatformApiError(error, "processIncompletePayment");
     throw(error);
   }
 };
 
+/**
+ * Approve payment
+ */
 export const processPaymentApproval = async (
   paymentId: string,
 ): Promise<{ success: boolean; message: string }> => {
@@ -165,7 +181,6 @@ export const processPaymentApproval = async (
 
     // Create a new payment record
     const newPaymentData = buildPaymentData(currentPayment);
-
     const newPayment = await createPayment(newPaymentData)
     // Validate payment record creation succeeded
     if (!newPayment) {
@@ -175,7 +190,10 @@ export const processPaymentApproval = async (
 
     // Handle logic based on the payment type
     if (paymentMetadata.payment_type === PaymentType.BuyerCheckout) {
-      const newOrder = await checkoutProcess(currentPayment, newPayment._id as string);
+      const newOrder = await checkoutProcess(
+        currentPayment, 
+        newPayment._id as string
+      );
       logger.info("Order created successfully: ", newOrder._id);
     }
 
@@ -188,50 +206,38 @@ export const processPaymentApproval = async (
     };
 
   } catch (error: any) {
-    if (error.response) {
-      logger.error("platformAPIClient error", {
-        url: error.config?.url,
-        method: error.config?.method,
-        status: error.response.status,
-        data: error.response.data,
-      });
-    } else {
-      logger.error("Unhandled error during payment approval", { message: error.message, stack: error.stack });
-    }
+    logPlatformApiError(error, "processPaymentApproval");
     throw(error);
   }
 };
 
-export const processPaymentCompletion = async (paymentId: string, txid: string) => {
+/**
+ * Complete payment
+ */
+export const processPaymentCompletion = async (
+  paymentId: string, 
+  txid: string
+) => {
   try {
     // Confirm the payment exists via Pi platform API
     await completePiPayment(paymentId, txid);
-
     return {
       success: true,
       message: `U2A Payment completed with id ${ paymentId }`,
     };
-
   } catch (error: any) {
-    if (error.response) {
-      logger.error("platformAPIClient error", {
-        url: error.config?.url,
-        method: error.config?.method,
-        status: error.response.status,
-        data: error.response.data,
-      });
-    } else {
-      logger.error("Unhandled error during payment completion", { message: error.message, stack: error.stack });
-    }
+    logPlatformApiError(error, "processPaymentCompletion");
     throw(error);
   }
 }; 
 
+/**
+ * Cancel payment
+ */
 export const processPaymentCancellation = async (paymentId: string) => {
   try {
     // Mark the payment as cancelled
     const cancelledPayment = await cancelPayment(paymentId);
-
     if (!cancelledPayment) {
       throw new Error(`No payment found with id ${ paymentId }`);
     }
@@ -254,20 +260,14 @@ export const processPaymentCancellation = async (paymentId: string) => {
       message: `Payment cancelled with id ${ paymentId }`,
     };
   } catch (error: any) {
-    if (error.response) {
-      logger.error("platformAPIClient error", {
-        url: error.config?.url,
-        method: error.config?.method,
-        status: error.response.status,
-        data: error.response.data,
-      });
-    } else {
-      logger.error("Unhandled error during payment cancellation", { message: error.message, stack: error.stack });
-    }
+    logPlatformApiError(error, "processPaymentCancellation");
     throw(error);
   }
 };
 
+/**
+ * Handle payment error
+ */
 export const processPaymentError = async (paymentDTO: PaymentDTO) => {
   try {
     // handle existing payment
@@ -296,16 +296,7 @@ export const processPaymentError = async (paymentDTO: PaymentDTO) => {
       };
     }
   } catch (error: any) {
-    if (error.response) {
-      logger.error("platformAPIClient error", {
-        url: error.config?.url,
-        method: error.config?.method,
-        status: error.response.status,
-        data: error.response.data,
-      });
-    } else {
-      logger.error("Unhandled error during handling payment error", { message: error.message, stack: error.stack });
-    }
+    logPlatformApiError(error, "processPaymentError");
     throw(error);
   }
 };
