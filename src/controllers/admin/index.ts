@@ -87,3 +87,12 @@ export const getAdminInfo = async (req: Request, res: Response) => {
     return res.status(401).json({ message: "Invalid or expired token.", error });
   }
 };
+
+export const getAlladmins = async (req: Request, res: Response) => {
+  try {
+    const admins = await Admin.find();
+    return res.status(200).json(admins);
+  } catch (error) {
+    return res.status(500).json({ message: "An error occurred while fetching admins.", error });
+  }
+}

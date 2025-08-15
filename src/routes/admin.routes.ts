@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { activateAdmin, deactivateAdmin, getAdminInfo, loginAdmin, registerAdmin } from "../controllers/admin";
+import { activateAdmin, deactivateAdmin, getAdminInfo, getAlladmins, loginAdmin, registerAdmin } from "../controllers/admin";
 
 
 
@@ -7,6 +7,7 @@ import { activateAdmin, deactivateAdmin, getAdminInfo, loginAdmin, registerAdmin
 const adminRoutes = Router();
 
 adminRoutes.get("/me", getAdminInfo);
+adminRoutes.get("/", getAlladmins);
 adminRoutes.post("/register", registerAdmin);
 adminRoutes.post("/login", loginAdmin);
 adminRoutes.put("/deactivate/:id", deactivateAdmin);
