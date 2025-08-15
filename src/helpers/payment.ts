@@ -74,7 +74,6 @@ const buildPaymentRecord = async (
   return { isExisting: false, paymentId: newPayment._id as string };
 };
 
-
 /**
  * Create an order from payment metadata
  */
@@ -132,7 +131,7 @@ const completePiPayment = async (piPaymentId: string, txid:string) => {
     const paymentMetadata = currentPayment.metadata as U2AMetadata
     const membershipClass = paymentMetadata.MembershipPayment?.membership_class as MembershipClassType | MappiCreditType
     await updateOrRenewMembership(userPiUid, membershipClass);
-    logger.info("Membership subscription successfully");
+    logger.info("Membership subscription updated successfully");
   }
 
   // Notify Pi Platform of successful completion
@@ -144,7 +143,7 @@ const completePiPayment = async (piPaymentId: string, txid:string) => {
 
   logger.info("Payment marked completed on Pi blockchain", completedPiPayment.status);
   return completedPiPayment;
-}
+};
 
 /**
  * Process incomplete payment
