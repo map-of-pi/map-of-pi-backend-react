@@ -47,6 +47,35 @@ const buildPaymentData = (currentPayment: PaymentDTO) => {
 };
 
 /**
+ * Handle existing otherwise build new payment record
+ */
+const buildPaymentRecord = async (
+  currentPayment: PaymentDTO
+): Promise<{ isExisting: boolean; paymentId?: string }> => {
+  const piPaymentId = currentPayment.identifier;
+  const existingPayment = await getPayment(piPaymentId);
+
+  // Check if a payment record with this ID already exists in the database
+  if (existingPayment) {
+    logger.info("Payment record already exists: ", existingPayment._id);
+    await processPaymentError(currentPayment);
+    return { isExisting: true };
+  }
+
+  // Create a new payment record
+  const newPaymentData = buildPaymentData(currentPayment);
+  const newPayment = await createPayment(newPaymentData);
+  // Validate payment record creation succeeded
+  if (!newPayment) {
+    logger.error("Unable to create payment record");
+    throw new Error("Unable to create payment record");
+  }
+
+  return { isExisting: false, paymentId: newPayment._id as string };
+};
+
+
+/**
  * Create an order from payment metadata
  */
 const checkoutProcess = async (currentPayment: PaymentDTO, paymentId: string) => {
@@ -165,46 +194,31 @@ export const processPaymentApproval = async (
     // Fetch payment details from the Pi platform using the payment ID
     const res = await platformAPIClient.get(`/v2/payments/${ paymentId }`);
     const currentPayment: PaymentDTO = res.data;
-    const piPaymentID = currentPayment.identifier
     const paymentMetadata = currentPayment.metadata as U2AMetadata
 
-    // Check if a payment record with this ID already exists in the database
-    const oldPayment = await getPayment(piPaymentID);
-    if (oldPayment) {
-      logger.info("Payment record already exists: ", oldPayment._id);
-      await processPaymentError(res.data);
+    const { isExisting, paymentId: newPaymentId } = 
+      await buildPaymentRecord(currentPayment);
+
+    if (isExisting) {
       return {
         success: false,
-        message: `Payment already exists with ID ${ piPaymentID }`,
+        message: `Payment already exists with ID ${currentPayment.identifier}`,
       };
-    }
-
-    // Create a new payment record
-    const newPaymentData = buildPaymentData(currentPayment);
-    const newPayment = await createPayment(newPaymentData)
-    // Validate payment record creation succeeded
-    if (!newPayment) {
-      logger.error("Unable to create payment record")
-      throw new Error("Unable to create payment record");
     }
 
     // Handle logic based on the payment type
     if (paymentMetadata.payment_type === PaymentType.BuyerCheckout) {
-      const newOrder = await checkoutProcess(
-        currentPayment, 
-        newPayment._id as string
-      );
+      const newOrder = await checkoutProcess(currentPayment, newPaymentId!);
       logger.info("Order created successfully: ", newOrder._id);
     }
 
     // Approve the payment on the Pi platform
-    await platformAPIClient.post(`/v2/payments/${ piPaymentID }/approve`);
+    await platformAPIClient.post(`/v2/payments/${ currentPayment.identifier }/approve`);
 
     return {
       success: true,
-      message: `Payment approved with id ${ piPaymentID }`,
+      message: `Payment approved with id ${ currentPayment.identifier }`,
     };
-
   } catch (error: any) {
     logPlatformApiError(error, "processPaymentApproval");
     throw(error);
