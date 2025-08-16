@@ -172,9 +172,9 @@ export const buildMembershipList = async (): Promise<MembershipOption[]> => {
 export const getUserMembership = async (authUser: IUser): Promise<IMembership> => {
   try {
     const membership = await Membership.findOne({ pi_uid: authUser.pi_uid }).lean();
-    const user = await User.findOne({ pi_uid:authUser.pi_uid }).lean();
     
     if (!membership) {
+      const user = await User.findOne({ pi_uid: authUser.pi_uid }).lean();
       const newMembership = await new Membership({
         user_id: user?._id,
         pi_uid: authUser.pi_uid,
@@ -195,23 +195,26 @@ export const getUserMembership = async (authUser: IUser): Promise<IMembership> =
 
 export const getSingleMembershipById = async (membership_id: string) => {
   try {
-    const membership = await Membership.findById(membership_id).lean();
-    return membership || null;
+    return await Membership.findById(membership_id).lean() ?? null;
   } catch (error) {
     logger.error(`Failed to get single membership with ID ${ membership_id }: ${ error }`);
-    return error;
+    throw error;
   }
 };
 
 export const updateMappiBalance = async (pi_uid: string, amount: number) => {
   try {
-    const membership = await Membership.findOne({pi_uid: pi_uid}).exec();
-    if (!membership) {
+    const updatedMembership = await Membership.findOneAndUpdate(
+      { pi_uid },
+      { $inc: { mappi_balance: amount } }, // atomic increment
+      { new: true }
+    ).exec();
+
+    if (!updatedMembership) {
       throw new Error('Membership not found');
     }
 
-    membership.mappi_balance = (membership.mappi_balance ?? 0) + amount;
-    return await membership.save();
+    return updatedMembership;
   } catch (error) {
     logger.error(`Failed to update Mappi balance for piUID ${ pi_uid }: ${ error}`);
     throw error;
