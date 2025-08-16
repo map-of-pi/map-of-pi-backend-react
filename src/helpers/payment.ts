@@ -16,7 +16,7 @@ import {
   completePayment, 
   cancelPayment
 } from '../services/payment.service';
-import { updateOrRenewMembership } from "../services/membership.service";
+import { applyMembershipChange } from "../services/membership.service";
 import { PaymentDTO, PaymentInfo, U2AMetadata } from '../types';
 
 const logPlatformApiError = (error: any, context: string) => {
@@ -130,7 +130,7 @@ const completePiPayment = async (piPaymentId: string, txid:string) => {
   } else if (completedPayment?.payment_type === PaymentType.Membership) {
     const paymentMetadata = currentPayment.metadata as U2AMetadata
     const membershipClass = paymentMetadata.MembershipPayment?.membership_class as MembershipClassType | MappiCreditType
-    await updateOrRenewMembership(userPiUid, membershipClass);
+    await applyMembershipChange(userPiUid, membershipClass);
     logger.info("Membership subscription updated successfully");
   }
 

@@ -6,7 +6,7 @@ import { FulfillmentType } from "../../src/models/enums/fulfillmentType";
 import { OrderStatusType } from "../../src/models/enums/orderStatusType";
 import { MembershipClassType } from "../../src/models/enums/membershipClassType";
 import { PaymentType } from "../../src/models/enums/paymentType";
-import { updateOrRenewMembership } from "../../src/services/membership.service";
+import { applyMembershipChange } from "../../src/services/membership.service";
 import { 
   cancelOrder,
   createOrder, 
@@ -265,7 +265,7 @@ describe('processIncompletePayment function', () => {
         paid: true
       });
 
-      (updateOrRenewMembership as jest.Mock).mockResolvedValue({});
+      (applyMembershipChange as jest.Mock).mockResolvedValue({});
 
       (platformAPIClient.post as jest.Mock).mockResolvedValue({ status: 200 });
 
@@ -279,7 +279,7 @@ describe('processIncompletePayment function', () => {
       expect(axios.create).toHaveBeenCalled();
       expect(platformAPIClient.get).toHaveBeenCalledWith(`/v2/payments/${ mockPaymentInfo.identifier }`);
       expect(completePayment).toHaveBeenCalledWith(mockPaymentInfo.identifier, mockPaymentInfo.transaction?.txid);
-      expect(updateOrRenewMembership).toHaveBeenCalledWith(
+      expect(applyMembershipChange).toHaveBeenCalledWith(
         mockPaymentDTO.user_uid, 
         u2aMetadata.MembershipPayment?.membership_class
       );
@@ -299,7 +299,7 @@ describe('processIncompletePayment function', () => {
         paid: true
       });
 
-      (updateOrRenewMembership as jest.Mock).mockResolvedValue({});
+      (applyMembershipChange as jest.Mock).mockResolvedValue({});
 
       (platformAPIClient.post as jest.Mock).mockResolvedValue({ status: 500 });
 
@@ -309,7 +309,7 @@ describe('processIncompletePayment function', () => {
       expect(axios.create).toHaveBeenCalled();
       expect(platformAPIClient.get).toHaveBeenCalledWith(`/v2/payments/${ mockPaymentInfo.identifier }`);
       expect(completePayment).toHaveBeenCalledWith(mockPaymentInfo.identifier, mockPaymentInfo.transaction?.txid);
-      expect(updateOrRenewMembership).toHaveBeenCalledWith(
+      expect(applyMembershipChange).toHaveBeenCalledWith(
         mockPaymentDTO.user_uid, 
         u2aMetadata.MembershipPayment?.membership_class
       );
@@ -632,7 +632,7 @@ describe('processPaymentCompletion function', () => {
       paid: true
     });
 
-    (updateOrRenewMembership as jest.Mock).mockResolvedValue({});
+    (applyMembershipChange as jest.Mock).mockResolvedValue({});
 
     (platformAPIClient.post as jest.Mock).mockResolvedValue({ status: 200 });
 
@@ -644,7 +644,7 @@ describe('processPaymentCompletion function', () => {
     });
     expect(platformAPIClient.get).toHaveBeenCalledWith(`/v2/payments/${ mockPaymentId }`);
     expect(completePayment).toHaveBeenCalledWith(mockPaymentId, mockTxid);
-    expect(updateOrRenewMembership).toHaveBeenCalledWith(
+    expect(applyMembershipChange).toHaveBeenCalledWith(
       mockPaymentDTO.user_uid, 
       u2aMetadata.MembershipPayment?.membership_class
     );

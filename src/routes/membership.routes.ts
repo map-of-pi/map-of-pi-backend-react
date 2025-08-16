@@ -129,7 +129,7 @@ membershipRoutes.get("/", verifyToken, membershipController.fetchUserMembership)
  *   put:
  *     tags:
  *       - Membership
- *     summary: Register or update the authenticated user's membership class *
+ *     summary: Register or update the authenticated user's membership *
  *     requestBody:
  *       required: true
  *       content:
@@ -155,6 +155,6 @@ membershipRoutes.get("/", verifyToken, membershipController.fetchUserMembership)
  *       500:
  *         description: Internal server error
  */
-membershipRoutes.put("/manage", verifyToken, membershipController.updateOrRenewMembership);
+membershipRoutes.put("/manage", verifyToken, membershipController.updateMembership);
 
 export default membershipRoutes;

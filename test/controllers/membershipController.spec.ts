@@ -1,9 +1,8 @@
-import { resolve } from 'path/win32';
 import {
   getMembershipList,
   fetchUserMembership,
   getSingleMembership,
-  updateOrRenewMembership,
+  updateMembership
 } from '../../src/controllers/membershipController';
 import { MembershipClassType, membershipTiers } from "../../src/models/enums/membershipClassType";
 import * as membershipService from "../../src/services/membership.service";
@@ -12,7 +11,7 @@ jest.mock('../../src/services/membership.service', () => ({
   buildMembershipList: jest.fn(),
   getUserMembership: jest.fn(),
   getSingleMembershipById: jest.fn(),
-  updateOrRenewMembership: jest.fn()
+  applyMembershipChange: jest.fn()
 }));
 
 describe('membershipController', () => {
@@ -182,7 +181,7 @@ describe('membershipController', () => {
     });
   });
 
-  describe('updateOrRenewMembership function', () => {
+  describe('updateMembership function', () => {
     const mockUser = { pi_uid: '0a0a0a-0a0a-0a0a' };
     const mockMembershipClass = MembershipClassType.WHITE;
     const mockUpdatedMembership = {
@@ -202,11 +201,11 @@ describe('membershipController', () => {
     });
 
     it('should return [200] and updated membership on success', async () => {
-      (membershipService.updateOrRenewMembership as jest.Mock).mockResolvedValue(mockUpdatedMembership);
+      (membershipService.applyMembershipChange as jest.Mock).mockResolvedValue(mockUpdatedMembership);
   
-      await updateOrRenewMembership(req, res);
+      await updateMembership(req, res);
   
-      expect(membershipService.updateOrRenewMembership).toHaveBeenCalledWith(
+      expect(membershipService.applyMembershipChange).toHaveBeenCalledWith(
         mockUser.pi_uid, 
         mockMembershipClass
       );
@@ -217,26 +216,26 @@ describe('membershipController', () => {
     it('should return [401] if no authenticated user', async () => {
       req.currentUser = undefined;
   
-      await updateOrRenewMembership(req, res);
+      await updateMembership(req, res);
   
-      expect(membershipService.updateOrRenewMembership).not.toHaveBeenCalled();
+      expect(membershipService.applyMembershipChange).not.toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(401);
       expect(res.json).toHaveBeenCalledWith({ error: 'Unauthorized' });
     });
 
     it('should return [500] if membership service throws error', async () => {
       const mockError = new Error('Membership service layer error');
-      (membershipService.updateOrRenewMembership as jest.Mock).mockRejectedValue(mockError);
+      (membershipService.applyMembershipChange as jest.Mock).mockRejectedValue(mockError);
   
-      await updateOrRenewMembership(req, res);
+      await updateMembership(req, res);
   
-      expect(membershipService.updateOrRenewMembership).toHaveBeenCalledWith(
+      expect(membershipService.applyMembershipChange).toHaveBeenCalledWith(
         mockUser.pi_uid, 
         mockMembershipClass
       );
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
-        message: 'An error occurred while updating/ renewing membership; please try again later'
+        message: 'An error occurred while updating membership; please try again later'
       });
     });
   });

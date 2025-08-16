@@ -50,7 +50,7 @@ export const fetchUserMembership = async (req: Request, res: Response) => {
   }
 };
 
-export const updateOrRenewMembership = async (req: Request, res: Response) => { 
+export const updateMembership = async (req: Request, res: Response) => { 
   try {
     const { membership_class } = req.body;
     const authUser = req.currentUser;
@@ -59,10 +59,10 @@ export const updateOrRenewMembership = async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     logger.info(`Updated or renewed membership for user ${authUser.pi_uid}`);
-    const updatedMembership = await membershipService.updateOrRenewMembership(authUser.pi_uid, membership_class);
+    const updatedMembership = await membershipService.applyMembershipChange(authUser.pi_uid, membership_class);
     return res.status(200).json(updatedMembership);
   } catch (error: any) {
     logger.error("Failed to update or renew membership:", error);
-    return res.status(500).json({ message: 'An error occurred while updating/ renewing membership; please try again later' });
+    return res.status(500).json({ message: 'An error occurred while updating membership; please try again later' });
   }
 };
