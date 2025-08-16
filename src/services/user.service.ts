@@ -79,7 +79,7 @@ export const authenticate = async (
       user: user,
       membership_class: userMembership.membership_class
     };
-  } catch (error: any) {
+  } catch (error) {
     logger.error(`Failed to authenticate user: ${ error }`);
     throw error;
   }
@@ -89,7 +89,7 @@ export const getUser = async (pi_uid: string): Promise<IUser | null> => {
   try {
     const user = await User.findOne({ pi_uid }).exec();
     return user ? user as IUser : null;
-  } catch (error: any) {
+  } catch (error) {
     logger.error(`Failed to retrieve user for piUID ${ pi_uid }: ${ error }`);
     throw error;
   }
@@ -111,7 +111,7 @@ export const deleteUser = async (pi_uid: string | undefined): Promise<{ user: IU
       sellers: deletedSellers as ISeller[],
       userSetting: deletedUserSettings as IUserSettings
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error(`Failed to delete user or user association for piUID ${ pi_uid }: ${ error }`);
     throw error;
   }
