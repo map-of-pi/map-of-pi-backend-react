@@ -25,13 +25,14 @@ export async function createSession(userId: Types.ObjectId, opts: CreateOpts = {
   const now = new Date(nowMs);
 
   const {
-    status = WATCH_ADS_SESSION_STATUS.Running,
-    totalSegments = 20,
-    segmentSecs = 30,
-    expiresAt = new Date(
-      nowMs + totalSegments * segmentSecs * 1000 + 10 * 60 * 1000 // buffer 10min
-    ),
-  } = opts;
+  status = WATCH_ADS_SESSION_STATUS.Running,
+  totalSegments = opts.totalSegments ?? 20,
+  segmentSecs = opts.segmentSecs ?? 30,
+  expiresAt = opts.expiresAt ?? new Date(
+    nowMs + (opts.totalSegments ?? 20) * (opts.segmentSecs ?? 30) * 1000 + 10 * 60 * 1000
+  ),
+} = opts;
+
 
   // Validation
   if (totalSegments <= 0 || segmentSecs <= 0) {
