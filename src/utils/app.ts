@@ -20,6 +20,7 @@ import mapCenterRoutes from "../routes/mapCenter.routes";
 import notificationRoutes from "../routes/notification.routes";
 import restrictionRoutes from "../routes/restriction.routes";
 import toggleRoutes from "../routes/toggle.routes";
+import cronRoutes from "../routes/cron.routes";
 
 
 dotenv.config();
@@ -54,6 +55,8 @@ app.use("/api/v1/map-center", mapCenterRoutes);
 app.use("/api/v1/notifications", notificationRoutes);
 app.use("/api/v1/restrictions", restrictionRoutes);
 app.use("/api/v1/toggles", toggleRoutes);
+
+app.use("/api/v1/cron", cronRoutes);
 
 app.use("/", homeRoutes);
 

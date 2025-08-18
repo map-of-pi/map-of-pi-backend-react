@@ -155,7 +155,18 @@ export const findAndRestrictSanctionedSellers = async () => {
   const results = await Promise.allSettled(tasks);
   const stats = summarizeSanctionedResults(results);
 
-  logger.info(`SanctionBot processed ${sellers.length} sellers.`);
-  logger.info(`Changed: ${stats.changed}`);
-  logger.info(`Restricted: ${stats.restricted}/ Unrestricted: ${stats.unrestricted}`);
+  const finalStats = {
+    total_sellers_processed: sellers.length,
+    changed: stats.changed,
+    restricted: stats.restricted,
+    unrestricted: stats.unrestricted,
+    run_timestamp: new Date().toISOString()
+  };
+
+  logger.info('Sanction Bot Statistics', {
+    category: 'stats',
+    ...finalStats
+  });
+
+  return finalStats;
 };

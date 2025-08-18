@@ -318,9 +318,17 @@ describe('findAndRestrictSanctionedSellers function', () => {
     expect(Seller.updateOne).toHaveBeenCalledTimes(2);
     expect(addNotification).toHaveBeenCalledTimes(2);
     expect(summarizeSanctionedResults).toHaveBeenCalledWith(expect.any(Array));
-    expect(logger.info).toHaveBeenCalledWith('SanctionBot processed 2 sellers.');
-    expect(logger.info).toHaveBeenCalledWith('Changed: 2');
-    expect(logger.info).toHaveBeenCalledWith('Restricted: 1/ Unrestricted: 1');
+    expect(logger.info).toHaveBeenCalledWith(
+      'Sanction Bot Statistics',
+      expect.objectContaining({
+        category: 'stats',
+        total_sellers_processed: 2,
+        changed: 2,
+        restricted: 1,
+        unrestricted: 1,
+        run_timestamp: expect.any(String) // since it's a timestamp string
+      })
+    );
   });
 
   it('should abort if no polygons are returned', async () => {
