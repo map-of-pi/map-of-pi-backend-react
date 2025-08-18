@@ -1,4 +1,10 @@
 import { Types } from "mongoose";
+import { 
+  isExpired, 
+  getTierByClass,
+  getTierRank,
+  isSameShoppingClassType
+} from "../../src/helpers/membership";
 import Membership from "../../src/models/Membership";
 import User from "../../src/models/User";
 import { 
@@ -8,13 +14,15 @@ import {
   membershipTiers
 } from "../../src/models/enums/membershipClassType";
 import { 
+  applyMembershipChange,
   buildMembershipList, 
   getSingleMembershipById, 
   getUserMembership, 
   updateMappiBalance
 } from "../../src/services/membership.service";
-import { IMembership } from "../../src/types";
+import { IMembership, IUser } from "../../src/types";
 
+jest.mock('../../src/helpers/membership');
 jest.mock('../../src/models/Membership');
 jest.mock('../../src/models/User');
 
@@ -93,7 +101,7 @@ describe('getUserMembership function', () => {
       membership_class: MembershipClassType.GOLD,
       mappi_balance: 100,
       membership_expiry_date: new Date(),
-      mappi_used_to_date: new Date(),
+      mappi_used_to_date: 50,
     } as unknown as IMembership;
 
     (Membership.findOne as jest.Mock).mockReturnValue({
@@ -213,7 +221,7 @@ describe('getSingleMembershipById function', () => {
       membership_class: MembershipClassType.GOLD,
       mappi_balance: 100,
       membership_expiry_date: new Date(),
-      mappi_used_to_date: new Date(),
+      mappi_used_to_date: 50,
     } as unknown as IMembership;
 
     (Membership.findById as jest.Mock).mockReturnValue({
@@ -261,7 +269,7 @@ describe('updateMappiBalance function', () => {
     membership_class: MembershipClassType.GOLD,
     mappi_balance: 100,
     membership_expiry_date: new Date(),
-    mappi_used_to_date: new Date(),
+    mappi_used_to_date: 50,
   } as unknown as IMembership;
 
   it('should update the Mappi balance successfully', async () => {
@@ -310,5 +318,643 @@ describe('updateMappiBalance function', () => {
       { $inc: { mappi_balance: amount } },
       { new: true }
     );
+  });
+});
+
+describe('applyMembershipChange function', () => {
+  const mockUser = { 
+    _id: '_id_TEST',
+    pi_uid: 'piUID_TEST' 
+  } as unknown as IUser;
+
+  it('throws an error if user not found', async () => {
+    (User.findOne as jest.Mock).mockReturnValue({
+      lean: jest.fn().mockResolvedValue(null),
+    });
+
+    await expect(applyMembershipChange(mockUser.pi_uid, MembershipClassType.CASUAL))
+      .rejects.toThrow(`User with pi_uid ${ mockUser.pi_uid } not found`);
+
+    expect(User.findOne).toHaveBeenCalledWith({ pi_uid: mockUser.pi_uid });
+    expect(Membership.findOne).not.toHaveBeenCalled();
+  });
+
+  describe('handleSingleMappiPurchase helper function', () => {
+    beforeEach(() => {
+      (User.findOne as jest.Mock).mockReturnValue({
+        lean: jest.fn().mockResolvedValue(mockUser),
+      });
+    });
+
+    it('should create a new base [CASUAL] membership if no existing membership found', async () => {
+      const baseMembership = {
+        user_id: mockUser._id,
+        pi_uid: mockUser.pi_uid,
+        membership_class: MembershipClassType.CASUAL,
+        membership_expiry_date: null,
+        mappi_balance: 1,
+        mappi_used_to_date: 0
+      } as unknown as IMembership;
+      
+      (Membership.findOne as jest.Mock).mockResolvedValue(null);
+      (Membership.create as jest.Mock).mockResolvedValue(baseMembership);
+
+      const result = await applyMembershipChange(mockUser.pi_uid, MappiCreditType.SINGLE);
+      
+      expect(result).toEqual(baseMembership);
+      expect(User.findOne).toHaveBeenCalledWith({ pi_uid: mockUser.pi_uid });
+      expect(Membership.findOne).toHaveBeenCalledWith({ user_id: mockUser._id });
+      expect(Membership.create).toHaveBeenCalledWith(expect.objectContaining({
+        user_id: mockUser._id,
+        pi_uid: mockUser.pi_uid,
+        membership_class: MembershipClassType.CASUAL,
+        membership_expiry_date: null,
+        mappi_balance: 1,
+        mappi_used_to_date: 0
+      }));
+    });
+
+    it('should reset expired membership to base [CASUAL] membership', async () => {
+      const expiredMembership = {
+        user_id: mockUser._id,
+        pi_uid: mockUser.pi_uid,
+        membership_class: MembershipClassType.TRIPLE_GOLD,
+        membership_expiry_date: new Date(),
+        mappi_balance: 100
+      } as unknown as IMembership;
+      
+      (Membership.findOne as jest.Mock).mockResolvedValue(expiredMembership);
+      (Membership.findOneAndUpdate as jest.Mock).mockReturnValue({
+        exec: jest.fn().mockResolvedValue({ 
+          ...expiredMembership,
+          membership_class: MembershipClassType.CASUAL,
+          membership_expiry_date: null, 
+          mappi_balance: 1 
+        })
+      });
+
+      // Force isExpired to return true
+      (isExpired as jest.Mock).mockReturnValue(true);
+
+      const result = await applyMembershipChange(mockUser.pi_uid, MappiCreditType.SINGLE);
+      
+      expect(result).toEqual({
+        ...expiredMembership,
+        membership_class: MembershipClassType.CASUAL,
+        membership_expiry_date: null, 
+        mappi_balance: 1 
+      });
+      expect(User.findOne).toHaveBeenCalledWith({ pi_uid: mockUser.pi_uid });
+      expect(Membership.findOne).toHaveBeenCalledWith({ user_id: mockUser._id });
+      expect(Membership.create).not.toHaveBeenCalled();
+      expect(isExpired).toHaveBeenCalledWith(expiredMembership.membership_expiry_date);
+      expect(Membership.findOneAndUpdate).toHaveBeenCalledWith(
+        { pi_uid: mockUser.pi_uid },
+        {
+          membership_class: MembershipClassType.CASUAL,
+          membership_expiry_date: null,
+          mappi_balance: 1,
+        },
+        { new: true }
+      );
+    });
+
+    it('should throw error if expired membership to reset [CASUAL] is unexpectedly not found', async () => {
+      const expiredMembership = {
+        user_id: mockUser._id,
+        pi_uid: mockUser.pi_uid,
+        membership_class: MembershipClassType.TRIPLE_GOLD,
+        membership_expiry_date: new Date(),
+        mappi_balance: 100
+      } as unknown as IMembership;
+      
+      (Membership.findOne as jest.Mock).mockResolvedValue(expiredMembership);
+      (Membership.findOneAndUpdate as jest.Mock).mockReturnValue({
+        exec: jest.fn().mockResolvedValue(null)
+      });
+
+      // Force isExpired to return true
+      (isExpired as jest.Mock).mockReturnValue(true);
+
+      await expect(applyMembershipChange(mockUser.pi_uid, MappiCreditType.SINGLE))
+        .rejects.toThrow(`Membership not found for update to base for piUID ${ mockUser.pi_uid}`);
+
+      expect(User.findOne).toHaveBeenCalledWith({ pi_uid: mockUser.pi_uid });
+      expect(Membership.findOne).toHaveBeenCalledWith({ user_id: mockUser._id });
+      expect(Membership.create).not.toHaveBeenCalled();
+      expect(isExpired).toHaveBeenCalledWith(expiredMembership.membership_expiry_date);
+      expect(Membership.findOneAndUpdate).toHaveBeenCalledWith(
+        { pi_uid: mockUser.pi_uid },
+        {
+          membership_class: MembershipClassType.CASUAL,
+          membership_expiry_date: null,
+          mappi_balance: 1,
+        },
+        { new: true }
+      );
+    });
+
+    it('should increment mappi balance for non-expired memberships', async () => {
+      const activeMembership = {
+        user_id: mockUser._id,
+        pi_uid: mockUser.pi_uid,
+        membership_class: MembershipClassType.DOUBLE_GOLD,
+        membership_expiry_date: new Date(),
+        mappi_balance: 50
+      } as unknown as IMembership;
+
+      (Membership.findOne as jest.Mock).mockResolvedValue(activeMembership);
+      (Membership.findOneAndUpdate as jest.Mock).mockReturnValue({
+        exec: jest.fn().mockResolvedValue({ 
+          ...activeMembership,
+          mappi_balance: 51
+        })
+      });
+
+      // Force isExpired to return false
+      (isExpired as jest.Mock).mockReturnValue(false);
+
+      const result = await applyMembershipChange(mockUser.pi_uid, MappiCreditType.SINGLE);
+
+      expect(result).toEqual({
+        ...activeMembership,
+        mappi_balance: 51 
+      });
+      expect(User.findOne).toHaveBeenCalledWith({ pi_uid: mockUser.pi_uid });
+      expect(Membership.findOne).toHaveBeenCalledWith({ user_id: mockUser._id });
+      expect(Membership.create).not.toHaveBeenCalled();
+      expect(isExpired).toHaveBeenCalledWith(activeMembership.membership_expiry_date);
+      expect(Membership.findOneAndUpdate).toHaveBeenCalledWith(
+        { pi_uid: mockUser.pi_uid },
+        { $inc: { mappi_balance: 1 } },
+        { new: true }
+      );
+    });
+
+    it('should throw error if non-expired membership to update is unexpectedly not found', async () => {
+      const activeMembership = {
+        user_id: mockUser._id,
+        pi_uid: mockUser.pi_uid,
+        membership_class: MembershipClassType.DOUBLE_GOLD,
+        membership_expiry_date: new Date(),
+        mappi_balance: 50
+      } as unknown as IMembership;
+      
+      (Membership.findOne as jest.Mock).mockResolvedValue(activeMembership);
+      (Membership.findOneAndUpdate as jest.Mock).mockReturnValue({
+        exec: jest.fn().mockResolvedValue(null)
+      });
+
+      // Force isExpired to return false
+      (isExpired as jest.Mock).mockReturnValue(false);
+
+      await expect(applyMembershipChange(mockUser.pi_uid, MappiCreditType.SINGLE))
+        .rejects.toThrow(`Membership not found for update to increment for piUID ${ mockUser.pi_uid}`);
+
+      expect(User.findOne).toHaveBeenCalledWith({ pi_uid: mockUser.pi_uid });
+      expect(Membership.findOne).toHaveBeenCalledWith({ user_id: mockUser._id });
+      expect(Membership.create).not.toHaveBeenCalled();
+      expect(isExpired).toHaveBeenCalledWith(activeMembership.membership_expiry_date);
+      expect(Membership.findOneAndUpdate).toHaveBeenCalledWith(
+        { pi_uid: mockUser.pi_uid },
+        { $inc: { mappi_balance: 1 } },
+        { new: true }
+      );
+    });
+
+    it('should throw error if handling single Mappi purchase unexpectedly fails', async () => {
+      const mockError = new Error('Mock database error');
+      
+      (Membership.findOne as jest.Mock).mockResolvedValue(null);
+      (Membership.create as jest.Mock).mockRejectedValue(mockError);
+
+      await expect(applyMembershipChange(mockUser.pi_uid, MappiCreditType.SINGLE))
+          .rejects.toThrow('Mock database error');
+      
+      expect(User.findOne).toHaveBeenCalledWith({ pi_uid: mockUser.pi_uid });
+      expect(Membership.findOne).toHaveBeenCalledWith({ user_id: mockUser._id });
+      expect(Membership.create).toHaveBeenCalledWith(expect.objectContaining({
+        user_id: mockUser._id,
+        pi_uid: mockUser.pi_uid,
+        membership_class: MembershipClassType.CASUAL,
+        membership_expiry_date: null,
+        mappi_balance: 1,
+        mappi_used_to_date: 0
+      }));
+      expect(isExpired).not.toHaveBeenCalled();
+      expect(Membership.findOneAndUpdate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('handleMembershipTierPurchase helper function', () => {
+    const WEEK_IN_MS = 7 * 24 * 60 * 60 * 1000;
+
+    const membershipCases: [MembershipClassType, keyof typeof membershipTiers][] = [
+      [MembershipClassType.CASUAL, 'tier0'],
+      [MembershipClassType.WHITE, 'tier1'],
+      [MembershipClassType.GREEN, 'tier2'],
+      [MembershipClassType.GOLD, 'tier3'],
+      [MembershipClassType.DOUBLE_GOLD, 'tier4'],
+      [MembershipClassType.TRIPLE_GOLD, 'tier5'],
+    ];
+
+    beforeAll(() => {
+      jest.useFakeTimers();
+      // freeze the system time for predictable expiry date calculation
+      jest.setSystemTime(new Date("2025-08-17T12:00:00Z"));
+    });
+
+    beforeEach(() => {
+      (User.findOne as jest.Mock).mockReturnValue({
+        lean: jest.fn().mockResolvedValue(mockUser),
+      });
+    });
+
+    afterAll(() => {
+      jest.useRealTimers();
+    })
+
+    // Parameterized testing of membership class tiers 
+    it.each(membershipCases)(
+      'should create a new membership [%s] if no existing membership found',
+      async (membershipClass, tierKey) => {     
+        const membershipTier = membershipTiers[tierKey];
+        let expectedExpiryDate: Date | null;
+        
+        if (membershipClass === MembershipClassType.CASUAL) { 
+          expectedExpiryDate = null;
+        } else {
+          expectedExpiryDate = new Date(
+            new Date("2025-08-17T12:00:00Z").getTime() + (membershipTier.DURATION ?? 0) * WEEK_IN_MS);
+        }
+      
+        (Membership.findOne as jest.Mock).mockResolvedValue(null);
+        (Membership.create as jest.Mock).mockResolvedValue({
+          user_id: mockUser._id,
+          pi_uid: mockUser.pi_uid,
+          membership_class: membershipClass,
+          membership_expiry_date: expectedExpiryDate,
+          mappi_balance: membershipTier.MAPPI_ALLOWANCE,
+          mappi_used_to_date: 0
+        });
+        (getTierByClass as jest.Mock).mockReturnValue(membershipTier);
+
+        const result = await applyMembershipChange(mockUser.pi_uid, membershipClass);
+
+        expect(result).toEqual({
+          user_id: mockUser._id,
+          pi_uid: mockUser.pi_uid,
+          membership_class: membershipClass,
+          membership_expiry_date: expectedExpiryDate,
+          mappi_balance: membershipTier.MAPPI_ALLOWANCE,
+          mappi_used_to_date: 0
+        });
+        expect(Membership.findOne).toHaveBeenCalledWith({ user_id: mockUser._id });
+        expect(Membership.create).toHaveBeenCalledWith({
+          user_id: mockUser._id,
+          pi_uid: mockUser.pi_uid,
+          membership_class: membershipClass,
+          membership_expiry_date: expectedExpiryDate,
+          mappi_balance: membershipTier.MAPPI_ALLOWANCE,
+          mappi_used_to_date: 0
+        });
+      }
+    );
+
+    it('should handle different shopping class type (online vs offline)', async () => {
+      const existingExpiryDate = new Date(
+        new Date("2025-08-17T12:00:00Z").getTime() + (membershipTiers.tier1.DURATION ?? 0) * WEEK_IN_MS);
+      const existingMembership = {
+        user_id: mockUser._id,
+        pi_uid: mockUser.pi_uid,
+        membership_class: MembershipClassType.WHITE,
+        membership_expiry_date: existingExpiryDate,
+        mappi_balance: 5
+      } as unknown as IMembership;
+      const existingMembershipTier = membershipTiers.tier1;
+
+      const newMembershipClass = MembershipClassType.TRIPLE_GOLD;
+      const newMembershipTier = membershipTiers.tier5;
+      const newExpiryDate = new Date(
+        new Date("2025-08-17T12:00:00Z").getTime() + newMembershipTier.DURATION * WEEK_IN_MS);
+
+      (Membership.findOne as jest.Mock).mockResolvedValue(existingMembership);
+      (getTierByClass as jest.Mock).mockReturnValue(newMembershipTier);
+      (getTierRank as jest.Mock).mockReturnValue(existingMembershipTier.RANK);
+      (isExpired as jest.Mock).mockReturnValue(false);
+      (isSameShoppingClassType as jest.Mock).mockReturnValue(false);
+      (Membership.findOneAndUpdate as jest.Mock).mockReturnValue({
+        exec: jest.fn().mockResolvedValue({
+          ...existingMembership,
+          membership_class: newMembershipClass,
+          membership_expiry_date: newExpiryDate,
+          mappi_balance: newMembershipTier.MAPPI_ALLOWANCE
+        })
+      });
+
+      const result = await applyMembershipChange(mockUser.pi_uid, newMembershipClass);
+
+      expect(result).toEqual({
+        user_id: mockUser._id,
+        pi_uid: mockUser.pi_uid,
+        membership_class: newMembershipClass,
+        membership_expiry_date: newExpiryDate,
+        mappi_balance: newMembershipTier.MAPPI_ALLOWANCE
+      });
+      expect(Membership.findOne).toHaveBeenCalledWith({ user_id: mockUser._id });
+      expect(Membership.create).not.toHaveBeenCalled();
+      expect(getTierRank).toHaveBeenCalledWith(existingMembership.membership_class);
+      expect(isExpired).toHaveBeenCalledWith(existingMembership.membership_expiry_date);
+      expect(isSameShoppingClassType).toHaveBeenCalledWith(
+        existingMembership.membership_class, 
+        newMembershipClass
+      );
+      expect(Membership.findOneAndUpdate).toHaveBeenCalledWith(
+        { pi_uid: mockUser.pi_uid },
+        {
+          membership_class: newMembershipClass,
+          membership_expiry_date: newExpiryDate,
+          mappi_balance: newMembershipTier.MAPPI_ALLOWANCE
+        },
+        { new: true }
+      )
+    });
+
+    it('should handle and extend same membership class if existing membership is not expired', async () => {
+      const existingExpiryDate = new Date(
+        new Date("2025-08-17T12:00:00Z").getTime() + 2 * WEEK_IN_MS); // not expired
+      const existingMembership = {
+        user_id: mockUser._id,
+        pi_uid: mockUser.pi_uid,
+        membership_class: MembershipClassType.GOLD,
+        membership_expiry_date: existingExpiryDate,
+        mappi_balance: 50
+      } as unknown as IMembership;
+      const existingMembershipTier = membershipTiers.tier3;
+
+      const newMembershipClass = MembershipClassType.GOLD;
+      const newMembershipTier = membershipTiers.tier3;
+      const newExpiryDate = new Date(
+        existingExpiryDate.getTime() + newMembershipTier.DURATION * WEEK_IN_MS);
+
+      (Membership.findOne as jest.Mock).mockResolvedValue(existingMembership);
+      (getTierByClass as jest.Mock).mockReturnValue(newMembershipTier);
+      (getTierRank as jest.Mock).mockReturnValue(existingMembershipTier.RANK);
+      (isExpired as jest.Mock).mockReturnValue(false);
+      (isSameShoppingClassType as jest.Mock).mockReturnValue(true);
+      (Membership.findOneAndUpdate as jest.Mock).mockReturnValue({
+        exec: jest.fn().mockResolvedValue({
+          ...existingMembership,
+          membership_class: newMembershipClass,
+          membership_expiry_date: newExpiryDate,
+          mappi_balance: existingMembership.mappi_balance + newMembershipTier.MAPPI_ALLOWANCE
+        })
+      });
+
+      const result = await applyMembershipChange(mockUser.pi_uid, newMembershipClass);
+
+      expect(result).toEqual({
+        user_id: mockUser._id,
+        pi_uid: mockUser.pi_uid,
+        membership_class: newMembershipClass,
+        membership_expiry_date: newExpiryDate,
+        mappi_balance: existingMembership.mappi_balance + newMembershipTier.MAPPI_ALLOWANCE
+      });
+      expect(Membership.findOne).toHaveBeenCalledWith({ user_id: mockUser._id });
+      expect(Membership.create).not.toHaveBeenCalled();
+      expect(getTierRank).toHaveBeenCalledWith(existingMembership.membership_class);
+      expect(isExpired).toHaveBeenCalledWith(existingMembership.membership_expiry_date);
+      expect(isSameShoppingClassType).toHaveBeenCalledWith(
+        existingMembership.membership_class, 
+        newMembershipClass
+      );
+      expect(Membership.findOneAndUpdate).toHaveBeenCalledWith(
+        { pi_uid: mockUser.pi_uid },
+        {
+          membership_expiry_date: newExpiryDate,
+          $inc: { mappi_balance: newMembershipTier.MAPPI_ALLOWANCE }
+        },
+        { new: true }
+      )
+    });
+
+    it('should handle and renew same membership class if existing membership is expired', async () => {
+      const existingExpiryDate = new Date(
+        new Date("2025-08-17T12:00:00Z").getTime() - 2 * WEEK_IN_MS); // expired
+      
+      const existingMembership = {
+        user_id: mockUser._id,
+        pi_uid: mockUser.pi_uid,
+        membership_class: MembershipClassType.GREEN,
+        membership_expiry_date: existingExpiryDate,
+        mappi_balance: 5
+      } as unknown as IMembership;
+      const existingMembershipTier = membershipTiers.tier2;
+
+      const newMembershipClass = MembershipClassType.GREEN;
+      const newMembershipTier = membershipTiers.tier2;
+      const newExpiryDate = new Date(
+        new Date("2025-08-17T12:00:00Z").getTime() + newMembershipTier.DURATION * WEEK_IN_MS);
+
+      (Membership.findOne as jest.Mock).mockResolvedValue(existingMembership);
+      (getTierByClass as jest.Mock).mockReturnValue(newMembershipTier);
+      (getTierRank as jest.Mock).mockReturnValue(existingMembershipTier.RANK);
+      (isExpired as jest.Mock).mockReturnValue(true);
+      (isSameShoppingClassType as jest.Mock).mockReturnValue(true);
+      (Membership.findOneAndUpdate as jest.Mock).mockReturnValue({
+        exec: jest.fn().mockResolvedValue({
+          ...existingMembership,
+          membership_class: newMembershipClass,
+          membership_expiry_date: newExpiryDate,
+          mappi_balance: existingMembership.mappi_balance + newMembershipTier.MAPPI_ALLOWANCE
+        })
+      });
+
+      const result = await applyMembershipChange(mockUser.pi_uid, newMembershipClass);
+
+      expect(result).toEqual({
+        user_id: mockUser._id,
+        pi_uid: mockUser.pi_uid,
+        membership_class: newMembershipClass,
+        membership_expiry_date: newExpiryDate,
+        mappi_balance: existingMembership.mappi_balance + newMembershipTier.MAPPI_ALLOWANCE
+      });
+      expect(Membership.findOne).toHaveBeenCalledWith({ user_id: mockUser._id });
+      expect(Membership.create).not.toHaveBeenCalled();
+      expect(getTierRank).toHaveBeenCalledWith(existingMembership.membership_class);
+      expect(isExpired).toHaveBeenCalledWith(existingMembership.membership_expiry_date);
+      expect(isSameShoppingClassType).toHaveBeenCalledWith(
+        existingMembership.membership_class, 
+        newMembershipClass
+      );
+      expect(Membership.findOneAndUpdate).toHaveBeenCalledWith(
+        { pi_uid: mockUser.pi_uid },
+        {
+          membership_expiry_date: newExpiryDate,
+          mappi_balance: newMembershipTier.MAPPI_ALLOWANCE
+        },
+        { new: true }
+      )
+    });
+
+    it('should handle and extend different membership class (upgrade or downgrade)', async () => {
+      const existingExpiryDate = new Date(
+        new Date("2025-08-17T12:00:00Z").getTime() * WEEK_IN_MS);
+      
+      const existingMembership = {
+        user_id: mockUser._id,
+        pi_uid: mockUser.pi_uid,
+        membership_class: MembershipClassType.GOLD,
+        membership_expiry_date: existingExpiryDate,
+        mappi_balance: 50
+      } as unknown as IMembership;
+      const existingMembershipTier = membershipTiers.tier3;
+
+      const newMembershipClass = MembershipClassType.DOUBLE_GOLD;
+      const newMembershipTier = membershipTiers.tier4;
+      const newExpiryDate = new Date(
+        new Date("2025-08-17T12:00:00Z").getTime() + newMembershipTier.DURATION * WEEK_IN_MS);
+
+      (Membership.findOne as jest.Mock).mockResolvedValue(existingMembership);
+      (getTierByClass as jest.Mock).mockReturnValue(newMembershipTier);
+      (getTierRank as jest.Mock).mockReturnValue(existingMembershipTier.RANK);
+      (isExpired as jest.Mock).mockReturnValue(false);
+      (isSameShoppingClassType as jest.Mock).mockReturnValue(true);
+      (Membership.findOneAndUpdate as jest.Mock).mockReturnValue({
+        exec: jest.fn().mockResolvedValue({
+          ...existingMembership,
+          membership_class: newMembershipClass,
+          membership_expiry_date: newExpiryDate,
+          mappi_balance: existingMembership.mappi_balance + newMembershipTier.MAPPI_ALLOWANCE
+        })
+      });
+
+      const result = await applyMembershipChange(mockUser.pi_uid, newMembershipClass);
+
+      expect(result).toEqual({
+        user_id: mockUser._id,
+        pi_uid: mockUser.pi_uid,
+        membership_class: newMembershipClass,
+        membership_expiry_date: newExpiryDate,
+        mappi_balance: existingMembership.mappi_balance + newMembershipTier.MAPPI_ALLOWANCE
+      });
+      expect(Membership.findOne).toHaveBeenCalledWith({ user_id: mockUser._id });
+      expect(Membership.create).not.toHaveBeenCalled();
+      expect(getTierRank).toHaveBeenCalledWith(existingMembership.membership_class);
+      expect(isExpired).toHaveBeenCalledWith(existingMembership.membership_expiry_date);
+      expect(isSameShoppingClassType).toHaveBeenCalledWith(
+        existingMembership.membership_class, 
+        newMembershipClass
+      );
+      expect(Membership.findOneAndUpdate).toHaveBeenCalledWith(
+        { pi_uid: mockUser.pi_uid },
+        {
+          membership_class: newMembershipClass,
+          membership_expiry_date: newExpiryDate,
+          $inc: { mappi_balance: newMembershipTier.MAPPI_ALLOWANCE }
+        },
+        { new: true }
+      )
+    });
+
+    it('should throw error if membership not found and returned during update', async () => {
+      const existingExpiryDate = new Date(
+        new Date("2025-08-17T12:00:00Z").getTime() * WEEK_IN_MS);
+      
+      const existingMembership = {
+        user_id: mockUser._id,
+        pi_uid: mockUser.pi_uid,
+        membership_class: MembershipClassType.DOUBLE_GOLD,
+        membership_expiry_date: existingExpiryDate,
+        mappi_balance: 100
+      } as unknown as IMembership;
+      const existingMembershipTier = membershipTiers.tier4;
+
+      const newMembershipClass = MembershipClassType.TRIPLE_GOLD;
+      const newMembershipTier = membershipTiers.tier5;
+      const newExpiryDate = new Date(
+        new Date("2025-08-17T12:00:00Z").getTime() + newMembershipTier.DURATION * WEEK_IN_MS);
+
+      (Membership.findOne as jest.Mock).mockResolvedValue(existingMembership);
+      (getTierByClass as jest.Mock).mockReturnValue(newMembershipTier);
+      (getTierRank as jest.Mock).mockReturnValue(existingMembershipTier.RANK);
+      (isExpired as jest.Mock).mockReturnValue(false);
+      (isSameShoppingClassType as jest.Mock).mockReturnValue(true);
+      (Membership.findOneAndUpdate as jest.Mock).mockReturnValue({
+        exec: jest.fn().mockResolvedValue(null)
+      });
+
+      await expect(applyMembershipChange(mockUser.pi_uid, newMembershipClass))
+        .rejects.toThrow(`Membership not found during update for ${ mockUser.pi_uid }`);
+
+      expect(Membership.findOne).toHaveBeenCalledWith({ user_id: mockUser._id });
+      expect(Membership.create).not.toHaveBeenCalled();
+      expect(getTierRank).toHaveBeenCalledWith(existingMembership.membership_class);
+      expect(isExpired).toHaveBeenCalledWith(existingMembership.membership_expiry_date);
+      expect(isSameShoppingClassType).toHaveBeenCalledWith(
+        existingMembership.membership_class, 
+        newMembershipClass
+      );
+      expect(Membership.findOneAndUpdate).toHaveBeenCalledWith(
+        { pi_uid: mockUser.pi_uid },
+        {
+          membership_class: newMembershipClass,
+          membership_expiry_date: newExpiryDate,
+          $inc: { mappi_balance: newMembershipTier.MAPPI_ALLOWANCE }
+        },
+        { new: true }
+      )
+    });
+
+    it('should throw error if membership not found and returned during update', async () => {
+      const mockError = new Error('Mock database error');
+      
+      const existingExpiryDate = new Date(
+        new Date("2025-08-17T12:00:00Z").getTime() * WEEK_IN_MS);
+      
+      const existingMembership = {
+        user_id: mockUser._id,
+        pi_uid: mockUser.pi_uid,
+        membership_class: MembershipClassType.WHITE,
+        membership_expiry_date: existingExpiryDate,
+        mappi_balance: 10
+      } as unknown as IMembership;
+      const existingMembershipTier = membershipTiers.tier1;
+
+      const newMembershipClass = MembershipClassType.TRIPLE_GOLD;
+      const newMembershipTier = membershipTiers.tier5;
+      const newExpiryDate = new Date(
+        new Date("2025-08-17T12:00:00Z").getTime() + newMembershipTier.DURATION * WEEK_IN_MS);
+
+      (Membership.findOne as jest.Mock).mockResolvedValue(existingMembership);
+      (getTierByClass as jest.Mock).mockReturnValue(newMembershipTier);
+      (getTierRank as jest.Mock).mockReturnValue(existingMembershipTier.RANK);
+      (isExpired as jest.Mock).mockReturnValue(false);
+      (isSameShoppingClassType as jest.Mock).mockReturnValue(false);
+      (Membership.findOneAndUpdate as jest.Mock).mockReturnValue({
+        exec: jest.fn().mockRejectedValue(mockError)
+      });
+
+      await expect(applyMembershipChange(mockUser.pi_uid, newMembershipClass))
+        .rejects.toThrow('Mock database error');
+
+      expect(Membership.findOne).toHaveBeenCalledWith({ user_id: mockUser._id });
+      expect(Membership.create).not.toHaveBeenCalled();
+      expect(getTierRank).toHaveBeenCalledWith(existingMembership.membership_class);
+      expect(isExpired).toHaveBeenCalledWith(existingMembership.membership_expiry_date);
+      expect(isSameShoppingClassType).toHaveBeenCalledWith(
+        existingMembership.membership_class, 
+        newMembershipClass
+      );
+      expect(Membership.findOneAndUpdate).toHaveBeenCalledWith(
+        { pi_uid: mockUser.pi_uid },
+        {
+          membership_class: newMembershipClass,
+          membership_expiry_date: newExpiryDate,
+          mappi_balance: newMembershipTier.MAPPI_ALLOWANCE
+        },
+        { new: true }
+      )
+    });
   });
 });

@@ -25,34 +25,54 @@ const handleSingleMappiPurchase = async (
   try {
     if (!existing) {
       // If user doesn't have a membership, create the base membership with 1 mappi
-      return await new Membership({
+      const baseMembership = await Membership.create({
         user_id: user._id,
         pi_uid: user.pi_uid,
         membership_class: MembershipClassType.CASUAL,
         membership_expiry_date: null,
         mappi_balance: 1,
         mappi_used_to_date: 0,
-      }).save();
+      });
+      return baseMembership;
     }
 
     // If membership exists, check if it's expired
-    const expired = isExpired(existing.membership_expiry_date ?? undefined);
+    const expired = isExpired(existing.membership_expiry_date);
 
-    // If expired, reset to casual membership with 1 mappi
+    // If expired, reset to base membership with 1 mappi
     if (expired && existing.membership_class !== MembershipClassType.CASUAL) {
       logger.info(`Expired membership reset to casual for ${user.pi_uid}`);
-      existing.membership_class = MembershipClassType.CASUAL;
-      existing.membership_expiry_date = null;
-      existing.mappi_balance = 1;
-    } else {
-      existing.mappi_balance = (existing.mappi_balance ?? 0) + 1; // safeguard
-    }
+      const updatedMembership = await Membership.findOneAndUpdate(
+        { pi_uid: user.pi_uid },
+        {
+          membership_class: MembershipClassType.CASUAL,
+          membership_expiry_date: null,
+          mappi_balance: 1,
+        },
+        { new: true }
+      ).exec();
 
-    return await existing.save();
+      if (!updatedMembership) {
+        throw new Error(`Membership not found for update to base for piUID ${ user.pi_uid }`);
+      }
+      return updatedMembership;
+    } else {
+      // Increment mappi balance atomically
+      const updatedMembership = await Membership.findOneAndUpdate(
+        { pi_uid: user.pi_uid },
+        { $inc: { mappi_balance: 1 } },
+        { new: true }
+      ).exec();
+
+      if (!updatedMembership) {
+        throw new Error(`Membership not found for update to increment for piUID ${ user.pi_uid }`);
+      }
+      return updatedMembership;
+    }
   } catch (error) {
     logger.error(`Failed to handle single mappi purchase for ${user.pi_uid}: ${error}`);
     throw error;
-  }  
+  }
 };
 
 const handleMembershipTierPurchase = async (
@@ -75,62 +95,71 @@ const handleMembershipTierPurchase = async (
     // If no existing membership, create new membership
     if (!existing) {
       logger.info(`Creating new membership ${membership_class} for user ${user.pi_uid}`);
-      return await new Membership({
+      return await Membership.create({
         user_id: user._id,
         pi_uid: user.pi_uid,
         membership_class,
         membership_expiry_date: newExpiryDate,
         mappi_balance: mappiAllowance,
         mappi_used_to_date: 0,
-      }).save();
+      });
     }
 
     const currentRank = getTierRank(existing.membership_class);
-    const expired = isExpired(existing.membership_expiry_date ?? undefined);
+    const expired = isExpired(existing.membership_expiry_date);
     const sameClassType = isSameShoppingClassType(existing.membership_class, membership_class);
+
+    let update: Partial<IMembership> = {};
 
     // Different class type (e.g., online shopping vs offline shopping)
     if (!sameClassType) {
       logger.info(`Switching membership type for ${user.pi_uid} to ${membership_class}`);
-      Object.assign(existing, {
+      update = {
         membership_class,
         membership_expiry_date: newExpiryDate,
         mappi_balance: mappiAllowance,
-      });
-      return await existing.save();
-    }
-
+      };
     // No rank change
-    if (newRank === currentRank) {
+    } else if (newRank === currentRank) {
       // Same rank & not expired then extend membership & add Mappi
       if (!expired) {
         logger.info(`Extending membership ${membership_class} for ${user.pi_uid}`);
-        existing.membership_expiry_date = new Date(
-          (existing.membership_expiry_date?.getTime() ?? today.getTime()) + durationMs
-        );
-        existing.mappi_balance = (existing.mappi_balance ?? 0) + mappiAllowance;
+        update = {
+          membership_expiry_date: new Date(
+            (existing.membership_expiry_date?.getTime() ?? today.getTime()) + durationMs
+          ),
+          $inc: { mappi_balance: mappiAllowance } as any, // atomic increment
+        };
       // Same rank & expired then reset expiry & Mappi
       } else {
         logger.info(`Renewing expired membership ${membership_class} for ${user.pi_uid}`);
-        existing.membership_expiry_date = newExpiryDate;
-        existing.mappi_balance = mappiAllowance;
+        update = {
+          membership_expiry_date: newExpiryDate,
+          mappi_balance: mappiAllowance,
+        };
       }
-      return await existing.save();
-    }
-
     // Rank change with upgrade or downgrade
-    if (newRank !== currentRank) {
+    } else if (newRank !== currentRank) {
       logger.info(`Changing rank from ${existing.membership_class} to ${membership_class} for ${user.pi_uid}`);
-      Object.assign(existing, {
+      update = {
         membership_class,
         membership_expiry_date: newExpiryDate,
-        mappi_balance: (existing.mappi_balance ?? 0) + mappiAllowance,
-      });
-      return await existing.save();
+        $inc: { mappi_balance: mappiAllowance } as any,
+      };
     }
 
-    // technically this path should never happen; failsafe
-    throw new Error(`Unhandled membership transition for ${user.pi_uid}`);
+    // Apply the update atomically
+    const updatedMembership = await Membership.findOneAndUpdate(
+      { pi_uid: user.pi_uid },
+      update,
+      { new: true }
+    ).exec();
+
+    if (!updatedMembership) {
+      throw new Error(`Membership not found during update for ${user.pi_uid}`);
+    }
+    
+    return updatedMembership;
   } catch (error) {
     logger.error(`Failed to handle membership tier purchase for ${user.pi_uid}: ${error}`);
     throw error;
@@ -226,8 +255,6 @@ export const applyMembershipChange = async (
   membership_class: MembershipClassType | MappiCreditType
 ): Promise<IMembership> => {
   try {
-    const today = new Date();
-
     // Get user first
     const user = await User.findOne({ pi_uid: piUid }).lean();
     if (!user) {

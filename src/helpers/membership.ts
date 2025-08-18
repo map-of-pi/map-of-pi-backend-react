@@ -4,7 +4,8 @@ import {
   membershipTiers
 } from '../models/enums/membershipClassType';
 
-export const isExpired = (date?: Date): boolean => !date || date < new Date();
+export const isExpired = (date?: Date | null): boolean => 
+  date === undefined ? true : date === null ? false : date < new Date();
 
 export const isOnlineShoppingClass = (tier: MembershipClassType): boolean =>
   [

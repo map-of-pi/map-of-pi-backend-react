@@ -18,6 +18,10 @@ describe('isExpired function ', () => {
     expect(isExpired(undefined)).toBe(true);
   });
 
+  it('should return false if the date is null', () => {
+    expect(isExpired(null)).toBe(false);
+  });
+
   it('should return true if the date is in the past', () => {
     const today = new Date();
     today.setMonth(today.getMonth() - 1); // 1 month in the past

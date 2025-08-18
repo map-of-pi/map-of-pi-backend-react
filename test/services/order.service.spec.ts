@@ -1,4 +1,5 @@
 import mongoose, { Types } from "mongoose";
+import { getUpdatedStockLevel } from "../../src/helpers/order";
 import Order from "../../src/models/Order";
 import OrderItem from "../../src/models/OrderItem";
 import Seller from "../../src/models/Seller";
@@ -8,7 +9,6 @@ import { FulfillmentType } from "../../src/models/enums/fulfillmentType";
 import { OrderStatusType } from "../../src/models/enums/orderStatusType";
 import { OrderItemStatusType } from "../../src/models/enums/orderItemStatusType";
 import { StockLevelType } from "../../src/models/enums/stockLevelType";
-import { getUpdatedStockLevel } from "../../src/helpers/order";
 import { NewOrder, PickedItems } from "../../src/types";
 import { 
   createOrder,
