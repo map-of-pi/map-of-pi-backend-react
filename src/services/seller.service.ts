@@ -164,7 +164,7 @@ export const getAllSellers = async (
     // Fetch and merge the settings for each seller
     const sellersWithSettings = await resolveSellerSettings(sellers, trustLevelFilters);
     return sellersWithSettings;
-  } catch (error: any) {
+  } catch (error) {
     logger.error(`Failed to get all sellers: ${ error }`);
     throw error;
   }
@@ -190,7 +190,7 @@ export const getSingleSellerById = async (seller_id: string): Promise<ISeller | 
       sellerInfo: user as IUser,
       sellerItems: items as ISellerItem[] || null
     } as any;
-  } catch (error: any) {
+  } catch (error) {
     logger.error(`Failed to get single seller for sellerID ${ seller_id }: ${ error }`);
     throw error;
   }
@@ -240,7 +240,7 @@ export const registerOrUpdateSeller = async (authUser: IUser, formData: any): Pr
       logger.info('New seller created in the database:', savedSeller);
       return savedSeller as ISeller;
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error(`Failed to register or update seller: ${ error }`);
     throw error;
   }
@@ -251,7 +251,7 @@ export const deleteSeller = async (seller_id: string | undefined): Promise<ISell
   try {
     const deletedSeller = await Seller.findOneAndDelete({ seller_id }).exec();
     return deletedSeller ? deletedSeller as ISeller : null;
-  } catch (error: any) {
+  } catch (error) {
     logger.error(`Failed to delete seller for sellerID ${ seller_id }: ${ error }`);
     throw error;
   }
@@ -271,7 +271,7 @@ export const getAllSellerItems = async (
     } 
     logger.info('fetched item list successfully');
     return existingItems as ISellerItem[];
-  } catch (error: any) {
+  } catch (error) {
     logger.error(`Failed to get seller items for sellerID ${ seller_id }: ${ error }`);
     throw error;
   }
@@ -331,7 +331,7 @@ export const addOrUpdateSellerItem = async (
       logger.info('Item created successfully:', { newItem });
       return newItem;
     }
-  } catch (error: any) {
+  } catch (error) {
     logger.error(`Failed to add or update seller item for sellerID ${ seller.seller_id}: ${ error }`);
     throw error;
   }
@@ -342,7 +342,7 @@ export const deleteSellerItem = async (id: string): Promise<ISellerItem | null> 
   try {
     const deletedSellerItem = await SellerItem.findByIdAndDelete(id).exec();
     return deletedSellerItem ? deletedSellerItem as ISellerItem : null;
-  } catch (error: any) {
+  } catch (error) {
     logger.error(`Failed to delete seller item for itemID ${ id }: ${ error}`);
     throw error;
   }
