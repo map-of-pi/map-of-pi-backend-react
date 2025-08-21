@@ -1,5 +1,6 @@
 import {Document, Types} from "mongoose";
 import {DeviceLocationType} from "./models/enums/deviceLocationType";
+import {MembershipClassType, MappiCreditType} from "./models/enums/membershipClassType";
 import {RatingScale} from "./models/enums/ratingScale";
 import {SellerType} from "./models/enums/sellerType";
 import {FulfillmentType} from "./models/enums/fulfillmentType";
@@ -44,6 +45,25 @@ export interface IUserSettings extends Document {
 
 // Select specific fields from IUserSettings
 export type PartialUserSettings = Pick<IUserSettings, 'user_name' | 'email' | 'phone_number' | 'findme' | 'trust_meter_rating'>;
+
+// ========================
+// MEMBERSHIP MODELS
+// ========================
+export interface IMembership extends Document {
+  user_id: Types.ObjectId;
+  pi_uid: string;
+  membership_class: MembershipClassType;
+  mappi_balance: number;
+  membership_expiry_date: Date | null;
+  mappi_used_to_date: number;
+};
+
+export interface MembershipOption {
+  value: MembershipClassType;
+  cost: number;
+  duration: number | null; // in weeks
+  mappi_allowance: number;
+}
 
 // ========================
 // MAP / GEOLOCATION TYPES
@@ -117,16 +137,7 @@ export type PartialReview = {
   receiver: string;
 };
 
-export interface IReviewFeedbackOutput extends IReviewFeedback, PartialReview {
-}
-
-// ========================
-// BUYER MODELS
-// ========================
-export interface PickedItems {
-  itemId: string,
-  quantity: number,
-};
+export interface IReviewFeedbackOutput extends IReviewFeedback, PartialReview {};
 
 // ========================
 // ORDER MODELS
@@ -156,24 +167,30 @@ export interface IOrderItem extends Document {
   updatedAt: Date;
 };
 
+export interface PickedItems {
+  itemId: string;
+  quantity: number;
+};
+
 export interface NewOrder {
-  buyerId: string,
-  sellerId: string,
-  paymentId: string,
-  totalAmount: string,
-  status: OrderStatusType,
-  fulfillmentMethod: FulfillmentType,
-  sellerFulfillmentDescription: string,
-  buyerFulfillmentDescription: string,
+  buyerPiUid: string;
+  sellerPiUid: string;
+  paymentId: string | null; // objectId of the Payment schema
+  totalAmount: string;
+  status: OrderStatusType;
+  orderItems: PickedItems[];
+  fulfillmentMethod: FulfillmentType;
+  sellerFulfillmentDescription: string;
+  buyerFulfillmentDescription: string;
 };
 
 export type OrderPaymentMetadataType = {
-  items: PickedItems[],
-  buyer: string,
-  seller: string,
-  fulfillment_method: FulfillmentType | undefined,
-  seller_fulfillment_description: string | undefined,
-  buyer_fulfillment_description: string
+  buyer: string;
+  seller: string;
+  items: PickedItems[];
+  fulfillment_method: FulfillmentType | undefined;
+  seller_fulfillment_description: string | undefined;
+  buyer_fulfillment_description: string;
 };
 
 // ========================
@@ -181,14 +198,26 @@ export type OrderPaymentMetadataType = {
 // ========================
 export interface IPayment extends Document {
   user_id: Types.ObjectId;
+  pi_payment_id: string;
   amount: Types.Decimal128;
   paid: boolean;
   memo: string;
-  pi_payment_id: string;
   txid?: string;
   payment_type: PaymentType;
   cancelled: boolean;
   createdAt: Date;
+};
+
+export interface U2AMetadata {
+  payment_type: PaymentType;
+  OrderPayment?: OrderPaymentMetadataType;
+  MembershipPayment?: MembershipPaymentMetadataType;
+}
+
+export interface A2UMetadata { 
+  orderId: string; 
+  sellerId: string; 
+  buyerId: string 
 };
 
 export interface PaymentInfo {
@@ -200,68 +229,49 @@ export interface PaymentInfo {
 };
 
 export interface PaymentDTO {
-  amount: number,
-  user_uid: string,
-  created_at: string,
-  identifier: string,
-  metadata: Object,
-  memo: string,
+  amount: number;
+  user_uid: string;
+  created_at: string;
+  identifier: string;
+  memo: string;
+  metadata: U2AMetadata | A2UMetadata;
   status: {
-    developer_approved: boolean,
-    transaction_verified: boolean,
-    developer_completed: boolean,
-    cancelled: boolean,
-    user_cancelled: boolean,
+    developer_approved: boolean;
+    transaction_verified: boolean;
+    developer_completed: boolean;
+    cancelled: boolean;
+    user_cancelled: boolean;
   },
-  to_address: string,
+  to_address: string;
   transaction: null | {
-    txid: string,
-    verified: boolean,
-    _link: string,
+    txid: string;
+    verified: boolean;
+    _link: string;
   },
 };
 
 export interface NewPayment {
-  piPaymentId: string,
-  userId: string,
-  memo: string,
-  amount: string,
-  paymentType: PaymentType
+  piPaymentId: string;
+  buyerPiUid: string;
+  memo: string;
+  amount: number;
+  paymentType: PaymentType;
 };
 
 export interface U2URefDataType {
-  u2aPaymentId?: string,
-  u2uStatus: U2UPaymentStatus,
-  a2uPaymentId: string | null,
-};
-
-export interface A2UPaymentDataType {
-  sellerId: string,
-  amount: string,
-  buyerId: string,
-  paymentType: PaymentType,
-  orderId: string,
-  memo: string
-};
-
-export type PaymentDataType = {
-  identifier: string;
-  amount: string;
-  memo: string;
-  metadata: {
-    payment_type: PaymentType,
-    OrderPayment?: OrderPaymentMetadataType,
-    MembershipPayment?: MembershipPaymentMetadataType
-  }
+  orderId: string;
+  u2aPaymentId?: string;
+  u2uStatus: U2UPaymentStatus;
+  a2uPaymentId: string | null;
 };
 
 export type PaymentMetadataType = {
-  OrderPayment: OrderPaymentMetadataType,
-  MembershipPayment: MembershipPaymentMetadataType
+  OrderPayment: OrderPaymentMetadataType;
+  MembershipPayment: MembershipPaymentMetadataType;
 };
 
 type MembershipPaymentMetadataType = {
-  membership_id: string
+  membership_class: MembershipClassType | MappiCreditType;
 };
 
 export interface IPaymentCrossReference {
