@@ -19,14 +19,18 @@ describe('getAllSellers function', () => {
     ne_lng: -73.8000
   };
 
-  it('should fetch all applicable sellers when all parameters are empty', async () => {
+  it('should fetch all unrestricted sellers when all parameters are empty', async () => {
     const userData = await User.findOne({ pi_username: 'TestUser1' }) as IUser;
     const sellersData = await getAllSellers(undefined, undefined, userData.pi_uid);
 
-    expect(sellersData).toHaveLength(await Seller.countDocuments());
+    expect(sellersData).toHaveLength(
+      await Seller.find({ 
+        isRestricted: { $ne: true } 
+      }).countDocuments()
+    )
   });
 
-  it('should fetch all applicable sellers when all parameters are empty and userSettings does not exist', async () => {
+  it('should fetch all unrestricted and applicable sellers when all parameters are empty and userSettings does not exist', async () => {
     const userData = await User.findOne({ pi_username: 'TestUser17' }) as IUser;
     const userSettings = await UserSettings.findOne({ user_settings_id: userData.pi_uid });
     expect(userSettings).toBeNull();
@@ -37,7 +41,7 @@ describe('getAllSellers function', () => {
     expect(sellersData).toHaveLength(1);
   });
 
-  it('should fetch all applicable filtered sellers when all parameters are empty', async () => {
+  it('should fetch all unrestricted and applicable filtered sellers when all parameters are empty', async () => {
     const userData = await User.findOne({ pi_username: 'TestUser2' }) as IUser;
     const sellersData = await getAllSellers(undefined, undefined, userData.pi_uid);
 
@@ -45,7 +49,7 @@ describe('getAllSellers function', () => {
     expect(sellersData).toHaveLength(2);
   });
 
-  it('should fetch all applicable sellers when search query is provided and bounding box params are empty', async () => {
+  it('should fetch all unrestricted and applicable sellers when search query is provided and bounding box params are empty', async () => {
     const searchQuery = 'Vendor';
     const userData = await User.findOne({ pi_username: 'TestUser1' }) as IUser;
     
@@ -54,12 +58,12 @@ describe('getAllSellers function', () => {
     // filter seller records to include those with "Vendor"
     expect(sellersData).toHaveLength(
       await Seller.find({
-        $text: { $search: searchQuery, $caseSensitive: false },
+        $text: { $search: searchQuery },
       }).countDocuments()
     ); // Ensure length matches expected sellers
   });
 
-  it('should fetch all applicable sellers when bounding box params are provided and search query param is empty', async () => {
+  it('should fetch all unrestricted and applicable sellers when bounding box params are provided and search query param is empty', async () => {
     const userData = await User.findOne({ pi_username: 'TestUser1' }) as IUser;
     const sellersData = await getAllSellers(mockBoundingBox, undefined, userData.pi_uid);
     
@@ -78,7 +82,7 @@ describe('getAllSellers function', () => {
     ); // Ensure length matches expected sellers
   });
 
-  it('should fetch all applicable sellers when all parameters are provided', async () => {
+  it('should fetch all unrestricted and applicable sellers when all parameters are provided', async () => {
     const searchQuery = 'Seller';
     const userData = await User.findOne({ pi_username: 'TestUser1' }) as IUser;
 
@@ -88,7 +92,7 @@ describe('getAllSellers function', () => {
        + include those with sell_map_center within geospatial bounding box */
     expect(sellersData).toHaveLength(
       await Seller.countDocuments({
-        $text: { $search: searchQuery, $caseSensitive: false },
+        $text: { $search: searchQuery },
         'sell_map_center.coordinates': {
           $geoWithin: {
             $box: [
