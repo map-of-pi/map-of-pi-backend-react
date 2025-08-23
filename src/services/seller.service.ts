@@ -12,6 +12,98 @@ import { IUser, IUserSettings, ISeller, ISellerWithSettings, ISellerItem } from 
 
 import logger from "../config/loggingConfig";
 
+/* Helper Functions */
+const buildDefaultSearchFilters = () => {
+  return {
+    include_active_sellers: true,
+    include_inactive_sellers: false,
+    include_test_sellers: false,
+    include_trust_level_100: true,
+    include_trust_level_80: true,
+    include_trust_level_50: true,
+    include_trust_level_0: false,
+  }
+};
+
+const buildBaseCriteria = (searchFilters: any): Record<string, any> => {
+  const criteria: Record<string, any> = { isRestricted: { $ne: true } };
+
+  // [Seller Type Filter]
+  const sellerTypeFilters: SellerType[] = [];
+  if (searchFilters.include_active_sellers) sellerTypeFilters.push(SellerType.Active);
+  if (searchFilters.include_inactive_sellers) sellerTypeFilters.push(SellerType.Inactive);
+  if (searchFilters.include_test_sellers) sellerTypeFilters.push(SellerType.Test);
+
+  // include filtered seller types
+  if (sellerTypeFilters.length > 0) {
+    criteria.seller_type = { $in: sellerTypeFilters };
+  }
+
+  return criteria;
+};
+
+const buildTrustLevelFilters = (searchFilters: any): TrustMeterScale[] => {
+  const trustLevels = [
+    { key: "include_trust_level_100", value: TrustMeterScale.HUNDRED },
+    { key: "include_trust_level_80", value: TrustMeterScale.EIGHTY },
+    { key: "include_trust_level_50", value: TrustMeterScale.FIFTY },
+    { key: "include_trust_level_0", value: TrustMeterScale.ZERO },
+  ];
+  return trustLevels
+    .filter(({ key }) => searchFilters[key])
+    .map(({ value }) => value);
+};
+
+const buildSearchQuery = async (
+  baseCriteria: Record<string, any>, search_query?: string
+): Promise<Record<string, any>> => {
+  if (!search_query) return baseCriteria;
+
+  const sellerTextQuery = { 
+    ...baseCriteria, 
+    $text: { 
+      $search: search_query, 
+      $caseSensitive: false 
+    } 
+  };
+
+  // Match sellers via items
+  const sellerIdsFromItems = await SellerItem.find({
+    stock_level: { $ne: StockLevelType.SOLD },
+    $text: { $search: search_query },
+  }).distinct("seller_id");
+
+  if (sellerIdsFromItems.length > 0) {
+    return { 
+      ...sellerTextQuery,
+      seller_id: { $in: sellerIdsFromItems }
+    }
+  }
+
+  return sellerTextQuery;
+};
+
+const addGeoFilter = (
+  criteria: Record<string, any>, 
+  bounds?: { sw_lat: number, sw_lng: number, ne_lat: number, ne_lng: number }
+) => {
+  if (!bounds) return;
+  criteria.sell_map_center = {
+    $geoWithin: {
+      $geometry: {
+        type: "Polygon",
+        coordinates: [[
+          [bounds.sw_lng, bounds.sw_lat],
+          [bounds.ne_lng, bounds.sw_lat],
+          [bounds.ne_lng, bounds.ne_lat],
+          [bounds.sw_lng, bounds.ne_lat],
+          [bounds.sw_lng, bounds.sw_lat],
+        ]],
+      },
+    },
+  };
+}; 
+
 // Helper function to get settings for all sellers and merge them into seller objects
 const resolveSellerSettings = async (
   sellers: ISeller[],
@@ -78,126 +170,29 @@ export const getAllSellers = async (
 ): Promise<ISellerWithSettings[]> => {
   try {
     const maxNumSellers = 50;
-    let userSettings: any = userId ? await getUserSettingsById(userId) ?? {} : {};
 
-    const defaultSearchFilters = {
-      include_active_sellers: true,
-      include_inactive_sellers: false,
-      include_test_sellers: false,
-      include_trust_level_100: true,
-      include_trust_level_80: true,
-      include_trust_level_50: true,
-      include_trust_level_0: false,
-    };
+    // Load user settings with defaults
+    const userSettings: any = userId ? await getUserSettingsById(userId) ?? {} : {};
+    const searchFilters = userSettings.search_filters ?? buildDefaultSearchFilters();
 
-    const searchFilters = userSettings.search_filters ?? defaultSearchFilters;
-
-    // Construct base filter criteria
-    const baseCriteria: Record<string, any> = {
-      isRestricted: { $ne: true } // Exclude restricted sellers
-    };
-    
-    // [Seller Type Filter]
-    const sellerTypeFilters: SellerType[] = [];
-    if (searchFilters.include_active_sellers) sellerTypeFilters.push(SellerType.Active);
-    if (searchFilters.include_inactive_sellers) sellerTypeFilters.push(SellerType.Inactive);
-    if (searchFilters.include_test_sellers) sellerTypeFilters.push(SellerType.Test);
-
-    // include filtered seller types
-    if (sellerTypeFilters.length > 0) {
-      baseCriteria.seller_type = { $in: sellerTypeFilters };
-    }
-
-    // [Trust Level Filters]
-    const trustLevels = [
-      { key: "include_trust_level_100", value: TrustMeterScale.HUNDRED },
-      { key: "include_trust_level_80", value: TrustMeterScale.EIGHTY },
-      { key: "include_trust_level_50", value: TrustMeterScale.FIFTY },
-      { key: "include_trust_level_0", value: TrustMeterScale.ZERO },
-    ];
-    const trustLevelFilters = trustLevels
-      .filter(({ key }) => searchFilters[key]) // Only include checked trust levels
-      .map(({ value }) => value);
-
-    // [Search Query Filter]
-    const searchCriteria = search_query
-      ? {
-        $text: {
-          $search: search_query,
-          $caseSensitive: false,
-        },
-      }
-      : {}; // default to empty object if search_query not provided
-
+    // Build criteria
+    const baseCriteria = buildBaseCriteria(searchFilters);
     // [Geo Filter]
-    const locationCriteria = bounds
-      ? {
-        sell_map_center: {
-          $geoWithin: {
-            $geometry: {
-              type: "Polygon",
-              coordinates: [[
-                [bounds.sw_lng, bounds.sw_lat],
-                [bounds.ne_lng, bounds.sw_lat],
-                [bounds.ne_lng, bounds.ne_lat],
-                [bounds.sw_lng, bounds.ne_lat],
-                [bounds.sw_lng, bounds.sw_lat],
-              ]],
-            },
-          },
-        },
-      }
-      : {};
+    addGeoFilter(baseCriteria, bounds);
+    // [Trust Level Filters]
+    const trustLevelFilters = buildTrustLevelFilters(searchFilters);
 
-    // [Final Aggregated Criteria]
-    const aggregatedCriteria = {
-      ...baseCriteria,
-      ...searchCriteria,
-      ...locationCriteria,
-    };
-
-    const sellers = await Seller.find(aggregatedCriteria)
-    // .sort({ updatedAt: -1 })
-    // .limit(maxNumSellers)
-    // .exec();
-
-    const sellerIdsByName = sellers.map(s => s.seller_id)
-
-    // find seller by matching item
-    const allowSellers = await Seller.find({ ...baseCriteria, locationCriteria });
-    const allowSellerIds = allowSellers.map(s => s.seller_id)
-    let itemsMatchingQuery: string[] = [];
-
-
-    itemsMatchingQuery = search_query
-      ? await SellerItem.find({
-        // seller_id: { $in: allowSellerIds },
-        stock_level: { $ne: StockLevelType.SOLD },
-        $text: {
-          $search: search_query,
-          $caseSensitive: false,
-        }
-      }).distinct("seller_id")
-      : [];
-
-
-    const combineSellerIds = Array.from(new Set([...sellerIdsByName, ...itemsMatchingQuery]))
-
-    // find seller fetch from combined list
-
-    const finalSellerDocs = await Seller.find({
-      seller_id: { $in: combineSellerIds },
-      ...baseCriteria,
-      ...locationCriteria
-    })
+    // Build seller query
+    const sellerQuery = await buildSearchQuery(baseCriteria, search_query);
+    
+    // Execute query
+    const finalSellerDocs = await Seller.find(sellerQuery)
       .sort({ updatedAt: -1 })
       .limit(maxNumSellers)
       .exec();
 
-
-    // Fetch and merge the settings for each seller
-    const sellersWithSettings = await resolveSellerSettings(finalSellerDocs, trustLevelFilters);
-    return sellersWithSettings;
+    // Post-filter + merge settings
+    return await resolveSellerSettings(finalSellerDocs, trustLevelFilters);
   } catch (error) {
     logger.error(`Failed to get all sellers: ${ error }`);
     throw error;
@@ -323,7 +318,7 @@ export const addOrUpdateSellerItem = async (
     const durationInMs = duration * 7 * 24 * 60 * 60 * 1000;
     const expiredBy = new Date(today.getTime() + durationInMs);
 
-    console.log(seller)
+    logger.debug(`Seller data: ${ seller }`);
 
     // Ensure unique identifier is used for finding existing items
     const query = {
