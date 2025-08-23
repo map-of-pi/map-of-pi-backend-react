@@ -59,28 +59,29 @@ const buildSearchQuery = async (
 ): Promise<Record<string, any>> => {
   if (!search_query) return baseCriteria;
 
-  const sellerTextQuery = { 
-    ...baseCriteria, 
-    $text: { 
-      $search: search_query, 
-      $caseSensitive: false 
-    } 
-  };
-
   // Match sellers via items
   const sellerIdsFromItems = await SellerItem.find({
     stock_level: { $ne: StockLevelType.SOLD },
+    expired_by: { $gt: new Date() },
     $text: { $search: search_query },
   }).distinct("seller_id");
 
+  // If any sellers matched via items, combine using $or
   if (sellerIdsFromItems.length > 0) {
     return { 
-      ...sellerTextQuery,
-      seller_id: { $in: sellerIdsFromItems }
-    }
+      ...baseCriteria,
+      $or: [
+        { $text: { $search: search_query, $caseSensitive: false } },
+        { seller_id: { $in: sellerIdsFromItems } }
+      ]
+    };
   }
 
-  return sellerTextQuery;
+  // If no sellers matched via items, just search text at top level
+  return {
+    ...baseCriteria,
+    $text: { $search: search_query, $caseSensitive: false }
+  };
 };
 
 const addGeoFilter = (
